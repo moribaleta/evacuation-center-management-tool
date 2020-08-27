@@ -2,7 +2,8 @@
 function repmat(array, count) {
     var result = [];
     while (count--) {
-        result = result.concat(array);
+        //result = result.concat(array);
+        result.push(array)
     }
     return result;
 }
@@ -23,6 +24,14 @@ function rand(min, max) {
     return value
 }
 
+function randArray(value, count) {
+    var result = []
+    while(count--) {
+        result.push(rand(0, value))
+    }
+    return result
+}
+
 function randElement(arr) {
     const random = Math.floor(Math.random() * arr.length);
     return arr[random]
@@ -32,6 +41,26 @@ function arrAdd(a,b) {
     x = [];
     for(var i = 0;i<=b.length-1;i++)
         x.push(a[i] + b[i]);
+    return x
+}
+
+function arrAddMultiDim(a, b) {
+     x = [];
+    for(var i = 0;i<b.length;i++){
+        var val = []
+        for(var j = 0; j<b[j].length; j++){
+            val.push(a[i][j] + b[i][j])
+        }
+        x.push(val)
+    }   
+        //x.push(a[i] + b[i]);
+    return x
+}
+
+function arrMult(a, b) {
+    x = [];
+    for(var i = 0;i<=b.length-1;i++)
+        x.push(a[i] * b[i]);
     return x
 }
 
@@ -141,6 +170,7 @@ function genNewSol(lb, up, Np, n, P, fit, trial, objective, D) {
     
     console.log("n: %o",n)
     console.log("lb: %o, up: %o", lb, up)
+    console.log("population %o", P)
     console.log("decisions: %o, populationSize: %o", D, Np)
     console.log("j: %o, p: %o", j, p)
     

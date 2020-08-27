@@ -36,12 +36,23 @@ class MOABC {
     }
 
     start() {
+        /* this.nDecisions = this.modelGen.lb.length
+
+        let substr = arrSub(this.modelGen.up, this.modelGen.lb)
+        let mularr = substr.map((val)=>{return val * rand(this.modelGen.population_size, this.nDecisions)}) 
+        let val = arrAdd(this.modelGen.lb, mularr)
+        console.log("value %o %o %o", substr, mularr, val) */
+
         this.initialization()
-        this.hiveGeneration()
+        //this.hiveGeneration()
+
+
+
+
         let arr_objective_set = ([...this.arr_objectives].concat(this.bestobj)).filter(x => x != undefined)
         let minBestObj = min(arr_objective_set)
         this.combSol = [...this.population].concat(this.bestSol)
-        this.bestSol = this.combSol[minBestObj.index] //this.population[this.bestObj.index]
+        this.bestSol = this.combSol[minBestObj.index]
 
         console.log("output end ==> arr_objective_set %o", arr_objective_set)
         console.log("output end ==> minBestObj %o", minBestObj)
@@ -59,12 +70,19 @@ class MOABC {
         this.arr_objectives = genArray(0, this.modelGen.population_size)
         this.trial = genArray(0, this.modelGen.population_size)
 
-        for (var i = 0; i < this.modelGen.up[0]; i++) {
+        /* for (var i = 0; i < this.modelGen.up[0]; i++) {
             this.population[i] = genArray(0, this.modelGen.population_size)
             for (var j = 0; j < this.modelGen.up[1]; j++) {
                 this.population[i][j] = rand(this.modelGen.population_size, this.nDecisions)
             }
-        }
+        } */
+        let p1 = repmat(this.modelGen.lb, this.modelGen.population_size)
+        console.log("initialize ==> population p1 %o", p1)
+        let p2 = repmat(arrSub(this.modelGen.up, this.modelGen.lb), this.modelGen.population_size)
+        console.log("initialize ==> population p2 %o", p2)
+        let v_p2 = this.genRandomDecision(p2)
+        console.log("initialize ==> population v_p2 %o", v_p2)
+        this.population = arrAddMultiDim(p1, v_p2)
 
         console.log(this.nDecisions)
         console.log("initialize ==> population %o", this.population)
@@ -127,6 +145,7 @@ class MOABC {
             this.combSol = [...this.population].concat(this.bestSol)
             this.bestSol = this.combSol[minBestObj.index] //this.population[this.bestObj.index]
 
+            console.log("onlooker end ==> arr_objectives %o, best obj %o", this.arr_objectives, this.bestobj)
             console.log("onlooker end ==> arr_objective_set %o", arr_objective_set)
             console.log("onlooker end ==> minBestObj %o", minBestObj)
             console.log("onlooker end ==> combSol %o", this.combSol)
@@ -137,12 +156,9 @@ class MOABC {
 
             if (val.max > this.modelGen.limit) {
                 this.trial[val.index] = 0
-                //this.population[val.index] = this.modelGen.lb + (this.modelGen.up - this.modelGen.lb) * rand(this.nDecisions)
-                //this.population[val.index] = 
-
-                for (var j = 0; j < this.modelGen.up[1]; j++) {
-                    this.population[val.index][j] = rand(this.modelGen.population_size, this.nDecisions)
-                }
+                
+                this.population[val.index] = arrAdd(this.modelGen.lb, (arrSub(this.modelGen.up, this.modelGen.lb).map((val)=>{val * rand(this.modelGen.population_size, this.nDecisions)}) ) )
+                
 
                 this.arr_objectives[val.index] = calcObjective(this.population[val.index])
                 this.arr_fitness[val.index] = calcFitness(this.arr_objectives[val.index])
@@ -158,6 +174,23 @@ class MOABC {
             console.log("end generation :" + generation)
         }
 
+    }
+
+    genScoutBeeSolution() {
+        let substr = arrSub(this.modelGen.up, this.modelGen.lb)
+        let mularr = this.genRandomDecision(substr)//substr.map((val)=>{return val * rand(this.modelGen.population_size, this.nDecisions)}) 
+        let val = arrAdd(this.modelGen.lb, mularr)
+        return val
+    }
+
+    genRandomDecision(arr){
+        //return arr.map((val)=>{return val * rand(this.modelGen.population_size, this.nDecisions)}) 
+        
+        //return arr.map((val)=>{return val * randArray(this.modelGen.population_size, this.nDecisions)}) 
+        return arr.map((val)=>{
+            let randVal = randArray(this.modelGen.population_size, this.nDecisions)
+            return arrMult(val, randVal)
+        })
     }
 
 }
