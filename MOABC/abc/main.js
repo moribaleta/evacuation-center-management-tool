@@ -156,9 +156,11 @@ class MOABC {
 
             if (val.max > this.modelGen.limit) {
                 this.trial[val.index] = 0
-                
-                this.population[val.index] = arrAdd(this.modelGen.lb, (arrSub(this.modelGen.up, this.modelGen.lb).map((val)=>{val * rand(this.modelGen.population_size, this.nDecisions)}) ) )
-                
+
+                this.population[val.index] = arrAdd(this.modelGen.lb, (arrSub(this.modelGen.up, this.modelGen.lb).map((val) => {
+                    val * rand(this.modelGen.population_size, this.nDecisions)
+                })))
+
 
                 this.arr_objectives[val.index] = calcObjective(this.population[val.index])
                 this.arr_fitness[val.index] = calcFitness(this.arr_objectives[val.index])
@@ -178,16 +180,16 @@ class MOABC {
 
     genScoutBeeSolution() {
         let substr = arrSub(this.modelGen.up, this.modelGen.lb)
-        let mularr = this.genRandomDecision(substr)//substr.map((val)=>{return val * rand(this.modelGen.population_size, this.nDecisions)}) 
+        let mularr = this.genRandomDecision(substr) //substr.map((val)=>{return val * rand(this.modelGen.population_size, this.nDecisions)}) 
         let val = arrAdd(this.modelGen.lb, mularr)
         return val
     }
 
-    genRandomDecision(arr){
+    genRandomDecision(arr) {
         //return arr.map((val)=>{return val * rand(this.modelGen.population_size, this.nDecisions)}) 
-        
+
         //return arr.map((val)=>{return val * randArray(this.modelGen.population_size, this.nDecisions)}) 
-        return arr.map((val)=>{
+        return arr.map((val) => {
             let randVal = randArray(this.modelGen.population_size, this.nDecisions)
             return arrMult(val, randVal)
         })

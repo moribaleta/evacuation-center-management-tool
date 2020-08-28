@@ -143,12 +143,11 @@ var ArtificialBeeColony = (function () {
         var thisFood = null;
         var bestScore = 0.0;
         var worstScore = 0.0;
-        worstScore = this.foodSources.max(function (val) {
-            return val.getConflicts();
-        }).value.getConflicts();
-        var minScore = this.foodSources.min(function (val) {
-            return val.getConflicts();
-        }).value.getConflicts();
+        console.log("curr gen: %o foodsource: %o", this.epoch, this.foodSources);
+        var worst = getMaxValue(this.foodSources, (function (val) { return val.getConflicts(); }));
+        console.log("worst fitness: %o", worst);
+        worstScore = worst.value.getConflicts();
+        var minScore = getMinValue(this.foodSources, (function (val) { return val.getConflicts(); })).value.getConflicts();
         bestScore = worstScore - minScore;
         for (var i = 0; i < this.FOOD_NUMBER; i++) {
             thisFood = this.foodSources[i];
@@ -158,11 +157,11 @@ var ArtificialBeeColony = (function () {
     ArtificialBeeColony.prototype.calculateProbabilities = function () {
         console.log("curr gen: %o foodsource: %o", this.epoch, this.foodSources);
         var currFitness = this.foodSources[this.epoch].getFitness();
-        var maxFoodSource = this.foodSources.max(function (val) {
+        var maxFoodSource = getMaxValue(this.foodSources, (function (val) {
             return val.getFitness();
-        });
+        })).value;
         console.log("max foodsource: %o", maxFoodSource);
-        var maxFit = maxFoodSource.value.getFitness();
+        var maxFit = maxFoodSource.getFitness();
         console.log("currFitness: %o maxfit: %o", currFitness, maxFit);
         var fitness_value = currFitness / maxFit;
         var probability = 0.9 * fitness_value + 0.1;
@@ -205,9 +204,9 @@ var ArtificialBeeColony = (function () {
         thisHoney.setNectar(positionB, temp);
     };
     ArtificialBeeColony.prototype.memorizeBestFoodSource = function () {
-        this.gBest = this.foodSources.min(function (val) {
+        this.gBest = getMinValue(this.foodSources, (function (val) {
             return val.getConflicts();
-        }).value;
+        })).value;
     };
     ArtificialBeeColony.prototype.printSolution = function (solution) {
         var board = new Board();

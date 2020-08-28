@@ -247,13 +247,18 @@ class ArtificialBeeColony {
         var worstScore = 0.0;
 
         // The worst score would be the one with the highest energy, best would be lowest.
-        worstScore = this.foodSources.max((val) : number =>{
+        /* worstScore = this.foodSources.max((val) : number =>{
             return (val as Honey).getConflicts()
-        }).getConflicts() //Collections.max(this.foodSources).getConflicts();
-
-        let minScore = this.foodSources.min((val) : number =>{
+        }).getConflicts() */
+        console.log("curr gen: %o foodsource: %o", this.epoch, this.foodSources)
+        const worst = getMaxValue(this.foodSources, ((val) => {return val.getConflicts()})) 
+        console.log("worst fitness: %o",worst)
+        worstScore = worst.value.getConflicts()
+        
+        let minScore = getMinValue(this.foodSources, ((val) => {return val.getConflicts()})).value.getConflicts()
+        /* let minScore = this.foodSources.min((val) : number =>{
             return (val as Honey).getConflicts()
-        }).getConflicts()
+        }).getConflicts() */
         // Convert to a weighted percentage.
         //bestScore = worstScore - Collections.min(foodSources).getConflicts();
         bestScore = worstScore - minScore
@@ -285,9 +290,13 @@ class ArtificialBeeColony {
         //var maxFit = this.foodSources.map((val)=>{return val.getFitness()}).reduce((prev, curr)=>{return prev+curr})
         console.log("curr gen: %o foodsource: %o", this.epoch, this.foodSources)
         let currFitness = this.foodSources[this.epoch].getFitness()
-        let maxFoodSource      = this.foodSources.max((val) : number => {
+        /* let maxFoodSource      = this.foodSources.max((val) : number => {
             return (val as Honey).getFitness()
-        })
+        }) */
+        let maxFoodSource = getMaxValue(this.foodSources,((val)=>{
+            return val.getFitness()
+        })).value
+
         console.log("max foodsource: %o", maxFoodSource)
         let maxFit = maxFoodSource.getFitness()
         
@@ -371,9 +380,12 @@ class ArtificialBeeColony {
 	 *
 	 */ 
     public memorizeBestFoodSource() {
-    	this.gBest = this.foodSources.min((val): number =>{
+    	/* this.gBest = this.foodSources.min((val): number =>{
             return (val as Honey).getConflicts()
-        }) //Collections.min(foodSources);
+        }) //Collections.min(foodSources); */
+        this.gBest = getMinValue(this.foodSources, ((val) : number => {
+            return val.getConflicts()
+        })).value
     }
 
     /* Prints the nxn board with the queens

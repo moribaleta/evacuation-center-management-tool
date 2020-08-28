@@ -91,4 +91,12 @@ var TesterABC = (function () {
     return TesterABC;
 }());
 var main = new TesterABC();
+console.log("build new file");
+var log = (function (value) {
+    console.log(value);
+});
+log("new value is this");
+log("gile get new");
+log("sample file");
+log("sample 2 and a half new");
 //# sourceMappingURL=main.js.map

@@ -5,11 +5,21 @@
   "main": "index.html",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "tsc -p tsconfig.json"
+    "start": "tsc -p tsconfig.json",
+    "gulp": "gulp",
+    "gulp-watch": "gulp watch"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "gulp": "^4.0.2",
+    "gulp-connect": "^5.7.0",
+    "gulp-markdown-it": "^0.1.1",
+    "gulp-run": "^1.7.1",
+    "gulp-typescript": "^6.0.0-alpha.1",
     "systemjs": "^6.5.0"
+  },
+  "devDependencies": {
+    "gulp-shell": "^0.8.0"
   }
 }

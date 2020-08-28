@@ -127,20 +127,43 @@ var Board = (function () {
     };
     return Board;
 }());
-Array.prototype.max = function (where) {
-    var index = Math.max.apply(Math, this.map(where));
-    return {
-        value: this[index],
-        index: index
+function getMaxValue(arr, where) {
+    var maxHoney = {
+        value: null,
+        index: undefined
     };
-};
-Array.prototype.min = function (where) {
-    var index = Math.min.apply(Math, this.map(where));
-    return {
-        value: this[index],
-        index: index
+    var max = -100000;
+    arr.forEach(function (value, index) {
+        var curr_value = where(value);
+        if (curr_value > max) {
+            max = curr_value;
+            maxHoney = {
+                value: value,
+                index: index
+            };
+        }
+        console.log("max compare curr_value: %o, max: %o", curr_value, max);
+    });
+    return maxHoney;
+}
+function getMinValue(arr, where) {
+    var minHoney = {
+        value: null,
+        index: undefined
     };
-};
+    var min = Infinity;
+    arr.forEach(function (value, index) {
+        var curr_value = where(value);
+        if (curr_value < min) {
+            min = curr_value;
+            minHoney = {
+                value: value,
+                index: index
+            };
+        }
+    });
+    return minHoney;
+}
 function randomNumber(min, max) {
     return Math.floor(Math.random() * (max - min) + min);
 }

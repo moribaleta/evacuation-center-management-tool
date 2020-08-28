@@ -152,3 +152,14 @@ class TesterABC {
 }
 
 const main = new TesterABC()
+
+console.log("build new file")
+
+const log = ((value: string) => {
+    console.log(value)
+})
+
+log("new value is this")
+log("gile get new")
+log("sample file")
+log("sample 2 and a half new")
