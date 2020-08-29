@@ -3,6 +3,19 @@
 class EvacuationCenter implements Model {
     id: string = genId()
     date: Date = new Date()
+
+    constructor(id: string = genId(), date: Date = new Date(),
+        population_capacity : number = 30,
+        current_population  : number = Infinity,
+        inventory_capacity  : number = Infinity,
+        current_inventory   : number = Infinity){
+        this.id = id
+        this.date = date
+        this.population_capacity = population_capacity 
+        this.current_population  = current_population  
+        this.inventory_capacity  = inventory_capacity  
+        this.current_inventory   = current_inventory   
+    }
     ///location of the Evacuation Centre
     //location            : Location
     distance            : number
@@ -25,14 +38,15 @@ class EvacuationCenter implements Model {
     ///function output value of population
     object_population   : number
 
-    getValue(type: EvacuationPropType) : number {
+    /* getValue(type: EvacuationPropType) : number {
         switch(type) {
             case EvacuationPropType.location:
                 return this.distance
+            case EvacuationPropType.current_population:
+                return this.current_population
             case EvacuationPropType.
         }
-
-    }
+    } */
     
 }
 

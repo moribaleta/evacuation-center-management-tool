@@ -21,7 +21,7 @@ class TesterABC {
      */
     public constructor() {
         this.logWriter  = new Writer();
-        this.MAX_RUN    = 50;
+        this.MAX_RUN    = 1;
         this.runtimes   = [];
         console.log("created")
     }
@@ -34,6 +34,7 @@ class TesterABC {
      */
     public test(maxLength: number, trialLimit: number, maxEpoch: number) {
         this.MAX_LENGTH = maxLength;
+        log("starting")
         this.abc = new ArtificialBeeColony(this.MAX_LENGTH);                                      //instantiate and define abc here
         this.abc.setLimit(trialLimit);
         this.abc.setMaxEpoch(maxEpoch);
@@ -43,11 +44,35 @@ class TesterABC {
         var endTime : number;
         var totalTime = 0;
         var fail = 0;
-        var success = 0;
+        //var success = 0;
         
         this.logParameters();
         
-        for(var i = 0; i < this.MAX_RUN; ) {                                             //run 50 sucess to pass passing criteria
+        startTime = window.performance.now();
+        let success = this.abc.algorithm()
+        endTime = window.performance.now();
+
+        //endTime = window.performance.now();
+                totalTime = endTime - startTime;
+                console.log("success?: %o", success)
+                console.log("Done");
+                console.log("time in nanoseconds: "+totalTime);
+                console.log("Success!");
+                
+                this.logWriter.addString("Runtime in nanoseconds: "+totalTime);
+                this.logWriter.addString("Found at epoch: "+this.abc.getEpoch());
+                this.logWriter.addString("Population size: "+this.abc.getPopSize());
+                this.logWriter.addString("");
+                
+                
+                this.abc.getSolutions().forEach(h => {
+                    //this.logWriter.addObject(h);
+                    this.logWriter.addString(h+"")
+                    this.logWriter.addString("");
+                });
+
+
+        /* for(var i = 0; i < this.MAX_RUN; ) {                                             //run 50 sucess to pass passing criteria
             startTime = window.performance.now();
             if(this.abc.algorithm()) {
                 endTime = window.performance.now();
@@ -69,12 +94,10 @@ class TesterABC {
                 this.logWriter.addString("Population size: "+this.abc.getPopSize());
                 this.logWriter.addString("");
                 
-                /* for(Honey h: abc.getSolutions()) {                              //write solutions to log file
-                    logWriter.add(h);
-                    logWriter.add("");
-                } */
+                
                 this.abc.getSolutions().forEach(h => {
-                    this.logWriter.addObject(h);
+                    //this.logWriter.addObject(h);
+                    this.logWriter.addString(h+"")
                     this.logWriter.addString("");
                 });
 
@@ -90,7 +113,7 @@ class TesterABC {
             startTime = 0;                                                          //reset time
             endTime = 0;
             totalTime = 0;
-        }
+        } */
     
         console.log("Number of Success: " +success);
         console.log("Number of failures: "+fail);

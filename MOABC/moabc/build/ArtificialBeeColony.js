@@ -58,6 +58,7 @@ var ArtificialBeeColony = (function () {
                 console.log("conflicts:" + h.getConflicts());
             }
         });
+        console.log("the best of all %o", this.gBest);
         return done;
     };
     ArtificialBeeColony.prototype.sendEmployedBees = function () {
@@ -101,22 +102,21 @@ var ArtificialBeeColony = (function () {
         var parameterToChange = 0;
         prevConflicts = currentBee.getConflicts();
         parameterToChange = this.getRandomNumber(0, this.MAX_LENGTH - 1);
-        tempValue = currentBee.getNectar(parameterToChange);
-        newValue = (tempValue + (tempValue - neighborBee.getNectar(parameterToChange)) * (Math.random() - 0.5) * 2);
+        var phi = -1 + (1 - (1)) * Math.random();
+        tempValue = currentBee.getNectar(parameterToChange, EvacuationPropType.current_population);
+        newValue = (tempValue + (tempValue - neighborBee.getNectar(parameterToChange, EvacuationPropType.current_population)) * phi);
         if (newValue < 0) {
             newValue = 0;
         }
         if (newValue > this.MAX_LENGTH - 1) {
             newValue = this.MAX_LENGTH - 1;
         }
-        tempIndex = currentBee.getIndex(newValue);
-        currentBee.setNectar(parameterToChange, newValue);
-        currentBee.setNectar(tempIndex, tempValue);
+        currentBee.setNectar(parameterToChange, newValue, EvacuationPropType.current_population);
         currentBee.computeConflicts();
         currConflicts = currentBee.getConflicts();
         if (prevConflicts < currConflicts) {
-            currentBee.setNectar(parameterToChange, tempValue);
-            currentBee.setNectar(tempIndex, newValue);
+            currentBee.setNectar(parameterToChange, tempValue, EvacuationPropType.current_population);
+            currentBee.setNectar(tempIndex, newValue, EvacuationPropType.current_population);
             currentBee.computeConflicts();
             currentBee.setTrials(currentBee.getTrials() + 1);
         }
@@ -199,9 +199,9 @@ var ArtificialBeeColony = (function () {
         var positionA = this.getRandomNumber(0, this.MAX_LENGTH - 1);
         var positionB = this.getExclusiveRandomNumber(this.MAX_LENGTH - 1, positionA);
         var thisHoney = this.foodSources[index];
-        var temp = thisHoney.getNectar(positionA);
-        thisHoney.setNectar(positionA, thisHoney.getNectar(positionB));
-        thisHoney.setNectar(positionB, temp);
+        var temp = thisHoney.getNectar(positionA, EvacuationPropType.current_population);
+        thisHoney.setNectar(positionA, thisHoney.getNectar(positionB, EvacuationPropType.current_population), EvacuationPropType.current_population);
+        thisHoney.setNectar(positionB, temp, EvacuationPropType.current_population);
     };
     ArtificialBeeColony.prototype.memorizeBestFoodSource = function () {
         this.gBest = getMinValue(this.foodSources, (function (val) {
@@ -209,29 +209,7 @@ var ArtificialBeeColony = (function () {
         })).value;
     };
     ArtificialBeeColony.prototype.printSolution = function (solution) {
-        var board = new Board();
-        for (var x = 0; x < this.MAX_LENGTH; x++) {
-            for (var y = 0; y < this.MAX_LENGTH; y++) {
-                board.set(x, y, "");
-            }
-        }
-        for (var x = 0; x < this.MAX_LENGTH; x++) {
-            board.set(x, solution.getNectar(x), "Q");
-        }
-        console.log("Board:");
-        for (var y = 0; y < this.MAX_LENGTH; y++) {
-            var string = "";
-            for (var x = 0; x < this.MAX_LENGTH; x++) {
-                if (board.get(x, y) == "Q") {
-                    string += "Q ";
-                }
-                else {
-                    string += ". ";
-                }
-                console.log(string);
-            }
-            console.log(string);
-        }
+        console.log("given solution: %o", solution);
     };
     ArtificialBeeColony.prototype.getSolutions = function () {
         return this.solutions;

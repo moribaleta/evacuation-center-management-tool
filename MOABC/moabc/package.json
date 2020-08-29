@@ -20,6 +20,7 @@
     "systemjs": "^6.5.0"
   },
   "devDependencies": {
+    "@yuheiy/gulp-debounce": "0.0.1",
     "gulp-shell": "^0.8.0"
   }
 }

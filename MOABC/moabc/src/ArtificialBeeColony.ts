@@ -111,6 +111,8 @@ class ArtificialBeeColony {
                 console.log("conflicts:"+h.getConflicts());
             }
         })
+
+        console.log("the best of all %o", this.gBest)
         
         return done;
     }
@@ -174,6 +176,8 @@ class ArtificialBeeColony {
         var currConflicts = 0;
         var parameterToChange = 0;
 
+        
+
         //get number of conflicts
         prevConflicts = currentBee.getConflicts();
 
@@ -183,8 +187,11 @@ class ArtificialBeeColony {
         /*v_{ij}=x_{ij}+\phi_{ij}*(x_{kj}-x_{ij}) 
         solution[param2change]=Foods[i][param2change]+(Foods[i][param2change]-Foods[neighbour][param2change])*(r-0.5)*2;
         */
-        tempValue = currentBee.getNectar(parameterToChange);
-        newValue = (tempValue+(tempValue - neighborBee.getNectar(parameterToChange))*(Math.random()-0.5)*2);
+        ///!!!REFERENCE
+        const phi = -1 + (1-(1))*Math.random()
+        tempValue   = currentBee.getNectar(parameterToChange, EvacuationPropType.current_population);
+        newValue    = (tempValue+(tempValue - neighborBee.getNectar(parameterToChange, EvacuationPropType.current_population)) * phi);
+        
 
         //trap the value within upper bound and lower bound limits
         if(newValue < 0) {
@@ -195,18 +202,18 @@ class ArtificialBeeColony {
         }
 
         //get the index of the new value
-        tempIndex = currentBee.getIndex(newValue);
+        //tempIndex = currentBee.getIndex(newValue, EvacuationPropType.current_population);
 
         //swap
-        currentBee.setNectar(parameterToChange, newValue);
-        currentBee.setNectar(tempIndex, tempValue);
+        currentBee.setNectar(parameterToChange, newValue, EvacuationPropType.current_population);
+        //currentBee.setNectar(tempIndex, tempValue, EvacuationPropType.current_population);
         currentBee.computeConflicts();
         currConflicts = currentBee.getConflicts();
         
         //greedy selection
         if(prevConflicts < currConflicts) {						//No improvement
-            currentBee.setNectar(parameterToChange, tempValue);
-            currentBee.setNectar(tempIndex, newValue);
+            currentBee.setNectar(parameterToChange, tempValue, EvacuationPropType.current_population);
+            currentBee.setNectar(tempIndex, newValue, EvacuationPropType.current_population);
             currentBee.computeConflicts();
             currentBee.setTrials(currentBee.getTrials() + 1);
         } else {												//improved solution
@@ -316,7 +323,7 @@ class ArtificialBeeColony {
         var shuffles = 0;
         
         for(var i = 0; i < this.FOOD_NUMBER; i++) {
-            var newHoney = new Honey(this.MAX_LENGTH);
+            let newHoney = new Honey(this.MAX_LENGTH);
        
             this.foodSources.push(newHoney);
             // reference get latest index --> this.foodSources.indexOf(newHoney);
@@ -371,9 +378,9 @@ class ArtificialBeeColony {
         let positionA = this.getRandomNumber(0, this.MAX_LENGTH - 1);
         let positionB = this.getExclusiveRandomNumber(this.MAX_LENGTH - 1, positionA);
         let thisHoney = this.foodSources[index];
-        let temp = thisHoney.getNectar(positionA);
-        thisHoney.setNectar(positionA, thisHoney.getNectar(positionB));
-        thisHoney.setNectar(positionB, temp);          
+        let temp = thisHoney.getNectar(positionA, EvacuationPropType.current_population);
+        thisHoney.setNectar(positionA, thisHoney.getNectar(positionB, EvacuationPropType.current_population), EvacuationPropType.current_population);
+        thisHoney.setNectar(positionB, temp, EvacuationPropType.current_population);          
     }
 
     /* Memorizes the best solution
@@ -393,7 +400,8 @@ class ArtificialBeeColony {
 	 * @param: a chromosome
 	 */ 
     public printSolution(solution: Honey) {
-        var board : Board = new Board();
+        console.log("given solution: %o", solution)
+        /* var board : Board = new Board();
         
         // Clear the board.
         for(var x = 0; x < this.MAX_LENGTH; x++) {
@@ -425,7 +433,7 @@ class ArtificialBeeColony {
             }
             //System.out.print("\n");
             console.log(string)
-        }
+        } */
     }    
 
     /* gets the solutions

@@ -1,13 +1,14 @@
 var TesterABC = (function () {
     function TesterABC() {
         this.logWriter = new Writer();
-        this.MAX_RUN = 50;
+        this.MAX_RUN = 1;
         this.runtimes = [];
         console.log("created");
     }
     TesterABC.prototype.test = function (maxLength, trialLimit, maxEpoch) {
         var _this = this;
         this.MAX_LENGTH = maxLength;
+        log("starting");
         this.abc = new ArtificialBeeColony(this.MAX_LENGTH);
         this.abc.setLimit(trialLimit);
         this.abc.setMaxEpoch(maxEpoch);
@@ -17,42 +18,23 @@ var TesterABC = (function () {
         var endTime;
         var totalTime = 0;
         var fail = 0;
-        var success = 0;
         this.logParameters();
-        for (var i = 0; i < this.MAX_RUN;) {
-            startTime = window.performance.now();
-            if (this.abc.algorithm()) {
-                endTime = window.performance.now();
-                totalTime = endTime - startTime;
-                console.log("Done");
-                console.log("run " + (i + 1));
-                console.log("time in nanoseconds: " + totalTime);
-                console.log("Success!");
-                this.runtimes[i] = totalTime;
-                i++;
-                success++;
-                this.logWriter.addString("Run: " + i);
-                this.logWriter.addString("Runtime in nanoseconds: " + totalTime);
-                this.logWriter.addString("Found at epoch: " + this.abc.getEpoch());
-                this.logWriter.addString("Population size: " + this.abc.getPopSize());
-                this.logWriter.addString("");
-                this.abc.getSolutions().forEach(function (h) {
-                    _this.logWriter.addObject(h);
-                    _this.logWriter.addString("");
-                });
-            }
-            else {
-                fail++;
-                console.log("Fail!");
-            }
-            if (fail >= 100) {
-                console.log("Cannot find solution with these params");
-                break;
-            }
-            startTime = 0;
-            endTime = 0;
-            totalTime = 0;
-        }
+        startTime = window.performance.now();
+        var success = this.abc.algorithm();
+        endTime = window.performance.now();
+        totalTime = endTime - startTime;
+        console.log("success?: %o", success);
+        console.log("Done");
+        console.log("time in nanoseconds: " + totalTime);
+        console.log("Success!");
+        this.logWriter.addString("Runtime in nanoseconds: " + totalTime);
+        this.logWriter.addString("Found at epoch: " + this.abc.getEpoch());
+        this.logWriter.addString("Population size: " + this.abc.getPopSize());
+        this.logWriter.addString("");
+        this.abc.getSolutions().forEach(function (h) {
+            _this.logWriter.addString(h + "");
+            _this.logWriter.addString("");
+        });
         console.log("Number of Success: " + success);
         console.log("Number of failures: " + fail);
         this.logWriter.addString("Runtime summary");

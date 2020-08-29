@@ -53,7 +53,10 @@ class Honey {
      */
     public initNectar() {
         for (var i = 0; i < this.MAX_LENGTH; i++) { //initialize the solution to 1... n
-            this.nectar[i] = i;
+            log("im here")
+            this.nectar[i] = new EvacuationCenter()
+            this.nectar[i].current_population = randomNumber(0, 30)
+            //this.nectar[i].current_population = i;
         }
     }
 
@@ -61,7 +64,14 @@ class Honey {
      *
      */
     public computeConflicts() { //compute the number of conflicts to calculate fitness
-        //String board[][] = new String[MAX_LENGTH][MAX_LENGTH]; 
+       
+        var sum = 0
+        for (var i = 0; i< this.MAX_LENGTH; i++) {
+            sum += (this.nectar[i].current_population/this.nectar[i].population_capacity)
+        }
+        this.setConflicts(sum)
+
+        /*  //String board[][] = new String[MAX_LENGTH][MAX_LENGTH]; 
         let board: Board = new Board()
         let x = 0; //row
         let y = 0; //column
@@ -104,7 +114,7 @@ class Honey {
             }
         }
 
-        this.conflicts = conflicts; //set conflicts of this chromosome
+        this.conflicts = conflicts; //set conflicts of this chromosome */
 
     }
 
@@ -112,19 +122,19 @@ class Honey {
      *
      * @param: a nxn board
      */
-    public plotQueens(board: Board): Board {
+    /* public plotQueens(board: Board): Board {
         for (var i = 0; i < this.MAX_LENGTH; i++) {
             //board[i][this.nectar[i]] = "Q";
             board.set(i, this.nectar[i], "Q")
         }
         return board;
     }
-
+ */
     /** Clears the board.
      *
      * @param: a nxn board
      */
-    public clearBoard(board: Board): Board {
+    /* public clearBoard(board: Board): Board {
         // Clear the board.
         for (var i = 0; i < this.MAX_LENGTH; i++) {
             for (var j = 0; j < this.MAX_LENGTH; j++) {
@@ -133,7 +143,7 @@ class Honey {
             }
         }
         return board;
-    }
+    } */
 
     /** Gets the conflicts of the Honey.
      *
@@ -188,8 +198,21 @@ class Honey {
      * @param: index of data
      * @return: position of queen
      */
-    public getNectar(index: number, type: string|EvacuationPropType): number {
-        return this.nectar[index][type] as number;
+    public getNectar(index: number, type: EvacuationPropType): number {
+        //return this.nectar[index][type] as number;
+        /* if (type == EvacuationPropType.population_capacity){
+            return this.nectar[index].population_capacity
+        } else {
+            return this.nectar[index].
+        } */
+        switch(type) {
+            case EvacuationPropType.current_population:
+                return this.nectar[index].current_population
+            case EvacuationPropType.current_inventory:
+                return this.nectar[index].current_inventory
+            default:
+                return 0
+        }
     }
 
     /** Gets the index on a specified data.
@@ -197,14 +220,30 @@ class Honey {
      * @param: index of data
      * @return: position of queen
      */
-    public getIndex(value: number): number {
+    public getIndex(value: number, type: EvacuationPropType): number {
         var k = 0;
         for (; k < this.MAX_LENGTH; k++) {
-            if (this.nectar[k] == value) {
-                break;
-            }
+            /* if (this.getNectar(k, type) == value) {
+                return k
+            } */
+            if (this.nectar[k].current_population == value) {
+                return k
+            } 
+            /* else {
+                let type_nectar = typeof this.nectar[k].current_population
+                let type_value  = typeof value
+                console.log("find nect value: %o vs val: %o are equal?: %o", this.nectar[k].current_population, value, this.nectar[k].current_population == value)
+                console.log("find type nect: %o vs type val: %o", type_nectar, type_value)
+                console.log("find nectars: %o", this.nectar[k])
+            } */
         }
-        return k;
+
+        /* console.log("find nectars: %o", this.nectar)
+        console.log("find value: %o, type: %o", value, type)
+        console.log("find index: %o", k)
+        console.trace() */
+
+        return null
     }
 
     /** Sets the data on a specified index.
@@ -212,8 +251,24 @@ class Honey {
      * @param: index of data
      * @param: new position of queen
      */
-    public setNectar(index: number, value: number) {
-        this.nectar[index] = value;
+    public setNectar(index: number, value: number, type: EvacuationPropType) {
+        //this.nectar[index] = value;
+        console.log("honeybee nectar %o", this.nectar)
+        console.log("set value index: %o, value: %o, type: %o", index, value, type)
+
+        if (index == null) {
+            console.log("fatalError()")
+            console.trace()
+        }
+
+        switch(type) {
+            case EvacuationPropType.current_population:
+                return this.nectar[index].current_population = value
+            case EvacuationPropType.current_inventory:
+                return this.nectar[index].current_inventory = value
+            default:
+                return 0
+        }
     }
 
     /** Gets the number of trials of a solution.

@@ -13,57 +13,17 @@ var Honey = (function () {
     };
     Honey.prototype.initNectar = function () {
         for (var i = 0; i < this.MAX_LENGTH; i++) {
-            this.nectar[i] = i;
+            log("im here");
+            this.nectar[i] = new EvacuationCenter();
+            this.nectar[i].current_population = randomNumber(0, 30);
         }
     };
     Honey.prototype.computeConflicts = function () {
-        var board = new Board();
-        var x = 0;
-        var y = 0;
-        var tempx = 0;
-        var tempy = 0;
-        var dx = [-1, 1, -1, 1];
-        var dy = [-1, 1, 1, -1];
-        var done = false;
-        var conflicts = 0;
-        board = this.clearBoard(board);
-        board = this.plotQueens(board);
+        var sum = 0;
         for (var i = 0; i < this.MAX_LENGTH; i++) {
-            x = i;
-            y = this.nectar[i];
-            for (var j = 0; j < 4; j++) {
-                tempx = x;
-                tempy = y;
-                done = false;
-                while (!done) {
-                    tempx += dx[j];
-                    tempy += dy[j];
-                    if ((tempx < 0 || tempx >= this.MAX_LENGTH) || (tempy < 0 || tempy >= this.MAX_LENGTH)) {
-                        done = true;
-                    }
-                    else {
-                        if (board.get(tempx, tempy) == "Q") {
-                            conflicts++;
-                        }
-                    }
-                }
-            }
+            sum += (this.nectar[i].current_population / this.nectar[i].population_capacity);
         }
-        this.conflicts = conflicts;
-    };
-    Honey.prototype.plotQueens = function (board) {
-        for (var i = 0; i < this.MAX_LENGTH; i++) {
-            board.set(i, this.nectar[i], "Q");
-        }
-        return board;
-    };
-    Honey.prototype.clearBoard = function (board) {
-        for (var i = 0; i < this.MAX_LENGTH; i++) {
-            for (var j = 0; j < this.MAX_LENGTH; j++) {
-                board.set(i, j, "");
-            }
-        }
-        return board;
+        this.setConflicts(sum);
     };
     Honey.prototype.getConflicts = function () {
         return this.conflicts;
@@ -83,20 +43,40 @@ var Honey = (function () {
     Honey.prototype.setFitness = function (mFitness) {
         this.fitness = mFitness;
     };
-    Honey.prototype.getNectar = function (index) {
-        return this.nectar[index];
+    Honey.prototype.getNectar = function (index, type) {
+        switch (type) {
+            case EvacuationPropType.current_population:
+                return this.nectar[index].current_population;
+            case EvacuationPropType.current_inventory:
+                return this.nectar[index].current_inventory;
+            default:
+                return 0;
+        }
     };
-    Honey.prototype.getIndex = function (value) {
+    Honey.prototype.getIndex = function (value, type) {
         var k = 0;
         for (; k < this.MAX_LENGTH; k++) {
-            if (this.nectar[k] == value) {
-                break;
+            if (this.nectar[k].current_population == value) {
+                return k;
             }
         }
-        return k;
+        return null;
     };
-    Honey.prototype.setNectar = function (index, value) {
-        this.nectar[index] = value;
+    Honey.prototype.setNectar = function (index, value, type) {
+        console.log("honeybee nectar %o", this.nectar);
+        console.log("set value index: %o, value: %o, type: %o", index, value, type);
+        if (index == null) {
+            console.log("fatalError()");
+            console.trace();
+        }
+        switch (type) {
+            case EvacuationPropType.current_population:
+                return this.nectar[index].current_population = value;
+            case EvacuationPropType.current_inventory:
+                return this.nectar[index].current_inventory = value;
+            default:
+                return 0;
+        }
     };
     Honey.prototype.getTrials = function () {
         return this.trials;
@@ -108,24 +88,6 @@ var Honey = (function () {
         return this.MAX_LENGTH;
     };
     return Honey;
-}());
-var Board = (function () {
-    function Board() {
-        this.value = [];
-    }
-    Board.prototype.set = function (section, row, value) {
-        if (!this.value[section]) {
-            this.value[section] = [];
-        }
-        this.value[section][row] = value;
-    };
-    Board.prototype.get = function (section, row) {
-        return this.value[section][row];
-    };
-    Board.prototype.push = function (value) {
-        this.value.push(value);
-    };
-    return Board;
 }());
 function getMaxValue(arr, where) {
     var maxHoney = {
