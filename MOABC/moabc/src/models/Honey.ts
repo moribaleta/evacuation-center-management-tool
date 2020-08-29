@@ -10,33 +10,32 @@
  */
 
 class Honey {
-    private MAX_LENGTH: number;
-    private nectar: number[]; //solution or placement of queen: numbers
-    private trials: number;
-    private conflicts: number;
-    private fitness: number;
+    ///number of nectars
+    private MAX_LENGTH  : number;
+    
+    ///Nectars of EvacuationCenter
+    private nectar      : EvacuationCenter[];  //solution or placement of queen: numbers
+    
+    ///number of trials/failed attempt on the solution
+    private trials      : number;
+
+    ///objective value
+    private conflicts   : number;
+    ///fitness value
+    private fitness     : number;
+    
     private selectionProbability: number;
 
     /** Instantiate a Honey.
      *
      * @param: size of n
      */
-    /**  public Honey(size: number) {
-         this.MAX_LENGTH = size;
-         this.nectar = [] //new int[this.MAX_LENGTH];
-         this.conflicts = 0;
-         this.trials = 0;
-         this.fitness = 0.0;
-         this.selectionProbability = 0.0;
-         this.initNectar();
-     } */
-
     constructor(size: number) {
-        this.MAX_LENGTH = size;
-        this.nectar = [] //new int[this.MAX_LENGTH];
-        this.conflicts = 0;
-        this.trials = 0;
-        this.fitness = 0.0;
+        this.MAX_LENGTH           = size;
+        this.nectar               = []     //new int[this.MAX_LENGTH];
+        this.conflicts            = 0;
+        this.trials               = 0;
+        this.fitness              = 0.0;
         this.selectionProbability = 0.0;
         this.initNectar();
     }
@@ -246,7 +245,7 @@ class Honey {
 ///type to define a callback function with a number to return
 type CallBackNumber < T > = (val: T) => number
 
-class Board {
+/* class Board {
     value: string[][] = []
 
     set(section: number, row: number, value: string) {
@@ -263,7 +262,7 @@ class Board {
     push(value: string[]) {
         this.value.push(value)
     }
-}
+} */
 
 interface Search < T > {
     value: T,

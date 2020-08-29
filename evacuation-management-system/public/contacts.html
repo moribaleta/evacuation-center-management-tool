@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,11,EmulateIE11" />
+    <meta name="csrf-token" content="VNZ37q61ydGY9rbo74Sg9QlQHSzoUE0upH3Yv1oo">
+    <link rel="stylesheet" href="css/app.css">
+
+    <script src="js/library/jquery-3.0.0.min.js"></script>
+    <script src="js/library/vue.js"></script>
+    <script src="js/library/Chart.min.js"></script>
+    <title>Water Reserve</title>
+    <style>
+        .header-jumbotron {
+            background-image: url('../admin/resources/images/background.jpg');
+            background-position: center;
+            height: 200px;
+            padding: 10px;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .header-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            flex-direction: row;
+            justify-content: cent;
+        }
+
+        .header-img {
+            height: 100px;
+            width: auto;
+        }
+
+        .header-title {
+            color: white;
+            font-weight: 700;
+        }
+
+        .info-label {
+            font-weight: 800
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <nav id="home_app" class="navbar navbar-expand-md sticky-top navbar-light navbar-laravel">
+            <div class="container">
+                <a class="navbar-brand" href="index.html">
+                    <img src="../admin/resources/images/logo.png" width="30" height="30" alt=""
+                        style="margin-top: -5px;">
+                    Water Reserve
+                </a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse"
+                    data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                    aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <!-- Left Side Of Navbar -->
+                    <ul class="navbar-nav mr-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="index.html">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="index.html#project-description">About Laguna de Bay</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Contact Us</a>
+                        </li>
+                    </ul>
+
+                    <!-- Right Side Of Navbar -->
+                    <ul class="navbar-nav ml-auto">
+                        <!-- Authentication Links -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="../admin/login.html">Login</a>
+                        </li>
+                        <!-- <li class="nav-item">
+                            <a class="nav-link" href="../admin/registration.html">Register</a>
+                        </li> -->
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+
+        <div id="overview" class="jumbotron p-3 bg-white">
+            <div class="container">
+                <div class="jumbotron header-jumbotron">
+                    <div class="header-container">
+                        <img src="../admin/resources/images/logo.png" class="header-img">
+                        <h2 class="header-title">Water Reserve</h2>
+                    </div>
+                </div>
+                <h1 class="display-5">Contact Us</h1>
+                <div class="row info-container">
+                    <p class="col col-xs-12 info-value">JEFFERSON L. LERIOS</p>
+                </div>
+                <div class="row info-container">
+                    <p class="col col-xs-12 info-value">Dean at : Laguna State Polytechnic University</p>
+                </div>
+                <div class="row info-container">
+                    <p class="col col-xs-12 info-value">Office: Technological Institute of the Philippines </p>
+                </div>
+                <div class="row info-container">
+                    <p class="col col-xs-12 info-value">Graduate Program </p>
+                </div>
+                <div class="row info-container">
+                    <p class="col col-md-2 info-label">Contact number:</p>
+                    <p class="col col-md-10 info-value"> 0998 887 6730
+                    </p>
+                </div>
+
+                <div class="row info-container">
+                    <p class="col col-md-2 info-label">Email:</p>
+                    <p class="col col-md-10 info-value">jeffersonlerios@yahoo.com
+                    </p>
+                </div>
+
+                <div class="row info-container">
+                    <p class="col col-md-2 info-label">Address:</p>
+                    <p class="col col-md-10 info-value">LLDA Building, National Ecology Center, East Avenue, Diliman,
+                        Quezon City
+                    </p>
+                </div>
+
+                <div class="row info-container">
+                    <p class="col col-md-2 info-label">Email:</p>
+                    <p class="col col-md-10 info-value">info@llda.gov.ph
+                    </p>
+                </div>
+
+                <div class="row info-container">
+                    <p class="col col-md-2 info-label">Contact number:</p>
+                    <p class="col col-md-10 info-value">(02) 376-4039
+                    </p>
+                </div>
+            </div>
+        </div>
+
+
+
+
+        <footer class="page-footer font-small bg-dark text-white pt-4">
+            <div class="container text-center text-md-left">
+                <div class="row">
+                    <div class="col-md-4 mx-auto">
+                        <h5 class="font-weight-bold text-uppercase mt-3 mb-4">Footer Content</h5>
+                        <p>Here you can use rows and columns here to organize your footer content. Lorem ipsum dolor sit
+                            amet, consectetur
+                            adipisicing elit.
+                        </p>
+                    </div>
+                    <hr class="clearfix w-100 d-md-none">
+                    <div class="col-md-2 mx-auto">
+                        <h5 class="font-weight-bold text-uppercase mt-3 mb-4">Links</h5>
+                        <ul class="list-unstyled">
+                            <li>
+                                <a href="#overview">Contact Us</a>
+                            </li>
+                            <li>
+                                <a href="../admin/login.html">Admin</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <div class="footer-copyright text-center py-3">© 2019 Copyright:
+                <a href="facebook.com"> Lagunadebay</a>
+            </div>
+        </footer>
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,37 @@
+.carousel-item img {
+  height: 95vmin;
+  max-height: 95vmin;
+}
+
+.card-img-top {
+  height: 175px;
+}
+
+.parallax {
+  height: 40vh;
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.bg-size-cover {
+  background-size: cover;
+}
+
+.bg-position-center {
+  background-position: center;
+}
+
+.bg-position-bottom {
+  background-position: bottom;
+}
+
+.bg-position-top {
+  background-position: top;
+}
+
+.page-header-about {
+  color: #f3f3f3;
+}
+

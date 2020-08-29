@@ -1,0 +1,81 @@
+<html>
+<header>
+    <script src="js/brain.js"></script>
+    <script src="js/data.js"></script>
+</header>
+
+<body>
+    <div>
+        <p id="input"></p>
+        <p id="output"></p>
+        <button title="test" onclick="test()">test</button>
+    </div>
+    <script src="js/regression.js"></script>
+    <script>
+        var sample_data   = []
+        var test_data     = []
+        var training_data = []
+
+
+        function trainModel() {
+
+            // === Create the linear regression === //
+            var regression = new jsregression.LinearRegression({
+                alpha: 0.00000001, // 
+                iterations: 3000,
+                lambda: 0.0,
+                trace: false
+            });
+            // can also use default configuration: var regression = new jsregression.LinearRegression(); 
+            // === Train the linear regression === //
+            var model = regression.fit(data);
+            // === Print the trained model === //
+            console.log(model);
+            // === Testing the trained linear regression === //
+            var items = [];
+            var items_predicted = [];
+            for (var x = 1.0; x < 100.0; x += 0.5) {
+                var actual_y = 6.0 + 5.0 * x + 2.0 * x * x + (Math.random() - 0.5) * x * 100;
+                var predicted_y = regression.transform([x, x * x]);
+                items.push({
+                    x: x,
+                    y: actual_y
+                });
+                items_predicted.push({
+                    x: x,
+                    y: predicted_y
+                });
+                console.log("actual: " + actual_y + " predicted: " + predicted_y);
+            }
+            console.log(items);
+        }
+
+        function processSampleData() {
+            sample_data = sample.map((item) => {
+                let raw_item = {
+                    "PH": Number(item.PH),
+                    "AMMONIA_TOTAL_MGL_N": Number(item.AMMONIA_TOTAL_MGL_N),
+                    "NITRATE_TOTAL_MGLASN": Number(item.NITRATE_TOTAL_MGLASN),
+                    "INORGANIC_PHOSPHATE": Number(item.INORGANIC_PHOSPHATE),
+                    "BOD": Number(item.BOD),
+                    "DISSOLVED_OXYGEN_MGL": Number(item.DISSOLVED_OXYGEN_MGL),
+                    "FECAL_COLIFORMS": Number(item.FECAL_COLIFORMS),
+                }
+                let input = Object.keys(raw_item).map((key) => {
+                    return raw_item[key]
+                })
+                return input
+            })
+
+
+            console.log("map normalize %o", map_normalization)
+            console.log("training data %o", sample_data)
+
+            let train_set = sample_data.length / 3
+            training_data = sample_data.splice(0, train_set)
+            test_data = sample_data
+        }
+    </script>
+</body>
+
+</html>

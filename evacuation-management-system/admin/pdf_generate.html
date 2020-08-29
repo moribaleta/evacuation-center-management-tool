@@ -1,0 +1,28 @@
+<html>
+
+<head>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.min.js"></script>
+</head>
+
+<body>
+    <script>
+         let data = window.sessionStorage.getItem('pdftoprint')
+        let name = window.sessionStorage.getItem('pdfname')
+        //console.log(data) */
+        var doc = new jsPDF({
+            orientation: 'landscape',
+            format: 'a1'
+        })
+        doc.setFontSize(10)
+        doc.text(data,10,10)
+        doc.save(name+'.pdf')
+        setTimeout(()=>{
+            window.close()
+        }, 2000)
+
+
+        
+    </script>
+</body>
+
+</html>
