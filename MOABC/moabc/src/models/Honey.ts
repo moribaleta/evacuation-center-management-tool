@@ -12,7 +12,7 @@
 class Honey {
     ///number of nectars
     private MAX_LENGTH  : number;
-    
+
     ///Nectars of EvacuationCenter
     private nectar      : EvacuationCenter[];  //solution or placement of queen: numbers
     
@@ -188,8 +188,8 @@ class Honey {
      * @param: index of data
      * @return: position of queen
      */
-    public getNectar(index: number): number {
-        return this.nectar[index];
+    public getNectar(index: number, type: string|EvacuationPropType): number {
+        return this.nectar[index][type] as number;
     }
 
     /** Gets the index on a specified data.

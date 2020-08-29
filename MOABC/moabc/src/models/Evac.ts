@@ -25,6 +25,14 @@ class EvacuationCenter implements Model {
     ///function output value of population
     object_population   : number
 
+    getValue(type: EvacuationPropType) : number {
+        switch(type) {
+            case EvacuationPropType.location:
+                return this.distance
+            case EvacuationPropType.
+        }
+
+    }
     
 }
 
