@@ -139,9 +139,10 @@
             }
             
             road_map = optimizeMap()
-            localStorage.setItem("roads", text)
+            
 
             var text = JSON.stringify(road_map)
+            localStorage.setItem("roads", text)
             //$('#myModal').modal('show');
             $('#road_value').html(text)
             //$('#path_value').html(textPath)
@@ -399,6 +400,8 @@
         }
         
         function initPrevMarkers(map) {
+            /* road_map = localStorage.getItem("roads")
+            console.log("road %o", road_map) */
             road_map = JSON.parse(localStorage.getItem('roads')) || []
             
             road_map.forEach((path) => {
