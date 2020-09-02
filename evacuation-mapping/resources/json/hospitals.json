@@ -1,0 +1,16 @@
+hospital_data = [
+    {
+        'name':'Evacuation Plaza',
+        'location':{
+            'lat':14.421234951320889,
+            'long':121.44583225250244,
+            'address': 'Evacution Plaza'
+        },
+        'available': 3,
+        'contact':'(02) 941 5511',
+        'onGoing':false,
+        'email':'garciahospital@mailinator.com'
+    },
+    //{"name":"evacuation 1","coordinates":[{"lat":14.421234951320889,"lng":121.44583225250244}]}
+
+]
