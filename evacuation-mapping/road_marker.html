@@ -82,7 +82,7 @@
         var emergency_marker = [];
         var hostpital_list = hospital_data;
         
-        var road_map = []
+        var road_map = []//[{"name":"path1","coordinates":[{"id":"path10","lat":14.422914527194624,"lng":121.44419080942102},{"id":"path11","lat":14.422800229442972,"lng":121.4443866106791},{"id":"path12","lat":14.422675540919757,"lng":121.44464678495355},{"id":"path13","lat":14.42253526624771,"lng":121.44485599725671},{"id":"path14","lat":14.42233784248559,"lng":121.44520200221963},{"id":"path15","lat":14.422189547260968,"lng":121.44545482052968},{"id":"path16","lat":14.421999916251135,"lng":121.44581691874669}]},{"name":"path2","coordinates":[{"id":"path20","lat":14.422697611686434,"lng":121.4446606617842},{"id":"path21","lat":14.42284568308532,"lng":121.44473576363661},{"id":"path22","lat":14.423004141283892,"lng":121.44481086548903},{"id":"path23","lat":14.423174288896206,"lng":121.44490608390906},{"id":"path24","lat":14.42331130997852,"lng":121.44497681772594}]}]
         
         var path = {
             name: null,
@@ -130,7 +130,7 @@
         }
         
         function savePath() {
-            if(path.name != null || coordinates.length > 0) {
+            if(path.name != null || path.coordinates.length > 0) {
                 road_map.push(JSON.parse(JSON.stringify(path)))
                 path = {
                     name: null,
@@ -138,17 +138,80 @@
                 }
             }
             
-            var text = JSON.stringify(road_map)
+            road_map = optimizeMap()
             localStorage.setItem("roads", text)
+
+            var text = JSON.stringify(road_map)
+            //$('#myModal').modal('show');
+            $('#road_value').html(text)
+            //$('#path_value').html(textPath)
         }
         
+        function getdistance(lat1, lat2, lon1, lon2) {
+            var p = 0.017453292519943295; // Math.PI / 180
+            var c = Math.cos;
+            var a = 0.5 - c((lat2 - lat1) * p) / 2 +
+            c(lat1 * p) * c(lat2 * p) *
+            (1 - c((lon2 - lon1) * p)) / 2;
+            
+            return 12742 * Math.asin(Math.sqrt(a)); // 2 * R; R = 6371 km
+        }
+        
+        function optimizeMap() {
+            var coordinates = []
+            road_map.forEach((val) => {
+                //coordinates.push(val.coordinates)
+                //coordinates = coordinates.concat(val.coordinates)
+                coordinates.push(...val.coordinates)
+            })
+            console.log("road_map %o", road_map)
+            console.log("coordinates %o", coordinates)
+            var coordinates2 = [...coordinates]
+            
+            coordinates.forEach((value_1, index_1) => {
+                coordinates2.forEach((value_2, index_2) => {
+                    let distance = getdistance(
+                    value_1.lat, value_2.lat,
+                    value_1.lng, value_2.lng)
+                    console.log("distance %o", distance)
+                    if (distance < 0.03) {
+                        coordinates2[index_2].lat = value_1.lat
+                        coordinates2[index_2].lng = value_1.lng
+                        console.log("hey im low, val1: %o vs val2: %o", value_1, value_2)
+                    }  
+                })
+            })
+            
+            let optimized = road_map.map((path, index) => {
+                coordinates2.forEach((coord) => {
+                    path.coordinates.forEach((coord2, index2) => {
+                        if (coord2.id == coord.id) {
+                            path.coordinates[index2] = coord
+                        }
+                    })
+                })
+                return path
+            })
+            
+            return optimized
+            
+        }
+        
+        
+        
         function printPath(){
-            road_map.push(JSON.parse(JSON.stringify(path)))
-            path = {
-                name: null,
-                coordinates: []
+            if(path.name != null || path.coordinates.length > 0) {
+                road_map.push(JSON.parse(JSON.stringify(path)))
+                path = {
+                    name: null,
+                    coordinates: []
+                }
             }
+
+            road_map = optimizeMap()
+
             var text = JSON.stringify(road_map)
+
             localStorage.setItem("roads", text)
             saveTextAsFile(text)
         }
@@ -294,7 +357,7 @@
                 path.name = prompt("enter road name");
             }
             var location = {
-                id : path.coordinates.length || 0,
+                id : path.name + path.coordinates.length || 0,
                 lat: position.lat(),
                 lng: position.lng()
             }
