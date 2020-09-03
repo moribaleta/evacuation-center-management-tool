@@ -21,6 +21,7 @@
     <script src="resources/bootstrap/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="resources/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="resources/css/main.css">
+    <script src="resources/js/vue.js"></script>
     
 </head>
 <body>
@@ -47,19 +48,45 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
-                    <h4>current path</h4>
-                    <p id="path_value"></p>
-                    <blank></blank>
-                    <h4>saved paths</h4>
-                    <p id="road_value"></p>
+                <div class="modal-body" style="max-height: 500px; overflow: auto;">
+                    <div class="panel-group">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h4 class="panel-title">
+                                    <a data-toggle="collapse" href="#collapse-path">Current Path</a>
+                                </h4>
+                            </div>
+                            <div id="collapse-path" class="panel-collapse collapse">
+                                <button type="button" class="btn btn-primary btn-danger"   v-on:click="deletePath()">Delete</button>
+                                <div class="panel-body">{{path}}</div>
+                            </div>
+                        </div>
+                    </div>    
                     
+                    <div>
+                        <h4>saved paths</h4>
+                        <div class="panel-group" v-for="(road,index) in road_map">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" v-bind:href="'#collapse'+index">{{road.id + " " + road.name}}</a>
+                                    </h4>
+                                </div>
+                                <div v-bind:id="'collapse'+index" class="panel-collapse collapse">
+                                    <button type="button" class="btn btn-primary btn-danger"   v-on:click="deleteRoad(road.id)">Delete</button>
+                                    <div class="panel-body">{{road}}</div>
+                                </div>
+                            </div>
+                        </div>                          
+                    </div>
+                    <!-- <p id="path_value">{{road_map}}</p> -->
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary btn-success"   onclick="testPath()">test paths</button>
-                    <button type="button" class="btn btn-primary"       onclick="savePath()">Compile</button>
-                    <button type="button" class="btn btn-primary"       onclick="printPath()">Compile & Print</button>
-                    <button type="button" class="btn btn-secondary"     data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary btn-success"   v-on:click="testPath()">test paths</button>
+                    <button type="button" class="btn btn-primary"               v-on:click="savePath()">Save</button>
+                    <button type="button" class="btn btn-primary"               v-on:click="printPath()">Save & Print</button>
+                    <button type="button" class="btn btn-primary btn-danger"   v-on:click="clearAll()">Clear All Saved</button>
+                    <button type="button" class="btn btn-secondary"             data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -70,236 +97,288 @@
     <!-- Modal -->
     <div class="bottom-container">
         
-        <button class="bottom-button" id="button_add_new" onclick="addNewPath()">add path</button>
-        <button class="bottom-button" id="button_add_new" onclick="showPath()">show paths</button>
-        <button class="bottom-button" id="button_reload" onclick="resetMarker()">back</button>
+        <button class="bottom-button" id="button_add_new"   onclick="addNewPath()">add path</button>
+        <button class="bottom-button" id="button_add_new"   onclick="showPath()">show paths</button>
+        <button class="bottom-button" id="button_reload"    onclick="resetMarker()">back</button>
     </div>
     
     <script src="resources/src/js/datahandler.js"></script>
     <script src="resources/src/js/utilities.js"></script>
+    
+    <!--GLOBAL VAR==START-->
     <script>
+        ///map instance of Google Map
         var map;
         
-        var infowindow;
-        var directionsService;
-        var emergency_marker = [];
-        var hostpital_list = hospital_data;
+        ///contains all the markers shown on the map
+        var node_markers = [];
         
+        ///contains all the evacuation center
+        var evacuation_center_list = hospital_data;
+        
+        ///contains all the path created
         var road_map = []
         
+        ///sample json object represents a path
         var path = {
+            id: "path*"+genID(5),
             name: null,
             coordinates: [
             ]
         }
         
-        var emergency_mark = {
+        ///sample json object represents a marker shown on the map
+        var node_mark = {
             id: null, 
             marker: null,
             location: {}
         }
-        
-        function resetMarker(){
-            path.name = null;
-            
-            path.coordinates = [];
-            initMap();
-        }//resetMarker
+    </script>
+    <!--GLOBAL VAR==END-->
+    
+    <!--CODE==START-->
+    <script>
         
         function addNewPath(){
             road_map.push(JSON.parse(JSON.stringify(path)))
             path = {
+                id: "path*"+genID(5),
                 name: null,
                 coordinates: []
             }
             alert("you can now create a new path")
         }//addNewPath
         
-        
-        
         function showPath(){
-            var textPath = JSON.stringify(path)
-            var textRoad = JSON.stringify(road_map)
+            modal_vue.setList(path, road_map)
             $('#myModal').modal('show');
-            $('#road_value').html(textRoad)
-            $('#path_value').html(textPath)
         }//showPath
         
-        function savePath() {
-            if(path.name != null || path.coordinates.length > 0) {
-                road_map.push(JSON.parse(JSON.stringify(path)))
-                path = {
-                    name: null,
-                    coordinates: []
+        
+        /* ///removes the current path created and reinitialize
+        function resetMarker(){
+            path.coordnates.forEach((marker) => {
+                removeMarker(marker)
+            })
+            path = {
+                id: null,
+                name: null,
+                coordinates: []
+            }
+        }//resetMarker */
+        
+        ///removes all markers from the map
+        function clearMarkers() {
+            //setMapOnAll(null);
+            node_markers.forEach((marker) => {
+                removeMarker(marker)
+            })
+        }//clearMarkers
+        
+        ///removes a single marker from the map 
+        function removeMarker(marker){
+            marker.marker.setMap(null)
+            const marker_location = marker.location
+            
+            node_markers = node_markers.filter((value) => {
+                return (marker.id != value.id)
+            })
+            
+            road_map.forEach((road, index) => {
+                let filter_coords = road.coordinates.filter((value) => {
+                    return !(value.lat == marker_location.lat && value.lng == marker_location.lng)
+                })
+                road_map[index].coordinates = filter_coords
+            })
+            
+            
+            let filter_coords = path.coordinates.filter((value) => {
+                return !(value.lat == marker_location.lat && value.lng == marker_location.lng)
+            })
+            path.coordinates = filter_coords
+            
+            console.log(path)
+        }//removeMarker
+        
+        
+        ///places a marker on the map and push the coordinates to path
+        function placeMarker(position, map) {
+            if(path.name==null){
+                path.name = prompt("enter road name");
+            }
+            var location = {
+                id : path.id +"-"+ (path.coordinates.length || 0),
+                lat: position.lat(),
+                lng: position.lng()
+            }
+            
+            path.coordinates.push(location);
+            
+            
+            console.log(""+JSON.stringify(path));
+            
+            var emergencymarker = new google.maps.Marker({
+                position: position,
+                map: map,
+                icon: 'resources/images/border-dot-point-25.png',
+            });
+            
+            let marker      = {...node_mark}
+            marker.id       = location.id
+            marker.marker   = emergencymarker
+            marker.location = {...location}
+            
+            console.log("position: "+position);
+            node_markers.push(marker);
+            
+            google.maps.event.addListener(emergencymarker, 'click', function() {
+                if ((path.name == null) && (confirm("start path here?"))) {
+                    path.name = prompt("enter road name");
+                    var location = {
+                        id : path.id +"-"+ (path.coordinates.length || 0),
+                        lat: position.lat(),
+                        lng: position.lng()
+                    }
+                    path.coordinates.push(location);
+                } else if (confirm("do you want to delete this?")) {
+                    removeMarker(marker)
                 }
+            });
+            
+        }//placeMarker
+        
+        ///places all the markers from saved data
+        function initPrevMarkers(map) {
+            /* road_map = localStorage.getItem("roads")
+            console.log("road %o", road_map) */
+            road_map = JSON.parse(localStorage.getItem('roads')) || []
+            
+            road_map.forEach((path) => {
+                path.coordinates.forEach((coord) => {
+                    placeMarkerPrev(coord, map)
+                })
+            })
+        }//initPrevMarkers
+        
+        ///placed previous marker
+        function placeMarkerPrev(coordinates, map) {
+            
+            var position = new google.maps.LatLng(coordinates.lat, coordinates.lng);
+            
+            var location = {
+                id : coordinates.id,
+                lat: coordinates.lat,
+                lng: coordinates.lng
             }
             
-            road_map = optimizeMap(road_map)
+            var emergencymarker = new google.maps.Marker({
+                position: position,
+                map: map,
+                icon: 'resources/images/border-dot-point-25.png',
+            });
             
-
-            var text = JSON.stringify(road_map)
-            localStorage.setItem("roads", text)
-            $('#road_value').html(text)
-        }//savePath
-        
-        function testPath(){
-            window.open('map.html');
-        }
-        
-        function printPath(){
-            if(path.name != null || path.coordinates.length > 0) {
-                road_map.push(JSON.parse(JSON.stringify(path)))
-                path = {
-                    name: null,
-                    coordinates: []
+            google.maps.event.addListener(emergencymarker, 'click', function() {
+                if ((path.name == null) && (confirm("start path here?"))) {
+                    path.name = prompt("enter road name");
+                    var location = {
+                        id : path.coordinates.length || 0,
+                        lat: position.lat(),
+                        lng: position.lng()
+                    }
+                    path.coordinates.push(location);
+                } else if (confirm("do you want to delete this?")) {
+                    removeMarker(marker)
                 }
-            }
-
-            road_map = optimizeMap(road_map)
-            var text = JSON.stringify(road_map)
-            localStorage.setItem("roads", text)
-            saveTextAsFile(text)
-        }//printPath
+            });
+        }//placeMarkerPrev
         
-        function saveTextAsFile(text) {
-            const textToWrite = text
-            const textFileAsBlob = new Blob([textToWrite], {type:'text/plain'});
-            const fileNameToSaveAs = "coordinates.json"//document.getElementById("").value;
-            let downloadLink = document.createElement("a");
-            downloadLink.download = fileNameToSaveAs;
-            downloadLink.innerHTML = "Download File";
-            if (window.webkitURL != null)
-            {
-                // Chrome allows the link to be clicked
-                // without actually adding it to the DOM.
-                downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
-            }
-            else
-            {
-                // Firefox requires the link to be added to the DOM
-                // before it can be clicked.
-                downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
-                downloadLink.onclick = destroyClickedElement;
-                downloadLink.style.display = "none";
-                document.body.appendChild(downloadLink);
-            }
-            
-            downloadLink.click();
-        }//saveTextAsFile
         
+    </script>
+    <!--CODE==END-->
+    
+    <!--VIEW CODE==>START-->
+    <script>
+        var modal_vue = new Vue({
+            el: '#myModal',
+            data: {
+                road_map: [],
+                path: {}
+            },
+            methods: {
+                setList: function(path, road_map) {
+                    this.road_map   = road_map
+                    this.path       = path
+                    //$('#progressDirection').hide();
+                },
+                deleteRoad: function(id){
+                    if (confirm("are you sure you want to delete this road?")) {
+                        //for((path, index) in this.road_map) {
+                        for(var i = 0; i < this.road_map.length; i++) {
+                            if (path.id == id) {
+                                this.road_map.splice(i, 1)
+                                break
+                            }
+                        }
+                    }
+                },
+                
+                deletePath: function(){
+                    
+                },
+                
+                testPath: function (){
+                    window.open('map.html');
+                }, 
+                savePath: function () {
+                    if(path.name != null || path.coordinates.length > 0) {
+                        road_map.push(JSON.parse(JSON.stringify(path)))
+                        path = {
+                            name: null,
+                            coordinates: []
+                        }
+                    }
+                    
+                    //road_map = optimizeMap(road_map)
+                    this.road_map = road_map
+                    
+                    var text = JSON.stringify(road_map)
+                    localStorage.setItem("roads", text)
+                    $('#road_value').html(text)
+                },//savePath
+                
+                printPath: function (){
+                    if(path.name != null || path.coordinates.length > 0) {
+                        road_map.push(JSON.parse(JSON.stringify(path)))
+                        path = {
+                            name: null,
+                            coordinates: []
+                        }
+                    }
+                    
+                    //road_map = optimizeMap(road_map)
+                    this.road_map = road_map
+                    
+                    var text = JSON.stringify(road_map)
+                    localStorage.setItem("roads", text)
+                    saveTextAsFile(text)
+                },//printPath
+                
+                clearAll: function() {
+                    if (confirm("remove all saved roads?")) {
+                        localStorage.setItem("roads", JSON.stringify([]))
+                        location.reload()
+                    }
+                }
+                
+            }
+        })
+    </script>
+    <!--VIEW CODE==>END-->
+    
+    
+    <!--MAP INIT==>START-->
+    <script>
         function initMap() {
-            var styledMapType = new google.maps.StyledMapType(
-            [
-              {elementType: 'geometry', stylers: [{color: '#ebe3cd'}]},
-              {elementType: 'labels.text.fill', stylers: [{color: '#523735'}]},
-              {elementType: 'labels.text.stroke', stylers: [{color: '#f5f1e6'}]},
-              {
-                featureType: 'administrative',
-                elementType: 'geometry.stroke',
-                stylers: [{color: '#c9b2a6'}]
-              },
-              {
-                featureType: 'administrative.land_parcel',
-                elementType: 'geometry.stroke',
-                stylers: [{color: '#dcd2be'}]
-              },
-              {
-                featureType: 'administrative.land_parcel',
-                elementType: 'labels.text.fill',
-                stylers: [{color: '#ae9e90'}]
-              },
-              {
-                featureType: 'landscape.natural',
-                elementType: 'geometry',
-                stylers: [{color: '#dfd2ae'}]
-              },
-              {
-                featureType: 'poi',
-                elementType: 'geometry',
-                stylers: [{color: '#dfd2ae'}]
-              },
-              {
-                featureType: 'poi',
-                elementType: 'labels.text.fill',
-                stylers: [{color: '#93817c'}]
-              },
-              {
-                featureType: 'poi.park',
-                elementType: 'geometry.fill',
-                stylers: [{color: '#a5b076'}]
-              },
-              {
-                featureType: 'poi.park',
-                elementType: 'labels.text.fill',
-                stylers: [{color: '#447530'}]
-              },
-              {
-                featureType: 'road',
-                elementType: 'geometry',
-                stylers: [{color: '#f5f1e6'}]
-              },
-              {
-                featureType: 'road.arterial',
-                elementType: 'geometry',
-                stylers: [{color: '#fdfcf8'}]
-              },
-              {
-                featureType: 'road.highway',
-                elementType: 'geometry',
-                stylers: [{color: '#f8c967'}]
-              },
-              {
-                featureType: 'road.highway',
-                elementType: 'geometry.stroke',
-                stylers: [{color: '#e9bc62'}]
-              },
-              {
-                featureType: 'road.highway.controlled_access',
-                elementType: 'geometry',
-                stylers: [{color: '#e98d58'}]
-              },
-              {
-                featureType: 'road.highway.controlled_access',
-                elementType: 'geometry.stroke',
-                stylers: [{color: '#db8555'}]
-              },
-              {
-                featureType: 'road.local',
-                elementType: 'labels.text.fill',
-                stylers: [{color: '#806b63'}]
-              },
-              {
-                featureType: 'transit.line',
-                elementType: 'geometry',
-                stylers: [{color: '#dfd2ae'}]
-              },
-              {
-                featureType: 'transit.line',
-                elementType: 'labels.text.fill',
-                stylers: [{color: '#8f7d77'}]
-              },
-              {
-                featureType: 'transit.line',
-                elementType: 'labels.text.stroke',
-                stylers: [{color: '#ebe3cd'}]
-              },
-              {
-                featureType: 'transit.station',
-                elementType: 'geometry',
-                stylers: [{color: '#dfd2ae'}]
-              },
-              {
-                featureType: 'water',
-                elementType: 'geometry.fill',
-                stylers: [{color: '#b9d3c2'}]
-              },
-              {
-                featureType: 'water',
-                elementType: 'labels.text.fill',
-                stylers: [{color: '#92998d'}]
-              }
-            ],
-            {name: 'Styled Map'});
             
             map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 15,
@@ -309,7 +388,7 @@
                 {
                     featureType: 'all',
                     stylers: [
-                     { "color": "#C0C0C0" }
+                    { "color": "#C0C0C0" }
                     ]
                 },{
                     featureType: 'poi',
@@ -327,8 +406,6 @@
                 ]
             });
             
-            
-            
             var bounds = new google.maps.LatLngBounds();
             
             google.maps.event.addListener(map, 'click', function(e) {
@@ -344,14 +421,14 @@
             };
             
             var infoWindow = new google.maps.InfoWindow(), marker, i;
-            for( i = 0; i < hostpital_list.length; i++ ) {
-                var position = new google.maps.LatLng( hostpital_list[i].location.lat,hostpital_list[i].location.long);
+            for( i = 0; i < evacuation_center_list.length; i++ ) {
+                var position = new google.maps.LatLng( evacuation_center_list[i].location.lat,evacuation_center_list[i].location.long);
                 bounds.extend(position);
                 
                 marker = new google.maps.Marker({
                     position: position,
                     map: map,
-                    title: hostpital_list[i].name,
+                    title: evacuation_center_list[i].name,
                     icon: 'resources/images/hospital_32.png'
                 });
                 
@@ -375,137 +452,10 @@
             });
             
             initPrevMarkers(map)
-        }
-        
-        function clearMarkers() {
-            setMapOnAll(null);
-            initMap();
-        }
-        
-        function removeMarker(marker){
-            //emergency_marker.splice(position,1);
-            
-            /* emergency_marker.filter((value) => {
-                return (position.lat() == value.position.lat() && position.lng() == value.position.lng())
-            }).forEach((marker) => {
-                marker.setMap(null)
-            }) */
-            marker.marker.setMap(null)
-            const marker_location = marker.location
-            
-            emergency_marker = emergency_marker.filter((value) => {
-                return (marker.id != value.id)
-            })
-            
-            road_map.forEach((road, index) => {
-                let filter_coords = road.coordinates.filter((value) => {
-                    return !(value.lat == marker_location.lat && value.lng == marker_location.lng)
-                })
-                road_map[index].coordinates = filter_coords
-            })
-            
-            
-            let filter_coords = path.coordinates.filter((value) => {
-                return !(value.lat == marker_location.lat && value.lng == marker_location.lng)
-            })
-            path.coordinates = filter_coords
-            
-            console.log(path)
-        }
-        
-        function placeMarker(position, map) {
-            if(path.name==null){
-                path.name = prompt("enter road name");
-            }
-            var location = {
-                id : path.name + path.coordinates.length || 0,
-                lat: position.lat(),
-                lng: position.lng()
-            }
-            
-            path.coordinates.push(location);
-            
-            
-            console.log(""+JSON.stringify(path));
-            
-            var emergencymarker = new google.maps.Marker({
-                position: position,
-                map: map,
-                icon: 'resources/images/border-dot-point-25.png',
-            });
-            
-            let marker      = {...emergency_mark}
-            marker.id       = path.name + location.id
-            marker.marker   = emergencymarker
-            marker.location = {...location}
-            
-            console.log("position: "+position);
-            emergency_marker.push(marker);
-            
-            google.maps.event.addListener(emergencymarker, 'click', function() {
-                if ((path.name == null) && (confirm("start path here?"))) {
-                    path.name = prompt("enter road name");
-                    var location = {
-                        id : path.coordinates.length || 0,
-                        lat: position.lat(),
-                        lng: position.lng()
-                    }
-                    path.coordinates.push(location);
-                } else if (confirm("do you want to delete this?")) {
-                    removeMarker(marker)
-                }
-            });
-            
-            
-        }
-        
-        function initPrevMarkers(map) {
-            /* road_map = localStorage.getItem("roads")
-            console.log("road %o", road_map) */
-            road_map = JSON.parse(localStorage.getItem('roads')) || []
-            
-            road_map.forEach((path) => {
-                path.coordinates.forEach((coord) => {
-                    placeMarkerPrev(coord, map)
-                })
-            })
-        }
-        
-        ///placed previous marker
-        function placeMarkerPrev(coordinates, map) {
-            
-            var position = new google.maps.LatLng(coordinates.lat, coordinates.lng);
-            
-            var location = {
-                id : coordinates.id,
-                lat: coordinates.lat,
-                lng: coordinates.lng
-            }
-            
-            //path.coordinates.push(location);
-            
-            
-            console.log(""+JSON.stringify(path));
-            
-            var emergencymarker = new google.maps.Marker({
-                position: position,
-                map: map,
-                icon: 'resources/images/border-dot-point-25.png',
-            });
-            
-            google.maps.event.addListener(emergencymarker, 'click', function() {
-                if (confirm("do you want to delete this?")) {
-                    path.coordinates.splice(location.id, 1)
-                    removeMarker(position)
-                }
-            });
-            
-            console.log("position: "+position);
-            emergency_marker.push(position);
-        }
-        
-        
+        }//initMap
     </script>
+    <!--MAP INIT==>END-->
+    
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBymq4YRMhZoMwnPUd2SfyzQQLEvUtafkM&libraries=places&callback=initMap"
     async defer></script>
 </body>

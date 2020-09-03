@@ -530,17 +530,18 @@
                 emergency_location.onGoing = true;
                 emergency_location.hospital_pos = winner.position;
 
+                console.log("emergency location %o", emergency_location)
 
                 var emergency_elem;
                 try{
                     emergency_elem= {
-                        lat: emergency_location.lat(),
-                        lng: emergency_location.lng()
+                        lat: emergency_location.position.lat(),
+                        lng: emergency_location.position.lng()
                     }}catch(e){
 
                         emergency_elem= {
-                            lat: emergency_location.lat,
-                            lng: emergency_location.lng
+                            lat: emergency_location.position.lat,
+                            lng: emergency_location.position.lng
                         }
                     }
                 var emergency_loc = getNearest(emergency_elem, tree);
@@ -555,9 +556,11 @@
                     }
                 });
                 
+                
+
                 //$.get( "email.php", { link: 'route_email.html?'+JSON.stringify(hospital)+"**"+JSON.stringify(emergency_location)} );
-                console.log("emergency location %o", emergency_location)
-                window.open('route.html?'+JSON.stringify(hospital)+"**"+JSON.stringify(emergency_location));
+                console.log("emergency location %o", emergency_elem)
+                window.open('route.html?'+JSON.stringify(hospital)+"**"+JSON.stringify(emergency_elem));
                 initMap();
             }
 
@@ -757,7 +760,7 @@
                 return detail;
             }
 
-            function getNearest(unit) {
+            function getNearest(unit, tree) {
                 var min;
                 var winner = null;
                 for (var i = 0; i < tree.length; i++) {
@@ -823,13 +826,12 @@
                         if (i != j) {
                             /* if (tree[i].coordinates.lat == tree_temp[j].coordinates.lat &&
                                 tree[i].coordinates.lng == tree_temp[j].coordinates.lng) { */
-                            const distance = getDistance(
+                            /* const distance = getDistance(
                                 tree[i].coordinates.lat, tree_temp[j].coordinates.lat,
-                                tree[i].coordinates.lng, tree_temp[j].coordinates.lng)
+                                tree[i].coordinates.lng, tree_temp[j].coordinates.lng) */
                             
                             if ((tree[i].coordinates.lat == tree_temp[j].coordinates.lat &&
-                                tree[i].coordinates.lng == tree_temp[j].coordinates.lng)||
-                                distance < 0.03) {
+                                tree[i].coordinates.lng == tree_temp[j].coordinates.lng)) {
                                 console.log("match: "+i+" vs "+j +" distance: "+ distance);
                                 if (!added.includes(j)) {
                                     for (var k = 0; k < tree_temp[j].vertex.length; k++) {

@@ -64,7 +64,7 @@
 
         <script>
 
-            var road_coord = road;
+            var road_coord = JSON.parse(localStorage.getItem("roads")) || [];
             var path_data;
             var start_location;
             var finish_location;
@@ -75,6 +75,8 @@
             }
 
             function initRoute(){
+
+                console.log("roads_coord %o", road_coord)
 
                 tree = [];
                 var node_id = 0;
@@ -117,21 +119,27 @@
 
                 var tree_temp = tree;
                 var added = [];
-                for(var i = 0; i<tree.length;i++){
-                    for(var j = 0; j<tree_temp.length;j++){
-                        if(i!=j){      
-                            if(tree[i].coordinates.lat == tree_temp[j].coordinates.lat
-                               &&tree[i].coordinates.lng == tree_temp[j].coordinates.lng){
-                                //console.log("match: "+i+" vs "+j);
-                                if(!added.includes(j)){
-                                    for(var k = 0;k<tree_temp[j].vertex.length;k++){
-                                        if(!tree[i].vertex.includes(tree_temp[j].vertex[k])){
+                for (var i = 0; i < tree.length; i++) {
+                    for (var j = 0; j < tree_temp.length; j++) {
+                        if (i != j) {
+                            /* if (tree[i].coordinates.lat == tree_temp[j].coordinates.lat &&
+                                tree[i].coordinates.lng == tree_temp[j].coordinates.lng) { */
+                            /* const distance = getDistance(
+                                tree[i].coordinates.lat, tree_temp[j].coordinates.lat,
+                                tree[i].coordinates.lng, tree_temp[j].coordinates.lng) */
+                            
+                            if ((tree[i].coordinates.lat == tree_temp[j].coordinates.lat &&
+                                tree[i].coordinates.lng == tree_temp[j].coordinates.lng)) {
+                                console.log("match: "+i+" vs "+j +" distance: "+ distance);
+                                if (!added.includes(j)) {
+                                    for (var k = 0; k < tree_temp[j].vertex.length; k++) {
+                                        if (!tree[i].vertex.includes(tree_temp[j].vertex[k])) {
                                             tree[i].vertex.push(tree_temp[j].vertex[k]);
-                                        }                                    
+                                        }
                                     }
                                     added.push(j);
                                 }
-                            }                        
+                            }
                         }
                     }
                 }
