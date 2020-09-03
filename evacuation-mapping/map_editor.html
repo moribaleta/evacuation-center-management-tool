@@ -21,6 +21,7 @@
     <script src="resources/bootstrap/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="resources/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="resources/css/main.css">
+    
 </head>
 <body>
     
@@ -55,9 +56,10 @@
                     
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="savePath()">Save</button>
-                    <button type="button" class="btn btn-primary" onclick="printPath()">Save & Print</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary btn-success"   onclick="testPath()">test paths</button>
+                    <button type="button" class="btn btn-primary"       onclick="savePath()">Compile</button>
+                    <button type="button" class="btn btn-primary"       onclick="printPath()">Compile & Print</button>
+                    <button type="button" class="btn btn-secondary"     data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -67,13 +69,14 @@
     <div id="map"></div>   
     <!-- Modal -->
     <div class="bottom-container">
+        
         <button class="bottom-button" id="button_add_new" onclick="addNewPath()">add path</button>
         <button class="bottom-button" id="button_add_new" onclick="showPath()">show paths</button>
         <button class="bottom-button" id="button_reload" onclick="resetMarker()">back</button>
     </div>
     
-    <script src="resources/json/road_coordinates2.json"></script>
-    
+    <script src="resources/src/js/datahandler.js"></script>
+    <script src="resources/src/js/utilities.js"></script>
     <script>
         var map;
         
@@ -82,7 +85,7 @@
         var emergency_marker = [];
         var hostpital_list = hospital_data;
         
-        var road_map = []//[{"name":"path1","coordinates":[{"id":"path10","lat":14.422914527194624,"lng":121.44419080942102},{"id":"path11","lat":14.422800229442972,"lng":121.4443866106791},{"id":"path12","lat":14.422675540919757,"lng":121.44464678495355},{"id":"path13","lat":14.42253526624771,"lng":121.44485599725671},{"id":"path14","lat":14.42233784248559,"lng":121.44520200221963},{"id":"path15","lat":14.422189547260968,"lng":121.44545482052968},{"id":"path16","lat":14.421999916251135,"lng":121.44581691874669}]},{"name":"path2","coordinates":[{"id":"path20","lat":14.422697611686434,"lng":121.4446606617842},{"id":"path21","lat":14.42284568308532,"lng":121.44473576363661},{"id":"path22","lat":14.423004141283892,"lng":121.44481086548903},{"id":"path23","lat":14.423174288896206,"lng":121.44490608390906},{"id":"path24","lat":14.42331130997852,"lng":121.44497681772594}]}]
+        var road_map = []
         
         var path = {
             name: null,
@@ -101,8 +104,7 @@
             
             path.coordinates = [];
             initMap();
-            //map.clearOverlays();
-        }
+        }//resetMarker
         
         function addNewPath(){
             road_map.push(JSON.parse(JSON.stringify(path)))
@@ -111,23 +113,17 @@
                 coordinates: []
             }
             alert("you can now create a new path")
-        }
+        }//addNewPath
         
         
         
         function showPath(){
-            /* road_map.push(JSON.parse(JSON.stringify(path)))
-            path = {
-                name: null,
-                coordinates: []
-            } */
-            
             var textPath = JSON.stringify(path)
             var textRoad = JSON.stringify(road_map)
             $('#myModal').modal('show');
             $('#road_value').html(textRoad)
             $('#path_value').html(textPath)
-        }
+        }//showPath
         
         function savePath() {
             if(path.name != null || path.coordinates.length > 0) {
@@ -138,67 +134,17 @@
                 }
             }
             
-            road_map = optimizeMap()
+            road_map = optimizeMap(road_map)
             
 
             var text = JSON.stringify(road_map)
             localStorage.setItem("roads", text)
-            //$('#myModal').modal('show');
             $('#road_value').html(text)
-            //$('#path_value').html(textPath)
+        }//savePath
+        
+        function testPath(){
+            window.open('map.html');
         }
-        
-        function getdistance(lat1, lat2, lon1, lon2) {
-            var p = 0.017453292519943295; // Math.PI / 180
-            var c = Math.cos;
-            var a = 0.5 - c((lat2 - lat1) * p) / 2 +
-            c(lat1 * p) * c(lat2 * p) *
-            (1 - c((lon2 - lon1) * p)) / 2;
-            
-            return 12742 * Math.asin(Math.sqrt(a)); // 2 * R; R = 6371 km
-        }
-        
-        function optimizeMap() {
-            var coordinates = []
-            road_map.forEach((val) => {
-                //coordinates.push(val.coordinates)
-                //coordinates = coordinates.concat(val.coordinates)
-                coordinates.push(...val.coordinates)
-            })
-            console.log("road_map %o", road_map)
-            console.log("coordinates %o", coordinates)
-            var coordinates2 = [...coordinates]
-            
-            coordinates.forEach((value_1, index_1) => {
-                coordinates2.forEach((value_2, index_2) => {
-                    let distance = getdistance(
-                    value_1.lat, value_2.lat,
-                    value_1.lng, value_2.lng)
-                    console.log("distance %o", distance)
-                    if (distance < 0.03) {
-                        coordinates2[index_2].lat = value_1.lat
-                        coordinates2[index_2].lng = value_1.lng
-                        console.log("hey im low, val1: %o vs val2: %o", value_1, value_2)
-                    }  
-                })
-            })
-            
-            let optimized = road_map.map((path, index) => {
-                coordinates2.forEach((coord) => {
-                    path.coordinates.forEach((coord2, index2) => {
-                        if (coord2.id == coord.id) {
-                            path.coordinates[index2] = coord
-                        }
-                    })
-                })
-                return path
-            })
-            
-            return optimized
-            
-        }
-        
-        
         
         function printPath(){
             if(path.name != null || path.coordinates.length > 0) {
@@ -209,13 +155,11 @@
                 }
             }
 
-            road_map = optimizeMap()
-
+            road_map = optimizeMap(road_map)
             var text = JSON.stringify(road_map)
-
             localStorage.setItem("roads", text)
             saveTextAsFile(text)
-        }
+        }//printPath
         
         function saveTextAsFile(text) {
             const textToWrite = text
@@ -241,10 +185,121 @@
             }
             
             downloadLink.click();
-        }
+        }//saveTextAsFile
         
         function initMap() {
-            
+            var styledMapType = new google.maps.StyledMapType(
+            [
+              {elementType: 'geometry', stylers: [{color: '#ebe3cd'}]},
+              {elementType: 'labels.text.fill', stylers: [{color: '#523735'}]},
+              {elementType: 'labels.text.stroke', stylers: [{color: '#f5f1e6'}]},
+              {
+                featureType: 'administrative',
+                elementType: 'geometry.stroke',
+                stylers: [{color: '#c9b2a6'}]
+              },
+              {
+                featureType: 'administrative.land_parcel',
+                elementType: 'geometry.stroke',
+                stylers: [{color: '#dcd2be'}]
+              },
+              {
+                featureType: 'administrative.land_parcel',
+                elementType: 'labels.text.fill',
+                stylers: [{color: '#ae9e90'}]
+              },
+              {
+                featureType: 'landscape.natural',
+                elementType: 'geometry',
+                stylers: [{color: '#dfd2ae'}]
+              },
+              {
+                featureType: 'poi',
+                elementType: 'geometry',
+                stylers: [{color: '#dfd2ae'}]
+              },
+              {
+                featureType: 'poi',
+                elementType: 'labels.text.fill',
+                stylers: [{color: '#93817c'}]
+              },
+              {
+                featureType: 'poi.park',
+                elementType: 'geometry.fill',
+                stylers: [{color: '#a5b076'}]
+              },
+              {
+                featureType: 'poi.park',
+                elementType: 'labels.text.fill',
+                stylers: [{color: '#447530'}]
+              },
+              {
+                featureType: 'road',
+                elementType: 'geometry',
+                stylers: [{color: '#f5f1e6'}]
+              },
+              {
+                featureType: 'road.arterial',
+                elementType: 'geometry',
+                stylers: [{color: '#fdfcf8'}]
+              },
+              {
+                featureType: 'road.highway',
+                elementType: 'geometry',
+                stylers: [{color: '#f8c967'}]
+              },
+              {
+                featureType: 'road.highway',
+                elementType: 'geometry.stroke',
+                stylers: [{color: '#e9bc62'}]
+              },
+              {
+                featureType: 'road.highway.controlled_access',
+                elementType: 'geometry',
+                stylers: [{color: '#e98d58'}]
+              },
+              {
+                featureType: 'road.highway.controlled_access',
+                elementType: 'geometry.stroke',
+                stylers: [{color: '#db8555'}]
+              },
+              {
+                featureType: 'road.local',
+                elementType: 'labels.text.fill',
+                stylers: [{color: '#806b63'}]
+              },
+              {
+                featureType: 'transit.line',
+                elementType: 'geometry',
+                stylers: [{color: '#dfd2ae'}]
+              },
+              {
+                featureType: 'transit.line',
+                elementType: 'labels.text.fill',
+                stylers: [{color: '#8f7d77'}]
+              },
+              {
+                featureType: 'transit.line',
+                elementType: 'labels.text.stroke',
+                stylers: [{color: '#ebe3cd'}]
+              },
+              {
+                featureType: 'transit.station',
+                elementType: 'geometry',
+                stylers: [{color: '#dfd2ae'}]
+              },
+              {
+                featureType: 'water',
+                elementType: 'geometry.fill',
+                stylers: [{color: '#b9d3c2'}]
+              },
+              {
+                featureType: 'water',
+                elementType: 'labels.text.fill',
+                stylers: [{color: '#92998d'}]
+              }
+            ],
+            {name: 'Styled Map'});
             
             map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 15,
@@ -254,7 +309,12 @@
                 {
                     featureType: 'all',
                     stylers: [
-                    { saturation: -80 }
+                     { "color": "#C0C0C0" }
+                    ]
+                },{
+                    featureType: 'poi',
+                    stylers: [
+                    { "visibility": "off" }
                     ]
                 },{
                     featureType: 'road.arterial',
