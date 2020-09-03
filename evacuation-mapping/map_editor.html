@@ -240,6 +240,13 @@
                         lng: position.lng()
                     }
                     path.coordinates.push(location);
+                } else if (path.id != marker.id.split("-")[0] && confirm("connect path here?"))  {
+                    var location = {
+                        id : path.id +"-"+ (path.coordinates.length || 0),
+                        lat: position.lat(),
+                        lng: position.lng()
+                    }
+                    path.coordinates.push(location);
                 } else if (confirm("do you want to delete this?")) {
                     removeMarker(marker)
                 }
@@ -278,10 +285,18 @@
             });
             
             google.maps.event.addListener(emergencymarker, 'click', function() {
+                console.log("path %o, location %o", path, location)
                 if ((path.name == null) && (confirm("start path here?"))) {
                     path.name = prompt("enter road name");
                     var location = {
-                        id : path.coordinates.length || 0,
+                        id : path.id +"-"+ (path.coordinates.length || 0),
+                        lat: position.lat(),
+                        lng: position.lng()
+                    }
+                    path.coordinates.push(location);
+                } else if (path.id != coordinates.id.split("-")[0] && confirm("connect path here?"))  {
+                    var location = {
+                        id : path.id +"-"+ (path.coordinates.length || 0),
                         lat: position.lat(),
                         lng: position.lng()
                     }
