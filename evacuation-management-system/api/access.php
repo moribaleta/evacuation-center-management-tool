@@ -3,9 +3,9 @@
 function OpenCon()
 {
     $dbhost = "localhost";
-    $dbuser = "id9573072_basic_database";
-    $dbpass = "abcd1234";
-    $db = "id9573072_basic_database";
+    $dbuser = "id14773083_admin";
+    $dbpass = "vF1i]d)925Ax(De-";
+    $db = "id14773083_ievacuatelaguna";
 
     $conn = new mysqli($dbhost, $dbuser, $dbpass, $db) or die("Connect failed: %s\n" . $conn->error);
 

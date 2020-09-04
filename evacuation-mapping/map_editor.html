@@ -259,13 +259,31 @@
         function initPrevMarkers(map) {
             /* road_map = localStorage.getItem("roads")
             console.log("road %o", road_map) */
-            road_map = JSON.parse(localStorage.getItem('roads')) || []
-            
-            road_map.forEach((path) => {
-                path.coordinates.forEach((coord) => {
-                    placeMarkerPrev(coord, map)
+            DataHandler.getRoadMap().then((data) => {
+                console.log("response %o", data)
+                //let _data = JSON.parse(data)
+                //console.log("parse response %o", _data)
+                if (data.length <= 0) {
+                    road_map = JSON.parse(localStorage.getItem("roads"))
+                    console.log("road_map %o", road_map)
+                } else {
+                    road_map = JSON.parse(data[0].road_map) || []
+                }
+                
+            }).catch(error => {
+                console.log(error)
+            }).finally(() => {
+                console.log("road_map %o", road_map)
+                road_map.forEach((path) => {
+                    path.coordinates.forEach((coord) => {
+                        placeMarkerPrev(coord, map)
+                    })
                 })
             })
+
+            //road_map = JSON.parse(localStorage.getItem('roads')) || []
+            
+            
         }//initPrevMarkers
         
         ///placed previous marker
@@ -346,7 +364,7 @@
                     window.open('map.html');
                 }, 
                 savePath: function () {
-                    if(path.name != null || path.coordinates.length > 0) {
+                    if(path.name != null && path.coordinates.length > 0) {
                         road_map.push(JSON.parse(JSON.stringify(path)))
                         path = {
                             name: null,
@@ -359,6 +377,13 @@
                     
                     var text = JSON.stringify(road_map)
                     localStorage.setItem("roads", text)
+
+                    DataHandler.setRoadMap({roadmap: text}).then((saved) => {
+                        console.log("saved %o", saved)
+                    }).catch((error) =>{
+                        console.log("error %o", error)
+                    })
+
                     $('#road_value').html(text)
                 },//savePath
                 
