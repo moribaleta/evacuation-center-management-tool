@@ -15,15 +15,20 @@ var Honey = (function () {
         for (var i = 0; i < this.MAX_LENGTH; i++) {
             log("im here");
             this.nectar[i] = new EvacuationCenter();
-            this.nectar[i].current_population = randomNumber(0, 30);
+            this.nectar[i].current_population = randomNumber(100, 200);
+            this.nectar[i].evacuation_size = randomNumber(50, 300);
         }
     };
     Honey.prototype.computeConflicts = function () {
-        var sum = 0;
+        var carrying_sum = 0;
         for (var i = 0; i < this.MAX_LENGTH; i++) {
-            sum += (this.nectar[i].current_population / this.nectar[i].population_capacity);
+            carrying_sum += (this.nectar[i].current_population / this.nectar[i].population_capacity);
         }
-        this.setConflicts(sum);
+        var density_sum = 0;
+        for (var i = 0; i < this.MAX_LENGTH; i++) {
+            carrying_sum += (this.nectar[i].current_population / this.nectar[i].evacuation_size);
+        }
+        this.setConflicts(carrying_sum + density_sum);
     };
     Honey.prototype.getConflicts = function () {
         return this.conflicts;
@@ -47,8 +52,6 @@ var Honey = (function () {
         switch (type) {
             case EvacuationPropType.current_population:
                 return this.nectar[index].current_population;
-            case EvacuationPropType.current_inventory:
-                return this.nectar[index].current_inventory;
             default:
                 return 0;
         }
@@ -72,8 +75,6 @@ var Honey = (function () {
         switch (type) {
             case EvacuationPropType.current_population:
                 return this.nectar[index].current_population = value;
-            case EvacuationPropType.current_inventory:
-                return this.nectar[index].current_inventory = value;
             default:
                 return 0;
         }

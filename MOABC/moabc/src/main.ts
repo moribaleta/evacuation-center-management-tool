@@ -170,7 +170,7 @@ class TesterABC {
 
     start(){
         console.log("im starting")
-        this.test(4, 50, 10)
+        this.test(10, 50, 10)
     }
 }
 

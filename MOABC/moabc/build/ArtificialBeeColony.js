@@ -1,5 +1,6 @@
 var ArtificialBeeColony = (function () {
     function ArtificialBeeColony(n) {
+        this.MAX_VAL = 200;
         this.MAX_LENGTH = n;
         this.NP = 40;
         this.FOOD_NUMBER = this.NP / 2;
@@ -108,8 +109,8 @@ var ArtificialBeeColony = (function () {
         if (newValue < 0) {
             newValue = 0;
         }
-        if (newValue > this.MAX_LENGTH - 1) {
-            newValue = this.MAX_LENGTH - 1;
+        if (newValue > this.MAX_VAL) {
+            newValue = this.MAX_VAL;
         }
         currentBee.setNectar(parameterToChange, newValue, EvacuationPropType.current_population);
         currentBee.computeConflicts();

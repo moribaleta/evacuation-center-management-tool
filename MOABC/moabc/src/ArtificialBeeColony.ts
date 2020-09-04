@@ -12,7 +12,8 @@
  */
 
 class ArtificialBeeColony {
-	/*ABC PARAMETERS*/
+    /*ABC PARAMETERS*/
+    public MAX_VAL : number 
 	public MAX_LENGTH: number 		/*The number of parameters of the problem to be optimized*/
     public NP: number 				/*The number of total bees/colony size. employed + onlookers*/
     public FOOD_NUMBER: number 	/*The number of food sources equals the half of the colony size*/
@@ -32,6 +33,7 @@ class ArtificialBeeColony {
 	 * @param: size of n queens
 	 */
     public constructor(n: number) {
+        this.MAX_VAL = 200
         this.MAX_LENGTH = n;
         this.NP = 40;					//pop size 20 to 40 or even 100
         this.FOOD_NUMBER = this.NP/2;
@@ -197,8 +199,8 @@ class ArtificialBeeColony {
         if(newValue < 0) {
             newValue = 0;
         }
-        if(newValue > this.MAX_LENGTH-1) {
-            newValue = this.MAX_LENGTH-1;
+        if(newValue > this.MAX_VAL) {
+            newValue = this.MAX_VAL;
         }
 
         //get the index of the new value

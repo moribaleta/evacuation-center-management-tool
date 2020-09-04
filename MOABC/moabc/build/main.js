@@ -68,7 +68,7 @@ var TesterABC = (function () {
     };
     TesterABC.prototype.start = function () {
         console.log("im starting");
-        this.test(4, 50, 10);
+        this.test(10, 50, 10);
     };
     return TesterABC;
 }());

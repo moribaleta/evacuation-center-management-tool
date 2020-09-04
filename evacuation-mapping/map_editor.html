@@ -15,6 +15,7 @@
             z-index: 0;
         }
     </style>
+    <script src="resources/json/boundary.js"></script>
     <script type="text/javascript" src="resources/json/coordinates.json"></script>
     <script type="text/javascript" src="resources/json/hospitals.json"></script>
     <script src="resources/js/jquery-3.0.0.min.js"></script>
@@ -454,12 +455,50 @@
                 this.setZoom(14);
                 google.maps.event.removeListener(boundsListener);
             });
+
             
             var line = new google.maps.Polyline({
                 path: coords,
                 strokeOpacity: 0,
                 icons: [{
                     icon: lineSymbol,
+                    offset: '0',
+                    repeat: '20px'
+                }],
+                map: map
+            });
+
+            var municipallineSymbol = {
+                path: 'M 0,-1 0,1',
+                strokeOpacity: 0.5,
+                scale: 2
+            };
+
+            var mabitac = new google.maps.Polyline({
+                path: mabitac_boundary,
+                strokeOpacity: 0,
+                icons: [{
+                    icon: municipallineSymbol,
+                    offset: '0',
+                    repeat: '20px'
+                }],
+                map: map
+            });
+            var stamaria = new google.maps.Polyline({
+                path: sta_maria_boundary,
+                strokeOpacity: 0,
+                icons: [{
+                    icon: municipallineSymbol,
+                    offset: '0',
+                    repeat: '20px'
+                }],
+                map: map
+            });
+            var siniloan = new google.maps.Polyline({
+                path: siniloan_boundary,
+                strokeOpacity: 0,
+                icons: [{
+                    icon: municipallineSymbol,
                     offset: '0',
                     repeat: '20px'
                 }],
