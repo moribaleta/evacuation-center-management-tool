@@ -3,7 +3,9 @@ header("Access-Control-Allow-Origin: *");
 error_reporting(0);
 include 'access.php';
 
-$ROAD_MAP  = $_POST['roadmap'];
+$params     = json_encode($_POST);
+
+$ROAD_MAP   = $_POST['roadmap'];
 
 
 $conn = OpenCon();
@@ -14,11 +16,14 @@ $message;
 
 if ($conn->query($sql) === TRUE) {
    $message->message = "success";
-   $message->params = $sql;
+   $message->params = $sql;//json_encode($_POST);
 } else {
     $message->error =  "error: " . mysqli_error($conn);
     $message->params = $sql;
 }
+
+$message->post = $params;
+
 echo json_encode($message);
 CloseCon($conn);
 ?>

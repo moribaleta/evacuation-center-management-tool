@@ -9,7 +9,14 @@ class DataHandlerClass {
         return new Promise((resolve,reject) => {
             $.get(url,param,function (data, status) {
                 if (status == "success"){
-                    resolve(JSON.parse(data))
+                    //resolve(JSON.parse(data))
+                    var message = {}
+                    try{
+                        message = JSON.parse(data)
+                    }catch(err){
+                        message = data
+                    }
+                    resolve(message)
                 }else{
                     reject(status)
                 }
@@ -22,7 +29,13 @@ class DataHandlerClass {
         return new Promise((resolve,reject) => {
             $.post(url,param,function (data, status) {
                 if (status == "success"){
-                    resolve(JSON.parse(data))
+                    var message = {}
+                    try{
+                        message = JSON.parse(data)
+                    }catch(err){
+                        message = data
+                    }
+                    resolve(message)
                 }else{
                     reject(status)
                 }
@@ -31,7 +44,8 @@ class DataHandlerClass {
     }
 
     getRoadMap(){
-        return this.fetchApi(`${this.baseUrl}/getRoadMap.php`)
+        //return this.fetchApi(`${this.baseUrl}/getRoadMap.php`)
+        return this.fetchApi(`${this.baseUrl}/getCoordinates.php`)
     }
 
     setRoadMap(params){
