@@ -82,12 +82,16 @@
                     </div>
                     <!-- <p id="path_value">{{road_map}}</p> -->
                 </div>
-                <div class="modal-footer">
+                <div class="modal-body" style="max-height: 500px; overflow: auto;">
                     <button type="button" class="btn btn-primary btn-success"   v-on:click="testPath()">test paths</button>
                     <button type="button" class="btn btn-primary"               v-on:click="savePath()">Save</button>
                     <button type="button" class="btn btn-primary"               v-on:click="printPath()">Save & Print</button>
+                    <!-- <p id="path_value">{{road_map}}</p> -->
+                </div>
+                <div class="modal-footer">
+                    
                     <button type="button" class="btn btn-primary btn-danger"   v-on:click="clearAll()">Clear All Saved</button>
-                    <button type="button" class="btn btn-secondary"             data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary btn-success"   v-on:click="loadLatest()">Load Latest</button>
                     <button type="button" class="btn btn-primary btn-success"   v-on:click="uploadFile()">Upload</button>
                 </div>
             </div>
@@ -101,7 +105,7 @@
         
         <button class="bottom-button" id="button_add_new"   onclick="addNewPath()">add path</button>
         <button class="bottom-button" id="button_add_new"   onclick="showPath()">show paths</button>
-        <button class="bottom-button" id="button_reload"    onclick="resetMarker()">back</button>
+        <!-- <button class="bottom-button" id="button_reload"    onclick="resetMarker()">back</button> -->
     </div>
     
     <script src="resources/src/js/datahandler.js"></script>
@@ -258,40 +262,34 @@
         
         ///places all the markers from saved data
         function initPrevMarkers(map) {
-            /* road_map = JSON.parse(localStorage.getItem("roads"))
-            console.log("road %o", road_map) */
-            DataHandler.getRoadMap().then((data) => {
-                console.log("response %o", data)
-                //let _data = JSON.parse(data)
-                //console.log("parse response %o", _data)
-                if (data.length <= 0) {
-                    road_map = JSON.parse(localStorage.getItem("roads"))
-                    console.log("road_map %o", road_map)
-                } else {
-                    road_map = JSON.parse(data) || []
-                }
-                
-            }).catch(error => {
-                console.log(error)
-            }).finally(() => {
-                console.log("road_map %o", road_map)
-                road_map.forEach((path) => {
-                    path.coordinates.forEach((coord) => {
-                        placeMarkerPrev(coord, map)
-                    })
-                })
-            })
+            road_map = JSON.parse(localStorage.getItem("roads"))
+            console.log("road %o", road_map)
 
             road_map.forEach((path) => {
                     path.coordinates.forEach((coord) => {
                         placeMarkerPrev(coord, map)
                     })
-                })
-
-            //road_map = JSON.parse(localStorage.getItem('roads')) || []
-            
-            
+                })            
         }//initPrevMarkers
+
+        ///replaces the local stored road maps with the latest road map from the database
+        function loadLatestRoad(){
+            road_map = []
+            DataHandler.getRoadMap().then((data) => {
+                console.log("response %o", data)
+                //let _data = JSON.parse(data)
+                //console.log("parse response %o", _data)
+                if (data.length > 0) {
+                    road_map = JSON.parse(data) || []
+                }
+            }).catch(error => {
+                console.log(error)
+            }).finally(() => {
+                console.log("road_map %o", road_map)
+                localStorage.setItem('roads', JSON.stringify(road_map))
+                location.reload()
+            })
+        }//loadLatestRoad
         
         ///placed previous marker
         function placeMarkerPrev(coordinates, map) {
@@ -387,13 +385,6 @@
 
                     alert("Saved to local storage")
 
-                    /* console.log("roadmap save %o", text)
-                    DataHandler.setRoadMap({roadmap: text}).then((saved) => {
-                        console.log("saved %o", saved)
-                    }).catch((error) =>{
-                        console.log("error %o", error)
-                    }) */
-
                     $('#road_value').html(text)
                 },//savePath
                 
@@ -422,6 +413,14 @@
                     if (confirm("remove all saved roads?")) {
                         localStorage.setItem("roads", JSON.stringify([]))
                         location.reload()
+                    }
+                }, 
+
+                loadLatest: function(){
+                    if (confirm("replace local saved with the latest from the database? ")) {
+                        localStorage.setItem("roads", JSON.stringify([]))
+                        loadLatestRoad()
+                        //location.reload()
                     }
                 }
                 
