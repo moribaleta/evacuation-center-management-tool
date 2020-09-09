@@ -92,6 +92,7 @@
                     
                     <button type="button" class="btn btn-primary btn-danger"   v-on:click="clearAll()">Clear All Saved</button>
                     <button type="button" class="btn btn-primary btn-success"   v-on:click="loadLatest()">Load Latest</button>
+                    <button type="button" class="btn btn-primary btn-success"   v-on:click="loadLocal()">Load Local</button>
                     <button type="button" class="btn btn-primary btn-success"   v-on:click="uploadFile()">Upload</button>
                 </div>
             </div>
@@ -433,6 +434,10 @@
                         loadLatestRoad()
                         //location.reload()
                     }
+                },
+
+                loadLocal: function(){
+                    window.open('load_local.html');
                 }
                 
             }
