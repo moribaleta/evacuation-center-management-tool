@@ -2,7 +2,7 @@
 
 class DataHandlerClass {
 
-    host = "https://lagunawaterreserve.000webhostapp.com/"
+    host = "https://ievacuate-laguna.000webhostapp.com/evacuation-center-management/evacuation-management-system/"
     baseUrl = this.host + "api"
 
     fetchApi(url, param = {}){
@@ -32,7 +32,7 @@ class DataHandlerClass {
 
     login(username, password) {
         console.log(username +"--"+ password)
-        return this.postApi(`${this.baseUrl}/login.php`, {username, password})
+        return this.postApi(`${this.baseUrl}/login_admin.php`, {username, password})
     }
 
     getReports(){

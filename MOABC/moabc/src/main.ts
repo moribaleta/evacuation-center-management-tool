@@ -49,7 +49,7 @@ class TesterABC {
         this.logParameters();
         
         startTime = window.performance.now();
-        let success = this.abc.algorithm()
+        var success = this.abc.algorithm()
         endTime = window.performance.now();
 
         //endTime = window.performance.now();

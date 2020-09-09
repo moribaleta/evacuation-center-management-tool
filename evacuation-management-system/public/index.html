@@ -15,7 +15,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
     <script src="../admin/js/brain.js"></script>
     <link rel="shortcut icon" href="../admin/resources/images/logo.png" />
-    <title>Water Reserve</title>
+    <title>iEvacuate</title>
 </head>
 
 <body>
@@ -24,7 +24,7 @@
             <div class="container">
                 <a class="navbar-brand" href="index.html">
                     <img src="../admin/resources/images/logo.png" width="30" height="30" alt="" style="margin-top: -5px;">
-                    Water Reserve
+                    iEvacuate-Laguna
                 </a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse"
                     data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
@@ -36,15 +36,16 @@
                     <!-- Left Side Of Navbar -->
                     <ul class="navbar-nav mr-auto">
                         <li class="nav-item">
-                            <a class="nav-link" href="#carouselExampleIndicators">Home</a>
+                            <a class="nav-link" href="index.html">Home</a>
                         </li>
-
                         <li class="nav-item">
-                            <a class="nav-link" href="#project-description">About Laguna de Bay</a>
+                            <a class="nav-link" href="map.html">Map</a>
                         </li>
-
                         <li class="nav-item">
                             <a class="nav-link" href="contacts.html">Contact Us</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="abouts.html">About US</a>
                         </li>
                     </ul>
 
@@ -52,7 +53,7 @@
                     <ul class="navbar-nav ml-auto">
                         <!-- Authentication Links -->
                         <li class="nav-item">
-                            <a class="nav-link" href="../admin/login.html">Login</a>
+                            <a class="nav-link" href="user.html">Login</a>
                         </li>
                     </ul>
                 </div>
@@ -160,63 +161,7 @@
             </div>
         </div>
 
-        <div id="overview" class="jumbotron p-3 bg-white">
-            <div class="container">
-                <h1 class="display-5">Water Quality Overview</h1>
-                <div class="col justyify-content-center">
-                    <div id="legend_overview"></div>
-                    <div id="map_overview" style="height:600px;"></div>
-                </div>
-            </div>
-        </div>
-
-        <div id="simulation" class="jumbotron p-3 bg-white">
-            <div class="container">
-                <h1 class="display-5">Water Quality Map</h1>
-                <div class="col justyify-content-center">
-                    <div id="map_simulation" style="height:600px;"></div>
-                    <div id="legend_simulate"></div>
-
-
-                </div>
-            </div>
-        </div>
-
-        <div id="water-quality-graph" class="jumbotron p-3" style="background: #f2f2f2">
-            <div class="container">
-                <h1 class="display-5">Line Graph</h1>
-
-                <div class="row" id="table_graph">
-                    <div class="col-md-5 col-12 form-group">
-                        <label for="line-graph-range">Date Range: </label>
-                        <select id="line-graph-select" class="form-control search-parameters" v-model="select_date">
-                            <option v-for='item in selection_date' :value="item.id">{{item.label}}</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4 col-12 form-group">
-                        <label for="line-graph-select">Parameter: </label>
-                        <select id="line-graph-select" class="form-control search-parameters" v-model="select_type">
-                            <!-- <option selected>Nitrogen</option>
-                            <option>Phosphate</option>
-                            <option>pH</option>
-                            <option>E. Coli</option>
-                            <option>Dissolved Oxygen</option>
-                            <option>Amonia</option>
-                            <option>Temp F</option>
-                            <option>Transparency</option> -->
-                            <option v-for='item in selection_type' :value="item">{{item}}</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3 col-12 form-group text-center">
-                        <button type="button" class="btn btn-primary w-75" style="margin-top: 30px;" v-on:click="filterGraph()">Search</button>
-                    </div>
-                </div>
-
-                <div class="row justyify-content-center">
-                    <canvas id="line-graph"></canvas>
-                </div>
-            </div>
-        </div>
+        
 
         <footer class="page-footer font-small bg-dark text-white pt-4">
             <div class="container text-center text-md-left">

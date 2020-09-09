@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Users</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <script src="js/jquery-3.0.0.min.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <link href="css/main-style.css" rel="stylesheet">
+    <script src="js/vue.js"></script>
+    <script src="js/datahandler.js"></script>
+    
+</head>
+
+<body>
+    <div class="sidenav" id="header">
+        <div class="sidenav-item">
+            <img class="nav-image" src="resources/images/logo.png" />
+        </div>
+        <div class="sidenav-item ">
+            <a href="index.html">
+                <div class="icon-block">
+                    <i class="material-icons">assessment</i>
+                    <h5 class="center">Reports</h5>
+                </div>
+            </a>
+        </div>
+        <div class="sidenav-item active" v-if="user.type == 'ADMIN'">
+            <a href="#content">
+                <div class="icon-block">
+                    <i class="material-icons">group</i>
+                    <h5 class="center">Evacuation</h5>
+                </div>
+            </a>
+        </div>
+        <div class="sidenav-item">
+            <a v-on:click="onLogout()">
+                <div class="icon-block">
+                    <i class="material-icons">close</i>
+                    <h5 class="center">Log Out</h5>
+                </div>
+            </a>
+        </div>
+    </div>
+    <!-- <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#editorModal">Open Modal</button> -->
+    <div class="container" id="content">
+        <!-- editor modal -->
+        <div id="editorModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">{{isEdit ? 'Edit ': 'Add '}} Evacuation Center</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form class="form-horizontal">
+                            <fieldset>
+                                <!-- Text input-->
+                                <div class="form-group">
+                                    <label class="col-md-4 control-label" for="name">Name</label>
+                                    <div class="col-md-4">
+                                        <input id="name" name="name" type="text" placeholder="Evacuation Center"
+                                        class="form-control input-md" required="">
+                                        <span class="help-block">Enter Evacuation Center</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Text input-->
+                                <div class="form-group">
+                                    <label class="col-md-4 control-label" for="population_capacity">Population
+                                        Capacity</label>
+                                        <div class="col-md-4">
+                                            <input id="population_capacity" name="population_capacity" type="text"
+                                            placeholder="capacity" class="form-control input-md" required="">
+                                            <span class="help-block">Number of population the facility can hold</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Text input-->
+                                    <div class="form-group">
+                                        <label class="col-md-4 control-label" for="floor_space">Floor space</label>
+                                        <div class="col-md-4">
+                                            <input id="floor_space" name="floor_space" type="text"
+                                            placeholder="area in square meters" class="form-control input-md"
+                                            required="">
+                                            <span class="help-block">The maximum space of the facility available</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Text input-->
+                                    <div class="form-group">
+                                        <label class="col-md-4 control-label" for="contact_numbers">Contact Numbers</label>
+                                        <div class="col-md-4">
+                                            <input id="contact_numbers" name="contact_numbers" type="text"
+                                            placeholder="eg. 0917..." class="form-control input-md">
+                                            <span class="help-block">Contact numbers available</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Textarea -->
+                                    <div class="form-group">
+                                        <label class="col-md-4 control-label" for="exact_address">Exact Address</label>
+                                        <div class="col-md-4">
+                                            <textarea class="form-control" id="exact_address"
+                                            name="exact_address"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 control-label" for="location">Location</label>
+                                        <div class="col-md-4">
+                                            <div class="col-md-4">
+                                                <label class="control-label" for="location">Latitude</label>
+                                                <input id="location" name="location" type="text" placeholder="120.123 ..."
+                                                class="form-control input-md" required="">
+                                                <span class="help-block">Latitude</span>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="control-label" for="location">Longitude</label>
+                                                <input id="location" name="location" type="text" placeholder="120.123 ..."
+                                                class="form-control input-md" required="">
+                                                <span class="help-block">Longitude</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Select Basic -->
+                                    <div class="form-group">
+                                        <label class="col-md-4 control-label" for="municipality">Municipality</label>
+                                        <div class="col-md-4">
+                                            <select id="municipality" name="municipality" class="form-control">
+                                                <option value="Alaminos">Alaminos</option>
+                                                <option value="Bay">Bay</option>
+                                                <option value="Biñan">Biñan</option>
+                                                <option value="Cabuyao">Cabuyao</option>
+                                                <option value="Calamba">Calamba</option>
+                                                <option value="Calauan">Calauan</option>
+                                                <option value="Cavinti">Cavinti</option>
+                                                <option value="Famy">Famy</option>
+                                                <option value="Kalayaan">Kalayaan</option>
+                                                <option value="Liliw">Liliw</option>
+                                                <option value="Los Baños">Los Baños</option>
+                                                <option value="Luisiana">Luisiana</option>
+                                                <option value="Lumban">Lumban</option>
+                                                <option value="Mabitac">Mabitac</option>
+                                                <option value="Magdalena">Magdalena</option>
+                                                <option value="Majayjay">Majayjay</option>
+                                                <option value="Nagcarlan">Nagcarlan</option>
+                                                <option value="Paete">Paete</option>
+                                                <option value="Pagsanjan">Pagsanjan</option>
+                                                <option value="Pakil">Pakil</option>
+                                                <option value="Pangil">Pangil</option>
+                                                <option value="Pila">Pila</option>
+                                                <option value="Rizal">Rizal</option>
+                                                <option value="San Pablo">San Pablo</option>
+                                                <option value="San Pedro">San Pedro</option>
+                                                <option value="Santa Cruz">Santa Cruz</option>
+                                                <option value="Santa Maria">Santa Maria</option>
+                                                <option value="Santa Rosa">Santa Rosa</option>
+                                                <option value="Siniloan">Siniloan</option>
+                                                <option value="Victoria">Victoria</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Button (Double) -->
+                                    <div class="form-group">
+                                        <label class="col-md-4 control-label" for="save_btn">Options</label>
+                                        <div class="col-md-8">
+                                            <button id="save_btn" name="save_btn" class="btn btn-success">Save</button>
+                                            <button id="delete_btn" name="delete_btn" class="btn btn-danger">Delete</button>
+                                        </div>
+                                    </div>
+                                    
+                                </fieldset>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal"
+                            v-on:click="addUser()">Save</button>
+                            <button type="button" class="btn btn-default" data-dismiss="modal"
+                            v-on:click="close()">Close</button>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+            <div class="section header">
+                <h1>Evacaution Center</h1>
+            </div>
+            
+            <div class="section" style="height: 80%;" v-if="user_list.length > 0">
+                
+                <div class="table-container" id="tableData">
+                    <div class="well" v-for="item,index in user_list">
+                        <div class="row">
+                            <div class="col col-md-3 item-info" v-for="key,index in headers" v-if="key !='id'">
+                                <p class="item-label">
+                                    {{key}}:
+                                </p>
+                                <p class="item-value">
+                                    {{item[key]}}
+                                </p>
+                            </div>
+                            
+                            <div class="col col-md-12">
+                                <button class="btn btn-default btn-info" v-on:click="editItem(index)">edit</button>
+                                <button class="btn btn-default btn-danger" v-on:click="deleteItem(index)">delete</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="section">
+                <button type="button" id="add-report" class="btn btn-info button-view"
+                v-on:click="openAddeditorModal(false)">Add Evacuation Center
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        var user = null
+        
+        /* var header = new Vue({
+            el: '#header',
+            data: {
+                user: null
+            },
+            methods: {
+                onStart() {
+                    try {
+                        user = JSON.parse(sessionStorage.getItem('user'))
+                        
+                        if (typeof user != 'string' && user) {
+                            console.log(user)
+                            this.user = user
+                            if (this.user.type == 'ADMIN') {
+                                app.fetchUser()
+                            } else {
+                                throw "No Account Privilege"
+                            }
+                            
+                        } else {
+                            alert('login user account')
+                            this.onLogout()
+                        }
+                    } catch (error) {
+                        alert('login user account')
+                        this.onLogout()
+                    }
+                },
+                onLogout() {
+                    sessionStorage.clear()
+                    window.open('login.html', '_self')
+                }
+            }
+        }) */
+        
+        var app = new Vue({
+            el: '#content',
+            data: {
+                user_list: [],
+                headers: [],
+                data_input: {
+                    id: null,
+                    name: null,
+                    location: null,
+                    population_capacity: null,
+                    floor_space: null,
+                    date_created: null,
+                    created_by: null,
+                    exact_address: null,
+                    municipality: null,
+                    contact_numbers: null
+                },
+                
+                isEdit: false,
+                editEvacuationID: null,
+                conf_password: null
+            },
+            methods: {
+                fetchUser() {
+                    DataHandler.getUsers().then((data) => {
+                        this.setUser(data)
+                    })
+                },
+                setUser(data) {
+                    this.user_list = data
+                    console.log(this.user_list)
+                    if (this.user_list.length > 0) {
+                        this.headers = Object.keys(this.user_list[0])
+                    }
+                },
+                openAddeditorModal(isEdit) {
+                    this.isEdit = isEdit
+                    if (!this.isEdit) {
+                        this.data_input = {
+                            username: null,
+                            firstname: null,
+                            lastname: null,
+                            email: null,
+                            password: null,
+                            type: null
+                        }
+                    }
+                    $('#editorModal').modal()
+                },
+                addUser() {
+                    if (this.data_input.password == this.conf_password) {
+                        if (this.isEdit) {
+                            this.onSaveEdit()
+                        } else {
+                            this.onSaveNewUser()
+                        }
+                        this.close()
+                    } else {
+                        alert("password doesn't match")
+                    }
+                },
+                
+                onSaveEdit() {
+                    this.data_input['id'] = this.editUserId
+                    DataHandler.editUser(this.data_input).then((data) => {
+                        if (data.error) {
+                            alert(`Can't Edit User ${data.error}`)
+                        } else {
+                            alert(`User Have Been Edited Successfuly`)
+                            this.fetchUser()
+                        }
+                    })
+                },
+                
+                onSaveNewUser() {
+                    DataHandler.addUser(this.data_input).then((data) => {
+                        if (data.error) {
+                            alert(`Can't Save User ${data.error}`)
+                        } else {
+                            alert(`User Have Been Added Successfuly`)
+                            this.fetchUser()
+                        }
+                    })
+                },
+                
+                editItem(index) {
+                    var user = this.user_list[index]
+                    this.editUserId = user.id
+                    this.data_input.username = user.username
+                    this.data_input.firstname = user.firstname
+                    this.data_input.lastname = user.lastname
+                    this.data_input.email = user.email
+                    this.data_input.type = user.type
+                    this.openAddeditorModal(true)
+                },
+                deleteItem(index) {
+                    let onConfirm = confirm('Deleting User\nPress confirm to proceed')
+                    if (onConfirm) {
+                        DataHandler.deleteUser(this.user_list[index].id).then((data) => {
+                            console.log(data)
+                            if (data.error) {
+                                alert(`Can't Delete User ${data.error}`)
+                            } else {
+                                alert(`User Have Been Deleted Successfuly`)
+                                this.fetchUser()
+                            }
+                        })
+                    }
+                    
+                },
+                close() {
+                    this.data_input = {
+                        username: null,
+                        firstname: null,
+                        lastname: null,
+                        email: null,
+                        password: null,
+                        type: null
+                    }
+                    this.conf_password = null
+                    this.isEdit = false
+                }
+                
+            }
+        })
+        
+        /* $(document).ready(() => {
+            header.onStart()
+        }) */
+    </script>
+    
+</body>
+
+</html>

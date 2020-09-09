@@ -1,5 +1,6 @@
 var Honey = (function () {
     function Honey(size) {
+        this.id = "honey*" + genId(5);
         this.MAX_LENGTH = size;
         this.nectar = [];
         this.conflicts = 0;
@@ -14,8 +15,9 @@ var Honey = (function () {
     Honey.prototype.initNectar = function () {
         for (var i = 0; i < this.MAX_LENGTH; i++) {
             log("im here");
-            this.nectar[i] = new EvacuationCenter();
+            this.nectar[i] = new EvacuationCenter(this.id + "-" + i);
             this.nectar[i].current_population = randomNumber(100, 200);
+            this.nectar[i].population_capacity = randomNumber(100, 200);
             this.nectar[i].evacuation_size = randomNumber(50, 300);
         }
     };

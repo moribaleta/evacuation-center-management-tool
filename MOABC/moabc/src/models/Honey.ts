@@ -10,6 +10,8 @@
  */
 
 class Honey {
+    id : string = "honey*"+genId(5)
+
     ///number of nectars
     private MAX_LENGTH  : number;
 
@@ -52,10 +54,12 @@ class Honey {
      *
      */
     public initNectar() {
+        
         for (var i = 0; i < this.MAX_LENGTH; i++) { //initialize the solution to 1... n
             log("im here")
-            this.nectar[i] = new EvacuationCenter()
+            this.nectar[i] = new EvacuationCenter(this.id+"-"+i)
             this.nectar[i].current_population   = randomNumber(100, 200)
+            this.nectar[i].population_capacity  = randomNumber(100, 200)
             this.nectar[i].evacuation_size      = randomNumber(50, 300)
             //this.nectar[i].current_population = i;
         }

@@ -7,7 +7,7 @@ $username = $_POST['username'];
 $password = $_POST['password'];
 
 
-$sql = "Select id,type from user where username = '$username' and password = '$password'";
+$sql = "Select id,type from admin_user where username = '$username' and password = '$password'";
 $conn = OpenCon();
 
 $result = $conn->query($sql);

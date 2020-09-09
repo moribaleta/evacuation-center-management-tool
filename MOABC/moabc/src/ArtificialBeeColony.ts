@@ -62,7 +62,8 @@ class ArtificialBeeColony {
             console.log("iteration current %o, max: %o", epoch, this.MAX_EPOCH)
             if(epoch < this.MAX_EPOCH) {
                 console.log("im the best %o", this.gBest)
-                if( this.gBest != null && this.gBest.getConflicts() == 0) {
+
+                if( this.gBest != null && this.gBest.getConflicts() == 0.5) {
                     done = true;
                 }
 
