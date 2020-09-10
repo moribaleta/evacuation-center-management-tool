@@ -67,6 +67,19 @@ class DataHandlerClass {
     editUser(params){
         return this.postApi(`${this.baseUrl}/editUser.php`, params)
     }
+
+    getEvacuationCenters(){
+        return this.fetchApi(`${this.baseUrl}/getEvacuationCenters.php`)
+    }
+    addEvacationCenter(params){
+        return this.postApi(`${this.baseUrl}/addEvacuationCenter.php`, params)
+    }
+    editEvacationCenter(params){
+        return this.postApi(`${this.baseUrl}/setEvacuationCenter.php`,{id})
+    }
+    deleteEvacationCenter(params){
+        return this.postApi(`${this.baseUrl}/deleteEvacuationCenter.php`, params)
+    }
 }
 
 let DataHandler = new DataHandlerClass()

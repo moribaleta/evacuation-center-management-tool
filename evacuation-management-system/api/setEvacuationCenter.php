@@ -16,7 +16,7 @@ $CONTACT_NUMBERS        = $_POST['contact_numbers'];
 
 $conn = OpenCon();
 
-$sql = "REPLACE INTO reports(id,name,location,population_capacity,floor_space,date_created,created_by,exact_address,municipality, contact_numbers) values($ID,'$NAME','$LOCATION',$POPULATION_CAPACITY,$FLOOR_SPACE,'$DATE_CREATED',$CREATED_BY,'$EXACT_ADDRESS',$MUNICIPALITY,'$CONTACT_NUMBERS')";
+$sql = "REPLACE INTO evacuation_center(id,name,location,population_capacity,floor_space,date_created,created_by,exact_address,municipality, contact_numbers) values($ID,'$NAME','$LOCATION',$POPULATION_CAPACITY,$FLOOR_SPACE,'$DATE_CREATED',$CREATED_BY,'$EXACT_ADDRESS','$MUNICIPALITY','$CONTACT_NUMBERS')";
 
 $message;
 

@@ -63,7 +63,7 @@
                                     <label class="col-md-4 control-label" for="name">Name</label>
                                     <div class="col-md-4">
                                         <input id="name" name="name" type="text" placeholder="Evacuation Center"
-                                        class="form-control input-md" required="">
+                                        class="form-control input-md" required="" v-model="data_input.name">
                                         <span class="help-block">Enter Evacuation Center</span>
                                     </div>
                                 </div>
@@ -74,7 +74,7 @@
                                         Capacity</label>
                                         <div class="col-md-4">
                                             <input id="population_capacity" name="population_capacity" type="text"
-                                            placeholder="capacity" class="form-control input-md" required="">
+                                            placeholder="capacity" class="form-control input-md" required="" v-model="data_input.population_capacity">
                                             <span class="help-block">Number of population the facility can hold</span>
                                         </div>
                                     </div>
@@ -85,7 +85,7 @@
                                         <div class="col-md-4">
                                             <input id="floor_space" name="floor_space" type="text"
                                             placeholder="area in square meters" class="form-control input-md"
-                                            required="">
+                                            required="" v-model="data_input.floor_space">
                                             <span class="help-block">The maximum space of the facility available</span>
                                         </div>
                                     </div>
@@ -95,7 +95,7 @@
                                         <label class="col-md-4 control-label" for="contact_numbers">Contact Numbers</label>
                                         <div class="col-md-4">
                                             <input id="contact_numbers" name="contact_numbers" type="text"
-                                            placeholder="eg. 0917..." class="form-control input-md">
+                                            placeholder="eg. 0917..." class="form-control input-md" v-model="data_input.contact_numbers">
                                             <span class="help-block">Contact numbers available</span>
                                         </div>
                                     </div>
@@ -105,22 +105,22 @@
                                         <label class="col-md-4 control-label" for="exact_address">Exact Address</label>
                                         <div class="col-md-4">
                                             <textarea class="form-control" id="exact_address"
-                                            name="exact_address"></textarea>
+                                            name="exact_address" v-model="data_input.exact_address"></textarea>
                                         </div>
                                     </div>
                                     <div class="form-group">
                                         <label class="col-md-4 control-label" for="location">Location</label>
                                         <div class="col-md-4">
-                                            <div class="col-md-4">
+                                            <div>
                                                 <label class="control-label" for="location">Latitude</label>
-                                                <input id="location" name="location" type="text" placeholder="120.123 ..."
-                                                class="form-control input-md" required="">
+                                                <input id="lat" name="location" type="text" placeholder="120.123 ..."
+                                                class="form-control input-md" required="" v-model="data_input.location.lat">
                                                 <span class="help-block">Latitude</span>
                                             </div>
-                                            <div class="col-md-4">
+                                            <div>
                                                 <label class="control-label" for="location">Longitude</label>
-                                                <input id="location" name="location" type="text" placeholder="120.123 ..."
-                                                class="form-control input-md" required="">
+                                                <input id="lng" name="location" type="text" placeholder="120.123 ..."
+                                                class="form-control input-md" required="" v-model="data_input.location.lng">
                                                 <span class="help-block">Longitude</span>
                                             </div>
                                         </div>
@@ -130,268 +130,287 @@
                                     <div class="form-group">
                                         <label class="col-md-4 control-label" for="municipality">Municipality</label>
                                         <div class="col-md-4">
-                                            <select id="municipality" name="municipality" class="form-control">
+                                            <select id="municipality" name="municipality" class="form-control" v-model="data_input.municipality">
                                                 <option v-for="municipal in municipalities" v-bind:value="municipal">{{municipal}}</option>
                                                 <!-- <option value="Alaminos">Alaminos</option>
-                                                <option value="Bay">Bay</option>
-                                                <option value="Biñan">Biñan</option>
-                                                <option value="Cabuyao">Cabuyao</option>
-                                                <option value="Calamba">Calamba</option>
-                                                <option value="Calauan">Calauan</option>
-                                                <option value="Cavinti">Cavinti</option>
-                                                <option value="Famy">Famy</option>
-                                                <option value="Kalayaan">Kalayaan</option>
-                                                <option value="Liliw">Liliw</option>
-                                                <option value="Los Baños">Los Baños</option>
-                                                <option value="Luisiana">Luisiana</option>
-                                                <option value="Lumban">Lumban</option>
-                                                <option value="Mabitac">Mabitac</option>
-                                                <option value="Magdalena">Magdalena</option>
-                                                <option value="Majayjay">Majayjay</option>
-                                                <option value="Nagcarlan">Nagcarlan</option>
-                                                <option value="Paete">Paete</option>
-                                                <option value="Pagsanjan">Pagsanjan</option>
-                                                <option value="Pakil">Pakil</option>
-                                                <option value="Pangil">Pangil</option>
-                                                <option value="Pila">Pila</option>
-                                                <option value="Rizal">Rizal</option>
-                                                <option value="San Pablo">San Pablo</option>
-                                                <option value="San Pedro">San Pedro</option>
-                                                <option value="Santa Cruz">Santa Cruz</option>
-                                                <option value="Santa Maria">Santa Maria</option>
-                                                <option value="Santa Rosa">Santa Rosa</option>
-                                                <option value="Siniloan">Siniloan</option>
-                                                <option value="Victoria">Victoria</option> -->
-                                            </select>
+                                                    <option value="Bay">Bay</option>
+                                                    <option value="Biñan">Biñan</option>
+                                                    <option value="Cabuyao">Cabuyao</option>
+                                                    <option value="Calamba">Calamba</option>
+                                                    <option value="Calauan">Calauan</option>
+                                                    <option value="Cavinti">Cavinti</option>
+                                                    <option value="Famy">Famy</option>
+                                                    <option value="Kalayaan">Kalayaan</option>
+                                                    <option value="Liliw">Liliw</option>
+                                                    <option value="Los Baños">Los Baños</option>
+                                                    <option value="Luisiana">Luisiana</option>
+                                                    <option value="Lumban">Lumban</option>
+                                                    <option value="Mabitac">Mabitac</option>
+                                                    <option value="Magdalena">Magdalena</option>
+                                                    <option value="Majayjay">Majayjay</option>
+                                                    <option value="Nagcarlan">Nagcarlan</option>
+                                                    <option value="Paete">Paete</option>
+                                                    <option value="Pagsanjan">Pagsanjan</option>
+                                                    <option value="Pakil">Pakil</option>
+                                                    <option value="Pangil">Pangil</option>
+                                                    <option value="Pila">Pila</option>
+                                                    <option value="Rizal">Rizal</option>
+                                                    <option value="San Pablo">San Pablo</option>
+                                                    <option value="San Pedro">San Pedro</option>
+                                                    <option value="Santa Cruz">Santa Cruz</option>
+                                                    <option value="Santa Maria">Santa Maria</option>
+                                                    <option value="Santa Rosa">Santa Rosa</option>
+                                                    <option value="Siniloan">Siniloan</option>
+                                                    <option value="Victoria">Victoria</option> -->
+                                                </select>
+                                            </div>
                                         </div>
-                                    </div>
-                                    
-                                    <!-- Button (Double) -->
-                                    <div class="form-group">
-                                        <label class="col-md-4 control-label" for="save_btn">Options</label>
-                                        <div class="col-md-8">
-                                            <button id="save_btn" name="save_btn" class="btn btn-success">Save</button>
-                                            <button id="delete_btn" name="delete_btn" class="btn btn-danger">Delete</button>
-                                        </div>
-                                    </div>
-                                    
-                                </fieldset>
-                            </form>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-default" data-dismiss="modal"
-                            v-on:click="addUser()">Save</button>
-                            <button type="button" class="btn btn-default" data-dismiss="modal"
-                            v-on:click="close()">Close</button>
-                        </div>
-                    </div>
-                    
-                </div>
-            </div>
-            
-            <div class="section header">
-                <h1>Evacuation Facilities</h1>
-            </div>
-            
-            <div class="section" style="height: 80%;" v-if="user_list.length > 0">
-                
-                <div class="table-container" id="tableData">
-                    <div class="well" v-for="item,index in user_list">
-                        <div class="row">
-                            <div class="col col-md-3 item-info" v-for="key,index in headers" v-if="key !='id'">
-                                <p class="item-label">
-                                    {{key}}:
-                                </p>
-                                <p class="item-value">
-                                    {{item[key]}}
-                                </p>
+                                        
+                                        <!-- Button (Double) -->
+                                        <!-- <div class="form-group">
+                                            <label class="col-md-4 control-label" for="save_btn">Options</label>
+                                            <div class="col-md-8">
+                                                <button id="save_btn" name="save_btn" class="btn btn-success">Save</button>
+                                                <button id="delete_btn" name="delete_btn" class="btn btn-danger">Delete</button>
+                                            </div>
+                                        </div> -->
+                                        
+                                    </fieldset>
+                                </form>
                             </div>
-                            
-                            <div class="col col-md-12">
-                                <button class="btn btn-default btn-info" v-on:click="editItem(index)">edit</button>
-                                <button class="btn btn-default btn-danger" v-on:click="deleteItem(index)">delete</button>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal"
+                                v-on:click="addEvacationCenter()">Save</button>
+                                <button type="button" class="btn btn-default" data-dismiss="modal"
+                                v-on:click="close()">Close</button>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-            <div class="section">
-                <button type="button" id="add-report" class="btn btn-info button-view"
-                v-on:click="openAddeditorModal(false)">Add Evacuation Center
-            </button>
-        </div>
-    </div>
-    
-    <script>
-        var user = null
-        
-        /* var header = new Vue({
-            el: '#header',
-            data: {
-                user: null
-            },
-            methods: {
-                onStart() {
-                    try {
-                        user = JSON.parse(sessionStorage.getItem('user'))
                         
-                        if (typeof user != 'string' && user) {
-                            console.log(user)
-                            this.user = user
-                            if (this.user.type == 'ADMIN') {
-                                app.fetchUser()
-                            } else {
-                                throw "No Account Privilege"
-                            }
+                    </div>
+                </div>
+                
+                <div class="section header">
+                    <h1>Evacuation Facilities</h1>
+                </div>
+                
+                <div class="section" style="height: 80%;" v-if="evac_list.length > 0">
+                    
+                    <div class="table-container" id="tableData">
+                        <div class="well" v-for="item,index in evac_list">
+                            <div class="row">
+                                <div class="col col-md-3 item-info" v-for="key,index in headers" v-if="key !='id'">
+                                    <p class="item-label">
+                                        {{key}}:
+                                    </p>
+                                    <p class="item-value">
+                                        {{item[key]}}
+                                    </p>
+                                </div>
+                                
+                                <div class="col col-md-12">
+                                    <button class="btn btn-default btn-info" v-on:click="editItem(index)">edit</button>
+                                    <button class="btn btn-default btn-danger" v-on:click="deleteItem(index)">delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="section">
+                    <button type="button" id="add-report" class="btn btn-info button-view"
+                    v-on:click="openAddeditorModal(false)">Add Evacuation Center
+                </button>
+            </div>
+        </div>
+        
+        <script>
+            var user = null
+            
+            /* var header = new Vue({
+                el: '#header',
+                data: {
+                    user: null
+                },
+                methods: {
+                    onStart() {
+                        try {
+                            user = JSON.parse(sessionStorage.getItem('user'))
                             
-                        } else {
+                            if (typeof user != 'string' && user) {
+                                console.log(user)
+                                this.user = user
+                                if (this.user.type == 'ADMIN') {
+                                    app.fetchEvacationCenter()
+                                } else {
+                                    throw "No Account Privilege"
+                                }
+                                
+                            } else {
+                                alert('login user account')
+                                this.onLogout()
+                            }
+                        } catch (error) {
                             alert('login user account')
                             this.onLogout()
                         }
-                    } catch (error) {
-                        alert('login user account')
-                        this.onLogout()
+                    },
+                    onLogout() {
+                        sessionStorage.clear()
+                        window.open('login.html', '_self')
                     }
-                },
-                onLogout() {
-                    sessionStorage.clear()
-                    window.open('login.html', '_self')
+                }
+            }) */
+            
+            function newEvac() {
+                return {
+                    id: null,
+                    name: "sampl1",
+                    location: {
+                        lat: 14.426700434748033,
+                        lng: 121.43130540847778
+                    },
+                    population_capacity: 1000,
+                    floor_space: 2000,
+                    date_created: Date(),
+                    created_by: 0,
+                    exact_address: "mabitac rd",
+                    municipality: "mabitac",
+                    contact_numbers: "09171231233",
                 }
             }
-        }) */
-        
-        var app = new Vue({
-            el: '#content',
-            data: {
-                user_list: [],
-                headers: [],
-                data_input: {
-                    id: null,
-                    name: null,
-                    location: null,
-                    population_capacity: null,
-                    floor_space: null,
-                    date_created: null,
-                    created_by: null,
-                    exact_address: null,
-                    municipality: null,
-                    contact_numbers: null
+
+            function prepareEvac(value){
+                return {
+                    id: value.id,
+                    name: value.name,
+                    location: JSON.stringify(value.location),
+                    population_capacity: value.population_capacity,
+                    floor_space: value.floor_space,
+                    date_created: value.date_created,
+                    created_by: value.created_by,
+                    exact_address: value.exact_address,
+                    municipality: value.municipality,
+                    contact_numbers: value.contact_numbers,
+                }
+            }
+            
+            var app = new Vue({
+                el: '#content',
+                data: {
+                    evac_list: [],
+                    headers: [],
+                    data_input: newEvac(),
+                    isEdit: false,
+                    editEvacuationID: null,
+                    conf_password: null,
+                    municipalities: municipalities
                 },
-                
-                isEdit: false,
-                editEvacuationID: null,
-                conf_password: null,
-                municipalities: municipalities
-            },
-            methods: {
-                fetchUser() {
-                    DataHandler.getUsers().then((data) => {
-                        this.setUser(data)
-                    })
-                },
-                setUser(data) {
-                    this.user_list = data
-                    console.log(this.user_list)
-                    if (this.user_list.length > 0) {
-                        this.headers = Object.keys(this.user_list[0])
-                    }
-                },
-                openAddeditorModal(isEdit) {
-                    this.isEdit = isEdit
-                    if (!this.isEdit) {
-                        this.data_input = {
-                            username: null,
-                            firstname: null,
-                            lastname: null,
-                            email: null,
-                            password: null,
-                            type: null
+                methods: {
+                    fetchEvacationCenter() {
+                        DataHandler.getEvacuationCenters().then((data) => {
+                            this.setEvacationCenter(data)
+                        })
+                    },
+                    setEvacationCenter(data) {
+                        this.evac_list = data
+                        console.log(this.evac_list)
+                        if (this.evac_list.length > 0) {
+                            this.headers = Object.keys(this.evac_list[0])
                         }
-                    }
-                    $('#editorModal').modal()
-                },
-                addUser() {
-                    if (this.data_input.password == this.conf_password) {
-                        if (this.isEdit) {
-                            this.onSaveEdit()
-                        } else {
-                            this.onSaveNewUser()
+                    },
+                    openAddeditorModal(isEdit) {
+                        this.isEdit = isEdit
+                        if (!this.isEdit) {
+                            this.data_input = newEvac()
                         }
-                        this.close()
-                    } else {
-                        alert("password doesn't match")
-                    }
-                },
-                
-                onSaveEdit() {
-                    this.data_input['id'] = this.editUserId
-                    DataHandler.editUser(this.data_input).then((data) => {
-                        if (data.error) {
-                            alert(`Can't Edit User ${data.error}`)
-                        } else {
-                            alert(`User Have Been Edited Successfuly`)
-                            this.fetchUser()
-                        }
-                    })
-                },
-                
-                onSaveNewUser() {
-                    DataHandler.addUser(this.data_input).then((data) => {
-                        if (data.error) {
-                            alert(`Can't Save User ${data.error}`)
-                        } else {
-                            alert(`User Have Been Added Successfuly`)
-                            this.fetchUser()
-                        }
-                    })
-                },
-                
-                editItem(index) {
-                    var user = this.user_list[index]
-                    this.editUserId = user.id
-                    this.data_input.username = user.username
-                    this.data_input.firstname = user.firstname
-                    this.data_input.lastname = user.lastname
-                    this.data_input.email = user.email
-                    this.data_input.type = user.type
-                    this.openAddeditorModal(true)
-                },
-                deleteItem(index) {
-                    let onConfirm = confirm('Deleting User\nPress confirm to proceed')
-                    if (onConfirm) {
-                        DataHandler.deleteUser(this.user_list[index].id).then((data) => {
-                            console.log(data)
-                            if (data.error) {
-                                alert(`Can't Delete User ${data.error}`)
+                        $('#editorModal').modal()
+                    },
+                    addEvacationCenter() {
+                        if (this.data_input.password == this.conf_password) {
+                            if (this.isEdit) {
+                                this.onSaveEdit()
                             } else {
-                                alert(`User Have Been Deleted Successfuly`)
-                                this.fetchUser()
+                                this.onSaveNewEvacationCenter()
+                            }
+                            this.close()
+                        } else {
+                            alert("password doesn't match")
+                        }
+                    },
+                    
+                    onSaveEdit() {
+                        this.data_input['id'] = this.editEvacId
+                        DataHandler.editEvacationCenter(this.data_input).then((data) => {
+                            if (data.error) {
+                                alert(`Can't Edit User ${data.error}`)
+                            } else {
+                                alert(`User Have Been Edited Successfuly`)
+                                this.fetchEvacationCenter()
                             }
                         })
+                    },
+                    
+                    onSaveNewEvacationCenter() {
+                        DataHandler.addEvacationCenter(prepareEvac(this.data_input)).then((data) => {
+                            if (data.error) {
+                                console.log("params %o", data.params)
+                                alert(`Can't Save User ${data.error}`)
+                            } else {
+                                alert(`User Have Been Added Successfuly`)
+                                this.fetchEvacationCenter()
+                            }
+                        })
+                    },
+                    
+                    editItem(index) {
+                        var evac = this.evac_list[index]
+                        this.editEvacId = evac.id
+                        this.data_input = {
+                            id: evac.id,
+                            name: evac.name,
+                            location: {
+                                lat: evac.location.lat,
+                                lng: evac.location.lng,
+                            },
+                            population_capacity: evac.population_capacity,
+                            floor_space: evac.floor_space,
+                            date_created: evac.date_created,
+                            created_by: evac.created_by,
+                            exact_address: evac.exact_address,
+                            municipality: evac.municipality,
+                            contact_numbers:evac.contact_numbers
+                        }
+                        this.openAddeditorModal(true)
+                    },
+                    deleteItem(index) {
+                        let onConfirm = confirm('Deleting User\nPress confirm to proceed')
+                        if (onConfirm) {
+                            DataHandler.deleteEvacationCenter(this.evac_list[index].id).then((data) => {
+                                console.log(data)
+                                if (data.error) {
+                                    alert(`Can't Delete User ${data.error}`)
+                                } else {
+                                    alert(`User Have Been Deleted Successfuly`)
+                                    this.fetchEvacationCenter()
+                                }
+                            })
+                        }
+                        
+                    },
+                    close() {
+                        this.data_input = newEvac()
+                        this.conf_password = null
+                        this.isEdit = false
                     }
                     
-                },
-                close() {
-                    this.data_input = {
-                        username: null,
-                        firstname: null,
-                        lastname: null,
-                        email: null,
-                        password: null,
-                        type: null
-                    }
-                    this.conf_password = null
-                    this.isEdit = false
                 }
-                
-            }
-        })
+            })
+            
+            $(document).ready(() => {
+                //header.onStart()
+                app.fetchEvacationCenter()
+            })
+        </script>
         
-        /* $(document).ready(() => {
-            header.onStart()
-        }) */
-    </script>
+    </body>
     
-</body>
-
-</html>
+    </html>
