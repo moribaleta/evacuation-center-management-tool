@@ -2,8 +2,8 @@
 
 class DataHandlerClass {
 
-    //host = "https://ievacuate-laguna.000webhostapp.com/evacuation-center-management/evacuation-management-system/"
-    host = "http://ievacuate-laguna.infinityfreeapp.com/"
+    host = "https://ievacuate-laguna.000webhostapp.com/evacuation-center-management/evacuation-management-system/"
+    //host = "http://ievacuate-laguna.infinityfreeapp.com/"
     baseUrl = this.host + "api"
 
     fetchApi(url, param = {}){
