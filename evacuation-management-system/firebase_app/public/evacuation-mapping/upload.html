@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- update the version number as needed -->
+  <script defer src="/__/firebase/7.19.1/firebase-app.js"></script>
+  <!-- include only the Firebase features as you need -->
+  <script defer src="/__/firebase/7.19.1/firebase-auth.js"></script>
+  <script defer src="/__/firebase/7.19.1/firebase-database.js"></script>
+  <script defer src="/__/firebase/7.19.1/firebase-messaging.js"></script>
+  <script defer src="/__/firebase/7.19.1/firebase-storage.js"></script>
+  <!-- initialize the SDK after all desired features are loaded -->
+  <script defer src="/__/firebase/init.js"></script>
+  <script src="resources/src/js/datahandler.js"></script>
+  <script src="resources/src/js/utilities.js"></script>
+</head>
+<body>
+  
+  <html>
+  <head>
+    
+  </head>
+  <body>
+    <input type='file' accept='text/plain' onchange='openFile(event)'><br>
+    <button onclick="upload()">save</button>
+    <div id='output'>
+    </div>
+    
+    <script src="https://www.gstatic.com/firebasejs/7.19.1/firebase-app.js"></script>
+    <script>
+      
+      
+      var value;
+      var storage;
+      var database;
+      var file;
+      
+      var openFile = function(event) {
+        var input = event.target;
+        
+        var reader = new FileReader();
+        reader.onload = function(){
+          var text = reader.result;
+          var node = document.getElementById('output');
+          node.innerText = text;
+          value = text
+          console.log(reader.result.substring(0, 200));
+        };
+        reader.readAsText(input.files[0]);
+        file = input.files[0]
+      };
+      
+      function upload(){
+        //localStorage.setItem('roads', value)
+        
+        let ref = storage.ref()
+        let id  = genID(5)
+        let filename = id+'.json'
+        let fileput = ref.child('uploads/'+filename)
+        
+        var metadata = {
+          contentType: 'json',
+        };
+        
+        console.log("file %o", file)
+        
+        /* fileput.put(file,metadata).then(function(snapshot) {
+          console.log('Uploaded a blob or file!');
+          database.ref('roadmap/' + id).set({
+            roadmap: filename,
+            created_by: 0, 
+            date_created: new Date()
+          });
+        }); */
+        database.ref('roadmap/' +id).set({
+          roadmap: value,
+          created_by: 0,
+          date_created: new Date()
+        })
+        
+      }
+      
+      function init(){
+        
+        let app = DataHandler.configure()
+        
+        // Get a reference to the storage service, which is used to create references in your storage bucket
+        storage = app.storage()
+        database = app.database()
+      }
+      
+      document.addEventListener('DOMContentLoaded', function() {
+        init()
+      })
+    </script>
+  </body>
+  
+  
+  
+  </html>

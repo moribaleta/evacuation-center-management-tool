@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Map Maker</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        #map {
+            height: 100%;
+            z-index: 0;
+        }
+    </style>
+    <!-- update the version number as needed -->
+    <script defer src="/__/firebase/7.19.1/firebase-app.js"></script>
+    <!-- include only the Firebase features as you need -->
+    <script defer src="/__/firebase/7.19.1/firebase-auth.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-database.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-messaging.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-storage.js"></script>
+    <!-- initialize the SDK after all desired features are loaded -->
+    <script defer src="/__/firebase/init.js"></script>
+    <script src="resources/json/boundary.js"></script>
+    <script src="resources/json/coordinates.json"></script>
+    <script src="resources/json/hospitals.json"></script>
+    <script src="resources/js/jquery-3.0.0.min.js"></script>
+    <script src="resources/bootstrap/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="resources/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="resources/css/main.css">
+    <script src="resources/js/vue.js"></script>
+    
+</head>
+<body>
+    
+    <nav class="navbar navbar-inverse" id="navbar">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span> 
+                </button>
+                <a class="navbar-brand" href="#">iEvacuate Map Maker</a>
+            </div>
+        </div>
+    </nav>
+    
+    <div  id="myModal" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Generated Coordinates</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" style="max-height: 500px; overflow: auto;">
+                    <div class="panel-group">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h4 class="panel-title">
+                                    <a data-toggle="collapse" href="#collapse-path">Current Path</a>
+                                </h4>
+                            </div>
+                            <div id="collapse-path" class="panel-collapse collapse">
+                                <button type="button" class="btn btn-primary btn-danger"   v-on:click="deletePath()">Delete</button>
+                                <div class="panel-body">{{path}}</div>
+                            </div>
+                        </div>
+                    </div>    
+                    
+                    <div>
+                        <h4>saved paths</h4>
+                        <div class="panel-group" v-for="(road,index) in road_map">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" v-bind:href="'#collapse'+index">{{road.id + " " + road.name}}</a>
+                                    </h4>
+                                </div>
+                                <div v-bind:id="'collapse'+index" class="panel-collapse collapse">
+                                    <button type="button" class="btn btn-primary btn-danger"   v-on:click="deleteRoad(road.id)">Delete</button>
+                                    <div class="panel-body">{{road}}</div>
+                                </div>
+                            </div>
+                        </div>                          
+                    </div>
+                    <!-- <p id="path_value">{{road_map}}</p> -->
+                </div>
+                <div class="modal-body" style="max-height: 500px; overflow: auto;">
+                    <button type="button" class="btn btn-primary btn-success"   v-on:click="testPath()">test paths</button>
+                    <button type="button" class="btn btn-primary"               v-on:click="savePath()">Save</button>
+                    <button type="button" class="btn btn-primary"               v-on:click="printPath()">Save & Print</button>
+                    <!-- <p id="path_value">{{road_map}}</p> -->
+                </div>
+                <div class="modal-footer">
+                    
+                    <button type="button" class="btn btn-primary btn-danger"   v-on:click="clearAll()">Clear All Saved</button>
+                    <button type="button" class="btn btn-primary btn-success"   v-on:click="loadLatest()">Load Latest</button>
+                    <button type="button" class="btn btn-primary btn-success"   v-on:click="loadLocal()">Load Local</button>
+                    <button type="button" class="btn btn-primary btn-success"   v-on:click="uploadFile()">Upload</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
+    <div id="map"></div>   
+    <!-- Modal -->
+    <div class="bottom-container">
+        
+        <button class="bottom-button" id="button_add_new"   onclick="addNewPath()">add path</button>
+        <button class="bottom-button" id="button_add_new"   onclick="showPath()">show paths</button>
+        <!-- <button class="bottom-button" id="button_reload"    onclick="resetMarker()">back</button> -->
+    </div>
+    
+    <script src="../_global/js/objects.js"></script>
+    <script src="../_global/js/utilities.js"></script>
+    <script src="resources/src/js/datahandler.js"></script>
+    <script src="resources/src/js/utilities.js"></script>
+    
+    <!--GLOBAL VAR==START-->
+    <script>
+        ///map instance of Google Map
+        var map;
+        
+        ///contains all the markers shown on the map
+        var node_markers = [];
+        
+        ///contains all the evacuation center
+        var evacuation_center_list = hospital_data;
+        
+        ///contains all the path created
+        var road_map = []
+        
+        ///sample json object represents a path
+        var path = {
+            id: "path*"+genID(5),
+            name: null,
+            coordinates: [
+            ]
+        }
+        
+        ///sample json object represents a marker shown on the map
+        var node_mark = {
+            id: null, 
+            marker: null,
+            location: {}
+        }
+    </script>
+    <!--GLOBAL VAR==END-->
+    
+    <!--CODE==START-->
+    <script>
+        
+        function addNewPath(){
+            road_map.push(JSON.parse(JSON.stringify(path)))
+            path = {
+                id: "path*"+genID(5),
+                name: null,
+                coordinates: []
+            }
+            alert("you can now create a new path")
+        }//addNewPath
+        
+        function showPath(){
+            modal_vue.setList(path, road_map)
+            $('#myModal').modal('show');
+        }//showPath
+        
+        
+        /* ///removes the current path created and reinitialize
+        function resetMarker(){
+            path.coordnates.forEach((marker) => {
+                removeMarker(marker)
+            })
+            path = {
+                id: null,
+                name: null,
+                coordinates: []
+            }
+        }//resetMarker */
+        
+        ///removes all markers from the map
+        function clearMarkers() {
+            //setMapOnAll(null);
+            node_markers.forEach((marker) => {
+                removeMarker(marker)
+            })
+        }//clearMarkers
+        
+        ///removes a single marker from the map 
+        function removeMarker(marker){
+            marker.marker.setMap(null)
+            const marker_location = marker.location
+            
+            node_markers = node_markers.filter((value) => {
+                return (marker.id != value.id)
+            })
+            
+            road_map.forEach((road, index) => {
+                let filter_coords = road.coordinates.filter((value) => {
+                    return !(value.lat == marker_location.lat && value.lng == marker_location.lng)
+                })
+                road_map[index].coordinates = filter_coords
+            })
+            
+            
+            let filter_coords = path.coordinates.filter((value) => {
+                return !(value.lat == marker_location.lat && value.lng == marker_location.lng)
+            })
+            path.coordinates = filter_coords
+            
+            console.log(path)
+        }//removeMarker
+        
+        
+        ///places a marker on the map and push the coordinates to path
+        function placeMarker(position, map) {
+            if(path.name==null){
+                path.name = prompt("enter road name");
+            }
+            var location = {
+                id : path.id +"-"+ (path.coordinates.length || 0),
+                lat: position.lat(),
+                lng: position.lng()
+            }
+            
+            path.coordinates.push(location);
+            
+            
+            console.log(""+JSON.stringify(path));
+            
+            var emergencymarker = new google.maps.Marker({
+                position: position,
+                map: map,
+                icon: 'resources/images/border-dot-point-25.png',
+            });
+            
+            let marker      = {...node_mark}
+            marker.id       = location.id
+            marker.marker   = emergencymarker
+            marker.location = {...location}
+            
+            console.log("position: "+position);
+            node_markers.push(marker);
+            
+            google.maps.event.addListener(emergencymarker, 'click', function() {
+                if ((path.name == null) && (confirm("start path here?"))) {
+                    path.name = prompt("enter road name");
+                    var location = {
+                        id : path.id +"-"+ (path.coordinates.length || 0),
+                        lat: position.lat(),
+                        lng: position.lng()
+                    }
+                    path.coordinates.push(location);
+                } else if (path.id != marker.id.split("-")[0] && confirm("connect path here?"))  {
+                    var location = {
+                        id : path.id +"-"+ (path.coordinates.length || 0),
+                        lat: position.lat(),
+                        lng: position.lng()
+                    }
+                    path.coordinates.push(location);
+                } else if (confirm("do you want to delete this?")) {
+                    removeMarker(marker)
+                }
+            });
+            
+        }//placeMarker
+        
+        ///places all the markers from saved data
+        function initPrevMarkers(map) {
+            road_map = JSON.parse(localStorage.getItem("roads"))
+            console.log("road %o", road_map)
+            
+            road_map.forEach((path) => {
+                path.coordinates.forEach((coord) => {
+                    placeMarkerPrev(coord, map)
+                })
+            })            
+        }//initPrevMarkers
+        
+        ///replaces the local stored road maps with the latest road map from the database
+        function loadLatestRoad(){
+            road_map = []
+            let app = DataHandler.configure()
+            let storage = app.storage()
+            let database = app.database()
+
+            //var children = []
+            
+            database.ref('roadmap/').once('value', function(snapshot) {
+                var children = []
+                snapshot.forEach(function(childSnapshot) {
+                    var childKey = childSnapshot.key;
+                    var childData = childSnapshot.val();
+                    children.push({id: childKey, ...childData})
+                });
+                //console.log("loaded data %o",snapshot)
+                let first = children[0].roadmap
+                //let road = {id: first.key, ...first.val()}
+                console.log("road %o", children)
+                
+                //var pathReference = storage.ref('roadmaps/'+first.road_map);
+                //road_map = JSON.parse(first)
+                localStorage.setItem('roads', first)
+                location.reload()
+            });
+            
+            /* DataHandler.getRoadMap().then((data) => {
+                console.log("response %o", data)
+                //let _data = JSON.parse(data)
+                //console.log("parse response %o", _data)
+                if (data.length > 0) {
+                    road_map = JSON.parse(data) || []
+                }
+            }).catch(error => {
+                console.log(error)
+            }).finally(() => {
+                console.log("road_map %o", road_map)
+            }) */
+            
+            
+        }//loadLatestRoad
+        
+        ///placed previous marker
+        function placeMarkerPrev(coordinates, map) {
+            
+            var position = new google.maps.LatLng(coordinates.lat, coordinates.lng);
+            
+            var location = {
+                id : coordinates.id,
+                lat: coordinates.lat,
+                lng: coordinates.lng
+            }
+            
+            var emergencymarker = new google.maps.Marker({
+                position: position,
+                map: map,
+                icon: 'resources/images/border-dot-point-25.png',
+            });
+            
+            google.maps.event.addListener(emergencymarker, 'click', function() {
+                console.log("path %o, location %o", path, location)
+                if ((path.name == null) && (confirm("start path here?"))) {
+                    path.name = prompt("enter road name");
+                    var location = {
+                        id : path.id +"-"+ (path.coordinates.length || 0),
+                        lat: position.lat(),
+                        lng: position.lng()
+                    }
+                    path.coordinates.push(location);
+                } else if (path.id != coordinates.id.split("-")[0] && confirm("connect path here?"))  {
+                    var location = {
+                        id : path.id +"-"+ (path.coordinates.length || 0),
+                        lat: position.lat(),
+                        lng: position.lng()
+                    }
+                    path.coordinates.push(location);
+                } else if (confirm("do you want to delete this?")) {
+                    removeMarker(marker)
+                }
+            });
+        }//placeMarkerPrev
+        
+        
+    </script>
+    <!--CODE==END-->
+    
+    <!--VIEW CODE==>START-->
+    <script>
+        var modal_vue = new Vue({
+            el: '#myModal',
+            data: {
+                road_map: [],
+                path: {}
+            },
+            methods: {
+                setList: function(path, road_map) {
+                    this.road_map   = road_map
+                    this.path       = path
+                    //$('#progressDirection').hide();
+                },
+                deleteRoad: function(id){
+                    if (confirm("are you sure you want to delete this road?")) {
+                        for(var i = 0; i < this.road_map.length; i++) {
+                            if (this.road_map[i].id == id) {
+                                this.road_map.splice(i, 1)
+                                this.savePath()
+                                location.reload()
+                                break
+                            }
+                        }
+                    }
+                },
+                
+                deletePath: function(){
+                    if (confirm("are you sure you want to delete current path?")) {
+                        path = {
+                            id: "path*"+genID(5),
+                            name: null,
+                            coordinates: []
+                        }
+                        this.savePath()
+                        location.reload()
+                    }
+                },
+                
+                testPath: function (){
+                    window.open('map.html');
+                }, 
+                savePath: function () {
+                    if(path.name != null && path.coordinates.length > 0) {
+                        road_map.push(JSON.parse(JSON.stringify(path)))
+                        path = {
+                            id: "path*"+genID(5),
+                            name: null,
+                            coordinates: []
+                        }
+                    }
+                    
+                    //road_map = optimizeMap(road_map)
+                    this.road_map = road_map
+                    
+                    var text = JSON.stringify(road_map)
+                    localStorage.setItem("roads", text)
+                    
+                    alert("Saved to local storage")
+                    
+                    $('#road_value').html(text)
+                },//savePath
+                
+                printPath: function (){
+                    if(path.name != null && path.coordinates.length > 0) {
+                        road_map.push(JSON.parse(JSON.stringify(path)))
+                        path = {
+                            id: "path*"+genID(5),
+                            name: null,
+                            coordinates: []
+                        }
+                    }
+                    
+                    //road_map = optimizeMap(road_map)
+                    this.road_map = road_map
+                    
+                    var text = JSON.stringify(road_map)
+                    localStorage.setItem("roads", text)
+                    saveTextAsFile(text)
+                },//printPath
+                
+                uploadFile: function(){
+                    window.open('upload.html');
+                },
+                
+                clearAll: function() {
+                    if (confirm("remove all saved roads?")) {
+                        localStorage.setItem("roads", JSON.stringify([]))
+                        location.reload()
+                    }
+                }, 
+                
+                loadLatest: function(){
+                    if (confirm("replace local saved with the latest from the database? ")) {
+                        localStorage.setItem("roads", JSON.stringify([]))
+                        loadLatestRoad()
+                        //location.reload()
+                    }
+                },
+                
+                loadLocal: function(){
+                    window.open('load_local.html');
+                }
+                
+            }
+        })
+    </script>
+    <!--VIEW CODE==>END-->
+    
+    
+    <!--MAP INIT==>START-->
+    <script>
+        function initMap() {
+            
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 15,
+                disableDefaultUI: true,
+                draggableCursor:'crosshair',
+                styles: [
+                {
+                    featureType: 'all',
+                    stylers: [
+                    { "color": "#C0C0C0" }
+                    ]
+                },{
+                    featureType: 'poi',
+                    stylers: [
+                    { "visibility": "off" }
+                    ]
+                },{
+                    featureType: 'road.arterial',
+                    elementType: 'geometry',
+                    stylers: [
+                    { hue: '#00ffee' },
+                    { saturation: 50 }
+                    ]
+                }
+                ]
+            });
+            
+            var bounds = new google.maps.LatLngBounds();
+            
+            google.maps.event.addListener(map, 'click', function(e) {
+                if (confirm("Do you want to add a road icon here?") ) {
+                    placeMarker(e.latLng, map);
+                }
+            });
+            
+            var lineSymbol = {
+                path: 'M 0,-1 0,1',
+                strokeOpacity: 1,
+                scale: 4
+            };
+            
+            var infoWindow = new google.maps.InfoWindow(), marker, i;
+            for( i = 0; i < evacuation_center_list.length; i++ ) {
+                var position = new google.maps.LatLng( evacuation_center_list[i].location.lat,evacuation_center_list[i].location.long);
+                bounds.extend(position);
+                
+                marker = new google.maps.Marker({
+                    position: position,
+                    map: map,
+                    title: evacuation_center_list[i].name,
+                    icon: 'resources/images/hospital_32.png'
+                });
+                
+                map.fitBounds(bounds);
+            }
+            
+            var boundsListener = google.maps.event.addListener((map), 'bounds_changed', function(event) {
+                this.setZoom(14);
+                google.maps.event.removeListener(boundsListener);
+            });
+            
+            
+            var line = new google.maps.Polyline({
+                path: coords,
+                strokeOpacity: 0,
+                icons: [{
+                    icon: lineSymbol,
+                    offset: '0',
+                    repeat: '20px'
+                }],
+                map: map
+            });
+            
+            var municipallineSymbol = {
+                path: 'M 0,-1 0,1',
+                strokeOpacity: 0.5,
+                scale: 2
+            };
+            
+            var mabitac = new google.maps.Polyline({
+                path: mabitac_boundary,
+                strokeOpacity: 0,
+                icons: [{
+                    icon: municipallineSymbol,
+                    offset: '0',
+                    repeat: '20px'
+                }],
+                map: map
+            });
+            var stamaria = new google.maps.Polyline({
+                path: sta_maria_boundary,
+                strokeOpacity: 0,
+                icons: [{
+                    icon: municipallineSymbol,
+                    offset: '0',
+                    repeat: '20px'
+                }],
+                map: map
+            });
+            var siniloan = new google.maps.Polyline({
+                path: siniloan_boundary,
+                strokeOpacity: 0,
+                icons: [{
+                    icon: municipallineSymbol,
+                    offset: '0',
+                    repeat: '20px'
+                }],
+                map: map
+            });
+            
+            initPrevMarkers(map)
+        }//initMap
+    </script>
+    <!--MAP INIT==>END-->
+    
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBymq4YRMhZoMwnPUd2SfyzQQLEvUtafkM&libraries=places&callback=initMap"
+    async defer></script>
+</body>
+</html>

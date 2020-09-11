@@ -1,0 +1,538 @@
+<html>
+
+<head>
+    <title>generate reports</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href='open-iconic-master/font/css/open-iconic-bootstrap.css' rel="stylesheet">
+    <script src="js/jquery-3.0.0.min.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <link href="css/main-style.css" rel="stylesheet">
+    <script src="js/vue.js"></script>
+    <script src="js/datahandler.js"></script>
+
+    <style>
+        .input {
+            width: 150px;
+        }
+
+        .btn {
+            margin-bottom: 2px;
+        }
+
+        .input-label {
+            margin-top: 5px;
+        }
+
+        .filter_div {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            justify-content: start;
+        }
+
+        .filter_item {
+            display: flex;
+            flex-direction: row;
+            align-items: stretch;
+            justify-content: start;
+        }
+
+        .filter_item input {
+            margin-right: 10px;
+        }
+
+        .input-select {
+            width: 100%;
+        }
+
+
+        .filter-container {
+            width: 100%;
+            
+        }
+
+        .button-container {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidenav" id="header">
+        <div class="sidenav-item">
+            <img class="nav-image" src="resources/images/logo.png" />
+        </div>
+        <div class="sidenav-item active">
+            <a href="#reports-panel">
+                <div class="icon-block">
+                    <i class="material-icons">assessment</i>
+                    <h5 class="center">Reports</h5>
+                </div>
+            </a>
+        </div>
+        <div class="sidenav-item" v-if="user && user.type == 'ADMIN'">
+            <a href="users.html">
+                <div class="icon-block">
+                    <i class="material-icons">group</i>
+                    <h5 class="center">Users</h5>
+                </div>
+            </a>
+        </div>
+        <div class="sidenav-item">
+            <a v-on:click="onLogout()">
+                <div class="icon-block">
+                    <i class="material-icons">close</i>
+                    <h5 class="center">Log Out</h5>
+                </div>
+            </a>
+        </div>
+    </div>
+    <div id='content' class="container">
+
+        <div class="section row">
+            <div class="col col-md-12 header-content">
+                <button class="btn header-btn" v-on:click="onBack()">
+                    <i class="large material-icons">arrow_back</i>
+                </button>
+                <h1 class="header-title">Generate Reports</h1>
+            </div>
+
+            <div class="col col-md-12 filter-container">
+                <a class="btn btn-info " href="#labels" data-toggle="collapse">Show Labels</a>
+                <a class="btn btn-info " href="#filter" data-toggle="collapse">Show Filter</a>
+
+                <div id="labels" class="well collapse">
+                    <div class="filter-div row">
+                        <div class="filter_item col-md-3" v-for="filter_type,index of filter_types">
+                            <input type="radio" class="radio" :value="filter_type"
+                                v-on:click="update_filter_list(filter_type)" :checked="getChecked(filter_type)">
+                            <label :for="filter_type">{{filter_type.replace(/_/g,' ')}}</label>
+                        </div>
+                    </div>
+                </div>
+                <div id="filter" class="well collapse">
+                    <div class="row">
+                        <div class="col col-md-3">
+                            <p class="input-label">year</p>
+                            <select id="input-type" class="input input-select" v-model="data_input.year">
+                                <option v-for="(item,index) in selections.years"
+                                    :selected="item == data_input.year ? true : false">{{item
+                                            ? item : "NOT AVAILABLE"}}</option>
+                            </select>
+                        </div>
+                        <div class="col col-md-3">
+                            <p class="input-label">month</p>
+                            <select id="input-type" class="input input-select" v-model="data_input.month">
+                                <option v-for="(item,index) in selections.months"
+                                    :selected="index == data_input.month ? true : false">
+                                    {{item}}</option>
+                            </select>
+                        </div>
+                        <div class="col col-md-3">
+                            <p class="input-label">stations</p>
+                            <select id="input-district" class="input input-select" v-model="data_input.station">
+                                <option v-for="(item,index) in selections.stations"
+                                    :selected="index == data_input.station ? true : false">{{item}}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col col-md-12 button-container">
+                <button type="button" id="add-report" class="btn btn-info button-view"
+                    v-on:click="generateData()">generate
+                    report
+                </button>
+                <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="download(true)">
+                    download xls
+                </button>
+                <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="download(false)">
+                    download pdf
+                </button>
+            </div>
+        </div>
+
+        <div class="section" v-for="table in table_group"
+            style="width: 100%; height: 500px; border: solid 1px lightgray; margin-bottom: 100px; overflow: auto">
+            <h1>{{table.title}}</h1>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col" v-for="item in table.header">
+                            {{item.replace(/_/g,' ')}}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="item in table.data">
+                        <td scope="col" v-for="key in table.header">
+                            {{item[key]}}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+    <script>
+        var user = null
+        var app
+
+        var header = new Vue({
+            el: '#header',
+            data: {
+                user: null
+            },
+            methods: {
+                onStart() {
+                    try {
+                        user = JSON.parse(sessionStorage.getItem('user'))
+                        if (typeof user != 'string' && user) {
+                            console.log(user)
+                            this.user = user
+                            app.fetchReports()
+                        } else {
+                            alert('login user account')
+                            this.onLogout()
+                        }
+                    } catch (error) {
+                        console.log(error)
+                        alert('login user account')
+                        this.onLogout()
+                    }
+
+                },
+                onLogout() {
+                    sessionStorage.clear()
+                    window.open('login.html', '_self')
+                }
+            }
+        })
+        $(document).ready(() => {
+            header.onStart()
+        })
+    </script>
+
+    <script>
+        app = new Vue({
+            el: '#content',
+            data: {
+                reports: [],
+
+                data_input: {
+                    year: null,
+                    month: null,
+                    station: null
+                },
+                filter_types: [],
+                selections: {
+                    stations: [],
+                    years: [],
+                    months: [
+                        'all',
+                        'JANUARY',
+                        'FEBRUARY',
+                        'MARCH',
+                        'APRIL',
+                        'MAY',
+                        'JUNE',
+                        'JULY',
+                        'AUGUST',
+                        'SEPTEMBER',
+                        'OCTOBER',
+                        'NOVEMBER',
+                        'DECEMBER',
+                        'NOT AVAILABLE',
+                    ],
+                },
+
+                filter_added: [],
+
+                display_data: [],
+                display_header: [],
+
+                table_group: [],
+
+                title: null
+            },
+            methods: {
+                fetchReports() {
+                    let reports = sessionStorage.getItem('reports')
+                    if (reports) {
+                        this.setData(JSON.parse(reports))
+                    } else {
+                        DataHandler.getReports().then((reports) => {
+                            console.log(reports)
+                            this.setData(reports)
+                        }).catch(error => {
+                            console.log(error)
+                        })
+                    }
+                },
+
+                onBack() {
+                    window.history.back()
+                },
+
+                setData(reports) {
+                    this.reports = reports
+                    this.getDistinctParams()
+                },
+
+                getDistinctParams() {
+                    this.selections.years = ['all']
+                    this.selections.stations = ['all']
+
+                    this.reports.map((report) => {
+                        let date = report.DATE_CREATED.split('-')
+                        var year = date[0]
+                        var month = date[1]
+
+                        if (!this.selections.years.includes(year)) {
+                            this.selections.years.push(year)
+                        }
+
+                        if (!this.selections.stations.includes(report.STATION)) {
+                            this.selections.stations.push(report.STATION)
+                        }
+                    })
+
+                    this.filter_types = Object.keys(this.reports[0])
+                },
+
+                update_filter_list(value) {
+                    console.log("entered %o", value)
+                    let filter_index = this.filter_added.indexOf(value)
+                    if (filter_index !== -1) {
+                        this.filter_added.splice(filter_index, 1)
+                    } else {
+                        this.filter_added.push(value)
+                    }
+                },
+
+                getChecked(value) {
+                    return this.filter_added.includes(value)
+                },
+
+                filter_list(data) {
+                    this.filter_types.map((key) => {
+                        if (!this.filter_added.includes(key)) {
+                            console.log('removing %o', key)
+                            data = data.map((item) => {
+                                if (item) {
+                                    delete item[key]
+                                }
+                                return item
+                            })
+                        }
+                    })
+                    return data
+                },
+
+
+                generateData() {
+                    let data = JSON.parse(JSON.stringify(this.reports))
+                    var title = ""
+
+                    console.log("data available %o", data)
+
+                    if (this.data_input.year != 'all' && this.data_input.year != null) {
+                        let filter_year = this.data_input.year
+                        console.log(filter_year)
+                        data = data.filter((item) => {
+                            console.log("item per %o", item)
+                            let item_year = item.DATE_CREATED.split('-')[0]
+                            if (!this.data_input.year || this.data_input.year == 'all' || this
+                                .data_input.year ==
+                                item_year) {
+                                return true
+                            } else {
+                                return false
+                            }
+                        })
+                        title += filter_year + " "
+                    }
+
+
+                    if (this.data_input.month != 'all' && this.data_input.month != null) {
+                        let filter_month = this.data_input.month
+                        console.log(filter_month)
+                        data = data.filter((item) => {
+                            let item_month = item.DATE_CREATED.split('-')[1]
+                            let index_selection_month = this.selections.months.indexOf(this.data_input
+                                .month)
+
+                            if (!this.data_input.month || this.data_input.month == 'all' ||
+                                item_month ==
+                                index_selection_month) {
+                                return true
+                            } else {
+                                return false
+                            }
+                        })
+                        title += filter_month + " "
+                    }
+                    if (this.data_input.station != 'all' && this.data_input.station != null) {
+                        let filter_station = this.data_input.station
+                        console.log(filter_station)
+                        data = data.filter((item) => {
+                            return item.STATION = filter_station
+                        })
+                        title += filter_station
+                    }
+
+                    console.log(data)
+
+
+                    if (data.length > 0) {
+                        this.table_group = []
+
+                        var filtered_data = data
+
+                        if (this.filter_added.length > 0) {
+                            filtered_data = this.filter_list(data)
+                            console.log('filtered %o', data)
+                        }
+
+                        this.table_group.push({
+                            header: Object.keys(data[0]),
+                            data: filtered_data,
+                            title: title + ' report'
+                        })
+                    }
+                },
+
+
+                download(isXls) {
+                    if (this.table_group.length > 0) {
+                        this.table_group.map(table => {
+                            if (isXls) {
+                                ExportExcel(table.data, table.title)
+                            } else {
+                                JSONToCSVConvertor(table.data, table.title, true);
+                            }
+                        })
+
+                    } else {
+                        alert('no data available')
+                    }
+                }
+            }
+        })
+    </script>
+
+    <script type="text/javascript">
+        function JSONToCSVConvertor(JSONData, ReportTitle, ShowLabel) {
+            console.log(JSONData)
+            //If JSONData is not an object then JSON.parse will parse the JSON string in an Object
+            var arrData = typeof JSONData != 'object' ? JSON.parse(JSONData) : JSONData;
+
+            var CSV = '';
+            //Set Report title in first row or line
+
+            CSV += ReportTitle + '\r\n\n';
+
+            //This condition will generate the Label/Header
+            if (ShowLabel) {
+                var row = "";
+
+                //This loop will extract the label from 1st index of on array
+                for (var index in arrData[0]) {
+
+                    //Now convert each value to string and comma-seprated
+                    console.log(index)
+                    try {
+                        let text = index + ""
+                        row += text.centerText(15) + ',';
+                    } catch (err) {
+                        row += (index + "").centerText(15) + ',';
+                    }
+
+
+                }
+
+                row = row.slice(0, -1);
+
+                //append Label row with line break
+                CSV += row + '\r\n';
+            }
+
+            //1st loop is to extract each row
+            for (var i = 0; i < arrData.length; i++) {
+                var row = "";
+
+                //2nd loop will extract each column and convert it in string comma-seprated
+                for (var index in arrData[i]) {
+                    var data
+                    if (typeof arrData[i][index] == 'string') {
+                        data = arrData[i][index] ? arrData[i][index] : ""
+                        row += data.centerText(15) + ',';
+                    } else {
+                        data = arrData[i][index]
+                        row += (data + '').centerText(15) + ','
+                    }
+
+
+                }
+
+                row.slice(0, row.length - 1);
+
+                //add a line break after each row
+                CSV += row + '\r\n';
+            }
+
+            if (CSV == '') {
+                alert("Invalid data");
+                return;
+            }
+
+            //Generate a file name
+            var fileName = "LagunaWaterReserverReport";
+            //this will remove the blank-spaces from the title and replace it with an underscore
+            fileName += ReportTitle.replace(/ /g, "_");
+            ExportPDF(CSV, fileName)
+        }
+
+        String.prototype.centerText = function (numberOfSpaces) {
+            try {
+                var text = this;
+                text = text.trim();
+                var l = text.length;
+                var w2 = Math.floor(numberOfSpaces / 2);
+                var l2 = Math.floor(l / 2);
+                var s = new Array(w2 - l2 + 1).join(" ");
+                text = s + text + s;
+                if (text.length < numberOfSpaces) {
+                    text += new Array(numberOfSpaces - text.length + 1).join(" ");
+                }
+                return text;
+            } catch (err) {
+                return this
+            }
+        };
+    </script>
+
+    <script src="js/xlsexport.js"></script>
+
+    <script>
+        function ExportExcel(data, title) {
+            var xls = new XlsExport(data);
+            xls.exportToXLS('LagunaWaterReserveReport' + title + '.xls');
+        }
+
+        function ExportPDF(data, fileName) {
+            console.log("data %o", data)
+            window.sessionStorage.setItem('pdfname', fileName)
+            window.sessionStorage.setItem('pdftoprint', data)
+            window.open('pdf_generate.html', '_blank')
+        }
+    </script>
+
+</body>
+
+</html>
