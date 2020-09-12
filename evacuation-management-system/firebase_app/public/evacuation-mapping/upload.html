@@ -8,8 +8,11 @@
   <script defer src="/__/firebase/7.19.1/firebase-database.js"></script>
   <script defer src="/__/firebase/7.19.1/firebase-messaging.js"></script>
   <script defer src="/__/firebase/7.19.1/firebase-storage.js"></script>
+  <script defer src="/__/firebase/7.19.1/firebase-firestore.js"></script>
   <!-- initialize the SDK after all desired features are loaded -->
   <script defer src="/__/firebase/init.js"></script>
+  <script src="../_global/js/objects.js"></script>
+    <script src="../_global/js/utilities.js"></script>
   <script src="resources/src/js/datahandler.js"></script>
   <script src="resources/src/js/utilities.js"></script>
 </head>
@@ -30,8 +33,8 @@
       
       
       var value;
-      var storage;
-      var database;
+      /* var storage;
+      var database; */
       var file;
       
       var openFile = function(event) {
@@ -52,7 +55,7 @@
       function upload(){
         //localStorage.setItem('roads', value)
         
-        let ref = storage.ref()
+        let ref = DataHandler.storage.ref()
         let id  = genID(5)
         let filename = id+'.json'
         let fileput = ref.child('uploads/'+filename)
@@ -71,7 +74,7 @@
             date_created: new Date()
           });
         }); */
-        database.ref('roadmap/' +id).set({
+        DataHandler.database.ref('roadmap/' +id).set({
           roadmap: value,
           created_by: 0,
           date_created: new Date()
@@ -81,11 +84,11 @@
       
       function init(){
         
-        let app = DataHandler.configure()
+        DataHandler.configure()
         
         // Get a reference to the storage service, which is used to create references in your storage bucket
-        storage = app.storage()
-        database = app.database()
+        /* storage = app.storage()
+        database = app.database() */
       }
       
       document.addEventListener('DOMContentLoaded', function() {
