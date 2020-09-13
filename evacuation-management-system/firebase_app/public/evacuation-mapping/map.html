@@ -433,6 +433,7 @@
                         title: "emergency at: " + i
                     });
                     var contentMessage = '<p>Emergency!!!</p>' +
+                        '<p>'+position+'</p>'+
                         '<button onclick="removeMarker(' + i + ')">remove</button><button onclick="setDestination(' + i + ')">set destination</button>';
                     try {
                         if (emergency_markers[i].onGoing) {
@@ -464,6 +465,7 @@
 
                 var id = genID(5);
                 var contentMessage = '<p>Emergency!!!</p>' +
+                    '<p>'+position+'</p>'+
                     `<button onclick="removeMarker('${id}')">remove</button><button onclick="setDestination('${id}')">set destination</button>`;
                 try {
                     if (emergency_markers[i].onGoing) {

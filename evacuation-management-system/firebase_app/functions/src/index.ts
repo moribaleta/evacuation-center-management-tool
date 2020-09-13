@@ -1,5 +1,6 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
+import main, { MOABCParameters } from './moabc/test';
 
 // // Start writing Firebase Functions
 // // https://firebase.google.com/docs/functions/typescript
@@ -29,7 +30,7 @@ export const getUsers = functions.https.onRequest((request, respose) => {
        });
 })
 
-export const createUser = functions.https.onRequest((request, respose) => {
+/* export  const createUser = functions.https.onRequest((request, respose) => {
        const app = configure()
        const db = admin.firestore(app);
        
@@ -38,13 +39,40 @@ export const createUser = functions.https.onRequest((request, respose) => {
        }).catch((err) => {
               respose.send({success: false, message: err })
        })
-       /* db.collection("users")
-       .onSnapshot(function(snapshot) {
-           snapshot.forEach(function (userSnapshot) {
-               //console.log(userSnapshot.data())
-               respose.send(userSnapshot.data())
-           });
-       }); */
+}) */
+
+
+export const testHoneyBee = functions.https.onRequest( async (request, respose) => {
+       const app = configure()
+       const db = admin.firestore(app);
+
+       await db.collection("moabc").orderBy('date_created', 'desc').limit(1)
+       .onSnapshot((snapshot) => {
+              let params : MOABCParameters[] = []
+              snapshot.forEach((param) => {
+                     let value = param.data() as MOABCParameters
+                     params.push(value)
+              })
+              let message = {
+                     data: {},
+                     error: ""
+              }
+              if (params.length > 0) {
+                     const param = params[0]
+                     let writer = main.generate(param)
+                     message.data = writer
+              } else {
+                     message.error = "empty list"
+              }
+              respose.send(message)
+       }, (error) => {
+              let message = {
+                     data: null,
+                     error: error
+              }
+              respose.send(message)
+       })
+
 })
        
 

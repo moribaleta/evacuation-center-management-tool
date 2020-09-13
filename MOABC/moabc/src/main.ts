@@ -10,19 +10,19 @@
  */
 
 class TesterABC {
-    logWriter : Writer;
+    logWriter: Writer;
     abc: ArtificialBeeColony;
     MAX_RUN: number;
     MAX_LENGTH: number;
-    runtimes : number[];
+    runtimes: number[];
 
     /* Instantiates the TesterABC class
      *
      */
     public constructor() {
-        this.logWriter  = new Writer();
-        this.MAX_RUN    = 1;
-        this.runtimes   = [];
+        this.logWriter = new Writer();
+        this.MAX_RUN = 1;
+        this.runtimes = [];
         console.log("created")
     }
 
@@ -35,41 +35,41 @@ class TesterABC {
     public test(maxLength: number, trialLimit: number, maxEpoch: number) {
         this.MAX_LENGTH = maxLength;
         log("starting")
-        this.abc = new ArtificialBeeColony(this.MAX_LENGTH);                                      //instantiate and define abc here
+        this.abc = new ArtificialBeeColony(this.MAX_LENGTH); //instantiate and define abc here
         this.abc.setLimit(trialLimit);
         this.abc.setMaxEpoch(maxEpoch);
         let testStart = window.performance.now();
-        let filepath = "ABC-N"+this.MAX_LENGTH+"-"+trialLimit+"-"+maxEpoch+".txt";
-        var startTime : number;
-        var endTime : number;
+        let filepath = "ABC-N" + this.MAX_LENGTH + "-" + trialLimit + "-" + maxEpoch + ".txt";
+        var startTime: number;
+        var endTime: number;
         var totalTime = 0;
         var fail = 0;
         //var success = 0;
-        
+
         this.logParameters();
-        
+
         startTime = window.performance.now();
         var success = this.abc.algorithm()
         endTime = window.performance.now();
 
         //endTime = window.performance.now();
-                totalTime = endTime - startTime;
-                console.log("success?: %o", success)
-                console.log("Done");
-                console.log("time in nanoseconds: "+totalTime);
-                console.log("Success!");
-                
-                this.logWriter.addString("Runtime in nanoseconds: "+totalTime);
-                this.logWriter.addString("Found at epoch: "+this.abc.getEpoch());
-                this.logWriter.addString("Population size: "+this.abc.getPopSize());
-                this.logWriter.addString("");
-                
-                
-                this.abc.getSolutions().forEach(h => {
-                    //this.logWriter.addObject(h);
-                    this.logWriter.addString(h+"")
-                    this.logWriter.addString("");
-                });
+        totalTime = endTime - startTime;
+        console.log("success?: %o", success)
+        console.log("Done");
+        console.log("time in nanoseconds: " + totalTime);
+        console.log("Success!");
+
+        this.logWriter.addString("Runtime in nanoseconds: " + totalTime);
+        this.logWriter.addString("Found at epoch: " + this.abc.getEpoch());
+        this.logWriter.addString("Population size: " + this.abc.getPopSize());
+        this.logWriter.addString("");
+
+
+        this.abc.getSolutions().forEach(h => {
+            //this.logWriter.addObject(h);
+            this.logWriter.addString(h + "")
+            this.logWriter.addString("");
+        });
 
 
         /* for(var i = 0; i < this.MAX_RUN; ) {                                             //run 50 sucess to pass passing criteria
@@ -114,22 +114,22 @@ class TesterABC {
             endTime = 0;
             totalTime = 0;
         } */
-    
-        console.log("Number of Success: " +success);
-        console.log("Number of failures: "+fail);
+
+        console.log("Number of Success: " + success);
+        console.log("Number of failures: " + fail);
         this.logWriter.addString("Runtime summary");
         this.logWriter.addString("");
-        
-        for(var x = 0; x < this.runtimes.length; x++){                                   //print runtime summary
+
+        for (var x = 0; x < this.runtimes.length; x++) { //print runtime summary
             this.logWriter.addString(this.runtimes[x].toString());
         }
-        
+
         let testEnd = window.performance.now();
         this.logWriter.addString((testStart).toString());
         this.logWriter.addString((testEnd).toString());
         this.logWriter.addString((testEnd - testStart).toString());
-        
-      
+
+
         this.logWriter.writeFile(filepath);
         this.printRuntimes();
     }
@@ -140,13 +140,13 @@ class TesterABC {
     public logParameters() {
         this.logWriter.addString("Artificial Bee Colony Algorithm");
         this.logWriter.addString("Parameters");
-        this.logWriter.addString(("MAX_LENGTH/N: "+this.MAX_LENGTH));
-        this.logWriter.addString(("STARTING_POPULATION: "+this.abc.getStartSize()));
-        this.logWriter.addString(("MAX_EPOCHS: "+this.abc.getMaxEpoch()));
-        this.logWriter.addString(("FOOD_NUMBER: "+this.abc.getFoodNum()));
-        this.logWriter.addString(("TRIAL_LIMIT: "+this.abc.getLimit()));
-        this.logWriter.addString(("MINIMUM_SHUFFLES: "+this.abc.getShuffleMin()));
-        this.logWriter.addString(("MAXIMUM_SHUFFLES: "+this.abc.getShuffleMax()));
+        this.logWriter.addString(("MAX_LENGTH/N: " + this.MAX_LENGTH));
+        this.logWriter.addString(("STARTING_POPULATION: " + this.abc.getStartSize()));
+        this.logWriter.addString(("MAX_EPOCHS: " + this.abc.getMaxEpoch()));
+        this.logWriter.addString(("FOOD_NUMBER: " + this.abc.getFoodNum()));
+        this.logWriter.addString(("TRIAL_LIMIT: " + this.abc.getLimit()));
+        this.logWriter.addString(("MINIMUM_SHUFFLES: " + this.abc.getShuffleMin()));
+        this.logWriter.addString(("MAXIMUM_SHUFFLES: " + this.abc.getShuffleMax()));
         this.logWriter.addString("");
     }
 
@@ -157,8 +157,8 @@ class TesterABC {
         /* for(long x: runtimes){
             console.log("run with time "+x+" nanoseconds");
         }    */
-        this.runtimes.forEach((val) =>{
-            console.log("run with time "+val+" nanoseconds");
+        this.runtimes.forEach((val) => {
+            console.log("run with time " + val + " nanoseconds");
         })
     }
 
@@ -168,7 +168,7 @@ class TesterABC {
         tester.test(4, 50, 1000);
     } */
 
-    start(){
+    start() {
         console.log("im starting")
         this.test(10, 50, 10)
     }
