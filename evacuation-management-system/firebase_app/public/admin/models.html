@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Evacuations</title>
+    
+    <!-- update the version number as needed -->
+    <script defer src="/__/firebase/7.19.1/firebase-app.js"></script>
+    <!-- include only the Firebase features as you need -->
+    <script defer src="/__/firebase/7.19.1/firebase-auth.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-database.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-messaging.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-storage.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-firestore.js"></script>
+    <!-- initialize the SDK after all desired features are loaded -->
+    <script defer src="/__/firebase/init.js"></script>
+    
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <script src="js/jquery-3.0.0.min.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <link href="css/main-style.css" rel="stylesheet">
+    <script src="js/vue.js"></script>
+    <script src="../_global/js/objects.js"></script>
+    <script src="../_global/js/utilities.js"></script>
+    
+    
+
+</head>
+
+<body>
+    <div class="sidenav" id="header">
+        <div class="sidenav-item">
+            <img class="nav-image" src="resources/images/logo.png" />
+        </div>
+        <div class="sidenav-item ">
+            <a href="index.html">
+                <div class="icon-block">
+                    <i class="material-icons">assessment</i>
+                    <h5 class="center">Reports</h5>
+                </div>
+            </a>
+        </div>
+       <!--  <div class="sidenav-item active" v-if="user.type == 'ADMIN'">
+            <a href="#content">
+                <div class="icon-block">
+                    <i class="material-icons">group</i>
+                    <h5 class="center">Evacuation</h5>
+                </div>
+            </a>
+        </div>
+        <div class="sidenav-item">
+            <a v-on:click="onLogout()">
+                <div class="icon-block">
+                    <i class="material-icons">close</i>
+                    <h5 class="center">Log Out</h5>
+                </div>
+            </a>
+        </div> -->
+    </div>
+    <!-- <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#editorModal">Open Modal</button> -->
+    <div class="container" id="content">
+        <!-- editor modal -->
+        <div id="editorModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">{{isEdit ? 'Edit ': 'Add '}} Classifier Parameters</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form class="form-horizontal" v-if="data_input != null">
+                            <fieldset>
+
+                                <div class="form-group">
+                                    <label class="col-md-4 control-label" for="max_epoch">Maximum Generation</label>
+                                    <div class="col-md-4">
+                                        <input id="max_epoch" name="max_epoch" type="text"
+                                        placeholder="0" class="form-control input-md" v-model="data_input.max_epoch">
+                                        <span class="help-block">the maximum # of generation on generating solution</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Text input-->
+                                <div class="form-group">
+                                    <label class="col-md-4 control-label" for="max_length">Maximum Number of Nectars per Food Source</label>
+                                    <div class="col-md-4">
+                                        <input id="max_length" name="max_length" type="text"
+                                        placeholder="0" class="form-control input-md" required="" v-model="data_input.max_length">
+                                        <span class="help-block">Number of values to be used for each food source</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Text input-->
+                                <div class="form-group">
+                                    <label class="col-md-4 control-label" for="population_size">Maximum # of Population </label>
+                                    <div class="col-md-4">
+                                        <input id="population_size" name="population_size" type="text"
+                                        placeholder="0" class="form-control input-md"
+                                        required="" v-model="data_input.population_size">
+                                        <span class="help-block">The maximum # of evacuation centers to be used on the search this will be based on the distance</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Text input-->
+                                <div class="form-group">
+                                    <label class="col-md-4 control-label" for="trial_limit">Trial Limit</label>
+                                    <div class="col-md-4">
+                                        <input id="trial_limit" name="trial_limit" type="text"
+                                        placeholder="0" class="form-control input-md" v-model="data_input.trial_limit">
+                                        <span class="help-block">the maximum # of trials before a food source is discarded and changed</span>
+                                    </div>
+                                </div>
+
+                                <!-- Text input-->
+                                <div class="form-group">
+                                    <label class="col-md-4 control-label" for="min_shuffle">Minimum Shuffle Value</label>
+                                    <div class="col-md-4">
+                                        <input id="min_shuffle" name="min_shuffle" type="text"
+                                        placeholder="0" class="form-control input-md" v-model="data_input.min_shuffle">
+                                        <span class="help-block">the minimum value of the number of shuffles</span>
+                                    </div>
+                                </div>
+
+                                <!-- Text input-->
+                                <div class="form-group">
+                                    <label class="col-md-4 control-label" for="max_shuffle">Maximum Shuffle Value</label>
+                                    <div class="col-md-4">
+                                        <input id="max_shuffle" name="max_shuffle" type="text"
+                                        placeholder="0" class="form-control input-md" v-model="data_input.max_shuffle">
+                                        <span class="help-block">the maximum value of the number of shuffles</span>
+                                    </div>
+                                </div>
+                                
+                            </fieldset>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal"
+                        v-on:click="addModelParams()">Save</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal"
+                        v-on:click="close()">Close</button>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        
+        <div class="section header">
+            <h1>Models</h1>
+        </div>
+        
+        <div class="section" style="height: 80%;" v-if="param_list.length > 0">
+            
+            <div class="table-container" id="tableData">
+                <div class="well" v-for="item,index in param_list">
+                    <div class="row">
+                        <div class="col col-md-3 item-info" v-for="key,index in headers" v-if="key !='id'">
+                            <p class="item-label">
+                                {{headers_title[key]}}:
+                            </p>
+                            <p class="item-value">
+                                {{item[key]}}
+                            </p>
+                        </div>
+                        
+                        <div class="col col-md-12">
+                            <button class="btn btn-default btn-info" v-on:click="editItem(index)">edit</button>
+                            <button class="btn btn-default btn-danger" v-on:click="deleteItem(index)">delete</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <button type="button" id="add-report" class="btn btn-info button-view"
+            v-on:click="openAddeditorModal(false)">Add New Model Parameters
+        </button>
+    </div>
+</div>
+<script src="js/app.js"></script>
+<script src="js/datahandler.js"></script>
+<script>
+    
+    const parameters_label =  MOABCParameters.parameters_shown
+    var app = new Vue({
+        el: '#content',
+        data: {
+            param_list: [MOABCParameters],
+            headers: Object.keys(parameters_label),
+            headers_title: parameters_label,
+            data_input: null,//new MOABCParameters(),
+            isEdit: false,
+            conf_password: null,
+        },
+        methods: {
+            fetchModelParams() {
+                DataHandler.getModelParams().then((data) => {
+                    this.setModelParams(data.data)
+                })
+            },
+            setModelParams(data) {
+                this.param_list = data
+                console.log(this.param_list)
+            },
+            openAddeditorModal(isEdit) {
+                this.isEdit = isEdit
+                if (!this.isEdit) {
+                    this.data_input = new MOABCParameters()
+                    this.data_input.location = {lat: null, lng: null}
+                    console.log("data_input %o", this.data_input)
+                }
+                $('#editorModal').modal()
+            },
+            addModelParams() {
+                if (this.data_input.password == this.conf_password) {
+                    if (this.isEdit) {
+                        this.onSaveEdit()
+                    } else {
+                        this.onSaveNewModelParams()
+                    }
+                    this.close()
+                } else {
+                    alert("password doesn't match")
+                }
+            },
+            
+            onSaveEdit() {
+                console.log("data %o", this.data_input)
+                DataHandler.addModelParams(this.data_input).then((data) => {
+                    if (data.error) {
+                        alert(`Can't Edit User ${data.error}`)
+                    } else {
+                        alert(`User Have Been Edited Successfuly`)
+                        this.data_input = new MOABCParameters()
+                        this.fetchModelParams()
+                    }
+                })
+            },
+            
+            onSaveNewModelParams() {
+                console.log("data %o", this.data_input)
+                this.data_input.created_by = user
+                DataHandler.addModelParams(this.data_input).then((data) => {
+                    if (data.error) {
+                        console.log("params %o", data.params)
+                        alert(`Can't Save User ${data.error}`)
+                    } else {
+                        alert(`User Have Been Added Successfuly`)
+                        this.fetchModelParams()
+                    }
+                })
+            },
+            
+            editItem(index) {
+                var model = this.param_list[index]
+                this.data_input = MOABCParameters.parse(model.toObject())
+                this.openAddeditorModal(true)
+            },
+            
+            deleteItem(index) {
+                let onConfirm = confirm('Deleting User\nPress confirm to proceed')
+                if (onConfirm) {
+                    DataHandler.deleteModelParams(this.param_list[index].id).then((data) => {
+                        console.log(data)
+                        if (data.error) {
+                            alert(`Can't Delete User ${data.error}`)
+                        } else {
+                            alert(`User Have Been Deleted Successfuly`)
+                            this.fetchModelParams()
+                        }
+                    })
+                }
+                
+            },
+            
+            close() {
+                this.data_input = new MOABCParameters()//newEvac()
+                this.conf_password = null
+                this.isEdit = false
+            }
+            
+        }
+    })
+    
+    $(document).ready(() => {
+        //header.onStart()
+        app.fetchModelParams()
+    })
+</script>
+
+</body>
+
+</html>

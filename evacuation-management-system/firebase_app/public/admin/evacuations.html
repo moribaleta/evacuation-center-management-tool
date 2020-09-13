@@ -25,6 +25,8 @@
     <script src="js/vue.js"></script>
     <script src="../_global/js/objects.js"></script>
     <script src="../_global/js/utilities.js"></script>
+
+    <script src="js/app.js"></script>
     <script src="js/datahandler.js"></script>
     <script src="js/constants.js"></script>
     
@@ -199,43 +201,7 @@
         </div>
         
         <script>
-            var user = null
-            
-            /* var header = new Vue({
-                el: '#header',
-                data: {
-                    user: null
-                },
-                methods: {
-                    onStart() {
-                        try {
-                            user = JSON.parse(sessionStorage.getItem('user'))
-                            
-                            if (typeof user != 'string' && user) {
-                                console.log(user)
-                                this.user = user
-                                if (this.user.type == 'ADMIN') {
-                                    app.fetchEvacationCenter()
-                                } else {
-                                    throw "No Account Privilege"
-                                }
-                                
-                            } else {
-                                alert('login user account')
-                                this.onLogout()
-                            }
-                        } catch (error) {
-                            alert('login user account')
-                            this.onLogout()
-                        }
-                    },
-                    onLogout() {
-                        sessionStorage.clear()
-                        window.open('login.html', '_self')
-                    }
-                }
-            }) */
-            
+                
             let sample = {
                 id: genID(5),
                 name: "sampl1",
