@@ -31,7 +31,7 @@ class DataHandlerClass extends DataHandlerType {
     getRoadMap(){
         
         return new Promise((resolve, reject) => {
-            this.database.ref('roadmap/').once('value')
+            this.database.ref('roadmap/').orderByChild('date_created').limitToLast(1).once('value')
             .then((snapshot) => {
                 var children = []
 
@@ -44,6 +44,7 @@ class DataHandlerClass extends DataHandlerType {
                 var message = new Message()
                 
                 if (children.length > 0) {
+                    console.log("roadmaps %o", children)
                     let first = children[0].roadmap
                     let roadmap = JSON.parse(first)
                     //console.log("road %o", children)

@@ -74,25 +74,31 @@
             date_created: new Date()
           });
         }); */
-        DataHandler.database.ref('roadmap/' +id).set({
-          roadmap: value,
-          created_by: 0,
-          date_created: new Date()
+
+        DataHandler.database.ref('roadmap/').once('value').then((snapshot) => {
+          let count = snapshot.numChildren()
+          let date = new Date()
+          DataHandler.database.ref('roadmap/' +id).set({
+            count       : count,
+            roadmap     : value,
+            created_by  : 0,
+            date_created: date.toLocaleString()
+        }).then((value) => {
+        alert("upload successfuly")
+        }).catch((error) => {
+        console.log(error)
         })
+        }).catch((error) => {
+        console.log(error)
+        })
+
+        
         
       }
-      
-      function init(){
-        
-        DataHandler.configure()
-        
-        // Get a reference to the storage service, which is used to create references in your storage bucket
-        /* storage = app.storage()
-        database = app.database() */
-      }
+  
       
       document.addEventListener('DOMContentLoaded', function() {
-        init()
+        DataHandler.configure()
       })
     </script>
   </body>

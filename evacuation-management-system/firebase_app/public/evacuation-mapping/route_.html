@@ -159,7 +159,7 @@
 
                 }
                 
-                var url_data = window.location.href.split('route.html?').pop();
+                var url_data = window.location.href.split('route_.html?').pop();
                 url_data = url_data.split("%20").join('');
                 url_data = url_data.split("%22").join('"');
                 var hospital = url_data.split("**")[0];
@@ -176,7 +176,7 @@
                 //var emergency = JSON.parse(localStorage.getItem("Emergency"));
                 hospital = {
                     lat:hospital.location.lat,
-                    lng:hospital.location.lng
+                    lng:hospital.location.long
                 }
                 start_location = hospital;
                 finish_location = emergency;

@@ -50,10 +50,10 @@ class MapHandlerClass {
             }
         });
         
-        const boundsListener = google.maps.event.addListener((map), 'bounds_changed', function(event) {
+        /* const boundsListener = google.maps.event.addListener((map), 'bounds_changed', function(event) {
             this.setZoom(14);
             google.maps.event.removeListener(boundsListener);
-        });
+        }); */
         
         this.initializeBoundaries()
     }

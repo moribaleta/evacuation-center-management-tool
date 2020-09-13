@@ -352,6 +352,30 @@
                 //marikinaBorder.setMap(map);
             }
 
+            function isJunction(tree_index, point, tree) {
+                var contains = false
+                /* tree.forEach((branch, index)  => {
+                    if (contains == false) {
+                        contains = (tree_index != index && branch.coordinates.lat == point.coordinates.lat && branch.coordinates.lng == point.coordinates.lng)
+                    }
+                }); */
+
+                /* for((branch, index) in tree) {
+                    if ((tree_index != index && branch.coordinates.lat == point.coordinates.lat && branch.coordinates.lng == point.coordinates.lng)) {
+                        contains = 
+                    }
+                } */
+                for(var i = 0; i< tree.length; i++ ) {
+                    let branch = tree[i]
+                    
+                    if ((i != tree_index && branch.coordinates.lat == point.coordinates.lat && branch.coordinates.lng == point.coordinates.lng)) {
+                        return true
+                    }
+                }
+
+                return false
+            }
+
             function placeTrafficPoints() {
                 var infoWindow = new google.maps.InfoWindow(),
                     marker, i;
@@ -360,7 +384,7 @@
                     //bounds.extend(position);
                     var condition = 'resources/images/border-dot-point-25-good.png';
                     var speed;
-                    try {
+                    /* try {
                         speed = getAveSpeed(i).toFixed(2);
                         if (speed < 20 && speed > 15) {
                             condition = 'resources/images/border-dot-point-25-caution.png'
@@ -371,7 +395,14 @@
                         condition = 'resources/images/border-dot-point-25.png'
                         speed = "20";
                         //console.log(e);
+                    } */
+                    
+                    if (isJunction(i, tree[i], tree)) {
+                        condition = 'resources/images/border-dot-point-25-warning.png'
+                    } else {
+                        condition = 'resources/images/border-dot-point-25.png'
                     }
+
                     marker = new google.maps.Marker({
                         position: position,
                         map: map,
@@ -560,7 +591,7 @@
 
                 //$.get( "email.php", { link: 'route_email.html?'+JSON.stringify(hospital)+"**"+JSON.stringify(emergency_location)} );
                 console.log("emergency location %o", emergency_elem)
-                window.open('route.html?'+JSON.stringify(hospital)+"**"+JSON.stringify(emergency_elem));
+                window.open('route_.html?'+JSON.stringify(hospital)+"**"+JSON.stringify(emergency_elem));
                 initMap();
             }
 

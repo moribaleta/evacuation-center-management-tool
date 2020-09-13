@@ -15,6 +15,7 @@
             z-index: 0;
         }
     </style>
+    <link rel="shortcut icon" href="resources/images/favicon.ico" type="image/x-icon">
     <!-- update the version number as needed -->
     <script defer src="/__/firebase/7.19.1/firebase-app.js"></script>
     <!-- include only the Firebase features as you need -->
@@ -25,10 +26,10 @@
     <script defer src="/__/firebase/7.19.1/firebase-firestore.js"></script>
     <!-- initialize the SDK after all desired features are loaded -->
     <script defer src="/__/firebase/init.js"></script>
+    <script src="resources/json/coordinates.js"></script>
     <script src="resources/json/boundaries.js"></script>
-    <script src="resources/json/coordinates.json"></script>
-    <script src="resources/json/hospitals.json"></script>
     <script src="resources/js/jquery-3.0.0.min.js"></script>
+
     <script src="resources/bootstrap/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="resources/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="resources/css/main.css">
@@ -138,7 +139,7 @@
         var node_markers = [];
         
         /** contains all the evacuation center */
-        var evacuation_center_list = hospital_data;
+        //var evacuation_center_list = hospital_data;
         
         /** contains all the path created */
         var road_map = []
@@ -224,7 +225,7 @@
                 },//savePath
                 
                 printPath: function (){
-                    if(path.name != null && path.coordinates.length > 0) {
+                    if(path != undefined && path.name != null && path.coordinates.length > 0) {
                         road_map.push(JSON.parse(JSON.stringify(path)))
                         path = {
                             id: "path*"+genID(5),
@@ -379,9 +380,9 @@
             road_map = JSON.parse(localStorage.getItem("roads")) || []
             console.log("road %o", road_map)
             
-            road_map.forEach((path) => {
+            road_map.forEach((path, index) => {
                 path.coordinates.forEach((coord) => {
-                    placeMarkerPrev(coord, map)
+                    placeMarkerPrev(coord, index, map)
                 })
             })            
         }//initPrevMarkers
@@ -404,9 +405,25 @@
             })
             
         }//loadLatestRoad
+
+        function isJunction(coordinates) {
+            /* let flatcoordinates = road_map.reduce((prev, curr) => {
+                console.log("prev %o", prev)
+                return [prev, curr]
+            }) */
+            var flatcoordinates = []
+            road_map.forEach((val) => {
+                flatcoordinates = flatcoordinates.concat(val.coordinates)
+            })
+            console.log("flatcoordinates %o", flatcoordinates)
+            let filter = flatcoordinates.filter((val) => {
+                return (val.lat == coordinates.lat && val.lng == coordinates.lng)
+            })
+            return filter.length > 1
+        }
         
         /** placed previous marker */
-        function placeMarkerPrev(coordinates, map) {
+        function placeMarkerPrev(coordinates, road_index, map) {
             
             var position = new google.maps.LatLng(coordinates.lat, coordinates.lng);
             
@@ -415,15 +432,18 @@
                 lat: coordinates.lat,
                 lng: coordinates.lng
             }
+
+            let icon = (isJunction(coordinates)) ? 'resources/images/border-dot-point-25-warning.png' : 'resources/images/border-dot-point-25.png'
             
             var emergencymarker = new google.maps.Marker({
                 position: position,
                 map: map,
-                icon: 'resources/images/border-dot-point-25.png',
+                icon: icon,
             });
             
             google.maps.event.addListener(emergencymarker, 'click', function() {
                 console.log("path %o, location %o", path, location)
+                
                 if ((path.name == null) && (confirm("start path here?"))) {
                     path.name = prompt("enter road name");
                     var location = {
@@ -432,12 +452,14 @@
                         lng: position.lng()
                     }
                     path.coordinates.push(location);
+                    marker.setIcon('resources/images/border-dot-point-25-warning.png')
                 } else if (path.id != coordinates.id.split("-")[0] && confirm("connect path here?"))  {
                     var location = {
                         id : path.id +"-"+ (path.coordinates.length || 0),
                         lat: position.lat(),
                         lng: position.lng()
                     }
+                    marker.setIcon('resources/images/border-dot-point-25-warning.png')
                     path.coordinates.push(location);
                 } else if (confirm("do you want to delete this?")) {
                     removeMarker(marker)
