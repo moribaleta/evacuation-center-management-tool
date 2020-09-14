@@ -14,6 +14,7 @@
     <script defer src="/__/firebase/7.19.1/firebase-messaging.js"></script>
     <script defer src="/__/firebase/7.19.1/firebase-storage.js"></script>
     <script defer src="/__/firebase/7.19.1/firebase-firestore.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-functions.js"></script>
     <!-- initialize the SDK after all desired features are loaded -->
     <script defer src="/__/firebase/init.js"></script>
     
@@ -25,8 +26,7 @@
     <script src="js/vue.js"></script>
     <script src="../_global/js/objects.js"></script>
     <script src="../_global/js/utilities.js"></script>
-    
-    
+    <script src="../_global/js/moabc/test.js"></script>
 
 </head>
 
@@ -35,19 +35,20 @@
         <div class="sidenav-item">
             <img class="nav-image" src="resources/images/logo.png" />
         </div>
-        <div class="sidenav-item ">
-            <a href="index.html">
+
+        <div class="sidenav-item" v-if="user.admin_type == '0'">
+            <a href="evacuations.html">
                 <div class="icon-block">
-                    <i class="material-icons">assessment</i>
-                    <h5 class="center">Reports</h5>
+                    <i class="material-icons">group</i>
+                    <h5 class="center">Evacuations</h5>
                 </div>
             </a>
         </div>
-       <!--  <div class="sidenav-item active" v-if="user.type == 'ADMIN'">
-            <a href="#content">
+        <div class="sidenav-item active" v-if="user.admin_type == '0'">
+            <a href="index.html">
                 <div class="icon-block">
-                    <i class="material-icons">group</i>
-                    <h5 class="center">Evacuation</h5>
+                    <i class="material-icons">assessment</i>
+                    <h5 class="center">Models</h5>
                 </div>
             </a>
         </div>
@@ -58,10 +59,14 @@
                     <h5 class="center">Log Out</h5>
                 </div>
             </a>
-        </div> -->
+        </div>
     </div>
+
+    
+
     <!-- <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#editorModal">Open Modal</button> -->
     <div class="container" id="content">
+
         <!-- editor modal -->
         <div id="editorModal" class="modal fade" role="dialog">
             <div class="modal-dialog">
@@ -148,57 +153,75 @@
             </div>
         </div>
         
-        <div class="section header">
-            <h1>Models</h1>
-        </div>
         
-        <div class="section" style="height: 80%;" v-if="param_list.length > 0">
-            
-            <div class="table-container" id="tableData">
-                <div class="well" v-for="item,index in param_list">
-                    <div class="row">
-                        <div class="col col-md-3 item-info" v-for="key,index in headers" v-if="key !='id'">
-                            <p class="item-label">
-                                {{headers_title[key]}}:
-                            </p>
-                            <p class="item-value">
-                                {{item[key]}}
-                            </p>
-                        </div>
-                        
-                        <div class="col col-md-12">
-                            <button class="btn btn-default btn-info" v-on:click="editItem(index)">edit</button>
-                            <button class="btn btn-default btn-danger" v-on:click="deleteItem(index)">delete</button>
+        <div class="subcontent">
+            <div class="section header">
+                <h1>Models</h1>
+            </div>
+            <div class="loader-container" v-if="isLoading">
+                <div class="loader"></div>
+            </div>
+
+            <div class="section" style="height: 80%;" v-if="param_list.length > 0">
+                
+                <div class="table-container" id="tableData">
+                    <div class="well" v-for="item,index in param_list">
+                        <div class="row">
+                            <div class="col col-md-3 item-info" v-for="key,index in headers" v-if="key !='id'">
+                                <p class="item-label">
+                                    {{headers_title[key]}}:
+                                </p>
+                                <p class="item-value">
+                                    {{item[key]}}
+                                </p>
+                            </div>
+                            
+                            <div class="col col-md-12">
+                                <button class="btn btn-default btn-info" v-on:click="testItem(index)">test</button>
+                                <button class="btn btn-default btn-info" v-on:click="editItem(index)">edit</button>
+                                <button class="btn btn-default btn-danger" v-on:click="deleteItem(index)">delete</button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+            <div class="section">
+                <button type="button" id="add-report" class="btn btn-info button-view"
+                v-on:click="openAddeditorModal(false)">Add New Model Parameters
+            </button>
         </div>
-        <div class="section">
-            <button type="button" id="add-report" class="btn btn-info button-view"
-            v-on:click="openAddeditorModal(false)">Add New Model Parameters
-        </button>
+        
     </div>
 </div>
-<script src="js/app.js"></script>
-<script src="js/datahandler.js"></script>
+
+<script src="js/app/datahandler.js"></script>
+<script src="js/app/app.js"></script>
 <script>
     
     const parameters_label =  MOABCParameters.parameters_shown
-    var app = new Vue({
+    app = new Vue({
         el: '#content',
         data: {
-            param_list: [MOABCParameters],
+            param_list: [],
             headers: Object.keys(parameters_label),
             headers_title: parameters_label,
             data_input: null,//new MOABCParameters(),
             isEdit: false,
             conf_password: null,
+            isLoading: false,
         },
         methods: {
+            onStart(){
+                this.fetchModelParams()
+            },
             fetchModelParams() {
+                this.isLoading = true
                 DataHandler.getModelParams().then((data) => {
                     this.setModelParams(data.data)
+                    this.isLoading = false
+                }).catch(err => {
+                    console.log(err)
+                    this.isLoading = false
                 })
             },
             setModelParams(data) {
@@ -242,7 +265,7 @@
             
             onSaveNewModelParams() {
                 console.log("data %o", this.data_input)
-                this.data_input.created_by = user
+                this.data_input.created_by = header.user.id
                 DataHandler.addModelParams(this.data_input).then((data) => {
                     if (data.error) {
                         console.log("params %o", data.params)
@@ -254,6 +277,19 @@
                 })
             },
             
+            testItem(index) {
+                var model = this.param_list[index]
+
+                let val = main.generate(model)
+                console.log("testing result %o", val)
+                /* DataHandler.testModelParams(model.id)
+                .then((value) => {
+                    console.log("message %o",value)
+                }).catch((error) => {
+                    console.log("error %o", error)
+                }) */
+            },
+
             editItem(index) {
                 var model = this.param_list[index]
                 this.data_input = MOABCParameters.parse(model.toObject())
@@ -284,11 +320,7 @@
             
         }
     })
-    
-    $(document).ready(() => {
-        //header.onStart()
-        app.fetchModelParams()
-    })
+
 </script>
 
 </body>

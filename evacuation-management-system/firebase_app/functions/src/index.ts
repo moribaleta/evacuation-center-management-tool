@@ -1,6 +1,11 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import main, { MOABCParameters } from './moabc/test';
+/* import * as cors from 'cors';
+const corsHandler = cors({origin: true}); */
+
+import main, {
+       MOABCParameters
+} from './moabc/test';
 
 // // Start writing Firebase Functions
 // // https://firebase.google.com/docs/functions/typescript
@@ -13,7 +18,9 @@ import main, { MOABCParameters } from './moabc/test';
 
 
 export const helloWorld = functions.https.onRequest((request, response) => {
-       functions.logger.info("Hello logs!", {structuredData: true});
+       functions.logger.info("Hello logs!", {
+              structuredData: true
+       });
        response.send("Hello from Firebase!");
 });
 
@@ -22,12 +29,12 @@ export const getUsers = functions.https.onRequest((request, respose) => {
        const db = admin.firestore(app);
 
        db.collection("users")
-       .onSnapshot(function(snapshot) {
-           snapshot.forEach(function (userSnapshot) {
-               //console.log(userSnapshot.data())
-               respose.send(userSnapshot.data())
-           });
-       });
+              .onSnapshot(function (snapshot) {
+                     snapshot.forEach(function (userSnapshot) {
+                            //console.log(userSnapshot.data())
+                            respose.send(userSnapshot.data())
+                     });
+              });
 })
 
 /* export  const createUser = functions.https.onRequest((request, respose) => {
@@ -42,41 +49,109 @@ export const getUsers = functions.https.onRequest((request, respose) => {
 }) */
 
 
-export const testHoneyBee = functions.https.onRequest( async (request, respose) => {
+export const testHoneyBee = functions.https.onRequest(async (request, response) => {
        const app = configure()
        const db = admin.firestore(app);
 
+       response.set('Access-Control-Allow-Origin', '*');
+
        await db.collection("moabc").orderBy('date_created', 'desc').limit(1)
-       .onSnapshot((snapshot) => {
-              let params : MOABCParameters[] = []
-              snapshot.forEach((param) => {
-                     let value = param.data() as MOABCParameters
-                     params.push(value)
+              .onSnapshot((snapshot) => {
+                     let params: MOABCParameters[] = []
+                     snapshot.forEach((param) => {
+                            let value = param.data() as MOABCParameters
+                            params.push(value)
+                     })
+                     let message = {
+                            data: {},
+                            error: ""
+                     }
+                     if (params.length > 0) {
+                            const param = params[0]
+                            let writer = main.generate(param)
+                            message.data = writer
+                     } else {
+                            message.error = "empty list"
+                     }
+                     response.send(message)
+              }, (error) => {
+                     let message = {
+                            data: null,
+                            error: error
+                     }
+                     response.send(message)
               })
-              let message = {
-                     data: {},
-                     error: ""
-              }
-              if (params.length > 0) {
-                     const param = params[0]
-                     let writer = main.generate(param)
-                     message.data = writer
-              } else {
-                     message.error = "empty list"
-              }
-              respose.send(message)
-       }, (error) => {
-              let message = {
-                     data: null,
-                     error: error
-              }
-              respose.send(message)
-       })
 
 })
+
+export const pingFunctionWithCorsAllowed = functions.https.onRequest((request, response) => {
+       response.set("Access-Control-Allow-Origin", "*");
+       response.set("Access-Control-Allow-Methods", "GET");
+       response.set("Access-Control-Allow-Headers", "Content-Type");
+       response.set("Access-Control-Max-Age", "3600");
+       response.status(200)
+              .json({ body: request.body ,message: `Ping from Firebase (with CORS handling)! ${new Date().toISOString()}`});
+});
+
+export const testHoneyBeeModel = functions.https.onRequest((request, response) => {
        
 
-function configure() : admin.app.App {
+       response.set("Access-Control-Allow-Origin", "*");
+       response.set("Access-Control-Allow-Methods", "*");
+       response.set("Access-Control-Allow-Headers", "Content-Type");
+       response.set("Access-Control-Max-Age", "3600");
+
+       const app = configure()
+       const db = admin.firestore(app);
+
+       /* response.set('Access-Control-Allow-Origin', '*');
+       response.set('Access-Control-Allow-Credentials', 'true'); // vital
+       response.set('Access-Control-Allow-Methods', 'GET');
+       response.set('Access-Control-Allow-Headers', 'Content-Type');
+       response.set('Access-Control-Max-Age', '3600'); */
+
+       /* const corsHandler = cors({origin: true});
+
+       corsHandler(request, response, () => {}); */
+
+              db.collection("moabc").where('id', '==', request.body.id).limit(1)
+              .onSnapshot((snapshot) => {
+                     let params: MOABCParameters[] = []
+                     snapshot.forEach((param) => {
+                            let value = param.data() as MOABCParameters
+                            value.max_val = 200
+                            params.push(value)
+                     })
+                     let message = {
+                            data: {},
+                            error: ""
+                     }
+                     if (params.length > 0) {
+                            const param = params[0]
+                            let writer = main.generate(param)
+                            message.data = writer
+                     } else {
+                            message.error = "empty list"
+                     }
+                     
+                     //response.send(message)
+                     response.status(200).json(message);
+              }, (error) => {
+                     let message = {
+                            data: null,
+                            error: error
+                     }
+                     response.status(200).json(message);
+              })
+              //response.send(`Ping from Firebase (with CORS handling)! ${new Date().toISOString()}`);
+      
+
+       
+
+})
+
+
+function configure(): admin.app.App {
 
        if (admin.apps.length > 0) {
               return admin.app()

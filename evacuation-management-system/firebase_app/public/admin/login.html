@@ -17,6 +17,7 @@
   <script defer src="/__/firebase/7.19.1/firebase-messaging.js"></script>
   <script defer src="/__/firebase/7.19.1/firebase-storage.js"></script>
   <script defer src="/__/firebase/7.19.1/firebase-firestore.js"></script>
+  <script defer src="/__/firebase/7.19.1/firebase-functions.js"></script>
   <!-- initialize the SDK after all desired features are loaded -->
   <script defer src="/__/firebase/init.js"></script>
   
@@ -26,7 +27,7 @@
   <script src="js/vue.js"></script>
   <script src="../_global/js/objects.js"></script>
   <script src="../_global/js/utilities.js"></script>
-  <script src="js/datahandler.js"></script>
+  <script src="js/app/datahandler.js"></script>
 
   <style>
     .login-page {
@@ -189,7 +190,7 @@
           console.log(user)
           if (user) {
             console.log('success')
-            window.open('index.html', "_self")
+            window.open('evacuations.html', "_self")
           }
         },
         login() {
@@ -209,6 +210,7 @@
         proceed(data) {
           console.log(data)
           if (data != "error") {
+            console.log("login %o", data)
             sessionStorage.setItem('user', JSON.stringify(data.data))
             window.open('evacuations.html', "_self")
           } else {

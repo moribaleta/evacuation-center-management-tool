@@ -12,6 +12,8 @@ function genID(length) {
  
  /** super class that contains object for firebase implementation */
  class DataHandlerType {
+    /** firebase functions */
+    functions
 
     /** firebase firestore */
     firestore
@@ -47,6 +49,7 @@ function genID(length) {
         this.storage    = this.config.storage()
         this.database   = this.config.database()
         this.firestore  = firebase.firestore(this.config)
+        this.functions  = firebase.functions()
     }//configure
 
  }//DataHandlerType
