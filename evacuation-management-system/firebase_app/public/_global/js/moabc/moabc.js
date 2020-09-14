@@ -1,5 +1,5 @@
 var ArtificialBeeColony = (function () {
-    function ArtificialBeeColony(max_length, max_val, population_size, trial_limit, max_epoch, min_shuffle, max_shuffle) {
+    function ArtificialBeeColony(max_length, max_val, population_size, trial_limit, max_epoch, min_shuffle, max_shuffle, evacuation_centers) {
         if (max_length === void 0) { max_length = 10; }
         if (max_val === void 0) { max_val = 200; }
         if (population_size === void 0) { population_size = 20; }
@@ -7,16 +7,24 @@ var ArtificialBeeColony = (function () {
         if (max_epoch === void 0) { max_epoch = 1000; }
         if (min_shuffle === void 0) { min_shuffle = 8; }
         if (max_shuffle === void 0) { max_shuffle = 20; }
+        if (evacuation_centers === void 0) { evacuation_centers = []; }
         this.foodSources = [];
         this.solutions = [];
-        this.MAX_VAL = max_val;
+        this.evacuation_centers = [];
+        this.MAX_VAL = evacuation_centers.map((evac) => {
+            return evac.population_capacity
+        }).reduce((prev,val) => {
+            return prev + val
+        });
         this.MAX_LENGTH = max_length;
         this.NP = population_size;
-        this.FOOD_NUMBER = this.NP / 2;
+        this.FOOD_NUMBER = population_size <= evacuation_centers.length ? population_size : evacuation_centers.length;
         this.LIMIT = trial_limit;
         this.MAX_EPOCH = max_epoch;
         this.MIN_SHUFFLE = min_shuffle;
         this.MAX_SHUFFLE = max_shuffle;
+        this.evacuation_centers = evacuation_centers;
+        console.log(" evac: %o", this.evacuation_centers)
         this.gBest = undefined;
         this.epoch = 0;
     }
@@ -75,13 +83,9 @@ var ArtificialBeeColony = (function () {
         var newFoodIndex = 0;
         var shuffles = 0;
         for (var i = 0; i < this.FOOD_NUMBER; i++) {
-            var newHoney = new Honey(this.MAX_LENGTH);
+            var newHoney = new Honey(this.MAX_LENGTH, this.evacuation_centers[i]);
             this.foodSources.push(newHoney);
             newFoodIndex = this.foodSources.length - 1;
-            shuffles = this.getRandomNumber(this.MIN_SHUFFLE, this.MAX_SHUFFLE);
-            for (var j = 0; j < shuffles; j++) {
-                this.randomlyArrange(newFoodIndex);
-            }
             this.foodSources[newFoodIndex].computeConflicts();
         }
     };
@@ -154,10 +158,6 @@ var ArtificialBeeColony = (function () {
         for (var i = 0; i < this.FOOD_NUMBER; i++) {
             currentBee = this.foodSources[i];
             if (currentBee.getTrials() >= this.LIMIT) {
-                shuffles = this.getRandomNumber(this.MIN_SHUFFLE, this.MAX_SHUFFLE);
-                for (var j = 0; j < shuffles; j++) {
-                    this.randomlyArrange(i);
-                }
                 currentBee.computeConflicts();
                 currentBee.setTrials(0);
             }

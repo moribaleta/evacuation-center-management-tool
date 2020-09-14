@@ -153,6 +153,72 @@
             </div>
         </div>
         
+        <div id="resultModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Result Classifier Parameters</h4>
+                    </div>
+                    
+                    <div class="modal-body" v-if="isTesting">
+                        <div class="loader-container" >
+                            <div class="loader"></div>
+                        </div>  
+                    </div>
+                    <div class="modal-body" v-if="test_result != null">
+                        <div class="section">
+                            <h3>Parameters</h3>
+                            <div class="col col-md-3 item-info" v-for="key,index in headers" v-if="key !='id'">
+                                <p class="item-label">
+                                    {{headers_title[key]}}:
+                                </p>
+                                <p class="item-value">
+                                    {{test_result.params[key]}}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="section">
+                            <h3>Results</h3>
+                            <ul>
+                                <li>
+                                    <p>Evacuation Center: {{test_result.output.best.evac.name}}</p>
+                                </li>
+                                <li>
+                                    <p>Conflicts: {{test_result.output.best.conflicts}}</p>
+                                </li>
+                                <li>
+                                    <p>Fitness: {{test_result.output.best.fitness}}</p>
+                                </li>
+                                <li>
+                                    <p>Trials: {{test_result.output.best.trials}}</p>
+                                </li>
+                                <li>
+                                    <ul>
+                                        <li v-for="item,index in test_result.output.best.nectar">
+                                            <p>{{index + 1}}</p>
+                                            <p>current_population : {{item.current_population}}</p>
+                                            <p>population_capacity: {{item.population_capacity}}</p>
+                                            <p>floor_space : {{item.floor_space}}</p>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="section">
+                            <p>Time elapsed: {{test_result.elapsed_time}}</p>
+                        </div>
+                    </div>
+                    <!-- <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal"
+                        v-on:click="addModelParams()">Save</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal"
+                        v-on:click="close()">Close</button>
+                    </div> -->
+                </div>
+                
+            </div>
+        </div>
         
         <div class="subcontent">
             <div class="section header">
@@ -165,7 +231,7 @@
             <div class="section" style="height: 80%;" v-if="param_list.length > 0">
                 
                 <div class="table-container" id="tableData">
-                    <div class="well" v-for="item,index in param_list">
+                    <div class="well" v-for="item,item_index in param_list">
                         <div class="row">
                             <div class="col col-md-3 item-info" v-for="key,index in headers" v-if="key !='id'">
                                 <p class="item-label">
@@ -177,9 +243,9 @@
                             </div>
                             
                             <div class="col col-md-12">
-                                <button class="btn btn-default btn-info" v-on:click="testItem(index)">test</button>
-                                <button class="btn btn-default btn-info" v-on:click="editItem(index)">edit</button>
-                                <button class="btn btn-default btn-danger" v-on:click="deleteItem(index)">delete</button>
+                                <button class="btn btn-default btn-info" v-on:click="testItem(item_index)">test</button>
+                                <button class="btn btn-default btn-info" v-on:click="editItem(item_index)">edit</button>
+                                <button class="btn btn-default btn-danger" v-on:click="deleteItem(item_index)">delete</button>
                             </div>
                         </div>
                     </div>
@@ -210,6 +276,7 @@
     app = new Vue({
         el: '#content',
         data: {
+            evac_list: [],
             param_list: [],
             headers: Object.keys(parameters_label),
             headers_title: parameters_label,
@@ -217,6 +284,8 @@
             isEdit: false,
             conf_password: null,
             isLoading: false,
+            test_result: null,
+            isTesting : false
         },
         methods: {
             onStart(){
@@ -230,6 +299,12 @@
                 }).catch(err => {
                     console.log(err)
                     this.isLoading = false
+                })
+
+                DataHandler.getEvacuationCenters().then((data) => {
+                    this.evac_list = data.data
+                }).catch(err => {
+                    console.log("err %o", err)
                 })
             },
             setModelParams(data) {
@@ -286,16 +361,29 @@
             },
             
             testItem(index) {
-                var model = this.param_list[index]
 
-                let val = main.generate(model)
-                console.log("testing result %o", val)
-                /* DataHandler.testModelParams(model.id)
-                .then((value) => {
-                    console.log("message %o",value)
-                }).catch((error) => {
-                    console.log("error %o", error)
-                }) */
+                $('#resultModal').modal()
+                this.test_result = null
+                this.isTesting = true
+                var model = this.param_list[index]
+                
+                console.log("models %o", this.param_list)
+                console.log("index %o", index)
+                console.log("model %o", model)
+                console.log("evac list %o", this.evac_list)
+                
+                main.evacuations = this.evac_list
+                
+                let promise = new Promise(async (resolve, reject) => {
+                    let val = await main.generate(model)
+                    resolve(val)
+                });
+
+                promise.then((data) => {
+                    console.log(data)
+                    this.test_result = data
+                    this.isTesting = false
+                })
             },
 
             editItem(index) {

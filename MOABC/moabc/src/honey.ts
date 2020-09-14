@@ -83,7 +83,7 @@ class Honey {
 
         let density_sum = 0
         for (let i = 0; i < this.MAX_LENGTH; i++) {
-            carrying_sum += (this.nectar[i].current_population / this.nectar[i].floor_space)
+            density_sum += (this.nectar[i].current_population / this.nectar[i].floor_space)
         }
 
 
@@ -284,6 +284,8 @@ class Honey {
                 return this.nectar[index].current_population = value
                 /* case EvacuationPropType.current_inventory:
                     return this.nectar[index].current_inventory = value */
+            case EvacuationPropType.floor_space:
+                return this.nectar[index].floor_space
             default:
                 return 0
         }

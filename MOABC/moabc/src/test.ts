@@ -10,36 +10,8 @@
  */
 
 
-
-
-
-class Writer {
-    private list: string[] = [];
-
-    /* Instantiates the writer class.
-     *
-     */
-    public constructor() {
-        this.list = [];
-        console.log("constructed writer %o", this.list)
-    }
-
-    /* Accepts a string to add to the string list in the writer class.
-     *
-     * @param: a line string to write into the log
-     */
-    public addString(line: string) {
-        this.list.push(line);
-    }
-
-    public printLog() : string[] {
-        return this.list
-    }
-}
-
 class TesterABC {
 
-    //logWriter: Writer;
     abc!        : ArtificialBeeColony;
     runtimes    : number[];
     evacuations : EvacuationCenter[]
@@ -85,7 +57,7 @@ class TesterABC {
         totalTime = endTime - startTime;
 
         return {
-            parameters: params,
+            params,
             output: {
                 best:           this.abc.gBest,
                 foodsources:    this.abc.foodSources,
@@ -94,18 +66,19 @@ class TesterABC {
             elapsed_time: totalTime
         }
     }
-
-    /* start() : MOABCOutput {
-        console.log("im starting")
-        return this.test(10, 50, 10)
-    } */
 }
 
 let main = new TesterABC()
 
 
 interface MOABCOutput {
-
+    params: MOABCParameters,
+    output: {
+        best: Honey,
+        foodsources: Honey[],
+        solutions: Honey[]
+    },
+    elapsed_time: number
 }
 
 interface MOABCParameters {
@@ -121,24 +94,4 @@ interface MOABCParameters {
     min_shuffle     : number
     max_shuffle     : number
 }
-
-//console.log("build new file")
-
-/* const log = ((value: string) => {
-    console.log(value)
-})
-
-log("new value is this")
-log("gile get new")
-log("sample file")
-log("sample 2 and a half new")
- */
-
-/* Writer.java
- *
- * Class that contains a string list to be written in a log file.
- *
- * @author: James M. Bayon-on
- * @version: 1.3
- */
 

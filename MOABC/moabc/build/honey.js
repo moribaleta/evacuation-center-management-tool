@@ -29,7 +29,7 @@ var Honey = (function () {
         }
         var density_sum = 0;
         for (var i = 0; i < this.MAX_LENGTH; i++) {
-            carrying_sum += (this.nectar[i].current_population / this.nectar[i].floor_space);
+            density_sum += (this.nectar[i].current_population / this.nectar[i].floor_space);
         }
         this.setConflicts(carrying_sum + density_sum);
     };
@@ -78,6 +78,8 @@ var Honey = (function () {
         switch (type) {
             case EvacuationPropType.current_population:
                 return this.nectar[index].current_population = value;
+            case EvacuationPropType.floor_space:
+                return this.nectar[index].floor_space;
             default:
                 return 0;
         }

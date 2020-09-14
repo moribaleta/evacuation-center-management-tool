@@ -1,17 +1,3 @@
-var Writer = (function () {
-    function Writer() {
-        this.list = [];
-        this.list = [];
-        console.log("constructed writer %o", this.list);
-    }
-    Writer.prototype.addString = function (line) {
-        this.list.push(line);
-    };
-    Writer.prototype.printLog = function () {
-        return this.list;
-    };
-    return Writer;
-}());
 var TesterABC = (function () {
     function TesterABC() {
         this.runtimes = [];
@@ -27,7 +13,7 @@ var TesterABC = (function () {
         endTime = (new Date()).getTime();
         totalTime = endTime - startTime;
         return {
-            parameters: params,
+            params: params,
             output: {
                 best: this.abc.gBest,
                 foodsources: this.abc.foodSources,
