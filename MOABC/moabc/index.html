@@ -1,20 +1,43 @@
 <html>
-    <head>
-        <!-- <script src="utilities.js"></script>
+
+<head>
+    <!-- <script src="utilities.js"></script>
         <script src="solution.js"></script> -->
-        <script src="node_modules/systemjs/dist/system.js"></script>
-        <script src="build/Writer.js"></script>
-        <script src="build/ArtificialBeeColony.js"></script>
-        <script src="build/main.js"></script>
-        <script src="build/models/Honey.js"></script>
-        <script src="build/models/Evac.js"></script>
-        <script src="build/utilities/utilities.js"></script>
-        <script>
-            //let main = new Main()
-            
-        </script>
-    </head>
-    <body>
-        <button onClick="main.start()" >start</button>
-    </body>
+    <script src="node_modules/systemjs/dist/system.js"></script>
+    <script src="build/Writer.js"></script>
+    <script src="build/moabc.js"></script>
+    <script src="build/test.js"></script>
+    <script src="build/honey.js"></script>
+    <script src="build/evacuation.js"></script>
+    <script src="build/utilities.js"></script>
+    <script src="evacuations.js"></script>
+    <script>
+        //let main = new Main()
+    </script>
+</head>
+
+<body>
+    <button onClick="onClick()">start</button>
+    <script>
+        let params = {
+            id: "8SX2j",
+            created_by: "QYilOJ2sx9MyeI1TJPYs",
+            date_created: "9/14/2020, 11:54:49 AM",
+            max_epoch: 10,
+            max_length: 10,
+            max_shuffle: 10,
+            max_val: 4000,
+            min_shuffle: 5,
+            population_size: 10,
+            trial_limit: 10
+        }
+
+        function onClick() {
+            main.evacuations = evacs
+            main.generate(params)
+        }
+        
+    </script>
+</body>
+
 </html>

@@ -173,18 +173,18 @@
             </div>
         </div>
 
-        
+
         <div class="subcontent">
             <div class="section header">
                 <h1>Evacuation Facilities</h1>
             </div>
-            
+
             <div class="loader-container" v-if="isLoading">
                 <div class="loader"></div>
             </div>
 
             <div class="section" style="height: 80%;" v-if="evac_list.length > 0">
-    
+
                 <div class="table-container" id="tableData">
                     <div class="well" v-for="item,index in evac_list">
                         <div class="row">
@@ -196,10 +196,11 @@
                                     {{item.toObject()[key]}}
                                 </p>
                             </div>
-    
+
                             <div class="col col-md-12">
                                 <button class="btn btn-default btn-info" v-on:click="editItem(index)">edit</button>
-                                <button class="btn btn-default btn-danger" v-on:click="deleteItem(index)">delete</button>
+                                <button class="btn btn-default btn-danger"
+                                    v-on:click="deleteItem(index)">delete</button>
                             </div>
                         </div>
                     </div>
@@ -209,9 +210,12 @@
                 <button type="button" id="add-report" class="btn btn-info button-view"
                     v-on:click="openAddeditorModal(false)">Add Evacuation Center
                 </button>
+                <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="download()">Download
+                    Evacuation Center
+                </button>
             </div>
         </div>
-        
+
     </div>
 
     <script src="js/app/datahandler.js"></script>
@@ -260,7 +264,7 @@
                 editEvacuationID: null,
                 conf_password: null,
                 municipalities: municipalities,
-                isLoading : false
+                isLoading: false
             },
             methods: {
                 onStart() {
@@ -274,7 +278,7 @@
                         this.isLoading = false
                     }).catch(err => {
                         this.isLoading = false
-                    }) 
+                    })
                 },
                 setEvacationCenter(data) {
                     this.evac_list = data
@@ -323,7 +327,7 @@
 
                 onSaveNewEvacationCenter() {
                     console.log("data %o", this.data_input)
-                    this.data_input.created_by = user
+                    this.data_input.created_by = header.user.id
                     DataHandler.addEvacationCenter(this.data_input).then((data) => {
                         if (data.error) {
                             console.log("params %o", data.params)
@@ -360,10 +364,41 @@
                     this.data_input = new EvacuationCenter()
                     this.conf_password = null
                     this.isEdit = false
+                },
+
+                download() {
+                    let text = JSON.stringify(this.evac_list)
+                    saveTextAsFile(text)
                 }
 
             }
         })
+
+        ///generates a file of json contains
+        function saveTextAsFile(text) {
+            const textToWrite = text
+            const textFileAsBlob = new Blob([textToWrite], {
+                type: 'text/plain'
+            });
+            const fileNameToSaveAs = "coordinates.json" //document.getElementById("").value;
+            let downloadLink = document.createElement("a");
+            downloadLink.download = fileNameToSaveAs;
+            downloadLink.innerHTML = "Download File";
+            if (window.webkitURL != null) {
+                // Chrome allows the link to be clicked
+                // without actually adding it to the DOM.
+                downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
+            } else {
+                // Firefox requires the link to be added to the DOM
+                // before it can be clicked.
+                downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
+                downloadLink.onclick = destroyClickedElement;
+                downloadLink.style.display = "none";
+                document.body.appendChild(downloadLink);
+            }
+
+            downloadLink.click();
+        } //saveTextAsFile
     </script>
 
 </body>

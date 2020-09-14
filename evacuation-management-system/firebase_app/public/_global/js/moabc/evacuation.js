@@ -1,11 +1,12 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.EvacuationPropType = exports.EvacuationCenter = void 0;
-const utilities_1 = require("./utilities");
-///Model for defining Evacuation center to be used by the MOABC
-class EvacuationCenter {
-    constructor(id = utilities_1.Utilities.genID(), date = new Date(), population_capacity = 30, current_population = Infinity, inventory_capacity = Infinity, evacuation_size = Infinity) {
-        this.id = utilities_1.Utilities.genID();
+/* var EvacuationCenter = (function () {
+    function EvacuationCenter(id, date, population_capacity, current_population, inventory_capacity, evacuation_size) {
+        if (id === void 0) { id = Utilities.genID(); }
+        if (date === void 0) { date = new Date(); }
+        if (population_capacity === void 0) { population_capacity = 30; }
+        if (current_population === void 0) { current_population = Infinity; }
+        if (inventory_capacity === void 0) { inventory_capacity = Infinity; }
+        if (evacuation_size === void 0) { evacuation_size = Infinity; }
+        this.id = Utilities.genID();
         this.date = new Date();
         this.id = id;
         this.date = date;
@@ -14,8 +15,8 @@ class EvacuationCenter {
         this.inventory_capacity = inventory_capacity;
         this.evacuation_size = evacuation_size;
     }
-}
-exports.EvacuationCenter = EvacuationCenter;
+    return EvacuationCenter;
+}()); */
 var EvacuationPropType;
 (function (EvacuationPropType) {
     EvacuationPropType["location"] = "location";
@@ -25,5 +26,5 @@ var EvacuationPropType;
     EvacuationPropType["current_inventory"] = "current_inventory";
     EvacuationPropType["object_inventory"] = "object_inventory";
     EvacuationPropType["object_population"] = "object_population";
-})(EvacuationPropType = exports.EvacuationPropType || (exports.EvacuationPropType = {}));
+})(EvacuationPropType || (EvacuationPropType = {}));
 //# sourceMappingURL=evacuation.js.map

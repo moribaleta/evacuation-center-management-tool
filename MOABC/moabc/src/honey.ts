@@ -9,37 +9,44 @@
  * @version: 1.3
  */
 
+
+
+
 class Honey {
-    id : string = "honey*"+genId(5)
+    id: string = "honey*" + Utilities.genID(5)
 
     ///number of nectars
-    private MAX_LENGTH  : number;
+    private MAX_LENGTH: number;
 
     ///Nectars of EvacuationCenter
-    private nectar      : EvacuationCenter[];  //solution or placement of queen: numbers
-    
+    private nectar: EvacuationCenter[]; //solution or placement of queen: numbers
+
     ///number of trials/failed attempt on the solution
-    private trials      : number;
+    private trials: number;
 
     ///objective value
-    private conflicts   : number;
+    private conflicts: number;
     ///fitness value
-    private fitness     : number;
-    
+    private fitness: number;
+
     private selectionProbability: number;
+
+    private evac : EvacuationCenter
 
     /** Instantiate a Honey.
      *
      * @param: size of n
      */
-    constructor(size: number) {
-        this.MAX_LENGTH           = size;
-        this.nectar               = []     //new int[this.MAX_LENGTH];
-        this.conflicts            = 0;
-        this.trials               = 0;
-        this.fitness              = 0.0;
+    constructor(size: number, evac: EvacuationCenter) {
+        this.MAX_LENGTH = size;
+        this.nectar = [] //new int[this.MAX_LENGTH];
+        this.conflicts = 0;
+        this.trials = 0;
+        this.fitness = 0.0;
         this.selectionProbability = 0.0;
+        this.evac = evac
         this.initNectar();
+        
     }
 
     /** Compares two Honeys.
@@ -54,13 +61,12 @@ class Honey {
      *
      */
     public initNectar() {
-        
-        for (var i = 0; i < this.MAX_LENGTH; i++) { //initialize the solution to 1... n
-            log("im here")
-            this.nectar[i] = new EvacuationCenter(this.id+"-"+i)
-            this.nectar[i].current_population   = randomNumber(100, 200)
-            this.nectar[i].population_capacity  = randomNumber(100, 200)
-            this.nectar[i].evacuation_size      = randomNumber(50, 300)
+        let evac_sub_id = this.evac.id || Utilities.genID(5)
+        for (let i = 0; i < this.MAX_LENGTH; i++) { //initialize the solution to 1... n
+            this.nectar[i] = new EvacuationCenter(evac_sub_id + "-" + i)
+            this.nectar[i].current_population = HoneyUtilities.randomNumber(100, this.evac.population_capacity)
+            this.nectar[i].population_capacity = this.evac.population_capacity //HoneyUtilities.randomNumber(100, 200)
+            this.nectar[i].floor_space = this.evac.floor_space; //HoneyUtilities.randomNumber(50, 300)
             //this.nectar[i].current_population = i;
         }
     }
@@ -69,17 +75,17 @@ class Honey {
      *
      */
     public computeConflicts() { //compute the number of conflicts to calculate fitness
-       
-        var carrying_sum = 0
-        for (var i = 0; i< this.MAX_LENGTH; i++) {
-            carrying_sum += (this.nectar[i].current_population/this.nectar[i].population_capacity)
+
+        let carrying_sum = 0
+        for (let i = 0; i < this.MAX_LENGTH; i++) {
+            carrying_sum += (this.nectar[i].current_population / this.nectar[i].population_capacity)
         }
 
-        var density_sum = 0 
-        for (var i = 0; i< this.MAX_LENGTH; i++) {
-            carrying_sum += (this.nectar[i].current_population/this.nectar[i].evacuation_size)
+        let density_sum = 0
+        for (let i = 0; i < this.MAX_LENGTH; i++) {
+            carrying_sum += (this.nectar[i].current_population / this.nectar[i].floor_space)
         }
-        
+
 
         this.setConflicts(carrying_sum + density_sum)
 
@@ -100,12 +106,12 @@ class Honey {
         board = this.plotQueens(board); //plots the Q in the board
 
         // Walk through each of the Queens and compute the number of conflicts.
-        for (var i = 0; i < this.MAX_LENGTH; i++) {
+        for (let i = 0; i < this.MAX_LENGTH; i++) {
             x = i;
             y = this.nectar[i]; //will result to no horizontal and vertical conflicts because it will result to diagonal 
 
             // Check diagonals.
-            for (var j = 0; j < 4; j++) { //because of dx and dy where there are 4 directions for diagonal searching for conflicts
+            for (let j = 0; j < 4; j++) { //because of dx and dy where there are 4 directions for diagonal searching for conflicts
                 tempx = x;
                 tempy = y; // store coordinate in temp
                 done = false;
@@ -135,7 +141,7 @@ class Honey {
      * @param: a nxn board
      */
     /* public plotQueens(board: Board): Board {
-        for (var i = 0; i < this.MAX_LENGTH; i++) {
+        for (let i = 0; i < this.MAX_LENGTH; i++) {
             //board[i][this.nectar[i]] = "Q";
             board.set(i, this.nectar[i], "Q")
         }
@@ -148,8 +154,8 @@ class Honey {
      */
     /* public clearBoard(board: Board): Board {
         // Clear the board.
-        for (var i = 0; i < this.MAX_LENGTH; i++) {
-            for (var j = 0; j < this.MAX_LENGTH; j++) {
+        for (let i = 0; i < this.MAX_LENGTH; i++) {
+            for (let j = 0; j < this.MAX_LENGTH; j++) {
                 //board[i][j] = "";
                 board.set(i, j, "")
             }
@@ -217,11 +223,11 @@ class Honey {
         } else {
             return this.nectar[index].
         } */
-        switch(type) {
+        switch (type) {
             case EvacuationPropType.current_population:
                 return this.nectar[index].current_population
-            /* case EvacuationPropType.evacuation_size:
-                return this.nectar[index].evacuation_size */
+                /* case EvacuationPropType.evacuation_size:
+                    return this.nectar[index].evacuation_size */
             default:
                 return 0
         }
@@ -232,15 +238,15 @@ class Honey {
      * @param: index of data
      * @return: position of queen
      */
-    public getIndex(value: number, type: EvacuationPropType): number {
-        var k = 0;
+    public getIndex(value: number, type: EvacuationPropType): number | null {
+        let k = 0;
         for (; k < this.MAX_LENGTH; k++) {
             /* if (this.getNectar(k, type) == value) {
                 return k
             } */
             if (this.nectar[k].current_population == value) {
                 return k
-            } 
+            }
             /* else {
                 let type_nectar = typeof this.nectar[k].current_population
                 let type_value  = typeof value
@@ -273,11 +279,11 @@ class Honey {
             console.trace()
         }
 
-        switch(type) {
+        switch (type) {
             case EvacuationPropType.current_population:
                 return this.nectar[index].current_population = value
-            /* case EvacuationPropType.current_inventory:
-                return this.nectar[index].current_inventory = value */
+                /* case EvacuationPropType.current_inventory:
+                    return this.nectar[index].current_inventory = value */
             default:
                 return 0
         }
@@ -332,8 +338,8 @@ type CallBackNumber < T > = (val: T) => number
 } */
 
 interface Search < T > {
-    value: T,
-    index: number
+    value: T | null,
+    index: number | undefined
 }
 
 interface Array < T > {
@@ -355,52 +361,53 @@ Array.prototype.min = function (where: CallBackNumber) {
     return this[index]
 } */
 
+class HoneyUtilities {
 
-
-function getMaxValue(arr: Honey[], where: CallBackNumber < Honey > ): Search < Honey > {
-    var maxHoney: Search < Honey > = {
-        value: null,
-        index: undefined
-    }
-    var max = -100000
-    arr.forEach((value, index) => {
-        let curr_value = where(value)
-        if (curr_value > max) {
-            max = curr_value
-            maxHoney = {
-                value: value,
-                index: index
-            }
+    static getMaxValue(arr: Honey[], where: CallBackNumber < Honey > ): Search < Honey > {
+        let maxHoney: Search < Honey > = {
+            value: null,
+            index: undefined
         }
-        console.log("max compare curr_value: %o, max: %o", curr_value, max)
-    })
-    return maxHoney
-}
-
-function getMinValue(arr: Honey[], where: CallBackNumber < Honey > ): Search < Honey > {
-    var minHoney: Search < Honey > = {
-        value: null,
-        index: undefined
-    }
-    var min = Infinity
-    arr.forEach((value, index) => {
-        let curr_value = where(value)
-        if (curr_value < min) {
-            min = curr_value
-            minHoney = {
-                value: value,
-                index: index
+        let max = -100000
+        arr.forEach((value, index) => {
+            let curr_value = where(value)
+            if (curr_value > max) {
+                max = curr_value
+                maxHoney = {
+                    value: value,
+                    index: index
+                }
             }
+            console.log("max compare curr_value: %o, max: %o", curr_value, max)
+        })
+        return maxHoney
+    }
+
+    static getMinValue(arr: Honey[], where: CallBackNumber < Honey > ): Search < Honey > {
+        let minHoney: Search < Honey > = {
+            value: null,
+            index: undefined
         }
-    })
-    return minHoney
-}
+        let min = Infinity
+        arr.forEach((value, index) => {
+            let curr_value = where(value)
+            if (curr_value < min) {
+                min = curr_value
+                minHoney = {
+                    value: value,
+                    index: index
+                }
+            }
+        })
+        return minHoney
+    }
 
 
-function randomNumber(min: number, max: number): number {
-    return Math.floor(Math.random() * (max - min) + min);
-}
+    static randomNumber(min: number, max: number): number {
+        return Math.floor(Math.random() * (max - min) + min);
+    }
 
-function randomNumberMax(max: number): number {
-    return randomNumber(0, max)
+    static randomNumberMax(max: number): number {
+        return this.randomNumber(0, max)
+    }
 }

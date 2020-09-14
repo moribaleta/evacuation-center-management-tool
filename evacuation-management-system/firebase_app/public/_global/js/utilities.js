@@ -49,7 +49,7 @@ function genID(length) {
         this.storage    = this.config.storage()
         this.database   = this.config.database()
         this.firestore  = firebase.firestore(this.config)
-        this.functions  = firebase.functions()
+        //this.functions  = firebase.functions()
     }//configure
 
  }//DataHandlerType
