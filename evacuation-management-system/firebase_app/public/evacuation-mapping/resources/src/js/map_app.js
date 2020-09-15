@@ -42,6 +42,8 @@ var infowindow;
 var directionsService;
 var emergency_markers = [];
 var history_list = []
+var model_param = {}
+var test_outputs = []
 
 var emergency_marker = {
     id: null,
@@ -121,6 +123,18 @@ function initializeMap() {
     Promise.all([promiseEvac, promiseRoute]).then((val) => {
         $("#progressDirection").hide();
     }).catch((err) => {
+        console.log(err)
+    })
+
+    DataHandler.getEvacuationHistory().then((message) => {
+        history_list = message.data
+    }).catch(error => {
+        console.log(err)
+    })
+
+    DataHandler.getModelParams().then((message) => {
+        model_param = message.data[0]
+    }).catch(error => {
         console.log(err)
     })
     
@@ -217,18 +231,16 @@ function placeMarker(position) {
     });
 
     var id = genID(5);
-    var contentMessage = '<p>Emergency!!!</p>' +
+    var contentMessage = '<p>Your Location</p>' +
         `<button onclick="removeMarker('${id}')">remove</button><button onclick="setDestination('${id}')">set destination</button>`;
-    try {
+    /* try {
         if (emergency_markers[i].onGoing) {
             contentMessage = '<p>Emergency!!!</p><button onclick="endResponse(' + id + ')">finished</button>';
         }
     } catch (err) {
-
-    }
+    } */
     var infoEmergency = new google.maps.InfoWindow({
         content: contentMessage
-
     });
     infoEmergency.open(MapHandler.map, emergencymarker);
 
@@ -268,14 +280,28 @@ function getMarker(id) {
 /** TODO use MOABC here
  * returns a list of evacuation center available */
 function getAvailableEvacuation() {
-    return evacuation_center_list
-    //var evacuation_center_available = [];
-    /* for (var i = 0; i < evacuation_center_list.length; i++) {
-        if (evacuation_center_list[i].available > 0) {
-            evacuation_center_available.push(evacuation_center_list[i]);
+
+    var ids = []
+    var evacs = []
+
+    test_outputs = []
+
+    while (evacs.length < 5) {
+        let test = new TesterABC()
+        test.evacuations = evacuation_center_list
+        test.history_list = history_list
+        let test_output = test.generate(model_param)
+        
+        if (!ids.includes(test_output.output.best.evac.id)) {
+            let evac = test_output.output.best.evac
+            let id = evac.id
+            ids.push(id)
+            evacs.push(evac)
+            test_outputs.push(test_output)
         }
-    } */
-    //return evacuation_center_available;
+    }
+
+    return evacs
 }
 
 function setEvacuationAvailable(evacuation_center_available) {
@@ -334,7 +360,7 @@ function createRouteFromEmergency(emergency_location) {
 function showDetail(path_detail, emergency_location) {
     var winner_index = path_detail.winner;
     var winner = path_detail.detail[winner_index];
-    modal_vue.setList(path_detail, winner, emergency_location);
+    modal_vue.setList(path_detail, winner, emergency_location, test_outputs);
 }
 
 function openRoute(winner, emergency_location) {
@@ -417,18 +443,20 @@ function openRoute(winner, emergency_location) {
 var modal_vue = new Vue({
     el: '#modal-body',
     data: {
+        test_outputs : [],
         items: null,
         winner: null,
         emergency: null
     },
     methods: {
-        setList: function (path_detail, winner, emergency) {
+        setList: function (path_detail, winner, emergency, test_outputs) {
             console.log('winner: %o', winner);
             console.log('items: %o', path_detail);
             console.log('emergency: %o', emergency);
             this.items = path_detail.detail;
             this.winner = winner;
             this.emergency = emergency;
+            this.test_outputs = test_outputs
             //$('#progressDirection').hide();
         },
         proceed: function () {
@@ -553,7 +581,7 @@ class MapRouterClass {
 
    
 
-    getNearestEvacuation(evacuation, emergency) {
+    getNearestEvacuation(evacuation = [], emergency) {
 
         var winner;
         var min;

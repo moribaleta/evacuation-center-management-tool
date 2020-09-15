@@ -86,30 +86,33 @@
                 <div class="modal-body">
                     <!--<div class="container">-->
                     <div class="panel panel-default">
-                        <div class="panel-heading">
+                        <!-- <div class="panel-heading">
                             <div class="row">
-                                <div class="col-sm-6">Evacuation Center</div>
-                                <div class="col-sm-2">Response Time</div>
+                                <div class="col-sm-4">Evacuation Center</div>
                                 <div class="col-sm-2">Distance</div>
-                                <div class="col-sm-1">Traffic Condition</div>
+                                <div class="col-sm-2">Capacity</div>
+                                <div class="col-sm-2">Floor Space</div>
+                                <div class="col-sm-2">Objective Output</div>
+                                <div class="col-sm-2">Fitness Output</div>
                             </div>
-                        </div>
+                        </div> -->
                         <div class="panel-body" v-if='items!=null'>
-                            <div class="row" v-for='evacuation,index in items'>
-                                <div class="col-sm-6">{{(index+1)+". "+evacuation.evacuation_detail.name}}</div>
-                                <div class="col-sm-2">{{evacuation.response_time+" min"}}</div>
-                                <div class="col-sm-2">{{evacuation.distance+" km"}}</div>
-                                <div class="col-sm-1">{{evacuation.condition}}</div>
+                            <div class="row" v-for='test,index in test_outputs'>
+                                <div class="col-sm-12 success">{{(index+1)+". "}} Name: {{test.output.best.evac.name}}</div>
+                                <div class="col-sm-4">Distance: {{items[index].distance+" km"}}</div>
+                                <div class="col-sm-2">Capacity: {{test.output.best.evac.population_capacity}}</div>
+                                <div class="col-sm-2">Floor Space: {{test.output.best.evac.floor_space}}</div>
+                                <div class="col-sm-2">Objective Output: {{test.output.best.conflicts.toFixed(4)}}</div>
+                                <div class="col-sm-2">Fitness Output: {{test.output.best.fitness.toFixed(4)}}</div>
                             </div>
                         </div>
                     </div>
 
 
                     <div class="panel panel-default" v-if='winner!=null'>
-                        <div class="panel-heading">The Best Route:</div>
+                        <div class="panel-heading">The Best:</div>
                         <div class="panel-body">
                             <div class="col-sm-7">{{winner.evacuation_detail.name}}</div>
-                            <div class="col-sm-3">{{winner.response_time+" min"}}</div>
                             <div class="col-sm-2">{{winner.distance+" km"}}</div>
                         </div>
                     </div>
