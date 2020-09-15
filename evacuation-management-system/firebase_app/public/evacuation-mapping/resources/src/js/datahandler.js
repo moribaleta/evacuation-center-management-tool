@@ -1,32 +1,6 @@
 class DataHandlerClass extends DataHandlerType {
 
-    getEvacuationCenters(){
-        
-        return new Promise((resolve, reject) => {
-            
-            this.firestore.collection('evacuation_centers')
-            .get().then(function(querySnapshot) {
-                var evacuations = []
-                querySnapshot.forEach(function(doc) {
-                    console.log(doc.id, " => ", doc.data());
-                    let data = doc.data()
-                    let id = doc.id
-                    
-                    let object = {id, ...data}
-                    evacuations.push(EvacuationCenter.parse(object))
-                });
-                
-                var message = new Message()
-                
-                message.data = evacuations
-                resolve(message)
-                
-            })
-            .catch(function(error) {
-                reject(error)
-            });
-        })
-    }
+    
 
     getRoadMap(){
         
@@ -59,6 +33,95 @@ class DataHandlerClass extends DataHandlerType {
             })
         })
     }
+
+    getEvacuationCenters(){
+        return new Promise((resolve, reject) => {
+            
+            this.firestore.collection('evacuation_centers')
+            .get().then(function(querySnapshot) {
+                var evacuations = []
+                querySnapshot.forEach(function(doc) {
+                    console.log(doc.id, " => ", doc.data());
+                    let data = doc.data()
+                    let id = doc.id
+                    
+                    let object = {id, ...data}
+                    evacuations.push(EvacuationCenter.parse(object))
+                });
+                
+                var message = new Message()
+                
+                message.data = evacuations
+                resolve(message)
+                
+            })
+            .catch(function(error) {
+                reject(error)
+            });
+        })
+    }
+
+    getModelParams() {
+        return new Promise((resolve, reject) => {
+            this.firestore.collection('moabc')
+                .get().then(function (querySnapshot) {
+                    var models = []
+                    querySnapshot.forEach(function (doc) {
+                        //console.log(doc.id, " => ", doc.data());
+                        let data = doc.data()
+                        let id = doc.id
+
+                        let object = {
+                            id,
+                            ...data
+                        }
+                        models.push(MOABCParameters.parse(object))
+                    });
+
+                    var message = new Message()
+
+                    message.data = models
+                    resolve(message)
+
+                })
+                .catch(function (error) {
+                    reject(error)
+                });
+        })
+    }
+
+    getEvacuationHistory(evac_id = null) {
+        let collection = this.firestore.collection('evacuation_history')
+        let ref = evac_id != null ? ref.where('evac_id', '==', evac_id) : collection
+
+        return new Promise((resolve, reject) => {
+            ref.get().then((querySnapshot) => {
+                    var models = []
+                    querySnapshot.forEach(function (doc) {
+                        //console.log(doc.id, " => ", doc.data());
+                        let data = doc.data()
+                        let id = doc.id
+
+                        let object = {
+                            id,
+                            evac_id: data.evac_id,
+                            current_population: data.current_population,
+                            created_by: data.created_by,
+                            report_date: data.report_date.toDate(),
+                            date_created: data.date_created?.toDate() || null,
+                        }
+                        models.push(EvacuationHistory.parse(object))
+                    });
+
+                    var message = new Message()
+                    message.data = models
+                    resolve(message)
+                })
+                .catch((error) => {
+                    reject(error)
+                });
+        })
+    } //getEvacuationHistory
 
 }
 

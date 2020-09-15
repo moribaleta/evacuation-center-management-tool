@@ -24,75 +24,7 @@ class AdminUser {
 } //AdminUser
 
 
-class MOABCParameters {
-    id
-    date_created
-    created_by
-    max_length
-    max_val
-    population_size
-    trial_limit
-    max_epoch
-    min_shuffle
-    max_shuffle
 
-    static parameters_shown = {
-        id: 'id',
-        date_created: 'Date Created',
-        created_by: 'Created By User',
-        max_length: 'Maximum Number of Nectars per Food Source',
-        population_size: 'Maximum # of Population',
-        trial_limit: 'Trial Limit',
-        max_epoch: 'Maximum Generation',
-        min_shuffle: 'Minimum Shuffle Value',
-        max_shuffle: 'Maximum Shuffle Value',
-    }
-
-    constructor(id, date_created, created_by, max_length, max_val,
-        population_size, trial_limit, max_epoch, min_shuffle, max_shuffle) {
-        this.id = id || genID(5)
-        this.date_created = date_created || (new Date()).toLocaleString()
-        this.created_by = created_by || '0'
-        this.max_length = max_length || 0
-        this.max_val = max_val || 0
-        this.population_size = population_size || 0
-        this.trial_limit = trial_limit || 0
-        this.max_epoch = max_epoch || 0
-        this.min_shuffle = min_shuffle || 0
-        this.max_shuffle = max_shuffle || 0
-    }
-
-    static parse(objects = {}) {
-        return new MOABCParameters(
-            objects.id,
-            objects.date_created,
-            objects.created_by,
-            objects.max_length,
-            objects.max_val,
-            objects.population_size,
-            objects.trial_limit,
-            objects.max_epoch,
-            objects.min_shuffle,
-            objects.max_shuffle
-        )
-    }
-
-    toObject() {
-        return {
-            id: this.id,
-            date_created: this.date_created,
-            created_by: this.created_by,
-            max_length: this.max_length,
-            max_val: this.max_val,
-            population_size: this.population_size,
-            trial_limit: this.trial_limit,
-            max_epoch: this.max_epoch,
-            min_shuffle: this.min_shuffle,
-            max_shuffle: this.max_shuffle
-        }
-    }
-
-} //MOABCParameters
 
 
 

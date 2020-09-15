@@ -1,143 +1,155 @@
 <!DOCTYPE html>
 <html>
 
-    <head>
-        <title>Map</title>
-        <meta name="viewport" content="initial-scale=1.0">
-        <meta charset="utf-8">
-        <style>
-            html,
-            body {
-                height: 100%;
-                margin: 0;
-                padding: 0;
-            }
+<head>
+    <title>Map</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
 
-            #map {
-                height: 100%;
-                z-index: 0;
-            }
-        </style>
-        
-        <link rel="shortcut icon" href="resources/images/favicon.ico" type="image/x-icon">
-        <!-- update the version number as needed -->
-        <script defer src="/__/firebase/7.19.1/firebase-app.js"></script>
-        <!-- include only the Firebase features as you need -->
-        <script defer src="/__/firebase/7.19.1/firebase-auth.js"></script>
-        <script defer src="/__/firebase/7.19.1/firebase-database.js"></script>
-        <script defer src="/__/firebase/7.19.1/firebase-messaging.js"></script>
-        <script defer src="/__/firebase/7.19.1/firebase-storage.js"></script>
-        <script defer src="/__/firebase/7.19.1/firebase-firestore.js"></script>
-        <!-- initialize the SDK after all desired features are loaded -->
-        <script defer src="/__/firebase/init.js"></script>
-        <script src="resources/json/boundaries.js"></script>
+        #map {
+            height: 100%;
+            z-index: 0;
+        }
+    </style>
 
-        <script src="resources/js/jquery-3.0.0.min.js"></script>
-        <script src="resources/js/vue.js"></script>
-        <script src="resources/bootstrap/js/bootstrap.min.js"></script>
-        <link rel="stylesheet" href="resources/bootstrap/css/bootstrap.min.css">
-        <link rel="stylesheet" href="resources/css/main.css">
-        <link rel="shortcut icon" href="resources/images/favicon.ico" type="image/x-icon">
-    </head>
+    <link rel="shortcut icon" href="resources/images/favicon.ico" type="image/x-icon">
+    <!-- update the version number as needed -->
+    <script defer src="/__/firebase/7.19.1/firebase-app.js"></script>
+    <!-- include only the Firebase features as you need -->
+    <script defer src="/__/firebase/7.19.1/firebase-auth.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-database.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-messaging.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-storage.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-firestore.js"></script>
+    <!-- initialize the SDK after all desired features are loaded -->
+    <script defer src="/__/firebase/init.js"></script>
+    <script src="resources/json/boundaries.js"></script>
 
-    <body>
+    <script src="resources/js/jquery-3.0.0.min.js"></script>
+    <script src="resources/js/vue.js"></script>
+    <script src="resources/bootstrap/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="resources/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="resources/css/main.css">
+    <link rel="shortcut icon" href="resources/images/favicon.ico" type="image/x-icon">
+</head>
 
-        <nav class="navbar navbar-inverse" id="navbar">
-            <div class="container-fluid">
-                <div class="navbar-header">
-                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span> 
-                    </button>
-                    <a class="navbar-brand" href="#">iEvacuate Map</a>
-                </div>
-                <div class="collapse navbar-collapse" id="myNavbar">
-                    <ul class="nav navbar-nav">
-                        <li class="active"><a href="map.html">Home</a></li>
-                    </ul>
-                    <ul class="nav navbar-nav navbar-right">
-                        <div id="warnings-panel"></div>
-                    </ul>
-                </div>
-                <button id="button_modal" type="button" class="btn btn-info btn-lg hidden" data-toggle="modal" data-target="#myModal"></button>
-                <div class="progress" id="progressDirection">
-                    <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width:100%">
-                        please wait...
-                    </div>
-                </div>
+<body>
 
+    <nav class="navbar navbar-inverse" id="navbar">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">iEvacuate Map</a>
             </div>
-        </nav>
-
-
-
-        <div id="myModal" class="modal fade" role="dialog">
-            <div class="modal-dialog">
-
-                <!-- Modal content-->
-                <div class="modal-content" id="modal-body">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">Evacuation Route Directions</h4>
-                    </div>
-                    <div class="modal-body" >
-                        <!--<div class="container">-->
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                <div class="row">
-                                    <div class="col-sm-6">Evacuation Center</div>
-                                    <div class="col-sm-2">Response Time</div>
-                                    <div class="col-sm-2">Distance</div>
-                                    <div class="col-sm-1">Traffic Condition</div>
-                                </div>
-                            </div>
-                            <div class="panel-body" v-if='items!=null'>
-                                <div class="row" v-for='evacuation,index in items'>
-                                    <div class="col-sm-6">{{(index+1)+". "+evacuation.evacuation_detail.name}}</div>
-                                    <div class="col-sm-2">{{evacuation.response_time+" min"}}</div>
-                                    <div class="col-sm-2">{{evacuation.distance+" km"}}</div>
-                                    <div class="col-sm-1">{{evacuation.condition}}</div>
-                                </div>
-                            </div>
-                        </div>
-
-
-                        <div class="panel panel-default" v-if='winner!=null'>
-                            <div class="panel-heading">The Best Route:</div>
-                            <div class="panel-body">
-                                <div class="col-sm-7">{{winner.evacuation_detail.name}}</div>
-                                <div class="col-sm-3">{{winner.response_time+" min"}}</div>
-                                <div class="col-sm-2">{{winner.distance+" km"}}</div>
-                            </div>
-                        </div>
-                        <!--</div>-->
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-success" v-on:click="proceed()" >Proceed</button>
-                        <button type="button" id='button-modal-close' class="btn btn-danger" data-dismiss="modal">Close</button>
-                    </div>
-                </div>
-
+            <div class="collapse navbar-collapse" id="myNavbar">
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="map.html">Home</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <div id="warnings-panel"></div>
+                </ul>
             </div>
+            <button id="button_modal" type="button" class="btn btn-info btn-lg hidden" data-toggle="modal"
+                data-target="#myModal"></button>
+            <div class="progress" id="progressDirection">
+                <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="40"
+                    aria-valuemin="0" aria-valuemax="100" style="width:100%">
+                    please wait...
+                </div>
+            </div>
+
         </div>
-        <div id="map"></div>
-        <!-- Modal -->
-        
-        <script src="resources/js/dijkstra.js"></script>
-        <script src="resources/js/xmlparser.js"></script>
-        <script src="resources/json/coordinates.js"></script>
-        <script src="resources/json/boundaries.js"></script>
+    </nav>
 
-        <script src="../_global/js/utilities.js"></script>
-        <script src="../_global/js/objects.js"></script>
-        <script src="resources/src/js/maphandler.js"></script>
-        <script src="resources/src/js/datahandler.js"></script>
-        <script src="resources/src/js/utilities.js"></script>
-        <script src="resources/src/js/map_app.js"></script>
-        
 
-        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBymq4YRMhZoMwnPUd2SfyzQQLEvUtafkM&libraries=places&callback=initializeMap" async defer></script>
-    </body>
+
+    <div id="myModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content" id="modal-body">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Evacuation Route Directions</h4>
+                </div>
+                <div class="modal-body">
+                    <!--<div class="container">-->
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div class="col-sm-6">Evacuation Center</div>
+                                <div class="col-sm-2">Response Time</div>
+                                <div class="col-sm-2">Distance</div>
+                                <div class="col-sm-1">Traffic Condition</div>
+                            </div>
+                        </div>
+                        <div class="panel-body" v-if='items!=null'>
+                            <div class="row" v-for='evacuation,index in items'>
+                                <div class="col-sm-6">{{(index+1)+". "+evacuation.evacuation_detail.name}}</div>
+                                <div class="col-sm-2">{{evacuation.response_time+" min"}}</div>
+                                <div class="col-sm-2">{{evacuation.distance+" km"}}</div>
+                                <div class="col-sm-1">{{evacuation.condition}}</div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="panel panel-default" v-if='winner!=null'>
+                        <div class="panel-heading">The Best Route:</div>
+                        <div class="panel-body">
+                            <div class="col-sm-7">{{winner.evacuation_detail.name}}</div>
+                            <div class="col-sm-3">{{winner.response_time+" min"}}</div>
+                            <div class="col-sm-2">{{winner.distance+" km"}}</div>
+                        </div>
+                    </div>
+                    <!--</div>-->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" v-on:click="proceed()">Proceed</button>
+                    <button type="button" id='button-modal-close' class="btn btn-danger"
+                        data-dismiss="modal">Close</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div id="map"></div>
+    <!-- Modal -->
+
+    <script src="resources/js/dijkstra.js"></script>
+    <script src="resources/js/xmlparser.js"></script>
+    <script src="resources/json/coordinates.js"></script>
+    <script src="resources/json/boundaries.js"></script>
+
+    <script src="../_global/js/utilities.js"></script>
+    <script src="../_global/js/objects.js"></script>
+    <script src="../_global/js/moabc/utilities.js"></script>
+    <script src="../_global/js/moabc/objects.js"></script>
+    <script src="../_global/js/moabc/evacuation.js"></script>
+    <script src="../_global/js/moabc/honey.js"></script>
+    <script src="../_global/js/moabc/moabc.js"></script>
+    <script src="../_global/js/moabc/test.js"></script>
+    
+    <script src="resources/src/js/maphandler.js"></script>
+    <script src="resources/src/js/datahandler.js"></script>
+    <script src="resources/src/js/utilities.js"></script>
+    <script src="resources/src/js/map_app.js"></script>
+
+
+    <script
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBymq4YRMhZoMwnPUd2SfyzQQLEvUtafkM&libraries=places&callback=initializeMap"
+        async defer></script>
+</body>
 
 </html>

@@ -41,6 +41,7 @@ var min = null;
 var infowindow;
 var directionsService;
 var emergency_markers = [];
+var history_list = []
 
 var emergency_marker = {
     id: null,
@@ -108,118 +109,6 @@ function getAveSpeedDetails(i) {
 function getHospital_data() {
     return JSON.parse(localStorage.getItem("hospital_list"));
 }
-
-
-
-/* function initMap() {
-    $('#button_reload').hide();
-    $("#progressDirection").hide();
-    //getLocation();
-
-    map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 16,
-
-        disableDefaultUI: true,
-        styles: [{
-            featureType: 'all',
-            stylers: [{
-                saturation: -80
-            }]
-        }, {
-            featureType: 'road.arterial',
-            elementType: 'geometry',
-            stylers: [{
-                    hue: '#00ffee'
-                },
-                {
-                    saturation: 50
-                }
-            ]
-        }, {
-            featureType: 'poi.business',
-            elementType: 'labels',
-            stylers: [{
-                visibility: 'off'
-            }]
-        }]
-    });
-
-    var bounds = new google.maps.LatLngBounds();
-
-    google.maps.event.addListener(map, 'click', function (e) {
-        if (confirm("Do you want to add an Emergency icon here?")) {
-            placeMarker(e.latLng, map);
-        }
-    });
-
-
-    var infoWindow = new google.maps.InfoWindow(),
-        marker, i;
-    for (i = 0; i < hospital_list.length; i++) {
-        var position = new google.maps.LatLng(hospital_list[i].location.lat, hospital_list[i].location.lng);
-        bounds.extend(position);
-        var icon = '';
-        if (hospital_list[i].available > 0) {
-            icon = 'resources/images/hospital_32.png';
-        }
-        if (hospital_list[i].available < hospital_list_og[i].available) {
-            icon = 'resources/images/on_going.png';
-        }
-        if (hospital_list[i].available <= 0) {
-            icon = 'resources/images/no_available.png';
-        }
-        console.log("hospital: " + hospital_list[i].name + " : " + hospital_list[i].available + " vs " + "hospital: " + hospital_list_og[i].name + " : " + hospital_list_og[i].available);
-
-        marker = new google.maps.Marker({
-            position: position,
-            map: map,
-            title: hospital_list[i].name,
-            icon: icon
-        });
-
-        google.maps.event.addListener(marker, 'click', (function (marker, i) {
-            return function () {
-                var available = "<p class='danger'>no available emergency ambulance<p>";
-                if (hospital_list[i].available > 0) {
-                    available = "<p class='success'>available emergency ambulance: " + hospital_list[i].available + "<p>";
-                }
-                infoWindow.setContent(hospital_list[i].name + "<br>" + available);
-                infoWindow.open(map, marker);
-            }
-        })(marker, i));
-
-        map.fitBounds(bounds);
-    }
-
-
-
-    var boundsListener = google.maps.event.addListener((map), 'bounds_changed', function (event) {
-        this.setZoom(14);
-        google.maps.event.removeListener(boundsListener);
-    });
-
-
-    var lineSymbol = {
-        path: 'M 0,-1 0,1',
-        strokeOpacity: 1,
-        scale: 4
-    };
-
-    var line = new google.maps.Polyline({
-        path: coords,
-        strokeOpacity: 0,
-        icons: [{
-            icon: lineSymbol,
-            offset: '0',
-            repeat: '20px'
-        }],
-        map: map
-    });
-
-    placeTrafficPoints();
-    initEmergencyMarkers();
-    //marikinaBorder.setMap(map);
-} */
 
 function initializeMap() {
     DataHandler.configure()
