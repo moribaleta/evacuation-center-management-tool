@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>History</title>
+
+    <!-- update the version number as needed -->
+    <script defer src="/__/firebase/7.19.1/firebase-app.js"></script>
+    <!-- include only the Firebase features as you need -->
+    <script defer src="/__/firebase/7.19.1/firebase-auth.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-database.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-messaging.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-storage.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-firestore.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-functions.js"></script>
+    <!-- initialize the SDK after all desired features are loaded -->
+    <script defer src="/__/firebase/init.js"></script>
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <script src="js/jquery-3.0.0.min.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <link href="css/main-style.css" rel="stylesheet">
+    <script src="js/vue.js"></script>
+    <script src="../_global/js/objects.js"></script>
+    <script src="../_global/js/utilities.js"></script>
+
+</head>
+
+<body>
+
+    <div class="sidenav" id="header">
+        <div class="sidenav-item">
+            <img class="nav-image" src="resources/images/logo.png" />
+        </div>
+        <div class="sidenav-item" v-if="user.admin_type == '0'">
+            <a href="evacuations.html">
+                <div class="icon-block">
+                    <i class="material-icons">group</i>
+                    <h5 class="center">Evacuations</h5>
+                </div>
+            </a>
+        </div>
+        <div class="sidenav-item active" v-if="user.admin_type == '0'">
+            <a href="history.html">
+                <div class="icon-block">
+                    <i class="material-icons">assessment</i>
+                    <h5 class="center">History</h5>
+                </div>
+            </a>
+        </div>
+        <div class="sidenav-item" v-if="user.admin_type == '0'">
+            <a href="models.html">
+                <div class="icon-block">
+                    <i class="material-icons">assessment</i>
+                    <h5 class="center">Models</h5>
+                </div>
+            </a>
+        </div>
+        <div class="sidenav-item">
+            <a v-on:click="onLogout()">
+                <div class="icon-block">
+                    <i class="material-icons">close</i>
+                    <h5 class="center">Log Out</h5>
+                </div>
+            </a>
+        </div>
+    </div>
+    <div class="container" id="content">
+
+
+        <div class="loader_container" v-if="isDataLoading">
+            <div class="loader"></div>
+        </div>
+
+        <div class="section" v-if="!isDataLoading">
+            <div class="header-container">
+                <h1>Reports</h1>
+                <div class="well input-container" style="padding:10px; width: 100%; min-height: 70px">
+                    <div class="col col-md-2">
+                        <p class="input-label">year</p>
+                        <select id="input-type" class="input input-select" v-model="filter.year">
+                            <option v-for="(item,index) in selections.years"
+                                :selected="index == filter.year ? true : false">{{item
+                                                ? item : "NOT AVAILABLE"}}</option>
+                        </select>
+                    </div>
+                    <div class="col col-md-2">
+                        <p class="input-label">month</p>
+                        <select id="input-type" class="input input-select" v-model="filter.month">
+                            <option v-for="(item,index) in selections.months"
+                                :selected="index == filter.month ? true : false">
+                                {{item}}</option>
+                        </select>
+                    </div>
+                    <div class="col col-md-2">
+                        <p class="input-label">stations</p>
+                        <select id="input-district" class="input input-select" v-model="filter.station">
+                            <option v-for="(item,index) in selections.stations"
+                                :selected="index == filter.station ? true : false">
+                                {{item}}</option>
+                        </select>
+                    </div>
+                    <div class="col col-md-3 button-filter-container">
+                        <button type="button" class="btn btn-warning button-view button-filter"
+                            v-on:click="filterList()">filter
+                        </button>
+                    </div>
+
+                </div>
+                <div class="button-container">
+                    <!-- <button type="button" class="btn btn-info button-view" v-on:click="createSampleReport()">
+                        create sample
+                        report
+                    </button> -->
+                    <button type="button" class="btn btn-info button-view" v-on:click="openAddReport()">
+                        add
+                        report
+                    </button>
+                    <button type="button" class="btn btn-info button-view" v-on:click="openGenerateReport()">
+                        generate
+                        report
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <div class="table" id="tableData">
+                    <div class="well" v-for="item,index in reports_view">
+                        <div class="row">
+                            <div class="col col-md-3 item-info">
+                                <p class="item-value">{{index + 1}}.</p>
+                            </div>
+                            <div class="col col-md-3 item-info " v-for="info,index in Object.keys(item)">
+                                <div v-if="info == 'evac_id'">
+                                    <p class="item-label">Evacuation Name</p>
+                                    <p class="item-value">{{getEvacFromId(item.evac_id).name}}</p>
+                                </div>
+                                <div v-if="info != 'evac_id'">
+                                    <p class="item-label">{{info.replace(/_/g,' ') +": "}}</p>
+                                    <p class="item-value">{{item[info] ? item[info] : 'N/A'}}</p>
+                                </div>
+                            </div>
+                            <div class="col col-md-12">
+                                <button class="btn btn-default btn-info" v-on:click="editItem(index)">edit</button>
+                                <button class="btn btn-default btn-danger"
+                                    v-on:click="deleteItem(index)">delete</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app/datahandler.js"></script>
+    <script src="js/app/app.js"></script>
+    <script src="../_global/js/moabc/utilities.js"></script>
+    <script src="../_global/js/moabc/objects.js"></script>
+    <script src="../_global/js/moabc/evacuation.js"></script>
+    <script src="../_global/js/moabc/honey.js"></script>
+    <script src="../_global/js/moabc/moabc.js"></script>
+    <script src="../_global/js/moabc/test.js"></script>
+
+    <script>
+        app = new Vue({
+            el: '#content',
+            data: {
+                evac_list: [],
+                reports: [],
+                reports_view: [],
+                selections: {
+                    years: ['all'],
+                    months: [
+                        'all',
+                        'JANUARY',
+                        'FEBRUARY',
+                        'MARCH',
+                        'APRIL',
+                        'MAY',
+                        'JUNE',
+                        'JULY',
+                        'AUGUST',
+                        'SEPTEMBER',
+                        'OCTOBER',
+                        'NOVEMBER',
+                        'DECEMBER',
+                    ],
+                    months_only: [
+                        'JANUARY',
+                        'FEBRUARY',
+                        'MARCH',
+                        'APRIL',
+                        'MAY',
+                        'JUNE',
+                        'JULY',
+                        'AUGUST',
+                        'SEPTEMBER',
+                        'OCTOBER',
+                        'NOVEMBER',
+                        'DECEMBER',
+                    ],
+                    stations: ['all']
+                },
+                filter: {
+                    year: 'all',
+                    month: 'all',
+                    station: 'all'
+                },
+
+                isDataLoading: true,
+
+                header: []
+            },
+            methods: {
+                onStart() {
+                    this.fetchReports()
+                },
+                fetchReports() {
+                    this.setLoading(true)
+
+                    DataHandler.getEvacuationCenters().then((data) => {
+                        this.evac_list = data.data
+                    }).catch(err => {
+                        console.log("err %o", err)
+                    })
+
+                    DataHandler.getEvacuationHistory().then((message) => {
+                        this.setData(message.data)
+                    }).catch(error => {
+                        console.log(error)
+                    }).finally(() => {
+                        this.setLoading(false)
+                    })
+
+                },
+
+                getEvacFromId(id) {
+                    for (var i = 0; i < this.evac_list.length; i++) {
+                        if (this.evac_list[i].id == id) {
+                            return this.evac_list[i]
+                        }
+                    }
+                    return null
+                },
+
+                setData: function (data) {
+                    console.log("data %o", data)
+                    if (data.length > 0) {
+                        this.header = Object.keys(data[0])
+                        this.reports = data
+                        this.reports_view = this.reports
+                        this.getDistinctParams()
+                    }
+                },
+
+                createSampleReport() {
+                    var reports = []
+                    let year = [2018, 2019, 2020]
+                    this.evac_list.forEach((evac = new EvacuationHistory()) => {
+                        year.forEach((year) => {
+                            this.selections.months_only.forEach((month, index) => {
+                                let samplePop = getRandomValue(evac
+                                    .population_capacity / 2, evac
+                                    .population_capacity)
+                                let date = new Date(year, (index + 1), 1);
+                                let history = new EvacuationHistory(null, evac.id,
+                                    samplePop, 0, date, null)
+                                reports.push(history)
+                            })
+                        })
+                    });
+                    DataHandler.setDataEvacuationHistory(reports).then((data) => {
+                        alert("added reports")
+                        this.fetchReports()
+                    }).catch((err) => {
+                        console.log("error")
+                    })
+                },
+
+                getDistinctParams() {
+                    this.selections.years = ['all']
+                    this.selections.stations = ['all']
+
+                    this.reports.map((report = new EvacuationHistory()) => {
+                        let date = report.report_date.split('-')
+                        var year = date[0]
+                        var month = date[1]
+
+                        if (!this.selections.years.includes(year)) {
+                            this.selections.years.push(year)
+                        }
+
+                        if (!this.selections.stations.includes(report.STATION)) {
+                            this.selections.stations.push(report.STATION)
+                        }
+                    })
+
+
+                },
+
+                setLoading(isLoading) {
+                    this.isDataLoading = isLoading
+                },
+
+                filterList() {
+                    //year
+                    this.reports_view = this.reports.filter((item) => {
+                        let item_year = item.DATE_CREATED.split('-')[0]
+                        if (!this.filter.year || this.filter.year == 'all' || this.filter.year ==
+                            item_year) {
+                            return true
+                        } else {
+                            return false
+                        }
+                    })
+                    //month
+                    this.reports_view = this.reports_view.filter((item) => {
+                        let item_month = item.DATE_CREATED.split('-')[1]
+                        let index_selection_month = this.selections.months.indexOf(this.filter.month)
+
+                        if (!this.filter.month || this.filter.month == 'all' || item_month ==
+                            index_selection_month) {
+                            return true
+                        } else {
+                            return false
+                        }
+                    })
+
+                    //district
+                    this.reports_view = this.reports_view.filter((item) => {
+                        if (!this.filter.station || this.filter.station == 'all' || this.filter
+                            .station == item.STATION) {
+                            return true
+                        } else {
+                            return false
+                        }
+                    })
+
+                    console.log("filtered %o", this.reports_view)
+                },
+
+                deleteItem(index) {
+                    let id = this.reports_view[index].ID
+                    let onConfirm = confirm(`delete item id: ${id}`)
+                    if (onConfirm) {
+                        DataHandler.deleteReport(id).then((data) => {
+                            console.log('response %o', data)
+                            if (data.error) {
+                                alert("error " + data.error)
+                            } else {
+                                alert("item deleted successfuly")
+                                this.fetchReports()
+                            }
+                        })
+                    }
+                },
+
+                editItem(index) {
+                    let report = this.reports_view[index]
+                    sessionStorage.setItem('edit', JSON.stringify(report))
+                    sessionStorage.setItem('reports', JSON.stringify(this.reports))
+                    window.open('reports_edit.html', '_self')
+                },
+
+                openGenerateReport() {
+                    sessionStorage.setItem('reports', JSON.stringify(this.reports))
+                    window.open('reports_generate.html', '_self')
+                },
+
+                openAddReport() {
+                    sessionStorage.setItem('reports', JSON.stringify(this.reports))
+                    window.open('reports_add.html', '_self')
+                }
+
+
+            }
+        })
+    </script>
+
+</body>
+
+</html>

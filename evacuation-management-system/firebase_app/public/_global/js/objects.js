@@ -93,3 +93,52 @@ class Message {
     data
     error
 } //Message
+
+/**
+ * evacuation history used on generating solutions references EvacuationCenter
+ */
+class EvacuationHistory {
+    
+    id = null
+    evac_id = null
+    current_population = 0
+    created_by = 0
+    report_date = new Date()
+    date_created = new Date()
+
+    constructor(id = null, evac_id = null, current_population = 0, created_by = 0, report_date = new Date, date_created = new Date()) {
+        this.id = id || genID(5)
+        this.evac_id = evac_id
+        this.current_population = current_population
+        this.created_by = created_by
+        this.report_date = report_date
+        this.date_created = date_created
+    }
+
+    /**returns instance to json object */
+    toObject() {
+        return {
+            id : this.id,
+            evac_id : this.evac_id,
+            current_population : this.current_population,
+            created_by : this.created_by,
+            date_created : this.date_created,
+            report_date : this.report_date
+        }
+    }
+
+    /** converts object to EvacuationCenter instance */
+    static parse(object = {}) {
+        let evac = new EvacuationHistory(
+            object.id,
+            object.evac_id,
+            object.current_population,
+            object.created_by,
+            object.report_date,
+            object.date_created,
+            )
+
+        return evac
+    }
+
+}//EvacuationHistory

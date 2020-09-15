@@ -1,5 +1,3 @@
-
-
 /**
  * User object structure
  */
@@ -27,17 +25,17 @@ class AdminUser {
 
 
 class MOABCParameters {
-    id             
-    date_created   
-    created_by     
-    max_length     
-    max_val        
+    id
+    date_created
+    created_by
+    max_length
+    max_val
     population_size
-    trial_limit    
-    max_epoch      
-    min_shuffle    
-    max_shuffle   
-    
+    trial_limit
+    max_epoch
+    min_shuffle
+    max_shuffle
+
     static parameters_shown = {
         id: 'id',
         date_created: 'Date Created',
@@ -50,51 +48,51 @@ class MOABCParameters {
         max_shuffle: 'Maximum Shuffle Value',
     }
 
-    constructor( id, date_created, created_by, max_length, max_val,
-                population_size, trial_limit, max_epoch, min_shuffle, max_shuffle) {
-        this.id              = id || genID(5)
-        this.date_created    = date_created || (new Date()).toLocaleString()
-        this.created_by      = created_by || '0'
-        this.max_length      = max_length || 0
-        this.max_val         = max_val || 0
+    constructor(id, date_created, created_by, max_length, max_val,
+        population_size, trial_limit, max_epoch, min_shuffle, max_shuffle) {
+        this.id = id || genID(5)
+        this.date_created = date_created || (new Date()).toLocaleString()
+        this.created_by = created_by || '0'
+        this.max_length = max_length || 0
+        this.max_val = max_val || 0
         this.population_size = population_size || 0
-        this.trial_limit     = trial_limit  || 0
-        this.max_epoch       = max_epoch    || 0
-        this.min_shuffle     = min_shuffle  || 0
-        this.max_shuffle     = max_shuffle  || 0
+        this.trial_limit = trial_limit || 0
+        this.max_epoch = max_epoch || 0
+        this.min_shuffle = min_shuffle || 0
+        this.max_shuffle = max_shuffle || 0
     }
 
     static parse(objects = {}) {
         return new MOABCParameters(
-            objects.id             ,
-            objects.date_created   ,
-            objects.created_by     ,
-            objects.max_length     ,
-            objects.max_val        ,
+            objects.id,
+            objects.date_created,
+            objects.created_by,
+            objects.max_length,
+            objects.max_val,
             objects.population_size,
-            objects.trial_limit    ,
-            objects.max_epoch      ,
-            objects.min_shuffle    ,
-            objects.max_shuffle    
+            objects.trial_limit,
+            objects.max_epoch,
+            objects.min_shuffle,
+            objects.max_shuffle
         )
     }
 
-    toObject(){
+    toObject() {
         return {
-            id              : this.id             ,
-            date_created    : this.date_created   ,
-            created_by      : this.created_by     ,
-            max_length      : this.max_length     ,
-            max_val         : this.max_val        ,
-            population_size : this.population_size,
-            trial_limit     : this.trial_limit    ,
-            max_epoch       : this.max_epoch      ,
-            min_shuffle     : this.min_shuffle    ,
-            max_shuffle     : this.max_shuffle    
+            id: this.id,
+            date_created: this.date_created,
+            created_by: this.created_by,
+            max_length: this.max_length,
+            max_val: this.max_val,
+            population_size: this.population_size,
+            trial_limit: this.trial_limit,
+            max_epoch: this.max_epoch,
+            min_shuffle: this.min_shuffle,
+            max_shuffle: this.max_shuffle
         }
     }
 
-}//MOABCParameters
+} //MOABCParameters
 
 
 
@@ -102,7 +100,7 @@ class MOABCParameters {
  * class for handling storage and database fetch
  */
 class DataHandlerClass extends DataHandlerType {
-    
+
 
     login(username, password) {
         this.configure()
@@ -120,7 +118,7 @@ class DataHandlerClass extends DataHandlerType {
                             doc.id, object.admin_type,
                             object.created_by, object.date_created,
                             object.firstname, object.lastname,
-                            object.municipality, object.username,)
+                            object.municipality, object.username, )
                         users.push(admin)
                     });
 
@@ -186,7 +184,7 @@ class DataHandlerClass extends DataHandlerType {
                 .get().then(function (querySnapshot) {
                     var evacuations = []
                     querySnapshot.forEach(function (doc) {
-                        console.log(doc.id, " => ", doc.data());
+                        //console.log(doc.id, " => ", doc.data());
                         let data = doc.data()
                         let id = doc.id
 
@@ -227,9 +225,9 @@ class DataHandlerClass extends DataHandlerType {
         return new Promise((resolve, reject) => {
             this.firestore.collection('evacuation_centers')
                 .doc(id).delete()
-                .then(function() {
+                .then(function () {
                     resolve("Document successfully deleted!");
-                }).catch(function(error) {
+                }).catch(function (error) {
                     reject(error)
                 });
         })
@@ -242,7 +240,7 @@ class DataHandlerClass extends DataHandlerType {
                 .get().then(function (querySnapshot) {
                     var models = []
                     querySnapshot.forEach(function (doc) {
-                        console.log(doc.id, " => ", doc.data());
+                        //console.log(doc.id, " => ", doc.data());
                         let data = doc.data()
                         let id = doc.id
 
@@ -284,51 +282,94 @@ class DataHandlerClass extends DataHandlerType {
         return new Promise((resolve, reject) => {
             this.firestore.collection('moabc')
                 .doc(id).delete()
-                .then(function() {
+                .then(function () {
                     resolve("Document successfully deleted!");
-                }).catch(function(error) {
+                }).catch(function (error) {
                     reject(error)
                 });
         })
     }
 
-    testModelParams(id) {
+
+    getEvacuationHistory(evac_id = null) {
+        let collection = this.firestore.collection('evacuation_history')
+        let ref = evac_id != null ? ref.where('evac_id', '==', evac_id) : collection
+
+        return new Promise((resolve, reject) => {
+            ref.get().then((querySnapshot) => {
+                    var models = []
+                    querySnapshot.forEach(function (doc) {
+                        //console.log(doc.id, " => ", doc.data());
+                        let data = doc.data()
+                        let id = doc.id
+
+                        let object = {
+                            id,
+                            evac_id: data.evac_id,
+                            current_population: data.current_population,
+                            created_by: data.created_by,
+                            report_date: data.report_date.toDate(),
+                            date_created: data.date_created?.toDate() || null,
+                        }
+                        models.push(EvacuationHistory.parse(object))
+                    });
+
+                    var message = new Message()
+                    message.data = models
+                    resolve(message)
+                })
+                .catch((error) => {
+                    reject(error)
+                });
+        })
+    } //getEvacuationHistory
+
+
+    addEvacuationHistory(params = new EvacuationHistory()) {
+        return new Promise((resolve, reject) => {
+            this.firestore.collection('evacuation_history')
+                .doc(params.id)
+                .set(params.toObject())
+                .then(function () {
+                    resolve("Document successfully written!")
+                }).catch(function (error) {
+                    reject(error)
+                });
+        })
+    } //addEvacuationHistory
+
+
+    setDataEvacuationHistory(params = []) {
+        let promises = params.map((evac) => {
+            return this.addEvacuationHistory(evac)
+        })
+        return Promise.all(promises)
         /* return new Promise((resolve, reject) => {
-            let test = this.functions.httpsCallable('testHoneyBeeModel')
-            test({id})
-                .then(function (value) {
-                    resolve(value);
+            this.firestore.collection('evacuation_history')
+                .doc(params.id)
+                .set(params.toObject())
+                .then(function () {
+                    resolve("Document successfully written!")
                 }).catch(function (error) {
                     reject(error)
                 });
         }) */
-        
-        return fetch('https://us-central1-ievacuate-laguna.cloudfunctions.net/testHoneyBeeModel', {
-                method: 'POST',
-                mode: "cors",
-                body: {id}
-            }).then((response) => response.json())
-    }
+    } //addEvacuationHistory
 
-    pingFunctions(id) {
+
+    deleteEvacuationHistory(id) {
         return new Promise((resolve, reject) => {
-            fetch('https://us-central1-ievacuate-laguna.cloudfunctions.net/pingFunctionWithCorsAllowed', {
-                method: 'POST',
-                mode: "cors",
-                body: {id}
-            })
-                .then((response) => response.json())
-                .then((response) => {
-                    console.log("value %o", response)
-                resolve(response);
-            }).catch(function (error) {
-                reject(error)
-            });
+            this.firestore.collection('evacuation_history')
+                .doc(id).delete()
+                .then(function () {
+                    resolve("Document successfully deleted!");
+                }).catch(function (error) {
+                    reject(error)
+                });
         })
-    }
+    } //deleteEvacuationHistory
 
 
 } //DataHandlerClass
 
 let DataHandler = new DataHandlerClass()
-

@@ -26,7 +26,6 @@
     <script src="js/vue.js"></script>
     <script src="../_global/js/objects.js"></script>
     <script src="../_global/js/utilities.js"></script>
-    <script src="../_global/js/moabc/test.js"></script>
 
 </head>
 
@@ -44,8 +43,16 @@
                 </div>
             </a>
         </div>
+        <div class="sidenav-item" v-if="user.admin_type == '0'">
+            <a href="history.html">
+                <div class="icon-block">
+                    <i class="material-icons">assessment</i>
+                    <h5 class="center">History</h5>
+                </div>
+            </a>
+        </div>
         <div class="sidenav-item active" v-if="user.admin_type == '0'">
-            <a href="index.html">
+            <a href="models.html">
                 <div class="icon-block">
                     <i class="material-icons">assessment</i>
                     <h5 class="center">Models</h5>
