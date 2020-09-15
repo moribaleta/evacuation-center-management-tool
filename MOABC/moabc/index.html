@@ -19,11 +19,12 @@
 <body>
     <button onClick="onClick()">start</button>
     <script>
+        
         let params = {
             id: "8SX2j",
             created_by: "QYilOJ2sx9MyeI1TJPYs",
             date_created: "9/14/2020, 11:54:49 AM",
-            max_epoch: 10,
+            max_epoch: 20,
             max_length: 10,
             max_val: 200,
             max_shuffle: 10,
@@ -34,6 +35,7 @@
 
         function onClick() {
             main.evacuations = evacs
+            main.history = history
             main.generate(params)
         }
         

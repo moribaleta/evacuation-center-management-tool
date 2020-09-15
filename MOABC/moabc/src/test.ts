@@ -15,6 +15,7 @@ class TesterABC {
     abc!        : ArtificialBeeColony;
     runtimes    : number[];
     evacuations : EvacuationCenter[]
+    history     : EvacuationHistory[]
 
     /* Instantiates the TesterABC class
      *
@@ -40,7 +41,8 @@ class TesterABC {
             params.max_epoch      ,
             params.min_shuffle    ,
             params.max_shuffle    ,
-            this.evacuations
+            this.evacuations,
+            this.history
         ); //instantiate and define abc here
 
         /* this.abc.setLimit(trialLimit);

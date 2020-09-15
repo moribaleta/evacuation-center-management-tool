@@ -3,9 +3,6 @@ import * as admin from 'firebase-admin';
 /* import * as cors from 'cors';
 const corsHandler = cors({origin: true}); */
 
-import main, {
-       MOABCParameters
-} from './moabc/test';
 
 // // Start writing Firebase Functions
 // // https://firebase.google.com/docs/functions/typescript
@@ -104,15 +101,6 @@ export const testHoneyBeeModel = functions.https.onRequest((request, response) =
        const app = configure()
        const db = admin.firestore(app);
 
-       /* response.set('Access-Control-Allow-Origin', '*');
-       response.set('Access-Control-Allow-Credentials', 'true'); // vital
-       response.set('Access-Control-Allow-Methods', 'GET');
-       response.set('Access-Control-Allow-Headers', 'Content-Type');
-       response.set('Access-Control-Max-Age', '3600'); */
-
-       /* const corsHandler = cors({origin: true});
-
-       corsHandler(request, response, () => {}); */
 
               db.collection("moabc").where('id', '==', request.body.id).limit(1)
               .onSnapshot((snapshot) => {

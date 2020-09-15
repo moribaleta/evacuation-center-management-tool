@@ -19,7 +19,7 @@ class Honey {
     private MAX_LENGTH: number;
 
     ///Nectars of EvacuationCenter
-    private nectar: EvacuationCenter[]; //solution or placement of queen: numbers
+    private nectar: EvacuationHistory[]; //solution or placement of queen: numbers
 
     ///number of trials/failed attempt on the solution
     private trials: number;
@@ -33,11 +33,13 @@ class Honey {
 
     private evac : EvacuationCenter
 
+    private history : EvacuationHistory[]
+
     /** Instantiate a Honey.
      *
      * @param: size of n
      */
-    constructor(size: number, evac: EvacuationCenter) {
+    constructor(size: number, evac: EvacuationCenter, history: EvacuationHistory[] = []) {
         this.MAX_LENGTH = size;
         this.nectar = [] //new int[this.MAX_LENGTH];
         this.conflicts = 0;
@@ -45,8 +47,8 @@ class Honey {
         this.fitness = 0.0;
         this.selectionProbability = 0.0;
         this.evac = evac
-        this.initNectar();
-        
+        this.history = history
+        this.initNectar();   
     }
 
     /** Compares two Honeys.
@@ -63,11 +65,21 @@ class Honey {
     public initNectar() {
         let evac_sub_id = this.evac.id || Utilities.genID(5)
         for (let i = 0; i < this.MAX_LENGTH; i++) { //initialize the solution to 1... n
-            this.nectar[i] = new EvacuationCenter(evac_sub_id + "-" + i)
-            this.nectar[i].current_population = HoneyUtilities.randomNumber(100, this.evac.population_capacity)
-            this.nectar[i].population_capacity = this.evac.population_capacity //HoneyUtilities.randomNumber(100, 200)
+            
+            if (i < this.history.length) {
+                let val = {...this.history[i]}
+                this.nectar.push(val)
+            } else {
+                let val = new EvacuationHistory(evac_sub_id)
+                val.current_population   = HoneyUtilities.randomNumber(0, this.evac.population_capacity)
+                this.nectar.push(val)
+            }
+            
+            /* this.nectar[i] = new EvacuationCenter(evac_sub_id + "-" + i)
+            this.nectar[i].current_population   = this.history[i].current_population//HoneyUtilities.randomNumber(100, this.evac.population_capacity)
+            this.nectar[i].population_capacity  = this.evac.population_capacity //HoneyUtilities.randomNumber(100, 200)
             this.nectar[i].floor_space = this.evac.floor_space; //HoneyUtilities.randomNumber(50, 300)
-            //this.nectar[i].current_population = i;
+            //this.nectar[i].current_population = i; */
         }
     }
 
@@ -78,14 +90,17 @@ class Honey {
 
         let carrying_sum = 0
         for (let i = 0; i < this.MAX_LENGTH; i++) {
-            carrying_sum += (this.nectar[i].current_population / this.nectar[i].population_capacity)
+            carrying_sum += (this.nectar[i].current_population / this.evac.population_capacity)
         }
+
+        carrying_sum = carrying_sum / this.MAX_LENGTH
 
         let density_sum = 0
         for (let i = 0; i < this.MAX_LENGTH; i++) {
-            density_sum += (this.nectar[i].current_population / this.nectar[i].floor_space)
+            density_sum += (this.nectar[i].current_population / this.evac.floor_space)
         }
 
+        density_sum = density_sum / this.MAX_LENGTH
 
         this.setConflicts(carrying_sum + density_sum)
 
@@ -285,7 +300,7 @@ class Honey {
                 /* case EvacuationPropType.current_inventory:
                     return this.nectar[index].current_inventory = value */
             case EvacuationPropType.floor_space:
-                return this.nectar[index].floor_space
+                return this.evac.floor_space
             default:
                 return 0
         }

@@ -4,7 +4,7 @@ var TesterABC = (function () {
         console.log("created");
     }
     TesterABC.prototype.generate = function (params) {
-        this.abc = new ArtificialBeeColony(params.max_length, params.max_val, params.population_size, params.trial_limit, params.max_epoch, params.min_shuffle, params.max_shuffle, this.evacuations);
+        this.abc = new ArtificialBeeColony(params.max_length, params.max_val, params.population_size, params.trial_limit, params.max_epoch, params.min_shuffle, params.max_shuffle, this.evacuations, this.history);
         var startTime;
         var endTime;
         var totalTime = 0;

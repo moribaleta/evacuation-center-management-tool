@@ -283,8 +283,9 @@
     app = new Vue({
         el: '#content',
         data: {
-            evac_list: [],
-            param_list: [],
+            report_list : [],
+            evac_list   : [],
+            param_list  : [],
             headers: Object.keys(parameters_label),
             headers_title: parameters_label,
             data_input: null,//new MOABCParameters(),
@@ -310,6 +311,12 @@
 
                 DataHandler.getEvacuationCenters().then((data) => {
                     this.evac_list = data.data
+                }).catch(err => {
+                    console.log("err %o", err)
+                })
+
+                DataHandler.getEvacuationHistory().then((data) => {
+                    this.report_list = data.data
                 }).catch(err => {
                     console.log("err %o", err)
                 })
@@ -378,8 +385,9 @@
                 console.log("index %o", index)
                 console.log("model %o", model)
                 console.log("evac list %o", this.evac_list)
-                
-                main.evacuations = this.evac_list
+                console.log("report list %o", this.report_list)
+                main.history        = this.report_list
+                main.evacuations    = this.evac_list
                 
                 let promise = new Promise(async (resolve, reject) => {
                     let val = await main.generate(model)

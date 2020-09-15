@@ -30,7 +30,7 @@ class ArtificialBeeColony {
 
     /**The number of cycles for foraging {a stopping criteria}*/
     public MAX_EPOCH: number
-    
+
     public MIN_SHUFFLE: number
     public MAX_SHUFFLE: number
 
@@ -44,37 +44,47 @@ class ArtificialBeeColony {
     /** current generation */
     public epoch: number
 
-    public evacuation_centers : EvacuationCenter[] = []
+    public evacuation_centers: EvacuationCenter[] = []
+    public evacuation_history: EvacuationHistory[] = []
 
     /* Instantiates the artificial bee colony algorithm along with its parameters.
      *
      * @param: size of n queens
      */
-    public constructor( max_length      : number    = 10,
-                        max_val         : number    = 200,
-                        population_size : number    = 20,
-                        trial_limit     : number    = 50,
-                        max_epoch       : number    = 1000,
-                        min_shuffle     : number    = 8,
-                        max_shuffle     : number    = 20,
-                        evacuation_centers : EvacuationCenter[] = []
-                        ) {
+    public constructor(max_length: number = 10,
+        max_val: number = 200,
+        population_size: number = 20,
+        trial_limit: number = 50,
+        max_epoch: number = 1000,
+        min_shuffle: number = 8,
+        max_shuffle: number = 20,
+        evacuation_centers: EvacuationCenter[] = [],
+        evacuation_history: EvacuationHistory[] = []
+    ) {
 
-        this.MAX_VAL        = max_val 
-        this.MAX_LENGTH     = max_length;
-        this.NP             = population_size; //pop size 20 to 40 or even 100
+        let capacity = evacuation_centers.map((evac) => {
+            return evac.population_capacity
+        })
+        this.MAX_VAL = Math.max(...capacity) /* evacuation_centers.max((evac) => {
+            return evac.population_capacity
+        }).population_capacity */
+
+        this.MAX_LENGTH = max_length;
+        let size = population_size > evacuation_centers.length ? evacuation_centers.length : population_size
+        this.NP         =  size//population_size; //pop size 20 to 40 or even 100
         //this.FOOD_NUMBER    = this.NP / 2;
-        this.FOOD_NUMBER    = population_size
-        this.LIMIT          = trial_limit;
-        this.MAX_EPOCH      = max_epoch;
-        this.MIN_SHUFFLE    = min_shuffle;
-        this.MAX_SHUFFLE    = max_shuffle;
+        this.FOOD_NUMBER = size
+        this.LIMIT = trial_limit;
+        this.MAX_EPOCH = max_epoch;
+        this.MIN_SHUFFLE = min_shuffle;
+        this.MAX_SHUFFLE = max_shuffle;
         this.evacuation_centers = evacuation_centers
-        this.gBest          = undefined;
-        this.epoch          = 0;
-        
-    }//constructor
-    
+        this.evacuation_history = evacuation_history
+        this.gBest = undefined;
+        this.epoch = 0;
+
+    } //constructor
+
 
     /** Starts the MOABC
      *

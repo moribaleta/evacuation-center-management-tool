@@ -366,8 +366,10 @@
                 },
 
                 openGenerateReport() {
-                    sessionStorage.setItem('reports', JSON.stringify(this.reports))
-                    window.open('reports_generate.html', '_self')
+                    /* sessionStorage.setItem('reports', JSON.stringify(this.reports))
+                    window.open('reports_generate.html', '_self') */
+                    let reports = JSON.stringify(this.reports)
+                    saveTextAsFile(reports)
                 },
 
                 openAddReport() {

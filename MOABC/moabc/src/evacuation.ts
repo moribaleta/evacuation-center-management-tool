@@ -40,18 +40,9 @@ class EvacuationCenter implements Model {
         this.floor_space        = floor_space   
     }
     
-
-    /* getValue(type: EvacuationPropType) : number {
-        switch(type) {
-            case EvacuationPropType.location:
-                return this.distance
-            case EvacuationPropType.current_population:
-                return this.current_population
-            case EvacuationPropType.
-        }
-    } */
-    
 }
+
+
 
 enum EvacuationPropType {
     location = "location",
@@ -62,3 +53,23 @@ enum EvacuationPropType {
     object_inventory    = "object_inventory",
     object_population   = "object_population"
 }
+
+class EvacuationHistory {
+    
+    id? : string
+    evac_id? : string
+    current_population = 0
+    created_by = 0
+    report_date = new Date()
+    date_created = new Date()
+
+    constructor(id: string = null, evac_id: string = null, current_population : number = 0, created_by = 0, report_date: Date = new Date(), date_created: Date = new Date()) {
+        this.id = id
+        this.evac_id = evac_id
+        this.current_population = current_population
+        this.created_by = created_by
+        this.report_date = report_date
+        this.date_created = date_created
+    }
+
+}//EvacuationHistory

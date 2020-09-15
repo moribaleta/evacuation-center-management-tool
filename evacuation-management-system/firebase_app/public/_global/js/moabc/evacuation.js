@@ -27,4 +27,26 @@ var EvacuationPropType;
     EvacuationPropType["object_inventory"] = "object_inventory";
     EvacuationPropType["object_population"] = "object_population";
 })(EvacuationPropType || (EvacuationPropType = {}));
+
+/* var EvacuationHistory = (function () {
+    function EvacuationHistory(id, evac_id, current_population, created_by, report_date, date_created) {
+        if (id === void 0) { id = null; }
+        if (evac_id === void 0) { evac_id = null; }
+        if (current_population === void 0) { current_population = 0; }
+        if (created_by === void 0) { created_by = 0; }
+        if (report_date === void 0) { report_date = new Date(); }
+        if (date_created === void 0) { date_created = new Date(); }
+        this.current_population = 0;
+        this.created_by = 0;
+        this.report_date = new Date();
+        this.date_created = new Date();
+        this.id = id;
+        this.evac_id = evac_id;
+        this.current_population = current_population;
+        this.created_by = created_by;
+        this.report_date = report_date;
+        this.date_created = date_created;
+    }
+    return EvacuationHistory;
+}()); */
 //# sourceMappingURL=evacuation.js.map
