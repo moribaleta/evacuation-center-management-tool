@@ -290,13 +290,17 @@ class DataHandlerClass extends DataHandlerType {
 
 
     deleteEvacuationHistory(id) {
+        var message = new Message()
+
         return new Promise((resolve, reject) => {
             this.firestore.collection('evacuation_history')
                 .doc(id).delete()
                 .then(function () {
-                    resolve("Document successfully deleted!");
+                    message.data = "success delete"
+                    resolve(message);
                 }).catch(function (error) {
-                    reject(error)
+                    message.error = error
+                    reject(message)
                 });
         })
     } //deleteEvacuationHistory

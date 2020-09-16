@@ -8,10 +8,12 @@ class EvacuationCenter {
     name = "sampl1"
     /**
     * lat lng values
-    * "location = {
+    * ```
+    * location = {
         lat = 14.426700434748033,
         lng = 121.43130540847778
-    }"
+    }
+    ```
     */
     location = {
         lat: null,
@@ -35,7 +37,7 @@ class EvacuationCenter {
 
     constructor(id, name, location, population_capacity, floor_space, date_created = new Date(),
         created_by, exact_address, municipality, contact_numbers) {
-        this.id = id || genID(5)
+        this.id = id || "evac-"+genID(5)
         this.name = name
         this.location = (location != null && location != undefined) ? location : {
             lat: null,
@@ -107,7 +109,7 @@ class EvacuationHistory {
     date_created = new Date()
 
     constructor(id = null, evac_id = null, current_population = 0, created_by = 0, report_date = new Date, date_created = new Date()) {
-        this.id = id || genID(5)
+        this.id = id || "history-"+genID(5)
         this.evac_id = evac_id
         this.current_population = current_population
         this.created_by = created_by
@@ -170,7 +172,7 @@ class MOABCParameters {
 
     constructor(id, date_created, created_by, max_length, max_val,
         population_size, trial_limit, max_epoch, min_shuffle, max_shuffle) {
-        this.id = id || genID(5)
+        this.id = id || "param-"+genID(5)
         this.date_created = date_created || (new Date()).toLocaleString()
         this.created_by = created_by || '0'
         this.max_length = max_length || 0

@@ -4,7 +4,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Evacuations</title>
+    <title>Models</title>
     
     <!-- update the version number as needed -->
     <script defer src="/__/firebase/7.19.1/firebase-app.js"></script>
@@ -26,39 +26,24 @@
     <script src="js/vue.js"></script>
     <script src="../_global/js/objects.js"></script>
     <script src="../_global/js/utilities.js"></script>
-
 </head>
 
 <body>
-    <div class="sidenav" id="header">
+
+    <div class="sidenav" id="header" attr="models">
         <div class="sidenav-item">
             <img class="nav-image" src="resources/images/logo.png" />
         </div>
 
-        <div class="sidenav-item" v-if="user.admin_type == '0'">
-            <a href="evacuations.html">
+        <div  v-for="item in header_items" v-bind:class="'sidenav-item ' + (active == item.id ? 'active' : '') ">
+            <a v-bind:href="item.href">
                 <div class="icon-block">
-                    <i class="material-icons">group</i>
-                    <h5 class="center">Evacuations</h5>
+                    <i class="material-icons">{{item.icon}}</i>
+                    <h5 class="center">{{item.title}}</h5>
                 </div>
             </a>
         </div>
-        <div class="sidenav-item" v-if="user.admin_type == '0'">
-            <a href="history.html">
-                <div class="icon-block">
-                    <i class="material-icons">assessment</i>
-                    <h5 class="center">History</h5>
-                </div>
-            </a>
-        </div>
-        <div class="sidenav-item active" v-if="user.admin_type == '0'">
-            <a href="models.html">
-                <div class="icon-block">
-                    <i class="material-icons">assessment</i>
-                    <h5 class="center">Models</h5>
-                </div>
-            </a>
-        </div>
+
         <div class="sidenav-item">
             <a v-on:click="onLogout()">
                 <div class="icon-block">
@@ -68,8 +53,6 @@
             </a>
         </div>
     </div>
-
-    
 
     <!-- <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#editorModal">Open Modal</button> -->
     <div class="container" id="content">

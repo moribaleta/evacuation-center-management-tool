@@ -1,9 +1,28 @@
-
-
 var header = new Vue({
     el: '#header',
     data: {
-        user: new AdminUser()
+        user: new AdminUser(),
+        active: "",
+        header_items: [
+            {
+                id: 'evacuations',
+                href: "evacuations.html",
+                icon: 'group',
+                title: 'Evacuations'
+            },
+            {
+                id: 'history',
+                href: "history.html",
+                icon: 'assessment',
+                title: 'History'
+            },
+            {
+                id: 'models',
+                href: "models.html",
+                icon: 'assessment',
+                title: 'Models'
+            },
+        ]
     },
     methods: {
         onStart() {
@@ -23,11 +42,14 @@ var header = new Vue({
                 alert('login user account')
                 this.onLogout()
             }
+
+            this.active = $('#header').attr('attr')
         },
         onLogout() {
             sessionStorage.clear()
             window.open('login.html', '_self')
-        }
+        },
+        
     }
 })
 

@@ -1,12 +1,13 @@
 /**generates random string from length */
 function genID(length) {
     var result = '';
-    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    var charactersLength = characters.length;
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
     for (var i = 0; i < length; i++) {
         result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
-    return result;
+    const d = Date.parse(new Date());
+    return result +"-"+ d;
 } //genID
 
 /**generates random value between min and max */
@@ -60,10 +61,10 @@ class DataHandlerType {
 
 
 ///generates a file of json contains
-function saveTextAsFile(text) {
+function saveTextAsFile(title, text) {
     const textToWrite = text
     const textFileAsBlob = new Blob([textToWrite], {type:'text/plain'});
-    const fileNameToSaveAs = "coordinates.json"//document.getElementById("").value;
+    const fileNameToSaveAs = title//document.getElementById("").value;
     let downloadLink = document.createElement("a");
     downloadLink.download = fileNameToSaveAs;
     downloadLink.innerHTML = "Download File";
