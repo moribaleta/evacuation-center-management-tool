@@ -21,6 +21,32 @@ class AdminUser {
         this.municipality = municipality
         this.username = username
     }
+
+    toObject() {
+        return {
+            id: this.id,
+            admin_type: this.admin_type,
+            created_by: this.created_by,
+            date_created: this.date_created,
+            firstname: this.firstname,
+            lastname: this.lastname,
+            municipality: this.municipality,
+            username: this.username,
+        }
+    }
+
+    parse(object = {}) {
+        return new AdminUser(
+            object.id,
+            object.admin_type,
+            object.created_by,
+            object.date_created,
+            object.firstname,
+            object.lastname,
+            object.municipality,
+            object.username,
+        )
+    }
 } //AdminUser
 
 
@@ -92,9 +118,37 @@ class DataHandlerClass extends DataHandlerType {
         return this.postApi(`${this.baseUrl}/editreports.php`, params)
     }
 
-    getUsers() {
-        return this.fetchApi(`${this.baseUrl}/getUsers.php`)
-    }
+    /** gets user from the database */
+    getUsers(userid = "") {
+        //return this.fetchApi(`${this.baseUrl}/getUsers.php`)
+        return new Promise((resolve, reject) => {
+            console.log(username + "--" + password)
+            this.firestore.collection('admin_user')
+                .where('created_by','==',userid)
+                .get().then(function (querySnapshot) {
+                    var users = []
+                    querySnapshot.forEach(function (doc) {
+                        console.log(doc.id, " => ", doc.data());
+                        let object = doc.data()
+                        let admin = new AdminUser(
+                            doc.id, object.admin_type,
+                            object.created_by, object.date_created,
+                            object.firstname, object.lastname,
+                            object.municipality, object.username, )
+                        users.push(admin)
+                    });
+
+                    var message = new Message()
+
+                    message.data = users    
+                    resolve(message)
+                })
+                .catch(function (error) {
+                    console.log("Error getting documents: ", error);
+                    reject(error)
+                });
+        })
+    }//getUsers
 
     addUser(params) {
         return this.postApi(`${this.baseUrl}/addUser.php`, params)

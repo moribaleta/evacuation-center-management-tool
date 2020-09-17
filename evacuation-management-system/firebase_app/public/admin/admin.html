@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin</title>
+
+    <!-- update the version number as needed -->
+    <script defer src="/__/firebase/7.19.1/firebase-app.js"></script>
+    <!-- include only the Firebase features as you need -->
+    <script defer src="/__/firebase/7.19.1/firebase-auth.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-database.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-messaging.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-storage.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-firestore.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-functions.js"></script>
+    <!-- initialize the SDK after all desired features are loaded -->
+    <script defer src="/__/firebase/init.js"></script>
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <script src="js/jquery-3.0.0.min.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <link href="css/main-style.css" rel="stylesheet">
+    <script src="js/vue.js"></script>
+    <script src="../_global/js/objects.js"></script>
+    <script src="../_global/js/utilities.js"></script>
+
+
+</head>
+
+<body>
+    <div class="sidenav" id="header" attr="admin">
+        <div class="sidenav-item">
+            <img class="nav-image" :src="logo" />
+        </div>
+
+        <div  v-for="item in header_items" v-bind:class="'sidenav-item ' + (active == item.id ? 'active' : '') ">
+            <a v-bind:href="item.href">
+                <div class="icon-block">
+                    <i class="material-icons">{{item.icon}}</i>
+                    <h5 class="center">{{item.title}}</h5>
+                </div>
+            </a>
+        </div>
+
+        <div class="sidenav-item">
+            <a v-on:click="onLogout()">
+                <div class="icon-block">
+                    <i class="material-icons">close</i>
+                    <h5 class="center">Log Out</h5>
+                </div>
+            </a>
+        </div>
+    </div>
+    <div class="container" id="content">
+        <div id="userModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">{{isEdit ? 'Edit ': 'Add '}} Admin</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col col-md-12 input-container">
+                                <p>username</p>
+                                <input type="text" class="input input-item" v-model="data_input.username">
+                            </div>
+                            <div class="col col-md-6 input-container">
+                                <p>firstname</p>
+                                <input type="text" class="input input-item" v-model="data_input.firstname">
+                            </div>
+
+                            <div class="col col-md-6 input-container">
+                                <p>lastname</p>
+                                <input type="text" class=" input input-item" v-model="data_input.lastname">
+                            </div>
+
+                            <div class="col col-md-6 input-container">
+                                <p>email</p>
+                                <input type="email" class="input input-item" v-model="data_input.email">
+                            </div>
+
+                            <div class="col col-md-6 input-container">
+                                <p>type</p>
+                                <select id="input-district" class="input input-item input-select"
+                                    v-model="data_input.type">
+                                    <option :selected="'ADMIN'==data_input.type">ADMIN</option>
+                                    <option :selected="'BASIC'==data_input.type">BASIC</option>
+                                </select>
+                            </div>
+                            <div class="col col-md-12">
+                                <p>password</p>
+                                <input type="password" class="input input-item" v-model="data_input.password">
+                                <p>confirm password</p>
+                                <input type="password" class="input input-item" v-model="conf_password">
+                            </div>
+
+
+
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal"
+                            v-on:click="addUser()">Save</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal"
+                            v-on:click="close()">Close</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <h1>Users</h1>
+        <div class="section" v-if="user_list.length > 0">
+            <div class="button-container">
+                <button type="button" id="add-report" class="btn btn-info button-view"
+                    v-on:click="openAddUserModal(false)">add User
+                </button>
+            </div>
+            <div class="table-container" id="tableData">
+                <div class="well" v-for="item,index in user_list">
+                    <div class="row">
+                        <div class="col col-md-3 item-info" v-for="key,index in headers" v-if="key !='id'">
+                            <p class="item-label">
+                                {{key}}:
+                            </p>
+                            <p class="item-value">
+                                {{item[key]}}
+                            </p>
+                        </div>
+
+                        <div class="col col-md-12">
+                            <button class="btn btn-default btn-info" v-on:click="editItem(index)">edit</button>
+                            <button class="btn btn-default btn-danger" v-on:click="deleteItem(index)">delete</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app/datahandler.js"></script>
+    <script src="js/app/constants.js"></script>
+    <script src="js/app/app.js"></script>
+    <script>
+
+        app = new Vue({
+            el: '#content',
+            data: {
+                user_list: [],
+                headers: [],
+                data_input: new AdminUser(),
+                isEdit: false,
+                editUserId: null,
+                conf_password: null
+            },
+            methods: {
+                onStart(){
+                    this.fetchUser()
+                },
+                fetchUser() {
+                    DataHandler.getUsers(header.user.id).then((message) => {
+                        this.setUser(message.data)
+                    }).catch(err => {
+                        console.log("error")
+                    })
+                },
+                setUser(data) {
+                    this.user_list = data
+                    console.log(this.user_list)
+                    if (this.user_list.length > 0) {
+                        this.headers = Object.keys(this.user_list[0])
+                    }
+                },
+                openAddUserModal(isEdit) {
+                    this.isEdit = isEdit
+                    if (!this.isEdit) {
+                        this.data_input = {
+                            username: null,
+                            firstname: null,
+                            lastname: null,
+                            email: null,
+                            password: null,
+                            type: null
+                        }
+                    }
+                    $('#userModal').modal()
+                },
+                addUser() {
+                    if (this.data_input.password == this.conf_password) {
+                        if (this.isEdit) {
+                            this.onSaveEdit()
+                        } else {
+                            this.onSaveNewUser()
+                        }
+                        this.close()
+                    } else {
+                        alert("password doesn't match")
+                    }
+                },
+
+                onSaveEdit() {
+                    this.data_input['id'] = this.editUserId
+                    DataHandler.editUser(this.data_input).then((data) => {
+                        if (data.error) {
+                            alert(`Can't Edit User ${data.error}`)
+                        } else {
+                            alert(`User Have Been Edited Successfuly`)
+                            this.fetchUser()
+                        }
+                    })
+                },
+
+                onSaveNewUser() {
+                    DataHandler.addUser(this.data_input).then((data) => {
+                        if (data.error) {
+                            alert(`Can't Save User ${data.error}`)
+                        } else {
+                            alert(`User Have Been Added Successfuly`)
+                            this.fetchUser()
+                        }
+                    })
+                },
+
+                editItem(index) {
+                    var user = this.user_list[index]
+                    this.editUserId = user.id
+                    this.data_input.username = user.username
+                    this.data_input.firstname = user.firstname
+                    this.data_input.lastname = user.lastname
+                    this.data_input.email = user.email
+                    this.data_input.type = user.type
+                    this.openAddUserModal(true)
+                },
+                deleteItem(index) {
+                    /*  deleteUser(this.user_list[index].id, this.initApp) */
+                    let onConfirm = confirm('Deleting User\nPress confirm to proceed')
+                    if (onConfirm) {
+                        DataHandler.deleteUser(this.user_list[index].id).then((data) => {
+                            console.log(data)
+                            if (data.error) {
+                                alert(`Can't Delete User ${data.error}`)
+                            } else {
+                                alert(`User Have Been Deleted Successfuly`)
+                                this.fetchUser()
+                            }
+                        })
+                    }
+
+                },
+                close() {
+                    this.data_input = {
+                        username: null,
+                        firstname: null,
+                        lastname: null,
+                        email: null,
+                        password: null,
+                        type: null
+                    }
+                    this.conf_password = null
+                    this.isEdit = false
+                }
+
+            }
+        })
+
+        /* $(document).ready(() => {
+            header.onStart()
+        }) */
+    </script>
+
+</body>
+
+</html>

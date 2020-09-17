@@ -34,7 +34,7 @@
 <body>
     <div class="sidenav" id="header" attr="evacuations">
         <div class="sidenav-item">
-            <img class="nav-image" src="resources/images/logo.png" />
+            <img class="nav-image" :src="logo" />
         </div>
 
         <div  v-for="item in header_items" v-bind:class="'sidenav-item ' + (active == item.id ? 'active' : '') ">

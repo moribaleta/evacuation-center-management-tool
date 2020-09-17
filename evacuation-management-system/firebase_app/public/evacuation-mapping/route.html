@@ -312,12 +312,12 @@
                     var position = new google.maps.LatLng( path_data[i].coordinates.lat,path_data[i].coordinates.lng);
                     path_line_coordinates.push(position)
                     bounds.extend(position);
-                    /* marker = new google.maps.Marker({
+                    marker = new google.maps.Marker({
                         position: position,
                         map: map,
                         title: (i+1)+". "+" node_id: "+path_data[i].node_id+" "+path_data[i].name+" position " + path_data[i].coordinates.lat +" , "+path_data[i].coordinates.lng,
                         icon: 'resources/images/ambulance_24.png'
-                    }); */
+                    });
                     map.fitBounds(bounds);
                 }
 
@@ -371,7 +371,7 @@
                     path_line_coordinates.push(path_data[i].coordinates);
                 }                                
                 path_line_coordinates.push(finish_location); */
-
+                
                 var lineSymbol = {
                     path: 'M 0,-1 0,1',
                     strokeOpacity: 1,

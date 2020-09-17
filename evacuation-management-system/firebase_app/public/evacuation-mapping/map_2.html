@@ -86,24 +86,17 @@
                 <div class="modal-body">
                     <!--<div class="container">-->
                     <div class="panel panel-default">
-                        <!-- <div class="panel-heading">
-                            <div class="row">
-                                <div class="col-sm-4">Evacuation Center</div>
-                                <div class="col-sm-2">Distance</div>
-                                <div class="col-sm-2">Capacity</div>
-                                <div class="col-sm-2">Floor Space</div>
-                                <div class="col-sm-2">Objective Output</div>
-                                <div class="col-sm-2">Fitness Output</div>
-                            </div>
-                        </div> -->
                         <div class="panel-body" v-if='items!=null'>
-                            <div class="row" v-for='test,index in test_outputs'>
-                                <div class="col-sm-12 success">{{(index+1)+". "}} Name: {{test.output.best.evac.name}}</div>
-                                <div class="col-sm-4">Distance: {{items[index].distance+" km"}}</div>
-                                <div class="col-sm-2">Capacity: {{test.output.best.evac.population_capacity}}</div>
-                                <div class="col-sm-2">Floor Space: {{test.output.best.evac.floor_space}}</div>
-                                <div class="col-sm-2">Objective Output: {{test.output.best.conflicts.toFixed(4)}}</div>
-                                <div class="col-sm-2">Fitness Output: {{test.output.best.fitness.toFixed(4)}}</div>
+                            <div class="panel panel-default" v-for='test,index in test_outputs'>
+                                <div class="panel-heading success">{{(index+1)+". "}} Name: {{test.output.best.evac.name}}</div>
+                                <div class="panel-body">
+                                    <div class="col-sm-4">Distance: {{items[index].distance+" km"}}</div>
+                                    <div class="col-sm-2">Capacity: {{test.output.best.evac.population_capacity}}</div>
+                                    <div class="col-sm-2">Floor Space: {{test.output.best.evac.floor_space}}</div>
+                                    <div class="col-sm-2">Objective Output: {{test.output.best.conflicts.toFixed(4)}}
+                                    </div>
+                                    <div class="col-sm-2">Fitness Output: {{test.output.best.fitness.toFixed(4)}}</div>
+                                </div>
                             </div>
                         </div>
                     </div>

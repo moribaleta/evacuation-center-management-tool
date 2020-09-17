@@ -3,6 +3,7 @@ var header = new Vue({
     data: {
         user: new AdminUser(),
         active: "",
+        logo: "resources/images/logo.png",
         header_items: [
             {
                 id: 'evacuations',
@@ -22,6 +23,12 @@ var header = new Vue({
                 icon: 'assessment',
                 title: 'Models'
             },
+            {
+                id: 'admin',
+                href: 'admin.html',
+                icon: 'group',
+                title: 'Admin'
+            }
         ]
     },
     methods: {
