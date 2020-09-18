@@ -10,16 +10,22 @@ class AdminUser {
     lastname
     municipality
     username
+    email
+    password
 
-    constructor(id, admin_type, created_by, date_created, firstname, lastname, municipality, username) {
-        this.id = id
+    static keys = ['admin_type', 'date_created', 'firstname', 'lastname', 'municipality', 'username', 'email']
+
+    constructor(id, admin_type, created_by, date_created, firstname, lastname, municipality, username, email, password) {
+        this.id = id || "admin-"+genID(5)
         this.admin_type = admin_type
         this.created_by = created_by
-        this.date_created = date_created
+        this.date_created = date_created || new Date()
         this.firstname = firstname
         this.lastname = lastname
         this.municipality = municipality
         this.username = username
+        this.email  = email
+        this.password = password
     }
 
     toObject() {
@@ -32,10 +38,12 @@ class AdminUser {
             lastname: this.lastname,
             municipality: this.municipality,
             username: this.username,
+            email: this.email,
+            password: this.password
         }
     }
 
-    parse(object = {}) {
+    static parse(object = {}) {
         return new AdminUser(
             object.id,
             object.admin_type,
@@ -45,6 +53,8 @@ class AdminUser {
             object.lastname,
             object.municipality,
             object.username,
+            object.email,
+            object.password
         )
     }
 } //AdminUser
@@ -71,13 +81,13 @@ class DataHandlerClass extends DataHandlerType {
                     var users = []
                     querySnapshot.forEach(function (doc) {
                         console.log(doc.id, " => ", doc.data());
-                        let object = doc.data()
-                        let admin = new AdminUser(
-                            doc.id, object.admin_type,
-                            object.created_by, object.date_created,
-                            object.firstname, object.lastname,
-                            object.municipality, object.username, )
-                        users.push(admin)
+                        let data = doc.data()
+                        let id = doc.id
+                        let object = {
+                            id,
+                            ...data
+                        }
+                        users.push(AdminUser.parse(object))
                     });
 
                     var message = new Message()
@@ -118,29 +128,29 @@ class DataHandlerClass extends DataHandlerType {
         return this.postApi(`${this.baseUrl}/editreports.php`, params)
     }
 
+    /* <------------ USER --------------*/
     /** gets user from the database */
-    getUsers(userid = "") {
-        //return this.fetchApi(`${this.baseUrl}/getUsers.php`)
+    getAdminUsers(userid = "") {
         return new Promise((resolve, reject) => {
-            console.log(username + "--" + password)
             this.firestore.collection('admin_user')
-                .where('created_by','==',userid)
+                .where('created_by', '==', userid)
                 .get().then(function (querySnapshot) {
                     var users = []
                     querySnapshot.forEach(function (doc) {
                         console.log(doc.id, " => ", doc.data());
-                        let object = doc.data()
-                        let admin = new AdminUser(
-                            doc.id, object.admin_type,
-                            object.created_by, object.date_created,
-                            object.firstname, object.lastname,
-                            object.municipality, object.username, )
-                        users.push(admin)
+                        let data = doc.data()
+                        let id = doc.id
+                        var object = {
+                            id,
+                            ...data
+                        }
+                        object.date_created = data.date_created?.toDate() 
+                        users.push(AdminUser.parse(object))
                     });
 
                     var message = new Message()
 
-                    message.data = users    
+                    message.data = users
                     resolve(message)
                 })
                 .catch(function (error) {
@@ -150,19 +160,32 @@ class DataHandlerClass extends DataHandlerType {
         })
     }//getUsers
 
-    addUser(params) {
-        return this.postApi(`${this.baseUrl}/addUser.php`, params)
-    }
-
-    deleteUser(id) {
-        return this.postApi(`${this.baseUrl}/deleteUser.php`, {
-            id
+    addAdminUsers(params = new AdminUser()) {
+        return new Promise((resolve, reject) => {
+            this.firestore.collection('admin_user')
+                .doc(params.id)
+                .set(params.toObject())
+                .then(function () {
+                    resolve("Document successfully written!")
+                }).catch(function (error) {
+                    reject(error)
+                });
         })
-    }
+    }//addAdminUsers
 
-    editUser(params) {
-        return this.postApi(`${this.baseUrl}/editUser.php`, params)
-    }
+
+    deleteAdminUsers(id) {
+        return new Promise((resolve, reject) => {
+            this.firestore.collection('admin_user')
+                .doc(id).delete()
+                .then(function () {
+                    resolve("Document successfully deleted!");
+                }).catch(function (error) {
+                    reject(error)
+                });
+        })
+    }//deleteAdminUsers
+    /* ------------ USER -------------->*/
 
     getEvacuationCenters() {
         return new Promise((resolve, reject) => {
