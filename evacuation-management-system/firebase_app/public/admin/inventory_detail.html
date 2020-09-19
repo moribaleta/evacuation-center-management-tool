@@ -4,7 +4,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Evacuations</title>
+    <title>Inventory</title>
 
     <!-- update the version number as needed -->
     <script defer src="/__/firebase/7.19.1/firebase-app.js"></script>
@@ -34,7 +34,7 @@
             <img class="nav-image" :src="logo" />
         </div>
 
-        <div  v-for="item in header_items" v-bind:class="'sidenav-item ' + (active == item.id ? 'active' : '') ">
+        <div v-for="item in header_items" v-bind:class="'sidenav-item ' + (active == item.id ? 'active' : '') ">
             <a v-bind:href="item.href">
                 <div class="icon-block">
                     <i class="material-icons">{{item.icon}}</i>
@@ -54,98 +54,49 @@
     </div>
     <!-- <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#editorModal">Open Modal</button> -->
     <div class="container" id="content">
-        <!-- editor modal -->
-        <div id="editorModal" class="modal fade" role="dialog">
+        <!-- Supply modal -->
+        <div id="supplyModal" class="modal fade" role="dialog">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">{{isEdit ? 'Edit ': 'Add '}} Evacuation Facility</h4>
+                        <h4 class="modal-title">Inventory Supply</h4>
                     </div>
                     <div class="modal-body">
-                        <form class="form-horizontal" v-if="data_input != null">
+                        <form class="form-horizontal" v-if="supply_input != null">
                             <fieldset>
-                                <!-- Text input-->
                                 <div class="form-group">
-                                    <label class="col-md-4 control-label" for="name">Name</label>
+                                    <label class="col-md-4 control-label" for="inventory_type">Supply Type</label>
                                     <div class="col-md-4">
-                                        <input id="name" name="name" type="text" placeholder="Evacuation Center"
-                                            class="form-control input-md" required="" v-model="data_input.name">
-                                        <span class="help-block">Enter Evacuation Center</span>
-                                    </div>
-                                </div>
-
-                                <!-- Text input-->
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label" for="population_capacity">Population
-                                        Capacity</label>
-                                    <div class="col-md-4">
-                                        <input id="population_capacity" name="population_capacity" type="text"
-                                            placeholder="capacity" class="form-control input-md" required=""
-                                            v-model="data_input.population_capacity">
-                                        <span class="help-block">Number of population the facility can hold</span>
-                                    </div>
-                                </div>
-
-                                <!-- Text input-->
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label" for="floor_space">Floor space</label>
-                                    <div class="col-md-4">
-                                        <input id="floor_space" name="floor_space" type="text"
-                                            placeholder="area in square meters" class="form-control input-md"
-                                            required="" v-model="data_input.floor_space">
-                                        <span class="help-block">The maximum space of the facility available</span>
-                                    </div>
-                                </div>
-
-                                <!-- Text input-->
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label" for="contact_numbers">Contact Numbers</label>
-                                    <div class="col-md-4">
-                                        <input id="contact_numbers" name="contact_numbers" type="text"
-                                            placeholder="eg. 0917..." class="form-control input-md"
-                                            v-model="data_input.contact_numbers">
-                                        <span class="help-block">Contact numbers available</span>
-                                    </div>
-                                </div>
-
-                                <!-- Textarea -->
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label" for="exact_address">Exact Address</label>
-                                    <div class="col-md-4">
-                                        <textarea class="form-control" id="exact_address" name="exact_address"
-                                            v-model="data_input.exact_address"></textarea>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label" for="location">Location</label>
-                                    <div class="col-md-4">
-                                        <div>
-                                            <label class="control-label" for="location">Latitude</label>
-                                            <input id="lat" name="location" type="text" placeholder="120.123 ..."
-                                                class="form-control input-md" required=""
-                                                v-model="data_input.location.lat">
-                                            <span class="help-block">Latitude</span>
-                                        </div>
-                                        <div>
-                                            <label class="control-label" for="location">Longitude</label>
-                                            <input id="lng" name="location" type="text" placeholder="120.123 ..."
-                                                class="form-control input-md" required=""
-                                                v-model="data_input.location.lng">
-                                            <span class="help-block">Longitude</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Select Basic -->
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label" for="municipality">Municipality</label>
-                                    <div class="col-md-4">
-                                        <select id="municipality" name="municipality" class="form-control"
-                                            v-model="data_input.municipality">
-                                            <option v-for="municipal in municipalities" v-bind:value="municipal">
-                                                {{municipal}}</option>
+                                        <select id="inventory_type" name="inventory_type" class="form-control"
+                                            v-model="supply_input.inventory_type">
+                                            <option v-for="type in supply_types" v-bind:value="type.id">
+                                                {{type.name}}</option>
                                         </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-md-4 control-label" for="qty">Qty</label>
+                                    <div class="col-md-4">
+                                        <input id="name" name="qty" type="number" placeholder="Quantity"
+                                            class="form-control input-md" required="" v-model="supply_input.qty">
+                                        <span class="help-block">Enter Quantity Stored</span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-md-4 control-label" for="report_date">Date Supplied</label>
+                                    <div class="col-md-4">
+                                        <input id="report_date" name="report_date" type="datetime-local"
+                                            class="form-control input-md" v-model="supply_input.date_supplied">
+                                        <span class="help-block">date supplied</span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-md-4 control-label" for="name">Remarks</label>
+                                    <div class="col-md-4">
+                                        <textarea id="name" name="name" type="text" placeholder="Remarks/Notes .... "
+                                            class="form-control input-md" required="" v-model="supply_input.remarks"></textarea>
+                                        <span class="help-block">Enter Any Remarks</span>
                                     </div>
                                 </div>
 
@@ -153,59 +104,251 @@
                         </form>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal"
-                            v-on:click="addEvacationCenter()">Save</button>
-                        <button type="button" class="btn btn-default" data-dismiss="modal"
-                            v-on:click="close()">Close</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal" v-on:click="onSaveSupplyItem()">Save</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                     </div>
                 </div>
 
             </div>
         </div>
 
+        <!-- Inventory Modal -->
+        <div id="inventoryModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Edit Inventory</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form class="form-horizontal" v-if="inventory_input != null">
+                            <fieldset>
+                                <div class="form-group">
+                                    <label class="col-md-4 control-label" for="name">Name</label>
+                                    <div class="col-md-4">
+                                        <input id="name" name="name" type="text" placeholder="Name"
+                                            class="form-control input-md" required="" v-model="inventory_input.name">
+                                        <span class="help-block">Enter Name</span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-md-4 control-label" for="description">Description</label>
+                                    <div class="col-md-4">
+                                        <textarea id="description" name="description" type="text" placeholder="Description .... "
+                                            class="form-control input-md" required="" v-model="inventory_input.description"></textarea>
+                                        <span class="help-block">Enter Description</span>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal" v-on:click="onSaveInventory()">Save</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Supply Type -->
+        <div id="typeModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Supply Types</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form class="form-horizontal" v-if="supply_type_input != null">
+                            <fieldset>
+                                <div class="form-group">
+                                    <label class="col-md-4 control-label" for="name">Name</label>
+                                    <div class="col-md-4">
+                                        <input id="name" name="name" type="text" placeholder="Name"
+                                            class="form-control input-md" required="" v-model="supply_type_input.name">
+                                        <span class="help-block">Enter Name</span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-md-4 control-label" for="qty">Unit Count</label>
+                                    <div class="col-md-4">
+                                        <input id="name" name="qty" type="number" placeholder="Unit Count"
+                                            class="form-control input-md" required="" v-model="supply_type_input.amount">
+                                        <span class="help-block"># of items per pack</span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-md-4 control-label" for="description">Description</label>
+                                    <div class="col-md-4">
+                                        <textarea id="description" name="description" type="text" placeholder="Description .... "
+                                            class="form-control input-md" required="" v-model="supply_type_input.description"></textarea>
+                                        <span class="help-block">Enter Description</span>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal" v-on:click="onSaveSupplyType()">Save</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
 
         <div class="subcontent">
             <div class="section header">
-                <h1>Evacuation Facilities</h1>
+                <h1>Inventory Details</h1>
             </div>
 
-            <div class="loader-container" v-if="isLoading">
-                <div class="loader"></div>
+            <div class="section">
+                <div class="well">
+                    <div class="section header">
+                        <h4>Inventory</h4>
+                    </div>
+
+                    <div class="loader" v-if="loading.isInventory"></div>
+
+                    <div class="row" v-if="!loading.isInventory">
+                        <div class="col col-md-12">
+                            <p class="item-value">
+                                name: {{inventory.name}}
+                            </p>
+                            <p class="item-value">
+                                description: {{inventory.description}}
+                            </p>
+                            <p class="item-value">
+                                date created: {{inventory.date_created}}
+                            </p>
+                            <p class="item-value">
+                                created by: {{inventory.created_by}}
+                            </p>
+                        </div>
+
+                        <div class="col col-md-12">
+                            <button class="btn btn-default btn-info" v-on:click="editInventory()">edit</button>
+                            <button class="btn btn-default btn-danger" v-on:click="deleteInventory()">delete</button>
+                        </div>
+                    </div>
+                </div>
             </div>
-
-            <div class="section" style="height: 80%;" v-if="evac_list.length > 0">
-
-                <div class="table-container" id="tableData">
-                    <div class="well" v-for="item,index in evac_list">
+            
+            
+            <div class="section" >
+                <div class="section header">
+                    <h4>Supplies</h4>
+                </div>
+                <div class="loader-container" v-if="loading.isSupply">
+                    <div class="loader"></div>
+                </div>
+                <div class="table-container" id="tableData" v-if="supplies.length > 0">
+                    <div class="well" v-for="item,index in supplies">
                         <div class="row">
-                            <div class="col col-md-3 item-info" v-for="key,index in headers" v-if="key !='id'">
+                            <div class="col col-md-2 item-info">
                                 <p class="item-label">
-                                    {{key}}:
+                                    {{index + 1}}.
+                                </p>
+                                <p class="item-label">
+                                    Name:
                                 </p>
                                 <p class="item-value">
-                                    {{item.toObject()[key]}}
+                                    {{item.name}}
+                                </p>
+                            </div>
+                            <div class="col col-md-2 item-info">
+                                <p class="item-label">
+                                    Quantity:
+                                </p>
+                                <p class="item-value">
+                                    {{item.qty}}
+                                </p>
+                            </div>
+                            <div class="col col-md-2 item-info">
+                                <p class="item-label">
+                                    Date Supplied:
+                                </p>
+                                <p class="item-value">
+                                    {{item.date_supplied}}
+                                </p>
+                            </div>
+                            <div class="col col-md-12 item-info">
+                                <p class="item-label">
+                                    Remarks:
+                                </p>
+                                <p class="item-value">
+                                    {{item.remarks}}
                                 </p>
                             </div>
 
                             <div class="col col-md-12">
-                                <button class="btn btn-default btn-info" v-on:click="editItem(index)">edit</button>
+                                <button class="btn btn-default btn-info" v-on:click="editSupplyItem(index)">edit</button>
                                 <button class="btn btn-default btn-danger"
-                                    v-on:click="deleteItem(index)">delete</button>
+                                    v-on:click="onDeleteSupplyItem(index)">delete</button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="section">
-                <button type="button" id="add-report" class="btn btn-info button-view"
-                    v-on:click="importEvac()">Import Evacuation Center
+                <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="addSupplyItem()">Add New
+                    Supply
                 </button>
-                <button type="button" id="add-report" class="btn btn-info button-view"
-                    v-on:click="openAddeditorModal(false)">Add Evacuation Center
+                <button type="button" id="add-report" class="btn btn-warning button-view" v-on:click="addSupplyType()">Add New
+                    Supply Type
                 </button>
-                <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="download()">Download
-                    Evacuation Center
+                <button type="button" id="add-report" class="btn btn-success button-view" v-on:click="generateReport()">
+                    Generate Report
                 </button>
+            </div>
+
+            <div class="section" >
+                <div class="section header" v-if="supply_types.length > 0">
+                    <h4>Supplies</h4>
+                </div>
+                <div class="loader-container" v-if="loading.isSupplyType">
+                    <div class="loader"></div>
+                </div>
+                <div class="table-container" id="tableData" v-if="supply_types.length > 0">
+                    <div class="well" v-for="item,index in supply_types">
+                        <div class="row" >
+                            <div class="col col-md-2 item-info">
+                                <p class="item-label">
+                                    {{index + 1}}.
+                                </p>
+                                <p class="item-label">
+                                    Name:
+                                </p>
+                                <p class="item-value" v-if="supply_types_ref[item.inventory_type] != undefined">
+                                    {{supply_types_ref[item.inventory_type].name}}
+                                </p>
+                            </div>
+                            <div class="col col-md-2 item-info">
+                                <p class="item-label">
+                                    Amount:
+                                </p>
+                                <p class="item-value">
+                                    {{item.amount}}
+                                </p>
+                            </div>
+                            <div class="col col-md-3 item-info">
+                                <p class="item-label">
+                                    Description:
+                                </p>
+                                <p class="item-value">
+                                    {{item.description}}
+                                </p>
+                            </div>
+                           
+
+                            <div class="col col-md-4">
+                                <button class="btn btn-default btn-info" v-on:click="editSupplyType(index)">edit</button>
+                                <button class="btn btn-default btn-danger"
+                                    v-on:click="onDeleteSupplyType(index)">delete</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -216,163 +359,212 @@
     <script src="js/app/app.js"></script>
 
     <script>
-
-        let sample = {
-            id: genID(5),
-            name: "sampl1",
-            location: {
-                lat: 14.426700434748033,
-                lng: 121.43130540847778
-            },
-            population_capacity: 1000,
-            floor_space: 2000,
-            date_created: Date(),
-            created_by: 0,
-            exact_address: "mabitac rd",
-            municipality: "mabitac",
-            contact_numbers: "09171231233",
-        }
-
-        function prepareEvac(value) {
-            return {
-                id: value.id,
-                name: value.name,
-                location: JSON.stringify(value.location),
-                population_capacity: value.population_capacity,
-                floor_space: value.floor_space,
-                date_created: value.date_created,
-                created_by: value.created_by,
-                exact_address: value.exact_address,
-                municipality: value.municipality,
-                contact_numbers: value.contact_numbers,
-            }
-        }
-
         app = new Vue({
             el: '#content',
             data: {
-                evac_list: [],
-                headers: [],
-                data_input: null, //new EvacuationCenter(),
-                isEdit: false,
-                editEvacuationID: null,
-                conf_password: null,
-                municipalities: municipalities,
-                isLoading: false
+                user              : new AdminUser(),
+                inventory         : new EvacuationInventory(),
+                supplies          : [],
+                supply_types      : [],
+                supply_types_ref  : {},
+                inventory_input   : null,
+                supply_input      : null,
+                supply_type_input : null,
+                isedit            : false,
+                municipalities    : municipalities,
+                /* isloadinginventory: false,
+                loading.isSupply : false, */
+                loading           : {
+                    isInventory : false,
+                    isSupply    : false,
+                    isSupplyType: false
+                },
+
+                supply_header       : [],
+                supply_type_header  : []
             },
             methods: {
                 onStart() {
-                    this.fetchEvacationCenter()
-                    //this.isLoading = false
+                    let link = window.location.href
+                    let id = link.split("=")[1]
+                    this.user = header.user
+                    this.fetchInventory(id)
                 },
 
-                fetchEvacationCenter() {
-                    this.isLoading = true
-                    DataHandler.getEvacuationCenters().then((data) => {
-                        this.setEvacationCenter(data.data)
-                        this.isLoading = false
+                fetchInventory(id) {
+                    this.loading.isInventory = true
+                    this.loading.isSupply = true
+                    DataHandler.getInventory(id).then((data) => {
+                        this.setInventory(data.data)
+                        this.loading.isInventory = false
                     }).catch(err => {
-                        this.isLoading = false
-                    })
-                },
-                setEvacationCenter(data) {
-                    this.evac_list = data
-                    console.log(this.evac_list)
-                    if (this.evac_list.length > 0) {
-                        this.headers = Object.keys(sample)
-                    }
-                },
-                openAddeditorModal(isEdit) {
-                    this.isEdit = isEdit
-                    if (!this.isEdit) {
-                        this.data_input = new EvacuationCenter()
-                        this.data_input.location = {
-                            lat: null,
-                            lng: null
-                        }
-                        console.log("data_input %o", this.data_input)
-                    }
-                    $('#editorModal').modal()
-                },
-                importEvac(){
-                    let promises = evacs.map((evac) => {
-                        return DataHandler.addEvacationCenter(EvacuationCenter.parse(evac))
+                        console.log(err)
+                        this.loading.isInventory = false
                     })
 
-                    Promise.all(promises).then(() => {
-                        this.fetchEvacationCenter()
-                    }).catch(error => {
-                        console.log(error)
-                    })
-                },
-                addEvacationCenter() {
-                    if (this.data_input.password == this.conf_password) {
-                        if (this.isEdit) {
-                            this.onSaveEdit()
-                        } else {
-                            this.onSaveNewEvacationCenter()
-                        }
-                        this.close()
-                    } else {
-                        alert("password doesn't match")
-                    }
+                    this.fetchSupplyType()
                 },
 
-                onSaveEdit() {
-                    console.log("data %o", this.data_input)
-                    DataHandler.addEvacationCenter(this.data_input).then((data) => {
+                setInventory(data) {
+                    this.inventory = data
+                    this.fetchSupply()
+                },
+
+                fetchSupply() {
+                    this.loading.isSupply = false
+                    DataHandler.getSupplies([this.inventory.id]).then((message) => {
+                        this.supplies = message.data[0].supplies
+                        this.loading.isSupply = false
+                    }).catch(err => {
+                        this.loading.isSupply = false
+                        console.log(err)
+                    })
+                },
+
+                fetchSupplyType(){
+                    this.loading.isSupplyType = true
+                    DataHandler.getSupplyTypes().then((data) => {
+                        this.supply_types = data.data || []
+                        this.loading.isSupplyType = false
+                        console.log("supply types %o", this.supply_types)
+
+                        this.supply_types.forEach(type => {
+                            this.supply_types_ref[type.id] = type
+                        });
+
+                    }).catch(err =>{
+                        console.log(err)
+                        this.loading.isSupplyType = false
+                    })
+                },
+
+                /*!!=============== INVENTORY ===============!!!*/
+                editInventory() {
+                    this.inventory_input = EvacuationInventory.parse(this.inventory.toObject())
+                    $('#inventoryModal').modal()
+                },
+
+                onSaveInventory() {
+                    console.log("data %o", this.inventory_input)
+                    DataHandler.addInventory(this.inventory_input).then((data) => {
                         if (data.error) {
-                            alert(`Can't Edit User ${data.error}`)
+                            alert(`Can't Persist Item ${data.error}`)
                         } else {
-                            alert(`User Have Been Edited Successfuly`)
-                            this.data_input = new EvacuationCenter()
-                            this.fetchEvacationCenter()
+                            alert(`Item Have Been Persisted Successfuly`)
+                            let id = this.inventory_input.id
+                            this.inventory_input = new EvacuationInventory()
+                            this.fetchInventory(id)
                         }
                     })
                 },
 
-                onSaveNewEvacationCenter() {
-                    console.log("data %o", this.data_input)
-                    this.data_input.created_by = header.user.id
-                    DataHandler.addEvacationCenter(this.data_input).then((data) => {
-                        if (data.error) {
-                            console.log("params %o", data.params)
-                            alert(`Can't Save User ${data.error}`)
-                        } else {
-                            alert(`User Have Been Added Successfuly`)
-                            this.fetchEvacationCenter()
-                        }
-                    })
-                },
-
-                editItem(index) {
-                    var evac = this.evac_list[index]
-                    this.data_input = EvacuationCenter.parse(evac.toObject())
-                    this.openAddeditorModal(true)
-                },
-
-                deleteItem(index) {
+                onDeleteInventory() {
+                    const id = this.inventory.id
                     let onConfirm = confirm('Deleting Item\nPress confirm to proceed')
                     if (onConfirm) {
-                        DataHandler.deleteEvacationCenter(this.evac_list[index].id).then((data) => {
+                        DataHandler.deleteInventory(id).then((data) => {
                             console.log(data)
                             if (data.error) {
                                 alert(`Can't Delete Item ${data.error}`)
                             } else {
                                 alert(`Item Have Been Deleted Successfuly`)
-                                this.fetchEvacationCenter()
+                                window.close()
                             }
                         })
                     }
                 },
+                /*!!=============== INVENTORY ===============!!!*/
 
-                close() {
-                    this.data_input = new EvacuationCenter()
-                    this.conf_password = null
+                /*!!=============== SUPPLY ===============!!!*/
+                addSupplyItem() {
+                    this.supply_input = new EvacuationSupply()
+                    this.supply_input.inventory_id = this.inventory.id
+                    this.supply_input.created_by = this.user.id
                     this.isEdit = false
+                    $('#supplyModal').modal()
                 },
 
-                download() {
+                editSupplyItem(index) {
+                    let supply = this.supplies[index]
+                    this.supply_input = EvacuationSupply.parse(supply.toObject())
+                    $('#supplyModal').modal()
+                },
+
+                onSaveSupplyItem() {
+                    console.log("data %o", this.supply_input)
+                    DataHandler.addSupply(this.supply_input).then((data) => {
+                        if (data.error) {
+                            alert(`Can't Persist Item ${data.error}`)
+                        } else {
+                            alert(`Item Have Been Persisted Successfuly`)
+                            this.supply_input = new EvacuationSupply()
+                            this.fetchSupply()
+                        }
+                    })
+                },
+
+                onDeleteSupplyItem(id) {
+                    let onConfirm = confirm('Deleting Item\nPress confirm to proceed')
+                    if (onConfirm) {
+                        DataHandler.deleteSupply(id).then((data) => {
+                            console.log(data)
+                            if (data.error) {
+                                alert(`Can't Delete Item ${data.error}`)
+                            } else {
+                                alert(`Item Have Been Deleted Successfuly`)
+                                this.fetchSupply()
+                            }
+                        })
+                    }
+                },
+                /*!!=============== SUPPLY ===============!!!*/
+
+                /*!!=============== SUPPLY-TYPE ===============!!!*/
+                addSupplyType() {
+                    this.supply_type_input = new EvacuationSupplyType()
+                    this.supply_type_input.inventory_id = this.inventory.id
+                    this.supply_type_input.created_by = this.user.id
+                    this.isEdit = false
+                    $('#typeModal').modal()
+                },
+
+                editSupplyType(index) {
+                    let supply = this.supply_types[index]
+                    this.supply_type_input = EvacuationSupplyType.parse(supply.toObject())
+                    $('#typeModal').modal()
+                },
+
+                onSaveSupplyType() {
+                    console.log("data %o", this.supply_type_input)
+                    DataHandler.addSupplyType(this.supply_type_input).then((data) => {
+                        if (data.error) {
+                            alert(`Can't Persist Item ${data.error}`)
+                        } else {
+                            alert(`Item Have Been Persisted Successfuly`)
+                            this.supply_type_input = new EvacuationSupplyType()
+                            this.fetchSupplyType()
+                        }
+                    })
+                },
+
+                onDeleteSupplyType(id) {
+                    let onConfirm = confirm('Deleting Item\nPress confirm to proceed')
+                    if (onConfirm) {
+                        DataHandler.deleteSupplyType(id).then((data) => {
+                            console.log(data)
+                            if (data.error) {
+                                alert(`Can't Delete Item ${data.error}`)
+                            } else {
+                                alert(`Item Have Been Deleted Successfuly`)
+                                this.fetchSupplyType()
+                            }
+                        })
+                    }
+                },
+                /*!!=============== SUPPLY-TYPE ===============!!!*/
+
+
+                generateReport() {
                     let text = JSON.stringify(this.evac_list)
                     saveTextAsFile(text)
                 }

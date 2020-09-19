@@ -293,8 +293,11 @@ class EvacuationSupply extends Model {
     /** date of the item supplied */
     date_supplied = new Date()
 
+    /** any remarks or descriptions */
+    remarks = ""
 
-    constructor(id, date_created, created_by, inventory_id, inventory_type, qty, date_supplied) {
+
+    constructor(id, date_created, created_by, inventory_id, inventory_type, qty, date_supplied, remarks) {
         super()
         this.id = id || "evacsupply-" + genID(5)
         this.date_created = date_created || new Date()
@@ -303,10 +306,11 @@ class EvacuationSupply extends Model {
         this.inventory_type = inventory_type
         this.qty = qty
         this.date_supplied = date_supplied
+        this.remarks    = remarks
     }
 
     static parse(objects = {}) {
-        return new EvacuationInventory(
+        return new EvacuationSupply(
             objects.id,
             objects.date_created,
             objects.created_by,
@@ -314,6 +318,7 @@ class EvacuationSupply extends Model {
             objects.inventory_type,
             objects.qty,
             objects.date_supplied,
+            objects.remarks
         )
     }
 
@@ -326,6 +331,7 @@ class EvacuationSupply extends Model {
             inventory_type : this.inventory_type,
             qty : this.qty,
             date_supplied : this.date_supplied,
+            remarks: this.remarks
         }
     }
 }//EvacuationSupply
@@ -353,7 +359,7 @@ class EvacuationSupplyType extends Model {
     }
 
     static parse(objects = {}) {
-        return new EvacuationInventory(
+        return new EvacuationSupplyType(
             objects.id,
             objects.date_created,
             objects.created_by,

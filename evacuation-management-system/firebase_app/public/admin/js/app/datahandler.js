@@ -458,6 +458,37 @@ class InventoryHandler extends MOABParamsHandler {
                 });
         })
     } //getInventories
+    
+    /** returns the inventories of the evacuation centers */
+    getInventory(id) {
+        return new Promise((resolve, reject) => {
+            this.firestore.collection(UserHandler.tables.evacuation_inventory)
+                .where('id', '==', id)
+                .get().then(function (querySnapshot) {
+                    var inventories = []
+                    querySnapshot.forEach(function (doc) {
+                        let data = doc.data()
+                        let id = doc.id
+
+                        let object = {
+                            id,
+                            ...data
+                        }
+                        try{
+                            object.date_created = object.date_created.toDate()
+                        }catch(err) {
+                            console.log(err)
+                        }
+                        inventories.push(EvacuationInventory.parse(object))
+                    });
+                    var message = new Message()
+                    message.data = inventories[0]
+                    resolve(message)
+                }).catch(function (error) {
+                    reject(error)
+                });
+        })
+    } //getInventories
 
     /** adds inventory uses
      * @param inventory - inventory to be updated to the database
@@ -534,7 +565,7 @@ class InventoryHandler extends MOABParamsHandler {
     
     getSupplyTypes() {
         return new Promise((resolve, reject) => {
-            this.firestore.collection('supply_types')
+            this.firestore.collection(UserHandler.tables.supply_types)
                 .get().then(function (querySnapshot) {
                     var supplytypes = []
                     querySnapshot.forEach(function (doc) {
@@ -560,7 +591,7 @@ class InventoryHandler extends MOABParamsHandler {
      * @param inventory - inventory to be updated to the database
      * @method UserHandler.addEntry()
      */
-    addSupplyType(params = new EvacuationSupply()) {
+    addSupplyType(params = new EvacuationSupplyType()) {
         return this.addEntry(params.id, params.toObject(), UserHandler.tables.supply_types)
     } //getInventories
 
