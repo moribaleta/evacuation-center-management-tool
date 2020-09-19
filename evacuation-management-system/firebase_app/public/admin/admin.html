@@ -122,8 +122,34 @@
 
             </div>
         </div>
-        <h1>Users</h1>
-        <div class="section" v-if="user_list.length > 0">
+        <h1>Admin</h1>
+        <div class="section">
+            <h3>Profile</h3>
+            <div class="table-container" id="tableData">
+                <div class="well">
+                    <div class="row">
+                        <div class="col col-xs-4 item-info" v-for="key,index in headers" v-if="key !='id'">
+                            <p class="item-label">
+                                {{key}}:
+                            </p>
+                            <p class="item-value">
+                                {{user[key]}}
+                            </p>
+                        </div>
+
+                        <div class="col col-xs-12">
+                            <button class="btn btn-default btn-info" v-on:click="editAdmin()">edit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h3>Users</h3>
+        <div class="loader-container" v-if="isLoading">
+            <div class="loader"></div>
+        </div>
+        <div class="section" v-if="!isLoading">
             <div class="table-container" id="tableData">
                 <div class="well" v-for="item,index in user_list">
                     <div class="row">
@@ -174,7 +200,8 @@
                 editUserId: null,
                 conf_password: null,
                 municipalities: [],
-                admint_types: ['admin','basic']
+                admint_types: ['admin','basic'],
+                isLoading : false
             },
             methods: {
                 onStart(){
@@ -183,10 +210,13 @@
                     this.municipalities = ["admin",...municipalities]
                 },
                 fetchUser() {
+                    this.isLoading = true
                     DataHandler.getAdminUsers(header.user.id).then((message) => {
                         this.setUser(message.data)
                     }).catch(err => {
                         console.log(err)
+                    }).finally(() => {
+                        this.isLoading = false
                     })
                 },
                 setUser(data) {
@@ -200,6 +230,7 @@
                     }
                     $('#userModal').modal()
                 },
+
                 addUser() {
                     if (this.data_input.password == this.conf_password) {
                         if (this.isEdit) {
@@ -214,14 +245,24 @@
                 },
 
                 onSaveEdit() {
-                    this.data_input.id = this.editUserId
-                    this.data_input.municipalities = this.data_input.municipalities == "admin" ? "0" : this.data_input.municipalities
-                    DataHandler.addAdminUsers(this.data_input).then((data) => {
+                    if(this.user.id != this.editUserId) {
+                        this.data_input.id = this.editUserId
+                        this.data_input.municipalities = this.data_input.municipalities == "admin" ? "0" : this.data_input.municipalities
+                    }
+
+                    DataHandler.addAdminUsers(AdminUser.parse(this.data_input.toObject())).then((data) => {
                         if (data.error) {
                             alert(`Can't Edit User ${data.error}`)
                         } else {
                             alert(`User Have Been Edited Successfuly`)
-                            this.fetchUser()
+                            //REPLACES the admin user 
+                            if (this.user.id == this.editUserId) {
+                                alert("you need to login after updated your profile")
+                                header.onLogout()
+                            } else {
+                                this.fetchUser()
+                            }
+                            
                         }
                     })
                 },
@@ -241,6 +282,13 @@
 
                 editItem(index) {
                     const user = this.user_list[index]
+                    this.editUserId = user.id
+                    this.data_input = AdminUser.parse(user.toObject())
+                    this.openAddUserModal(true)
+                },
+
+                editAdmin(){
+                    const user      = this.user
                     this.editUserId = user.id
                     this.data_input = AdminUser.parse(user.toObject())
                     this.openAddUserModal(true)

@@ -18,6 +18,12 @@ var header = new Vue({
                 title: 'History'
             },
             {
+                id: 'inventory',
+                href: 'inventory.html',
+                icon: 'storage',
+                title: 'Inventory'
+            },
+            {
                 id: 'models',
                 href: "models.html",
                 icon: 'assessment',
@@ -36,6 +42,7 @@ var header = new Vue({
             DataHandler.configure()
             try {
                 let user = JSON.parse(sessionStorage.getItem('user'))
+                user = AdminUser.parse(user)
                 console.log("user %o", user)
                 if (user != undefined && user != null) {
                     console.log(user)
@@ -52,6 +59,12 @@ var header = new Vue({
 
             this.active = $('#header').attr('attr')
         },
+
+        onSetUser(user){
+            sessionStorage.setItem('user', JSON.stringify(user))
+            this.user = user
+        },
+
         onLogout() {
             sessionStorage.clear()
             window.open('login.html', '_self')

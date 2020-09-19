@@ -64,12 +64,24 @@ class AdminUser {
 
 
 
-/**
- * class for handling storage and database fetch
- */
-class DataHandlerClass extends DataHandlerType {
 
 
+/** class functions handles user actions */
+class UserHandler extends DataHandlerType {
+
+    /** static enum contains all database table */
+    static tables = {
+        admin_user          : 'admin_user',
+        evacuation_centers  : 'evacuation_centers',
+        evacuation_history  : 'evacuation_history',
+        evacuation_inventory: 'evacuation_inventory',
+        evacuation_supply   : 'evacuation_supply',
+        supply_types        : 'supply_types',
+        moabc               : 'moabc',
+        users               : 'users',
+    }
+
+    /** login function */
     login(username, password) {
         this.configure()
         return new Promise((resolve, reject) => {
@@ -87,6 +99,12 @@ class DataHandlerClass extends DataHandlerType {
                             id,
                             ...data
                         }
+                        try{
+                            object.date_created = data.date_created?.toDate() 
+                        }catch(err) {
+                            console.log("error %o", err)
+                        }
+                        
                         users.push(AdminUser.parse(object))
                     });
 
@@ -107,26 +125,8 @@ class DataHandlerClass extends DataHandlerType {
                     reject(error)
                 });
         })
-    }
+    }//login
 
-    getReports() {
-        return this.fetchApi(`${this.baseUrl}/getreports.php?i=1`)
-    }
-
-    saveReport(params) {
-        return this.postApi(`${this.baseUrl}/savereport.php`, params)
-    }
-
-    deleteReport(ID) {
-        console.log("deleting %o", ID)
-        return this.postApi(`${this.baseUrl}/deletereports.php`, {
-            ID
-        })
-    }
-
-    editReport(params) {
-        return this.postApi(`${this.baseUrl}/editreports.php`, params)
-    }
 
     /* <------------ USER --------------*/
     /** gets user from the database */
@@ -186,6 +186,51 @@ class DataHandlerClass extends DataHandlerType {
         })
     }//deleteAdminUsers
     /* ------------ USER -------------->*/
+    
+    /** deletes an entry from table
+     * @param id - id of document
+     * @param table - database table
+     */
+    deleteEntry(id, table) {
+        var message = new Message()
+        return new Promise((resolve, reject) => {
+            this.firestore.collection(table)
+                .doc(id).delete()
+                .then(function () {
+                    message.data = "success delete"
+                    resolve(message);
+                }).catch(function (error) {
+                    message.error = error
+                    reject(message)
+                });
+        })
+    } //deleteEvacuationHistory
+
+    /** deletes an entry from table
+     * @param id - id of document
+     * @param table - database table
+     */
+    addEntry(id, params, table) {
+        var message = new Message()
+        return new Promise((resolve, reject) => {
+            this.firestore.collection(table)
+                .doc(id)
+                .set(params)
+                .then(function () {
+                    message.data = "success add"
+                    resolve(message);
+                }).catch(function (error) {
+                    message.error = error
+                    reject(message)
+                });
+        })
+    } //deleteEvacuationHistory
+}//UserHandler
+
+/** class functions handles evacuation center data */
+class EvacuationHandler  extends UserHandler {
+
+    /*!--------- EVACUAITON CENTER ---------------!*/
 
     getEvacuationCenters() {
         return new Promise((resolve, reject) => {
@@ -213,7 +258,7 @@ class DataHandlerClass extends DataHandlerType {
                     reject(error)
                 });
         })
-    }
+    }//getEvacuationCenters
 
 
     addEvacationCenter(params = new EvacuationCenter()) {
@@ -227,7 +272,7 @@ class DataHandlerClass extends DataHandlerType {
                     reject(error)
                 });
         })
-    }
+    }//addEvacationCenter
 
 
     deleteEvacationCenter(id) {
@@ -240,65 +285,9 @@ class DataHandlerClass extends DataHandlerType {
                     reject(error)
                 });
         })
-    }
+    }//deleteEvacationCenter
 
-
-    getModelParams() {
-        return new Promise((resolve, reject) => {
-            this.firestore.collection('moabc')
-                .get().then(function (querySnapshot) {
-                    var models = []
-                    querySnapshot.forEach(function (doc) {
-                        //console.log(doc.id, " => ", doc.data());
-                        let data = doc.data()
-                        let id = doc.id
-
-                        let object = {
-                            id,
-                            ...data
-                        }
-                        models.push(MOABCParameters.parse(object))
-                    });
-
-                    var message = new Message()
-
-                    message.data = models
-                    resolve(message)
-
-                })
-                .catch(function (error) {
-                    reject(error)
-                });
-        })
-    }
-
-
-    addModelParams(params = new MOABCParameters()) {
-        return new Promise((resolve, reject) => {
-            this.firestore.collection('moabc')
-                .doc(params.id)
-                .set(params.toObject())
-                .then(function () {
-                    resolve("Document successfully written!")
-                }).catch(function (error) {
-                    reject(error)
-                });
-        })
-    }
-
-
-    deleteModelParams(id) {
-        return new Promise((resolve, reject) => {
-            this.firestore.collection('moabc')
-                .doc(id).delete()
-                .then(function () {
-                    resolve("Document successfully deleted!");
-                }).catch(function (error) {
-                    reject(error)
-                });
-        })
-    }
-
+    /*!--------- EVACUAITON HISTORY ---------------!*/
 
     getEvacuationHistory(evac_id = null) {
         let collection = this.firestore.collection('evacuation_history')
@@ -353,16 +342,6 @@ class DataHandlerClass extends DataHandlerType {
             return this.addEvacuationHistory(evac)
         })
         return Promise.all(promises)
-        /* return new Promise((resolve, reject) => {
-            this.firestore.collection('evacuation_history')
-                .doc(params.id)
-                .set(params.toObject())
-                .then(function () {
-                    resolve("Document successfully written!")
-                }).catch(function (error) {
-                    reject(error)
-                });
-        }) */
     } //addEvacuationHistory
 
 
@@ -382,6 +361,243 @@ class DataHandlerClass extends DataHandlerType {
         })
     } //deleteEvacuationHistory
 
+}//EvacuationHandler
+
+/** class functions handles moab parameters used */
+class MOABParamsHandler extends EvacuationHandler {
+    
+    getModelParams() {
+        return new Promise((resolve, reject) => {
+            this.firestore.collection('moabc')
+                .get().then(function (querySnapshot) {
+                    var models = []
+                    querySnapshot.forEach(function (doc) {
+                        //console.log(doc.id, " => ", doc.data());
+                        let data = doc.data()
+                        let id = doc.id
+
+                        let object = {
+                            id,
+                            ...data
+                        }
+                        models.push(MOABCParameters.parse(object))
+                    });
+
+                    var message = new Message()
+
+                    message.data = models
+                    resolve(message)
+
+                })
+                .catch(function (error) {
+                    reject(error)
+                });
+        })
+    }//getModelParams
+
+
+    addModelParams(params = new MOABCParameters()) {
+        return new Promise((resolve, reject) => {
+            this.firestore.collection('moabc')
+                .doc(params.id)
+                .set(params.toObject())
+                .then(function () {
+                    resolve("Document successfully written!")
+                }).catch(function (error) {
+                    reject(error)
+                });
+        })
+    }//addModelParams
+
+
+    deleteModelParams(id) {
+        return new Promise((resolve, reject) => {
+            this.firestore.collection('moabc')
+                .doc(id).delete()
+                .then(function () {
+                    resolve("Document successfully deleted!");
+                }).catch(function (error) {
+                    reject(error)
+                });
+        })
+    }//deleteModelParams
+}//MOABParamsHandler
+
+class InventoryHandler extends MOABParamsHandler {
+
+    /** returns the inventories of the evacuation centers */
+    getInventories(evac_id = "") {
+        return new Promise((resolve, reject) => {
+            this.firestore.collection(UserHandler.tables.evacuation_inventory)
+                .where('evac_id', '==', evac_id)
+                .get().then(function (querySnapshot) {
+                    var inventories = []
+                    querySnapshot.forEach(function (doc) {
+                        let data = doc.data()
+                        let id = doc.id
+
+                        let object = {
+                            id,
+                            ...data
+                        }
+                        try{
+                            object.date_created = object.date_created.toDate()
+                        }catch(err) {
+                            console.log(err)
+                        }
+                        inventories.push(EvacuationInventory.parse(object))
+                    });
+                    var message = new Message()
+                    message.data = {
+                        id: evac_id,
+                        inventories
+                    }
+                    resolve(message)
+                }).catch(function (error) {
+                    reject(error)
+                });
+        })
+    } //getInventories
+
+    /** adds inventory uses
+     * @param inventory - inventory to be updated to the database
+     * @method UserHandler.addEntry()
+     */
+    addInventory(inventory = new EvacuationInventory()) {
+        return this.addEntry(inventory.id, inventory.toObject(), UserHandler.tables.evacuation_inventory)
+    } //getInventories
+
+    /**
+     * deletes inventory from the database
+     * @param id - inventory id to be deleted
+     * @method UserHandler.deleteEntry()
+     */
+    deleteInventory(id) {
+        return this.deleteEntry(id, UserHandler.tables.evacuation_inventory)
+    }
+
+    /** returns the supplies of the evacuation centers */
+    getSupplies(inventory_ids = []){
+        return new Promise((resolve, reject) => {
+            this.firestore.collection(UserHandler.tables.evacuation_supply)
+                .where('inventory_id', 'in', inventory_ids)
+                .get().then(function (querySnapshot) {
+                    var supplies = []
+                    querySnapshot.forEach(function (doc) {
+                        let data = doc.data()
+                        let id = doc.id
+
+                        let object = {
+                            id,
+                            ...data
+                        }
+                        supplies.push(EvacuationSupply.parse(object))
+                    });
+
+                    const _supplies = inventory_ids.map((inventory_id) => {
+                        const filtered_supplies = supplies.filter((supply) => {
+                            return supply.inventory_id == inventory_id
+                        })
+                        return {
+                            inventory_id,
+                            supplies: filtered_supplies
+                        }
+                    })
+
+                    var message = new Message()
+                    message.data = _supplies
+
+                    resolve(message)
+                }).catch(function (error) {
+                    reject(error)
+                });
+        })
+    }
+
+    /** adds supply
+     * @param inventory - inventory to be updated to the database
+     * @method UserHandler.addEntry()
+     */
+    addSupply(params = new EvacuationSupply()) {
+        return this.addEntry(params.id, params.toObject(), UserHandler.tables.evacuation_supply)
+    } //getInventories
+
+    /**
+     * deletes supply from the database
+     * @param id - inventory id to be deleted
+     * @method UserHandler.deleteEntry()
+     */
+    deleteSupply(id) {
+        return this.deleteEntry(id, UserHandler.tables.evacuation_supply)
+    }
+
+    
+    getSupplyTypes() {
+        return new Promise((resolve, reject) => {
+            this.firestore.collection('supply_types')
+                .get().then(function (querySnapshot) {
+                    var supplytypes = []
+                    querySnapshot.forEach(function (doc) {
+                        let data = doc.data()
+                        let id = doc.id
+
+                        let object = {
+                            id,
+                            ...data
+                        }
+                        supplytypes.push(EvacuationSupplyType.parse(object))
+                    });
+                    var message = new Message()
+                    message.data = supplytypes
+                    resolve(message)
+                }).catch(function (error) {
+                    reject(error)
+                });
+        })
+    }
+
+     /** adds `SUPPLY TYPE`
+     * @param inventory - inventory to be updated to the database
+     * @method UserHandler.addEntry()
+     */
+    addSupplyType(params = new EvacuationSupply()) {
+        return this.addEntry(params.id, params.toObject(), UserHandler.tables.supply_types)
+    } //getInventories
+
+    /**
+     * deletes `SUPPLY TYPE` from the database
+     * @param id - inventory id to be deleted
+     * @method UserHandler.deleteEntry()
+     */
+    deleteSupplyType(id) {
+        return this.deleteEntry(id, UserHandler.tables.supply_types)
+    }
+
+}
+
+/**
+ * class for handling storage and database fetch
+ */
+class DataHandlerClass extends InventoryHandler {
+
+    getReports() {
+        return this.fetchApi(`${this.baseUrl}/getreports.php?i=1`)
+    }
+
+    saveReport(params) {
+        return this.postApi(`${this.baseUrl}/savereport.php`, params)
+    }
+
+    deleteReport(ID) {
+        console.log("deleting %o", ID)
+        return this.postApi(`${this.baseUrl}/deletereports.php`, {
+            ID
+        })
+    }
+
+    editReport(params) {
+        return this.postApi(`${this.baseUrl}/editreports.php`, params)
+    }
 
 } //DataHandlerClass
 

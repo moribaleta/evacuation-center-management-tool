@@ -211,7 +211,7 @@
           console.log(data)
           if (data != "error") {
             console.log("login %o", data)
-            sessionStorage.setItem('user', JSON.stringify(data.data))
+            sessionStorage.setItem('user', JSON.stringify(data.data.toObject()))
             window.open('evacuations.html', "_self")
           } else {
             alert("error")

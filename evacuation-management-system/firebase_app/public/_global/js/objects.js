@@ -1,9 +1,21 @@
 /**
+ * superclass defines the model of any object created
+ */
+class Model {
+    /** id model */
+    id = ""
+    /** id of the admin that created the model */
+    created_by = ""
+    /** date created*/
+    date_created = new Date()
+} //Model
+
+
+/**
  * object structure of Evacuation Center
  */
-class EvacuationCenter {
-    /**evacuation center: id*/
-    id = null
+class EvacuationCenter extends Model {
+
     /**name     = "sampl1"*/
     name = "sampl1"
     /**
@@ -24,10 +36,6 @@ class EvacuationCenter {
     population_capacity
     /**floor_space         = 2000*/
     floor_space
-    /**date_created        = Date()*/
-    date_created = new Date()
-    /**created_by          = 0*/
-    created_by
     /**exact_address       = "mabitac rd"*/
     exact_address
     /**municipality        = "mabitac"*/
@@ -35,9 +43,9 @@ class EvacuationCenter {
     /**contact_numbers     = "09171231233"*/
     contact_numbers
 
-    constructor(id, name, location, population_capacity, floor_space, date_created = new Date(),
-        created_by, exact_address, municipality, contact_numbers) {
-        this.id = id || "evac-"+genID(5)
+    constructor(id, name, location, population_capacity, floor_space, date_created = new Date(), created_by, exact_address, municipality, contact_numbers) {
+        super()
+        this.id = id || "evac-" + genID(5)
         this.name = name
         this.location = (location != null && location != undefined) ? location : {
             lat: null,
@@ -92,24 +100,24 @@ class EvacuationCenter {
  * object structure of Message response from Datahandler
  */
 class Message {
+    /** contains the data */
     data
+    /** contains error if any */
     error
 } //Message
 
 /**
  * evacuation history used on generating solutions references EvacuationCenter
  */
-class EvacuationHistory {
-    
-    id = null
+class EvacuationHistory extends Model {
+
     evac_id = null
     current_population = 0
-    created_by = 0
     report_date = new Date()
-    date_created = new Date()
 
     constructor(id = null, evac_id = null, current_population = 0, created_by = 0, report_date = new Date, date_created = new Date()) {
-        this.id = id || "history-"+genID(5)
+        super()
+        this.id = id || "history-" + genID(5)
         this.evac_id = evac_id
         this.current_population = current_population
         this.created_by = created_by
@@ -120,12 +128,12 @@ class EvacuationHistory {
     /**returns instance to json object */
     toObject() {
         return {
-            id : this.id,
-            evac_id : this.evac_id,
-            current_population : this.current_population,
-            created_by : this.created_by,
-            date_created : this.date_created,
-            report_date : this.report_date
+            id: this.id,
+            evac_id: this.evac_id,
+            current_population: this.current_population,
+            created_by: this.created_by,
+            date_created: this.date_created,
+            report_date: this.report_date
         }
     }
 
@@ -138,18 +146,17 @@ class EvacuationHistory {
             object.created_by,
             object.report_date,
             object.date_created,
-            )
+        )
 
         return evac
     }
 
-}//EvacuationHistory
+} //EvacuationHistory
 
-
-class MOABCParameters {
-    id
-    date_created
-    created_by
+/**
+ * object used in generating results
+ */
+class MOABCParameters extends Model {
     max_length
     max_val
     population_size
@@ -170,9 +177,9 @@ class MOABCParameters {
         max_shuffle: 'Maximum Shuffle Value',
     }
 
-    constructor(id, date_created, created_by, max_length, max_val,
-        population_size, trial_limit, max_epoch, min_shuffle, max_shuffle) {
-        this.id = id || "param-"+genID(5)
+    constructor(id, date_created, created_by, max_length, max_val, population_size, trial_limit, max_epoch, min_shuffle, max_shuffle) {
+        super()
+        this.id = id || "param-" + genID(5)
         this.date_created = date_created || (new Date()).toLocaleString()
         this.created_by = created_by || '0'
         this.max_length = max_length || 0
@@ -215,3 +222,155 @@ class MOABCParameters {
     }
 
 } //MOABCParameters
+
+
+/**
+ * object defines the inventory/warehouse of the evacuation center
+ */
+class EvacuationInventory extends Model {
+
+    /** id of the evacuation */
+    evac_id = ""
+
+    /** name of the inventory */
+    name = ""
+
+    /** description of the inventory */
+    description = ""
+    
+    /** supplies of the inventory array `EvacuationSupply` not store on the database */
+    supplies = []
+
+    constructor(id, date_created, created_by, evac_id, name, description) {
+        super()
+        this.id = id || "evacinv-" + genID(5)
+        this.date_created = date_created || new Date()
+        this.created_by = created_by || '0'
+        this.evac_id = evac_id
+        this.name = name
+        this.description = description
+    }
+
+    static parse(objects = {}) {
+        return new EvacuationInventory(
+            objects.id,
+            objects.date_created,
+            objects.created_by,
+            objects.evac_id,
+            objects.name,
+            objects.description,
+        )
+    }
+
+    /** returns object 
+     *  - doesnt include supplies */
+    toObject() {
+        return {
+            id: this.id,
+            date_created: this.date_created,
+            created_by: this.created_by,
+            evac_id: this.evac_id,
+            name: this.name,
+            description: this.description,
+        }
+    }
+
+} //EvacuationInventory
+
+/**
+ * object defines the inventory supply
+ */
+class EvacuationSupply extends Model {
+    /** id of the inventory reference */
+    inventory_id = ""
+
+    /** type of supply definition */
+    inventory_type = ""
+
+    /** number of quantity */
+    qty = 0
+
+    /** date of the item supplied */
+    date_supplied = new Date()
+
+
+    constructor(id, date_created, created_by, inventory_id, inventory_type, qty, date_supplied) {
+        super()
+        this.id = id || "evacsupply-" + genID(5)
+        this.date_created = date_created || new Date()
+        this.created_by = created_by || '0'
+        this.inventory_id = inventory_id
+        this.inventory_type = inventory_type
+        this.qty = qty
+        this.date_supplied = date_supplied
+    }
+
+    static parse(objects = {}) {
+        return new EvacuationInventory(
+            objects.id,
+            objects.date_created,
+            objects.created_by,
+            objects.inventory_id,
+            objects.inventory_type,
+            objects.qty,
+            objects.date_supplied,
+        )
+    }
+
+    toObject() {
+        return {
+            id : this.id,
+            date_created : this.date_created,
+            created_by : this.created_by,
+            inventory_id : this.inventory_id,
+            inventory_type : this.inventory_type,
+            qty : this.qty,
+            date_supplied : this.date_supplied,
+        }
+    }
+}//EvacuationSupply
+
+/**
+ * defines the type of evacuation supply is given
+ */
+class EvacuationSupplyType extends Model {
+
+    /** name of the item */
+    name = ""
+    /** description of the item */
+    description = ""
+    /** amount per package given */
+    amount = 0
+
+    constructor(id, date_created, created_by, name, description, amount) {
+        super()
+        this.id = id || "evacsupplytype-" + genID(5)
+        this.date_created = date_created || new Date()
+        this.created_by = created_by || '0'
+        this.name = name
+        this.description = description
+        this.amount = amount
+    }
+
+    static parse(objects = {}) {
+        return new EvacuationInventory(
+            objects.id,
+            objects.date_created,
+            objects.created_by,
+            objects.name,
+            objects.description,
+            objects.amount,
+        )
+    }
+
+    toObject() {
+        return {
+            id: this.id,
+            date_created: this.date_created,
+            created_by: this.created_by,
+            name: this.name,
+            description: this.description,
+            amount: this.amount,
+        }
+    }
+}//EvacuationSupplyType
