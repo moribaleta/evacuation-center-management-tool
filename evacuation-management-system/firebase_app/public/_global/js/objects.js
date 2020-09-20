@@ -278,10 +278,63 @@ class EvacuationInventory extends Model {
 } //EvacuationInventory
 
 /**
+ * object defines the inventory for the municipal
+ */
+class MunicipalInventory extends Model {
+
+    /** municipal that uses the inventory*/
+    municipality = ""
+
+    /** name of the inventory */
+    name = ""
+
+    /** description of the inventory */
+    description = ""
+    
+    /** supplies of the inventory array `EvacuationSupply` not store on the database */
+    supplies = []
+
+    constructor(id, date_created, municipality, created_by, name, description) {
+        super()
+        this.id = id || "muninv-" + genID(5)
+        this.date_created = date_created || new Date()
+        this.municipality = municipality
+        this.created_by = created_by || '0'
+        this.name = name
+        this.description = description
+    }
+
+    static parse(objects = {}) {
+        return new EvacuationInventory(
+            objects.id,
+            objects.date_created,
+            objects.created_by,
+            objects.municipality,
+            objects.name,
+            objects.description,
+        )
+    }
+
+    /** returns object 
+     *  - doesnt include supplies */
+    toObject() {
+        return {
+            id: this.id,
+            date_created: this.date_created,
+            created_by: this.created_by,
+            municipality: this.municipality,
+            name: this.name,
+            description: this.description,
+        }
+    }
+}
+
+/**
  * object defines the inventory supply
  */
 class EvacuationSupply extends Model {
-    /** id of the inventory reference */
+    
+    /** id of the inventory reference can either be from Municipal or Evacuation*/
     inventory_id = ""
 
     /** type of supply definition */
