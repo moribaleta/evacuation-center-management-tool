@@ -95,7 +95,8 @@
                                     <label class="col-md-4 control-label" for="name">Remarks</label>
                                     <div class="col-md-4">
                                         <textarea id="name" name="name" type="text" placeholder="Remarks/Notes .... "
-                                            class="form-control input-md" required="" v-model="supply_input.remarks"></textarea>
+                                            class="form-control input-md" required=""
+                                            v-model="supply_input.remarks"></textarea>
                                         <span class="help-block">Enter Any Remarks</span>
                                     </div>
                                 </div>
@@ -104,7 +105,8 @@
                         </form>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal" v-on:click="onSaveSupplyItem()">Save</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal"
+                            v-on:click="onSaveSupplyItem()">Save</button>
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                     </div>
                 </div>
@@ -134,16 +136,29 @@
                                 <div class="form-group">
                                     <label class="col-md-4 control-label" for="description">Description</label>
                                     <div class="col-md-4">
-                                        <textarea id="description" name="description" type="text" placeholder="Description .... "
-                                            class="form-control input-md" required="" v-model="inventory_input.description"></textarea>
+                                        <textarea id="description" name="description" type="text"
+                                            placeholder="Description .... " class="form-control input-md" required=""
+                                            v-model="inventory_input.description"></textarea>
                                         <span class="help-block">Enter Description</span>
+                                    </div>
+                                </div>
+                                <!-- Select Basic -->
+                                <div class="form-group" v-if="user.admin_type == 0 && user.municipality == 'admin' && inventory_input.id.includes('muninv')">
+                                    <label class="col-md-4 control-label" for="municipality">Municipality</label>
+                                    <div class="col-md-4">
+                                        <select id="municipality" name="municipality" class="form-control"
+                                            v-model="inventory_input.municipality">
+                                            <option v-for="municipal in municipalities" v-bind:value="municipal">
+                                                {{municipal}}</option>
+                                        </select>
                                     </div>
                                 </div>
                             </fieldset>
                         </form>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal" v-on:click="onSaveInventory()">Save</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal"
+                            v-on:click="onSaveInventory()">Save</button>
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                     </div>
                 </div>
@@ -173,15 +188,17 @@
                                     <label class="col-md-4 control-label" for="qty">Unit Count</label>
                                     <div class="col-md-4">
                                         <input id="name" name="qty" type="number" placeholder="Unit Count"
-                                            class="form-control input-md" required="" v-model="supply_type_input.amount">
+                                            class="form-control input-md" required=""
+                                            v-model="supply_type_input.amount">
                                         <span class="help-block"># of items per pack</span>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-md-4 control-label" for="description">Description</label>
                                     <div class="col-md-4">
-                                        <textarea id="description" name="description" type="text" placeholder="Description .... "
-                                            class="form-control input-md" required="" v-model="supply_type_input.description"></textarea>
+                                        <textarea id="description" name="description" type="text"
+                                            placeholder="Description .... " class="form-control input-md" required=""
+                                            v-model="supply_type_input.description"></textarea>
                                         <span class="help-block">Enter Description</span>
                                     </div>
                                 </div>
@@ -189,7 +206,8 @@
                         </form>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal" v-on:click="onSaveSupplyType()">Save</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal"
+                            v-on:click="onSaveSupplyType()">Save</button>
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                     </div>
                 </div>
@@ -215,6 +233,9 @@
                             <p class="item-value">
                                 name: {{inventory.name}}
                             </p>
+                            <p class="item-value" v-if="inventory.id.includes('muninv')">
+                                municipality: {{inventory.municipality}}
+                            </p>
                             <p class="item-value">
                                 description: {{inventory.description}}
                             </p>
@@ -228,19 +249,30 @@
 
                         <div class="col col-md-12">
                             <button class="btn btn-default btn-info" v-on:click="editInventory()">edit</button>
-                            <button class="btn btn-default btn-danger" v-on:click="deleteInventory()">delete</button>
+                            <button class="btn btn-default btn-danger" v-on:click="onDeleteInventory()">delete</button>
                         </div>
                     </div>
                 </div>
             </div>
-            
-            
-            <div class="section" >
+
+
+            <div class="section">
                 <div class="section header">
                     <h4>Supplies</h4>
                 </div>
                 <div class="loader-container" v-if="loading.isSupply">
                     <div class="loader"></div>
+                </div>
+                <div class="table-container" id="tableData" v-if="supplies.length == 0 && !loading.isSupply">
+                    <div class="well">
+                        <div class="row">
+                            <div class="col col-md-12 item-info">
+                                <p class="item-value">
+                                    no supplies stored
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="table-container" id="tableData" v-if="supplies.length > 0">
                     <div class="well" v-for="item,index in supplies">
@@ -253,7 +285,7 @@
                                     Name:
                                 </p>
                                 <p class="item-value">
-                                    {{item.name}}
+                                    {{supply_types_ref[item.inventory_type].name}}
                                 </p>
                             </div>
                             <div class="col col-md-2 item-info">
@@ -282,36 +314,36 @@
                             </div>
 
                             <div class="col col-md-12">
-                                <button class="btn btn-default btn-info" v-on:click="editSupplyItem(index)">edit</button>
+                                <button class="btn btn-default btn-info"
+                                    v-on:click="editSupplyItem(index)">edit</button>
                                 <button class="btn btn-default btn-danger"
                                     v-on:click="onDeleteSupplyItem(index)">delete</button>
                             </div>
                         </div>
                     </div>
                 </div>
+                <div class="section">
+                    <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="addSupplyItem()">Add
+                        New
+                        Supply
+                    </button>
+                    <button type="button" id="add-report" class="btn btn-success button-view" v-on:click="generateReport()">
+                        Generate Report
+                    </button>
+                </div>
             </div>
-            <div class="section">
-                <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="addSupplyItem()">Add New
-                    Supply
-                </button>
-                <button type="button" id="add-report" class="btn btn-warning button-view" v-on:click="addSupplyType()">Add New
-                    Supply Type
-                </button>
-                <button type="button" id="add-report" class="btn btn-success button-view" v-on:click="generateReport()">
-                    Generate Report
-                </button>
-            </div>
+            
 
-            <div class="section" >
+            <div class="section">
                 <div class="section header" v-if="supply_types.length > 0">
-                    <h4>Supplies</h4>
+                    <h4>Supplies Types</h4>
                 </div>
                 <div class="loader-container" v-if="loading.isSupplyType">
                     <div class="loader"></div>
                 </div>
                 <div class="table-container" id="tableData" v-if="supply_types.length > 0">
                     <div class="well" v-for="item,index in supply_types">
-                        <div class="row" >
+                        <div class="row">
                             <div class="col col-md-2 item-info">
                                 <p class="item-label">
                                     {{index + 1}}.
@@ -319,8 +351,8 @@
                                 <p class="item-label">
                                     Name:
                                 </p>
-                                <p class="item-value" v-if="supply_types_ref[item.inventory_type] != undefined">
-                                    {{supply_types_ref[item.inventory_type].name}}
+                                <p class="item-value">
+                                    {{item.name}}
                                 </p>
                             </div>
                             <div class="col col-md-2 item-info">
@@ -339,15 +371,22 @@
                                     {{item.description}}
                                 </p>
                             </div>
-                           
+
 
                             <div class="col col-md-4">
-                                <button class="btn btn-default btn-info" v-on:click="editSupplyType(index)">edit</button>
+                                <button class="btn btn-default btn-info"
+                                    v-on:click="editSupplyType(index)">edit</button>
                                 <button class="btn btn-default btn-danger"
                                     v-on:click="onDeleteSupplyType(index)">delete</button>
                             </div>
                         </div>
                     </div>
+                </div>
+                <div class="section">
+                    <button type="button" id="add-report" class="btn btn-warning button-view"
+                        v-on:click="addSupplyType()">Add New
+                        Supply Type
+                    </button>
                 </div>
             </div>
         </div>
@@ -362,43 +401,66 @@
         app = new Vue({
             el: '#content',
             data: {
-                user              : new AdminUser(),
-                inventory         : new EvacuationInventory(),
-                supplies          : [],
-                supply_types      : [],
-                supply_types_ref  : {},
-                inventory_input   : null,
-                supply_input      : null,
-                supply_type_input : null,
-                isedit            : false,
-                municipalities    : municipalities,
+                user: new AdminUser(),
+                inventory: new InventoryType(),
+                supplies: [],
+                supply_types: [],
+                supply_types_ref: {},
+                inventory_input: null,
+                supply_input: null,
+                supply_type_input: null,
+                isedit: false,
+                municipalities: [],
                 /* isloadinginventory: false,
                 loading.isSupply : false, */
-                loading           : {
-                    isInventory : false,
-                    isSupply    : false,
+                loading: {
+                    isInventory: false,
+                    isSupply: false,
                     isSupplyType: false
                 },
 
-                supply_header       : [],
-                supply_type_header  : []
+                supply_header: [],
+                supply_type_header: [],
+                isMunicipality: false
             },
             methods: {
+
                 onStart() {
-                    let link = window.location.href
-                    let id = link.split("=")[1]
+                    this.municipalities = municipalities
                     this.user = header.user
+
+                    const queryString = window.location.search;
+                    console.log(queryString);
+
+                    const urlParams = new URLSearchParams(queryString);
+
+                    const id = urlParams.get('inventory_id')
+                    console.log("inventory id: " + id);
+
+                    const isMuni = urlParams.get('isMuni')
+                    console.log("is Municipality: " + isMuni)
+                    this.isMunicipality = isMuni || false
+                    
                     this.fetchInventory(id)
                 },
 
                 fetchInventory(id) {
                     this.loading.isInventory = true
                     this.loading.isSupply = true
-                    DataHandler.getInventory(id).then((data) => {
+
+                    var promiseFetch = DataHandler.getInventory(id)
+
+                    if (this.isMunicipality == true) {
+                        console.log("is municipal?")
+                        promiseFetch = DataHandler.getMunicipalInventory(id)
+                    }
+
+                    promiseFetch.then((data) => {
+                        console.log("inventory %o", data.data)
                         this.setInventory(data.data)
-                        this.loading.isInventory = false
                     }).catch(err => {
                         console.log(err)
+                    }).finally(() => {
                         this.loading.isInventory = false
                     })
 
@@ -421,7 +483,7 @@
                     })
                 },
 
-                fetchSupplyType(){
+                fetchSupplyType() {
                     this.loading.isSupplyType = true
                     DataHandler.getSupplyTypes().then((data) => {
                         this.supply_types = data.data || []
@@ -432,7 +494,7 @@
                             this.supply_types_ref[type.id] = type
                         });
 
-                    }).catch(err =>{
+                    }).catch(err => {
                         console.log(err)
                         this.loading.isSupplyType = false
                     })
@@ -440,35 +502,52 @@
 
                 /*!!=============== INVENTORY ===============!!!*/
                 editInventory() {
-                    this.inventory_input = EvacuationInventory.parse(this.inventory.toObject())
+                    if(this.isMunicipality) {
+                        this.inventory_input = MunicipalInventory.parse(this.inventory.toObject())
+                    } else {
+                        this.inventory_input = EvacuationInventory.parse(this.inventory.toObject())
+                    }
+                    
                     $('#inventoryModal').modal()
                 },
 
                 onSaveInventory() {
                     console.log("data %o", this.inventory_input)
-                    DataHandler.addInventory(this.inventory_input).then((data) => {
+                    var promise = DataHandler.addInventory(this.inventory_input)
+                    if (this.isMunicipality) {
+                        promise = DataHandler.addMunicipalInventory(this.inventory_input)
+                    }
+
+                    promise.then((data) => {
                         if (data.error) {
                             alert(`Can't Persist Item ${data.error}`)
                         } else {
                             alert(`Item Have Been Persisted Successfuly`)
                             let id = this.inventory_input.id
-                            this.inventory_input = new EvacuationInventory()
+                            this.inventory_input = (this.isMunicipality) ? new MunicipalInventory() : new EvacuationInventory()
                             this.fetchInventory(id)
                         }
+                    }).catch((err) => {
+                        console.log(err)
                     })
                 },
 
                 onDeleteInventory() {
                     const id = this.inventory.id
                     let onConfirm = confirm('Deleting Item\nPress confirm to proceed')
+
                     if (onConfirm) {
-                        DataHandler.deleteInventory(id).then((data) => {
+                        var promise = DataHandler.deleteInventory(id)
+                        if (this.isMunicipality) {
+                            promise = DataHandler.deleteMunicipalInventory(id)
+                        }
+                        promise.then((data) => {
                             console.log(data)
                             if (data.error) {
                                 alert(`Can't Delete Item ${data.error}`)
                             } else {
                                 alert(`Item Have Been Deleted Successfuly`)
-                                window.close()
+                                window.open(`inventory.html`)
                             }
                         })
                     }

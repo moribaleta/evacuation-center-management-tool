@@ -223,23 +223,26 @@ class MOABCParameters extends Model {
 
 } //MOABCParameters
 
-
-/**
- * object defines the inventory/warehouse of the evacuation center
- */
-class EvacuationInventory extends Model {
-
-    /** id of the evacuation */
-    evac_id = ""
+class InventoryType extends Model {
 
     /** name of the inventory */
     name = ""
 
     /** description of the inventory */
     description = ""
-    
+
     /** supplies of the inventory array `EvacuationSupply` not store on the database */
     supplies = []
+
+}
+
+/**
+ * object defines the inventory/warehouse of the evacuation center
+ */
+class EvacuationInventory extends InventoryType {
+
+    /** id of the evacuation */
+    evac_id = ""
 
     constructor(id, date_created, created_by, evac_id, name, description) {
         super()
@@ -280,32 +283,24 @@ class EvacuationInventory extends Model {
 /**
  * object defines the inventory for the municipal
  */
-class MunicipalInventory extends Model {
+class MunicipalInventory extends InventoryType {
 
     /** municipal that uses the inventory*/
     municipality = ""
 
-    /** name of the inventory */
-    name = ""
 
-    /** description of the inventory */
-    description = ""
-    
-    /** supplies of the inventory array `EvacuationSupply` not store on the database */
-    supplies = []
-
-    constructor(id, date_created, municipality, created_by, name, description) {
+    constructor(id, date_created, created_by, municipality, name, description) {
         super()
         this.id = id || "muninv-" + genID(5)
         this.date_created = date_created || new Date()
-        this.municipality = municipality
         this.created_by = created_by || '0'
+        this.municipality = municipality
         this.name = name
         this.description = description
     }
 
     static parse(objects = {}) {
-        return new EvacuationInventory(
+        return new MunicipalInventory(
             objects.id,
             objects.date_created,
             objects.created_by,
