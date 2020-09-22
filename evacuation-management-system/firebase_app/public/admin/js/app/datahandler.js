@@ -101,9 +101,10 @@ class UserHandler extends DataHandlerType {
                             ...data
                         }
                         try {
-                            object.date_created = data.date_created?.toDate()
+                            object.date_created = object.date_created.toDate()
+                            object.date_updated = object.date_updated.toDate()
                         } catch (err) {
-                            console.log("error %o", err)
+                            console.log(err)
                         }
 
                         users.push(AdminUser.parse(object))
@@ -145,7 +146,12 @@ class UserHandler extends DataHandlerType {
                             id,
                             ...data
                         }
-                        object.date_created = data.date_created?.toDate()
+                        try {
+                            object.date_created = object.date_created.toDate()
+                            object.date_updated = object.date_updated.toDate()
+                        } catch (err) {
+                            console.log(err)
+                        }
                         users.push(AdminUser.parse(object))
                     });
 
@@ -247,6 +253,12 @@ class EvacuationHandler extends UserHandler {
                             id,
                             ...data
                         }
+                        try {
+                            object.date_created = object.date_created.toDate()
+                            object.date_updated = object.date_updated.toDate()
+                        } catch (err) {
+                            console.log(err)
+                        }
                         evacuations.push(EvacuationCenter.parse(object))
                     });
 
@@ -304,11 +316,14 @@ class EvacuationHandler extends UserHandler {
 
                         let object = {
                             id,
-                            evac_id: data.evac_id,
-                            current_population: data.current_population,
-                            created_by: data.created_by,
-                            report_date: data.report_date.toDate(),
-                            date_created: data.date_created?.toDate() || null,
+                            ...data
+                        }
+                        try {
+                            object.date_created = object.date_created.toDate()
+                            object.date_updated = object.date_updated.toDate()
+                            object.report_date  = object.report_date.toDate()
+                        } catch (err) {
+                            console.log(err)
                         }
                         models.push(EvacuationHistory.parse(object))
                     });
@@ -381,6 +396,12 @@ class MOABParamsHandler extends EvacuationHandler {
                             id,
                             ...data
                         }
+                        try {
+                            object.date_created = object.date_created.toDate()
+                            object.date_updated = object.date_updated.toDate()
+                        } catch (err) {
+                            console.log(err)
+                        }
                         models.push(MOABCParameters.parse(object))
                     });
 
@@ -443,6 +464,7 @@ class InventoryHandler extends MOABParamsHandler {
                         }
                         try {
                             object.date_created = object.date_created.toDate()
+                            object.date_updated = object.date_updated.toDate()
                         } catch (err) {
                             console.log(err)
                         }
@@ -477,6 +499,7 @@ class InventoryHandler extends MOABParamsHandler {
                         }
                         try {
                             object.date_created = object.date_created.toDate()
+                            object.date_updated = object.date_updated.toDate()
                         } catch (err) {
                             console.log(err)
                         }
@@ -532,6 +555,12 @@ class InventoryHandler extends MOABParamsHandler {
                         let object = {
                             id,
                             ...data
+                        }
+                        try {
+                            object.date_created = object.date_created.toDate()
+                            object.date_updated = object.date_updated.toDate()
+                        } catch (err) {
+                            console.log(err)
                         }
                         supplies.push(EvacuationSupply.parse(object))
                     });
@@ -619,6 +648,12 @@ class InventoryHandler extends MOABParamsHandler {
                             id,
                             ...data
                         }
+                        try {
+                            object.date_created = object.date_created.toDate()
+                            object.date_updated = object.date_updated.toDate()
+                        } catch (err) {
+                            console.log(err)
+                        }
                         supplytypes.push(EvacuationSupplyType.parse(object))
                     });
                     var message = new Message()
@@ -671,6 +706,7 @@ class MunicipalInventoryHandler extends InventoryHandler {
                     }
                     try {
                         object.date_created = object.date_created.toDate()
+                        object.date_updated = object.date_updated.toDate()
                     } catch (err) {
                         console.log(err)
                     }
@@ -702,6 +738,7 @@ class MunicipalInventoryHandler extends InventoryHandler {
                         }
                         try {
                             object.date_created = object.date_created.toDate()
+                            object.date_updated = object.date_updated.toDate()
                         } catch (err) {
                             console.log(err)
                         }

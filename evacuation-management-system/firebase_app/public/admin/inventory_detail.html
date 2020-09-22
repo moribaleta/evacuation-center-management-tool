@@ -54,6 +54,7 @@
     </div>
     <!-- <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#editorModal">Open Modal</button> -->
     <div class="container" id="content">
+        <inventory-selector></inventory-selector>
         <!-- Supply modal -->
         <div id="supplyModal" class="modal fade" role="dialog">
             <div class="modal-dialog">
@@ -143,7 +144,8 @@
                                     </div>
                                 </div>
                                 <!-- Select Basic -->
-                                <div class="form-group" v-if="user.admin_type == 0 && user.municipality == 'admin' && inventory_input.id.includes('muninv')">
+                                <div class="form-group"
+                                    v-if="user.admin_type == 0 && user.municipality == 'admin' && inventory_input.id.includes('muninv')">
                                     <label class="col-md-4 control-label" for="municipality">Municipality</label>
                                     <div class="col-md-4">
                                         <select id="municipality" name="municipality" class="form-control"
@@ -315,6 +317,8 @@
 
                             <div class="col col-md-12">
                                 <button class="btn btn-default btn-info"
+                                    v-on:click="onTransferSupply(index)">transfer</button>
+                                <button class="btn btn-default btn-info"
                                     v-on:click="editSupplyItem(index)">edit</button>
                                 <button class="btn btn-default btn-danger"
                                     v-on:click="onDeleteSupplyItem(index)">delete</button>
@@ -323,16 +327,18 @@
                     </div>
                 </div>
                 <div class="section">
-                    <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="addSupplyItem()">Add
+                    <button type="button" id="add-report" class="btn btn-info button-view"
+                        v-on:click="addSupplyItem()">Add
                         New
                         Supply
                     </button>
-                    <button type="button" id="add-report" class="btn btn-success button-view" v-on:click="generateReport()">
+                    <button type="button" id="add-report" class="btn btn-success button-view"
+                        v-on:click="generateReport()">
                         Generate Report
                     </button>
                 </div>
             </div>
-            
+
 
             <div class="section">
                 <div class="section header" v-if="supply_types.length > 0">
@@ -344,52 +350,75 @@
                 <div class="table-container" id="tableData" v-if="supply_types.length > 0">
                     <div class="well" v-for="item,index in supply_types">
                         <div class="row">
-                            <div class="col col-md-2 item-info">
+                            <div class="col col-xs-1">
                                 <p class="item-label">
                                     {{index + 1}}.
                                 </p>
-                                <p class="item-label">
-                                    Name:
-                                </p>
-                                <p class="item-value">
-                                    {{item.name}}
-                                </p>
                             </div>
-                            <div class="col col-md-2 item-info">
-                                <p class="item-label">
-                                    Amount:
-                                </p>
-                                <p class="item-value">
-                                    {{item.amount}}
-                                </p>
+                            <div class="col col-xs-9">
+                                <div class="row">
+                                    <div class="col col-md-2 item-info">
+                                        <p class="item-label">
+                                            Name:
+                                        </p>
+                                        <p class="item-value">
+                                            {{item.name}}
+                                        </p>
+                                    </div>
+                                    <div class="col col-md-2 item-info">
+                                        <p class="item-label">
+                                            Amount:
+                                        </p>
+                                        <p class="item-value">
+                                            {{item.amount}}
+                                        </p>
+                                    </div>
+                                    <div class="col col-md-3 item-info">
+                                        <p class="item-label">
+                                            Description:
+                                        </p>
+                                        <p class="item-value">
+                                            {{item.description}}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col col-md-4 item-info">
+                                        <p class="item-label">
+                                            Date Created:
+                                        </p>
+                                        <p class="item-value">
+                                            {{item.date_created}}
+                                        </p>
+                                    </div>
+        
+                                    <div class="col col-md-4 item-info" v-if="item.date_updated != item.date_created">
+                                        <p class="item-label">
+                                            Date Updated:
+                                        </p>
+                                        <p class="item-value">
+                                            {{item.date_updated}}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col col-md-3 item-info">
-                                <p class="item-label">
-                                    Description:
-                                </p>
-                                <p class="item-value">
-                                    {{item.description}}
-                                </p>
-                            </div>
-
-
-                            <div class="col col-md-4">
-                                <button class="btn btn-default btn-info"
-                                    v-on:click="editSupplyType(index)">edit</button>
-                                <button class="btn btn-default btn-danger"
-                                    v-on:click="onDeleteSupplyType(index)">delete</button>
+                            <div class="col col-md-2">
+                                <button class="btn btn-default btn-info" v-on:click="editSupplyType(index)">edit</button>
+                                <button class="btn btn-default btn-danger" v-on:click="onDeleteSupplyType(index)">delete</button>        
                             </div>
                         </div>
+                        
                     </div>
                 </div>
-                <div class="section">
-                    <button type="button" id="add-report" class="btn btn-warning button-view"
-                        v-on:click="addSupplyType()">Add New
-                        Supply Type
-                    </button>
-                </div>
+            </div>
+            <div class="section">
+                <button type="button" id="add-report" class="btn btn-warning button-view"
+                    v-on:click="addSupplyType()">Add New
+                    Supply Type
+                </button>
             </div>
         </div>
+    </div>
 
     </div>
 
@@ -440,7 +469,7 @@
                     const isMuni = urlParams.get('isMuni')
                     console.log("is Municipality: " + isMuni)
                     this.isMunicipality = isMuni || false
-                    
+
                     this.fetchInventory(id)
                 },
 
@@ -502,17 +531,20 @@
 
                 /*!!=============== INVENTORY ===============!!!*/
                 editInventory() {
-                    if(this.isMunicipality) {
+                    if (this.isMunicipality) {
                         this.inventory_input = MunicipalInventory.parse(this.inventory.toObject())
                     } else {
                         this.inventory_input = EvacuationInventory.parse(this.inventory.toObject())
                     }
-                    
+
                     $('#inventoryModal').modal()
                 },
 
                 onSaveInventory() {
                     console.log("data %o", this.inventory_input)
+
+                    this.inventory_input.date_updated = new Date()
+
                     var promise = DataHandler.addInventory(this.inventory_input)
                     if (this.isMunicipality) {
                         promise = DataHandler.addMunicipalInventory(this.inventory_input)
@@ -524,7 +556,8 @@
                         } else {
                             alert(`Item Have Been Persisted Successfuly`)
                             let id = this.inventory_input.id
-                            this.inventory_input = (this.isMunicipality) ? new MunicipalInventory() : new EvacuationInventory()
+                            this.inventory_input = (this.isMunicipality) ? new MunicipalInventory() :
+                                new EvacuationInventory()
                             this.fetchInventory(id)
                         }
                     }).catch((err) => {
@@ -571,6 +604,8 @@
 
                 onSaveSupplyItem() {
                     console.log("data %o", this.supply_input)
+                    this.supply_input.date_updated = new Date()
+
                     DataHandler.addSupply(this.supply_input).then((data) => {
                         if (data.error) {
                             alert(`Can't Persist Item ${data.error}`)
@@ -596,6 +631,12 @@
                         })
                     }
                 },
+
+                onTransferSupply(index) {
+                    let supply = this.supplies[index]
+                    $('#inventorySelectionModal').modal()
+                },
+
                 /*!!=============== SUPPLY ===============!!!*/
 
                 /*!!=============== SUPPLY-TYPE ===============!!!*/
@@ -615,6 +656,9 @@
 
                 onSaveSupplyType() {
                     console.log("data %o", this.supply_type_input)
+
+                    this.supply_type_input.date_updated = new Date()
+
                     DataHandler.addSupplyType(this.supply_type_input).then((data) => {
                         if (data.error) {
                             alert(`Can't Persist Item ${data.error}`)
@@ -642,7 +686,6 @@
                 },
                 /*!!=============== SUPPLY-TYPE ===============!!!*/
 
-
                 generateReport() {
                     let text = JSON.stringify(this.evac_list)
                     saveTextAsFile(text)
@@ -650,6 +693,7 @@
 
             }
         })
+
 
         ///generates a file of json contains
         function saveTextAsFile(text) {
@@ -676,6 +720,9 @@
 
             downloadLink.click();
         } //saveTextAsFile
+        
+
+    
     </script>
 
 </body>

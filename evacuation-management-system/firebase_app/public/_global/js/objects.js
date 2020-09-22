@@ -8,6 +8,8 @@ class Model {
     created_by = ""
     /** date created*/
     date_created = new Date()
+    /** date the model has been updated*/
+    date_updated = new Date()
 } //Model
 
 
@@ -43,7 +45,7 @@ class EvacuationCenter extends Model {
     /**contact_numbers     = "09171231233"*/
     contact_numbers
 
-    constructor(id, name, location, population_capacity, floor_space, date_created = new Date(), created_by, exact_address, municipality, contact_numbers) {
+    constructor(id, name, location, population_capacity, floor_space, date_created = new Date(), date_updated = new Date(), created_by, exact_address, municipality, contact_numbers) {
         super()
         this.id = id || "evac-" + genID(5)
         this.name = name
@@ -54,6 +56,7 @@ class EvacuationCenter extends Model {
         this.population_capacity = population_capacity
         this.floor_space = floor_space
         this.date_created = date_created
+        this.date_updated   = date_updated
         this.created_by = created_by
         this.exact_address = exact_address
         this.municipality = municipality
@@ -69,6 +72,7 @@ class EvacuationCenter extends Model {
             population_capacity: this.population_capacity,
             floor_space: this.floor_space,
             date_created: this.date_created,
+            date_updated: this.date_updated,
             created_by: this.created_by,
             exact_address: this.exact_address,
             municipality: this.municipality,
@@ -85,6 +89,7 @@ class EvacuationCenter extends Model {
             object.population_capacity,
             object.floor_space,
             object.date_created,
+            object.date_updated,
             object.created_by,
             object.exact_address,
             object.municipality,
@@ -115,7 +120,7 @@ class EvacuationHistory extends Model {
     current_population = 0
     report_date = new Date()
 
-    constructor(id = null, evac_id = null, current_population = 0, created_by = 0, report_date = new Date, date_created = new Date()) {
+    constructor(id = null, evac_id = null, current_population = 0, created_by = 0, report_date = new Date, date_created = new Date(), date_updated = new Date()) {
         super()
         this.id = id || "history-" + genID(5)
         this.evac_id = evac_id
@@ -123,6 +128,7 @@ class EvacuationHistory extends Model {
         this.created_by = created_by
         this.report_date = report_date
         this.date_created = date_created
+        this.date_updated = date_updated
     }
 
     /**returns instance to json object */
@@ -133,7 +139,8 @@ class EvacuationHistory extends Model {
             current_population: this.current_population,
             created_by: this.created_by,
             date_created: this.date_created,
-            report_date: this.report_date
+            report_date: this.report_date,
+            date_updated: this.date_updated
         }
     }
 
@@ -146,6 +153,7 @@ class EvacuationHistory extends Model {
             object.created_by,
             object.report_date,
             object.date_created,
+            object.date_updated
         )
 
         return evac
@@ -168,6 +176,7 @@ class MOABCParameters extends Model {
     static parameters_shown = {
         id: 'id',
         date_created: 'Date Created',
+        date_updated: 'Date Updated',
         created_by: 'Created By User',
         max_length: 'Maximum Number of Nectars per Food Source',
         population_size: 'Maximum # of Population',
@@ -177,10 +186,11 @@ class MOABCParameters extends Model {
         max_shuffle: 'Maximum Shuffle Value',
     }
 
-    constructor(id, date_created, created_by, max_length, max_val, population_size, trial_limit, max_epoch, min_shuffle, max_shuffle) {
+    constructor(id, date_created, date_updated, created_by, max_length, max_val, population_size, trial_limit, max_epoch, min_shuffle, max_shuffle) {
         super()
         this.id = id || "param-" + genID(5)
-        this.date_created = date_created || (new Date()).toLocaleString()
+        this.date_created = date_created || new Date()
+        this.date_updated = date_updated || new Date()
         this.created_by = created_by || '0'
         this.max_length = max_length || 0
         this.max_val = max_val || 0
@@ -210,6 +220,7 @@ class MOABCParameters extends Model {
         return {
             id: this.id,
             date_created: this.date_created,
+            date_updated: this.date_updated,
             created_by: this.created_by,
             max_length: this.max_length,
             max_val: this.max_val,
@@ -244,10 +255,11 @@ class EvacuationInventory extends InventoryType {
     /** id of the evacuation */
     evac_id = ""
 
-    constructor(id, date_created, created_by, evac_id, name, description) {
+    constructor(id, date_created, date_updated, created_by, evac_id, name, description) {
         super()
         this.id = id || "evacinv-" + genID(5)
         this.date_created = date_created || new Date()
+        this.date_updated = date_updated || new Date()
         this.created_by = created_by || '0'
         this.evac_id = evac_id
         this.name = name
@@ -258,6 +270,7 @@ class EvacuationInventory extends InventoryType {
         return new EvacuationInventory(
             objects.id,
             objects.date_created,
+            objects.date_updated,
             objects.created_by,
             objects.evac_id,
             objects.name,
@@ -271,6 +284,7 @@ class EvacuationInventory extends InventoryType {
         return {
             id: this.id,
             date_created: this.date_created,
+            date_updated: this.date_updated,
             created_by: this.created_by,
             evac_id: this.evac_id,
             name: this.name,
@@ -289,10 +303,11 @@ class MunicipalInventory extends InventoryType {
     municipality = ""
 
 
-    constructor(id, date_created, created_by, municipality, name, description) {
+    constructor(id, date_created, date_updated, created_by, municipality, name, description) {
         super()
         this.id = id || "muninv-" + genID(5)
         this.date_created = date_created || new Date()
+        this.date_updated = date_updated || new Date()
         this.created_by = created_by || '0'
         this.municipality = municipality
         this.name = name
@@ -303,6 +318,7 @@ class MunicipalInventory extends InventoryType {
         return new MunicipalInventory(
             objects.id,
             objects.date_created,
+            objects.date_updated,
             objects.created_by,
             objects.municipality,
             objects.name,
@@ -316,6 +332,7 @@ class MunicipalInventory extends InventoryType {
         return {
             id: this.id,
             date_created: this.date_created,
+            date_updated: this.date_updated,
             created_by: this.created_by,
             municipality: this.municipality,
             name: this.name,
@@ -345,10 +362,11 @@ class EvacuationSupply extends Model {
     remarks = ""
 
 
-    constructor(id, date_created, created_by, inventory_id, inventory_type, qty, date_supplied, remarks) {
+    constructor(id, date_created, date_updated, created_by, inventory_id, inventory_type, qty, date_supplied, remarks) {
         super()
         this.id = id || "evacsupply-" + genID(5)
         this.date_created = date_created || new Date()
+        this.date_updated = date_updated || new Date()
         this.created_by = created_by || '0'
         this.inventory_id = inventory_id
         this.inventory_type = inventory_type
@@ -361,6 +379,7 @@ class EvacuationSupply extends Model {
         return new EvacuationSupply(
             objects.id,
             objects.date_created,
+            objects.date_updated,
             objects.created_by,
             objects.inventory_id,
             objects.inventory_type,
@@ -374,6 +393,7 @@ class EvacuationSupply extends Model {
         return {
             id : this.id,
             date_created : this.date_created,
+            date_updated : this.date_updated,
             created_by : this.created_by,
             inventory_id : this.inventory_id,
             inventory_type : this.inventory_type,
@@ -396,10 +416,11 @@ class EvacuationSupplyType extends Model {
     /** amount per package given */
     amount = 0
 
-    constructor(id, date_created, created_by, name, description, amount) {
+    constructor(id, date_created, date_updated, created_by, name, description, amount) {
         super()
         this.id = id || "evacsupplytype-" + genID(5)
         this.date_created = date_created || new Date()
+        this.date_updated = date_updated || new Date()
         this.created_by = created_by || '0'
         this.name = name
         this.description = description
@@ -410,6 +431,7 @@ class EvacuationSupplyType extends Model {
         return new EvacuationSupplyType(
             objects.id,
             objects.date_created,
+            objects.date_updated,
             objects.created_by,
             objects.name,
             objects.description,
@@ -421,6 +443,7 @@ class EvacuationSupplyType extends Model {
         return {
             id: this.id,
             date_created: this.date_created,
+            date_updated: this.date_updated,
             created_by: this.created_by,
             name: this.name,
             description: this.description,
