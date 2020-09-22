@@ -4,7 +4,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Inventory</title>
+    <title>Inventory Detail</title>
 
     <!-- update the version number as needed -->
     <script defer src="/__/firebase/7.19.1/firebase-app.js"></script>
@@ -54,7 +54,14 @@
     </div>
 
     <div id="inventory-list-picker">
-        <inventory-selector v-bind:muni_inv_list="muni_inv_list" v-bind:evac_list="evac_list" v-bind:inventory_list="inventory_list" v-bind:is-loading="isLoading"></inventory-selector>
+        <inventory-selector 
+            :muni_inv_list="muni_inv_list" 
+            :evac_list="evac_list" 
+            :inventory_list="inventory_list" 
+            :is-loading="isLoading"
+            :supply="supply"
+            v-on:on-select-inventory="id => {onSelectInventory(id)}"
+        ></inventory-selector>
     </div>
     <!-- <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#editorModal">Open Modal</button> -->
     <div class="container" id="content">
@@ -283,42 +290,66 @@
                 <div class="table-container" id="tableData" v-if="supplies.length > 0">
                     <div class="well" v-for="item,index in supplies">
                         <div class="row">
-                            <div class="col col-md-2 item-info">
+                            <div class="col col-md-1 item-info">
                                 <p class="item-label">
                                     {{index + 1}}.
                                 </p>
-                                <p class="item-label">
-                                    Name:
-                                </p>
-                                <p class="item-value">
-                                    {{supply_types_ref[item.inventory_type].name}}
-                                </p>
                             </div>
-                            <div class="col col-md-2 item-info">
-                                <p class="item-label">
-                                    Quantity:
-                                </p>
-                                <p class="item-value">
-                                    {{item.qty}}
-                                </p>
+                            <div class="col col-md-10">
+                                <div class="row">
+                                    <div class="col col-md-4 item-info">
+                                        <p class="item-label">
+                                            Name:
+                                        </p>
+                                        <p class="item-value">
+                                            {{supply_types_ref[item.inventory_type].name}}
+                                        </p>
+                                    </div>
+                                    <div class="col col-md-2 item-info">
+                                        <p class="item-label">
+                                            Quantity:
+                                        </p>
+                                        <p class="item-value">
+                                            {{item.qty}}
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="col col-md-6 item-info">
+                                        <p class="item-label">
+                                            Remarks:
+                                        </p>
+                                        <p class="item-value">
+                                            {{item.remarks}}
+                                        </p>
+                                    </div>
+                                    <div class="col col-md-4 item-info">
+                                        <p class="item-label">
+                                            Date Supplied:
+                                        </p>
+                                        <p class="item-value">
+                                            {{item.date_supplied}}
+                                        </p>
+                                    </div>
+                                    <div class="col col-md-4 item-info">
+                                        <p class="item-label">
+                                            Date Created:
+                                        </p>
+                                        <p class="item-value">
+                                            {{item.date_created}}
+                                        </p>
+                                    </div>
+                                    <div class="col col-md-4 item-info">
+                                        <p class="item-label">
+                                            Date Updated:
+                                        </p>
+                                        <p class="item-value">
+                                            {{item.date_updated}}
+                                        </p>
+                                    </div>
+                                </div>
+                               
                             </div>
-                            <div class="col col-md-2 item-info">
-                                <p class="item-label">
-                                    Date Supplied:
-                                </p>
-                                <p class="item-value">
-                                    {{item.date_supplied}}
-                                </p>
-                            </div>
-                            <div class="col col-md-12 item-info">
-                                <p class="item-label">
-                                    Remarks:
-                                </p>
-                                <p class="item-value">
-                                    {{item.remarks}}
-                                </p>
-                            </div>
-
+                            
                             <div class="col col-md-12">
                                 <button class="btn btn-default btn-info"
                                     v-on:click="onTransferSupply(index)">transfer</button>
@@ -454,7 +485,8 @@
 
                 supply_header: [],
                 supply_type_header: [],
-                isMunicipality: false
+                isMunicipality: false,
+                transfer_supply: new EvacuationSupply()
             },
             methods: {
 
@@ -638,8 +670,28 @@
 
                 onTransferSupply(index) {
                     let supply = this.supplies[index]
-                    inventory_selection.onStart()
-                    $('#inventorySelectionModal').modal()
+                    this.transfer_supply = EvacuationSupply.parse(supply.toObject())
+                    inventory_selection.onStart(supply, this.onSelectedInventory)
+                    //$('#inventorySelectionModal').modal()
+                },
+
+                onSelectedInventory(id) {
+                    if (confirm("transfer inventory here?")) {
+                        this.transfer_supply.inventory_id = id
+                        this.transfer_supply.date_updated = new Date()
+                        inventory_selection.onDismiss()
+                        DataHandler.addSupply(this.transfer_supply).then((data) => {
+                            if (data.error) {
+                                alert(`Can't Persist Item ${data.error}`)
+                            } else {
+                                alert(`Item Have Been Persisted Successfuly`)
+                                this.transfer_supply = new EvacuationSupply()
+                                this.fetchSupply()
+                            }
+                        }).catch(err => {
+                            console.log(err)
+                        })
+                    }
                 },
 
                 /*!!=============== SUPPLY ===============!!!*/

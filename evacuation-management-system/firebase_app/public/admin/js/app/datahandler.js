@@ -257,7 +257,7 @@ class EvacuationHandler extends UserHandler {
                             object.date_created = object.date_created.toDate()
                             object.date_updated = object.date_updated.toDate()
                         } catch (err) {
-                            console.log(err)
+                            //console.log(err)
                         }
                         evacuations.push(EvacuationCenter.parse(object))
                     });
@@ -323,7 +323,7 @@ class EvacuationHandler extends UserHandler {
                             object.date_updated = object.date_updated.toDate()
                             object.report_date  = object.report_date.toDate()
                         } catch (err) {
-                            console.log(err)
+                            //console.log(err)
                         }
                         models.push(EvacuationHistory.parse(object))
                     });
@@ -400,7 +400,7 @@ class MOABParamsHandler extends EvacuationHandler {
                             object.date_created = object.date_created.toDate()
                             object.date_updated = object.date_updated.toDate()
                         } catch (err) {
-                            console.log(err)
+                            //console.log(err)
                         }
                         models.push(MOABCParameters.parse(object))
                     });
@@ -466,7 +466,7 @@ class InventoryHandler extends MOABParamsHandler {
                             object.date_created = object.date_created.toDate()
                             object.date_updated = object.date_updated.toDate()
                         } catch (err) {
-                            console.log(err)
+                            //console.log(err)
                         }
                         inventories.push(EvacuationInventory.parse(object))
                     });
@@ -560,7 +560,7 @@ class InventoryHandler extends MOABParamsHandler {
                             object.date_created = object.date_created.toDate()
                             object.date_updated = object.date_updated.toDate()
                         } catch (err) {
-                            console.log(err)
+                            //console.log(err)
                         }
                         supplies.push(EvacuationSupply.parse(object))
                     });
@@ -652,7 +652,7 @@ class InventoryHandler extends MOABParamsHandler {
                             object.date_created = object.date_created.toDate()
                             object.date_updated = object.date_updated.toDate()
                         } catch (err) {
-                            console.log(err)
+                            //console.log(err)
                         }
                         supplytypes.push(EvacuationSupplyType.parse(object))
                     });
@@ -708,7 +708,7 @@ class MunicipalInventoryHandler extends InventoryHandler {
                         object.date_created = object.date_created.toDate()
                         object.date_updated = object.date_updated.toDate()
                     } catch (err) {
-                        console.log(err)
+                        //console.log(err)
                     }
                     inventories.push(MunicipalInventory.parse(object))
                 });
@@ -740,7 +740,7 @@ class MunicipalInventoryHandler extends InventoryHandler {
                             object.date_created = object.date_created.toDate()
                             object.date_updated = object.date_updated.toDate()
                         } catch (err) {
-                            console.log(err)
+                            //console.log(err)
                         }
                         inventories.push(MunicipalInventory.parse(object))
                     });
