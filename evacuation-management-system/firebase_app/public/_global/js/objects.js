@@ -205,6 +205,7 @@ class MOABCParameters extends Model {
         return new MOABCParameters(
             objects.id,
             objects.date_created,
+            objects.date_updated,
             objects.created_by,
             objects.max_length,
             objects.max_val,
