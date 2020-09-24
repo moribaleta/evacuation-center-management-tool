@@ -33,6 +33,12 @@ var header = new Vue({
             href: 'admin.html',
             icon: 'group',
             title: 'Admin'
+        },
+        {
+            id: 'map',
+            href: 'map.html',
+            icon: 'room',
+            title: 'Map'
         }
     ]
 },

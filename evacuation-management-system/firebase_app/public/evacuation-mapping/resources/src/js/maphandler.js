@@ -14,7 +14,7 @@ class MapHandlerClass {
     map_boundaries
 
     /** initialize the display of map */
-    configure(element, map_boundaries){
+    configure(element, map_boundaries, onPlaceMarker){
         this.map_boundaries = map_boundaries
         this.element = element
         this.bounds = new google.maps.LatLngBounds();
@@ -46,7 +46,14 @@ class MapHandlerClass {
         
         google.maps.event.addListener(this.map, 'click', function(e) {
             if (confirm("Do you want to add a road icon here?") ) {
-                placeMarker(e.latLng, this.map);
+                try{
+                    onPlaceMarker(e.latLng)
+                }catch(err){
+                    placeMarker(e.latLng, this.map);
+                }
+                
+                
+                //this.onPlaceMarker(e.latLng)
             }
         });
         

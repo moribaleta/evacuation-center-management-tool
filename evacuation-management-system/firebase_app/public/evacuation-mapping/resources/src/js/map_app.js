@@ -1,100 +1,208 @@
-var map;
-var emergency_markers = [];
-var history_list = []
-var model_param = {}
-var test_outputs = []
-
-var emergency_marker = {
-    id: null,
-    position: null,
-    marker: null,
-    //onGoing: false
-}
-
-/** function for handling initial setup */
-function initializeMap() {
-    DataHandler.configure()
-    console.log("boundaries %o", map_boundaries)
-    MapHandler.configure(document.getElementById('map'), map_boundaries)
-
-    let promiseEvac = initEvacuationCenters()
-    let promiseRoute = initializeMapRouter()
-
-    Promise.all([promiseEvac, promiseRoute]).then((val) => {
-        $("#progressDirection").hide();
-    }).catch((err) => {
-        console.log(err)
-    })
-
-    DataHandler.getEvacuationHistory().then((message) => {
-        history_list = message.data
-    }).catch(error => {
-        console.log(err)
-    })
-
-    DataHandler.getModelParams().then((message) => {
-        model_param = message.data[0]
-    }).catch(error => {
-        console.log(err)
-    })
-
-    MapHandler.onPlaceMarker = placeMarker
-} //initializeMap
-
-/** gets the road coordinates from the database */
-function initializeMapRouter() {
-    return new Promise((resolve, reject) => {
-        DataHandler.getRoadMap().then((message) => {
-            MapRouter.configure(message.data || [])
-            localStorage.setItem('roads', JSON.stringify(message.data))
-            resolve(true)
-        }).catch((error) => {
-            console.log(error)
-            reject(error)
-        })
-    })
-} //initializeMapRouter
-
-/** gets the evacuation centers from the database */
-function initEvacuationCenters() {
-    return new Promise((resolve, reject) => {
-        DataHandler.getEvacuationCenters().then((message) => {
-            evacuation_center_list = message.data
-            console.log("MapHandler %o", MapHandler.bounds)
-            var bounds = MapHandler.bounds
-
-            evacuation_center_list.forEach(evac => {
-                var position = new google.maps.LatLng(evac.location.lat, evac.location.lng);
-                bounds.extend(position);
-                marker = new google.maps.Marker({
-                    position: position,
-                    map: MapHandler.map,
-                    title: evac.name,
-                    icon: 'resources/images/hospital_32.png'
-                });
-                MapHandler.map.fitBounds(bounds);
-            });
-            resolve(true)
-        }).catch((error) => {
-            console.log("error %o", error)
-            reject(error)
-        })
-    })
-} //initEvacuationCenters
 
 
-function initEmergencyMarkers() {
-    console.log("emergency_markers %o", emergency_markers);
-    for (var i = 0; i < emergency_markers.length; i++) {
-        console.log("init emergency marker %o", emergency_markers[i]);
-        //var position = new google.maps.LatLng( emergency_markers[i].position);
-        var marker = new google.maps.Marker({
-            position: emergency_markers[i].position,
-            map: MapHandler.map,
+/**
+ * class defines the marker of the user pinned on the map
+ */
+class EmergencyMarker extends Model {
+    marker
+    position 
+    
+    constructor(id, position, marker) {
+        super()
+        this.id = id || "location-"+genID(5)
+        this.position = position
+        this.marker = marker
+    }
+
+    removeMarker(){
+        this.marker.setMap(null)
+    }
+
+    static create(position, map) {
+
+        var emergencymarker = new google.maps.Marker({
+            position: position,
+            map: map,
             icon: 'resources/images/emergency_32.png',
-            title: "emergency at: " + i
         });
 
+        var id = "location-"+genID(5)
+        var contentMessage = 
+            `
+            <p>Your Location</p>
+            <button onclick="mapApp.removeMarker()">remove</button>
+            <button onclick="mapApp.setDestination()">set destination</button>
+            `;
+
+        var infoEmergency = new google.maps.InfoWindow({
+            content: contentMessage
+        });
+
+        infoEmergency.open(map, emergencymarker);
+
+        google.maps.event.addListener(emergencymarker, 'click', function () {
+            infoEmergency.open(map, emergencymarker);
+        });
+        
+        const marker = new EmergencyMarker(id, position, emergencymarker)
+        return marker
+    }
+}//EmergencyMarker
+
+class EvacuationMarker extends EmergencyMarker {
+
+    evacuation_center = new EvacuationCenter()
+
+    constructor(id, position, marker, evacuation) {
+        super()
+        this.id = id || "evacuation-"+genID(5)
+        this.position = position
+        this.marker = marker
+        this.evacuation_center = evacuation
+    }
+
+    static create(evac, position, map) {
+
+        var emergencymarker = new google.maps.Marker({
+            position: position,
+            map: map,
+            icon: 'resources/images/hospital_32.png',
+        });
+
+        var id = "evacuation-"+genID(5)
+        var contentMessage = 
+            `
+            <h4>${evac.name}</h4>
+            <p>Evacuation Marker</p>
+            <p>population capacity: ${evac.population_capacity}</p>
+            <p>floor space: ${evac.floor_space}</p>
+            <p>municipality: ${evac.municipality}</p>
+            <p>contac info: ${evac.contact_numbers}</p>
+            <p>exact address: ${evac.exact_address}</p>
+            <p>lat: ${evac.location.lat}, lng: ${evac.location.lng}</p>
+            `;
+
+        var infoEmergency = new google.maps.InfoWindow({
+            content: contentMessage
+        });
+
+        //infoEmergency.open(map, emergencymarker);
+
+        google.maps.event.addListener(emergencymarker, 'click', function () {
+            infoEmergency.open(map, emergencymarker);
+        });
+            
+        return new EvacuationMarker(id, position, emergencymarker, evac)
+    }
+}
+
+/**
+ * class app of the map
+ */
+class MapApp {  
+
+    /** the pinned location of the user */
+    emergency_marker
+
+    /** contains all the evacuation centers */
+    evacuation_center_list = []
+
+    /** contains all the evacuation center's marker shown on the map */
+    evacuation_center_markers = []
+
+    /** contains all the history of the evacuation centers */
+    history_list = []
+    /** defines the parameters of the MOAB*/
+    model_param = {}
+
+    /** contains the boundaries shown on the map */
+    map_boundaries
+
+    constructor(){
+        this.map_boundaries = map_boundaries   
+    }
+
+    /** function for handling initial setup */
+    initializeMap() {
+        DataHandler.configure()
+        MapHandler.configure(document.getElementById('map'), this.map_boundaries, this.onPlaceMarker)
+        let promiseEvac     = this.initEvacuationCenters()
+        let promiseRoute    = this.initializeMapRouter()
+
+        Promise.all([promiseEvac, promiseRoute]).then((val) => {
+            $("#progressDirection").hide();
+        }).catch((err) => {
+            console.log(err)
+        })
+
+        DataHandler.getEvacuationHistory().then((message) => {
+            this.history_list = message.data
+        }).catch(error => {
+            console.log(err)
+        })
+
+        DataHandler.getModelParams().then((message) => {
+            this.model_param = message.data[0]
+        }).catch(error => {
+            console.log(err)
+        })
+
+        
+        /* MapHandler.onPlaceMarker((location) => {
+            console.log(location)
+        }) */
+    } //initializeMap
+
+    /** gets the road coordinates from the database */
+    initializeMapRouter() {
+        return new Promise((resolve, reject) => {
+            DataHandler.getRoadMap().then((message) => {
+                MapRouter.configure(message.data || [])
+                localStorage.setItem('roads', JSON.stringify(message.data))
+                resolve(true)
+            }).catch((error) => {
+                console.log(error)
+                reject(error)
+            })
+        })
+    } //initializeMapRouter
+
+    /** gets the evacuation centers from the database */
+    initEvacuationCenters() {
+        return new Promise((resolve, reject) => {
+            DataHandler.getEvacuationCenters().then((message) => {
+                this.evacuation_center_list = message.data
+                console.log("MapHandler %o", MapHandler.bounds)
+                var bounds = MapHandler.bounds
+
+                this.evacuation_center_list.forEach(evac => {
+                    var position = new google.maps.LatLng(evac.location.lat, evac.location.lng);
+                    bounds.extend(position);
+                    this.evacuation_center_markers.push(EvacuationMarker.create(evac, position, MapHandler.map))
+                    MapHandler.map.fitBounds(bounds);
+                });
+                resolve(true)
+            }).catch((error) => {
+                console.log("error %o", error)
+                reject(error)
+            })
+        })
+    } //initEvacuationCenters
+
+    onPlaceMarker(position) {    
+        let locationMarker = EmergencyMarker.create(position, MapHandler.map)
+        mapApp.emergency_marker = locationMarker
+    }
+    
+    /** places emergency starting location on the map */
+    //placeMarker(position) {
+        /* var emergencymarker = new google.maps.Marker({
+            position: position,
+            map: MapHandler.map,
+            icon: 'resources/images/emergency_32.png',
+        });
+
+        var id = genID(5);
         var contentMessage = '<p>Your Location</p>' +
             `<button onclick="removeMarker('${id}')">remove</button><button onclick="setDestination('${id}')">set destination</button>`;
 
@@ -107,151 +215,129 @@ function initEmergencyMarkers() {
         google.maps.event.addListener(emergencymarker, 'click', function () {
             infoEmergency.open(MapHandler.map, emergencymarker);
         });
-    }
-    console.log("emergency_markers %o", emergency_markers);
-}
 
-/** places emergency starting location on the map */
-function placeMarker(position) {
-    var emergencymarker = new google.maps.Marker({
-        position: position,
-        map: MapHandler.map,
-        icon: 'resources/images/emergency_32.png',
-    });
+        const marker = {
+            id: id,
+            marker: emergencymarker,
+            position: position,
+        } */
+        /* let locationMarker = EmergencyMarker.create(position, MapHandler.map)
+        this.emergency_marker = locationMarker
+    } */
 
-    var id = genID(5);
-    var contentMessage = '<p>Your Location</p>' +
-        `<button onclick="removeMarker('${id}')">remove</button><button onclick="setDestination('${id}')">set destination</button>`;
+    /** function called on get direction from emergency location event*/
+    setDestination(id) {
+        /* console.log("emergency marker: %o", id);
+        let marker = getMarker(id)
+        createRouteFromEmergency(marker); */
+        
+        this.getAvailableEvacuation().then((evacs) => {
+            var path_detail = MapRouter.getNearestEvacuation(evacs, this.emergency_marker);
+            this.showDetail(path_detail, this.emergency_marker);
+            $("#button_modal").click();
+        })
+        
+        //var evacuation_available = this.getAvailableEvacuation();
+        //console.log("emergency marker: %o", this.emergency_marker);
+        //emergency_location['position'] = position;
+        
 
-    var infoEmergency = new google.maps.InfoWindow({
-        content: contentMessage
-    });
+    } //setDestination
 
-    infoEmergency.open(MapHandler.map, emergencymarker);
-
-    google.maps.event.addListener(emergencymarker, 'click', function () {
-        infoEmergency.open(MapHandler.map, emergencymarker);
-    });
-
-    const marker = {
-        id: id,
-        marker: emergencymarker,
-        position: position,
-    }
-
-    emergency_markers.push(marker);
-}
-
-/** function called on get direction from emergency location event*/
-function setDestination(id) {
-    console.log("emergency marker: %o", id);
-    let marker = getMarker(id)
-    createRouteFromEmergency(marker);
-} //setDestination
-
-/** returns the marker selected to be the starting point of location */
-function getMarker(id) {
-    for (var i = 0; i < emergency_markers.length; i++) {
-        const item = emergency_markers[i]
-        if (item.id == id) {
-            return item
+    
+    /** `DEPRECATED` 
+     * returns the marker selected to be the starting point of location */
+    getMarker(id) {
+        for (var i = 0; i < emergency_markers.length; i++) {
+            const item = emergency_markers[i]
+            if (item.id == id) {
+                return item
+            }
         }
-    }
-    return null
-} //getMarker
+        return null
+    } //getMarker
 
-/** TODO use MOABC here
- * returns a list of evacuation center available */
-function getAvailableEvacuation() {
+    /** TODO use MOABC here
+     * returns a list of evacuation center available */
+    getAvailableEvacuation() {
+        return new Promise((resolve, reject) => {
+            var ids = []
+            var evacs = []
 
-    var ids = []
-    var evacs = []
+            var test_outputs = []
+            console.log("history list %o", this.history_list)
+            console.log("params %o", this.model_param)
 
-    test_outputs = []
+            while (evacs.length < 5) {
+                let test = new TesterABC()
+                test.evacuations = this.evacuation_center_list
+                test.history_list = this.history_list
+                let test_output = test.generate(this.model_param)
 
-    while (evacs.length < 5) {
-        let test = new TesterABC()
-        test.evacuations = evacuation_center_list
-        test.history_list = history_list
-        let test_output = test.generate(model_param)
-
-        if (!ids.includes(test_output.output.best.evac.id)) {
-            let evac = test_output.output.best.evac
-            let id = evac.id
-            ids.push(id)
-            evacs.push(evac)
-            test_outputs.push(test_output)
-        }
-    }
-
-    return evacs
-}
-
-/** clears all the emergency markers from the map */
-function clearMarkers() {
-    emergency_markers.forEach((marker) => {
-        marker.marker.setMap(null)
-    })
-    emergency_markers = []
-} //clearMarkers
-
-
-/** removes a specific emergency marker from the map */
-function removeMarker(id) {
-    for (var i = 0; i < emergency_markers.length; i++) {
-        const item = emergency_markers[i]
-        if (item.id == id) {
-            emergency_markers[index].marker.setMap(null)
-            emergency_markers.splice(index, 1)
-            return
-        }
-    }
-} //removeMarker
-
-function createRouteFromEmergency(emergency_location) {
-    var evacuation_available = getAvailableEvacuation();
-    console.log("emergency marker: %o", emergency_location);
-    var path_detail = MapRouter.getNearestEvacuation(evacuation_available, emergency_location);
-    //emergency_location['position'] = position;
-    $("#button_modal").click();
-    showDetail(path_detail, emergency_location);
-}
-
-function showDetail(path_detail, emergency_location) {
-    var winner_index = path_detail.winner;
-    var winner = path_detail.detail[winner_index];
-    modal_vue.setList(path_detail, winner, emergency_location, test_outputs);
-}
-
-function openRoute(winner, emergency_location) {
-    var evacuation_center = winner.evacuation_detail;
-
-    $('#button-modal-close').click();
-    emergency_location.onGoing = true;
-    emergency_location.hospital_pos = winner.position;
-
-    console.log("emergency location %o", emergency_location)
-
-    var emergency_elem;
-    try {
-        emergency_elem = {
-            lat: emergency_location.position.lat(),
-            lng: emergency_location.position.lng()
-        }
-    } catch (e) {
-
-        emergency_elem = {
-            lat: emergency_location.position.lat,
-            lng: emergency_location.position.lng
-        }
+                if (!ids.includes(test_output.output.best.evac.id)) {
+                    let evac = test_output.output.best.evac
+                    let id = evac.id
+                    ids.push(id)
+                    evacs.push(evac)
+                    test_outputs.push(test_output)
+                }
+            }
+            resolve(evacs)
+        })
     }
 
-    console.log("emergency location %o", emergency_elem)
-    window.open('route.html?' + JSON.stringify(evacuation_center) + "**" + JSON.stringify(emergency_elem));
-    initMap();
+    
+    /** `DEPRECATED` clears all the emergency markers from the map */
+    clearMarkers() {
+        emergency_markers.forEach((marker) => {
+            marker.marker.setMap(null)
+        })
+        emergency_markers = []
+    } //clearMarkers
+
+
+    /** removes a specific emergency marker from the map */
+    removeMarker() {
+        /* for (var i = 0; i < emergency_markers.length; i++) {
+            const item = emergency_markers[i]
+            if (item.id == id) {
+                emergency_markers[index].marker.setMap(null)
+                emergency_markers.splice(index, 1)
+                return
+            }
+        } */
+        this.emergency_marker.removeMarker()
+        this.emergency_marker = new EmergencyMarker()
+    } //removeMarker
+
+    /* createRouteFromEmergency(emergency_location) {
+        var evacuation_available = getAvailableEvacuation();
+        console.log("emergency marker: %o", emergency_location);
+        var path_detail = MapRouter.getNearestEvacuation(evacuation_available, emergency_location);
+        //emergency_location['position'] = position;
+        $("#button_modal").click();
+        showDetail(path_detail, emergency_location);
+    } */
+
+    showDetail(path_detail, emergency_location) {
+        var winner_index = path_detail.winner;
+        var winner = path_detail.detail[winner_index];
+        modal_vue.setList(path_detail, winner, emergency_location, test_outputs);
+    }
+
+    
 }
 
+const mapApp = new MapApp()
 
+function onInitializeMap(){
+    mapApp.initializeMap()
+    MapHandler.onPlaceMarker = onPlaceMarker
+}
+
+function onPlaceMarker(location){
+    mapApp.onPlaceMarker(location)
+}
 
 /* function saveResponseTime(hospital, emergency_loc) {
 
@@ -304,7 +390,34 @@ var modal_vue = new Vue({
             //$('#progressDirection').hide();
         },
         proceed: function () {
-            openRoute(this.winner, this.emergency);
+            this.openRoute(this.winner, this.emergency);
+        },
+        openRoute(winner, emergency_location) {
+            var evacuation_center = winner.evacuation_detail;
+    
+            $('#button-modal-close').click();
+            emergency_location.onGoing = true;
+            emergency_location.hospital_pos = winner.position;
+    
+            console.log("emergency location %o", emergency_location)
+    
+            var emergency_elem;
+            try {
+                emergency_elem = {
+                    lat: emergency_location.position.lat(),
+                    lng: emergency_location.position.lng()
+                }
+            } catch (e) {
+    
+                emergency_elem = {
+                    lat: emergency_location.position.lat,
+                    lng: emergency_location.position.lng
+                }
+            }
+    
+            console.log("emergency location %o", emergency_elem)
+            window.open('route.html?' + JSON.stringify(evacuation_center) + "**" + JSON.stringify(emergency_elem));
+            initMap();
         }
     }
 }) //modal_vue
@@ -376,7 +489,6 @@ class MapRouterClass {
                 if (i != j) {
                     if ((this.tree[i].coordinates.lat == tree_temp[j].coordinates.lat &&
                             this.tree[i].coordinates.lng == tree_temp[j].coordinates.lng)) {
-                        console.log("match: " + i + " vs " + j + " distance: " + distance);
                         if (!added.includes(j)) {
                             for (var k = 0; k < tree_temp[j].vertex.length; k++) {
                                 if (!this.tree[i].vertex.includes(tree_temp[j].vertex[k])) {
@@ -525,7 +637,7 @@ class MapRouterClass {
 
         return return_data;
 
-    }//getNearestEvacuation
+    } //getNearestEvacuation
 
     /**calculate distance path and condtion */
     getResponseTime(path_data) {
@@ -542,7 +654,7 @@ class MapRouterClass {
                 path_data[i].coordinates.lng, path_data[i + 1].coordinates.lng, );
 
         }
-        
+
         condition = condition_total / path_data.length;
         condition = Math.floor(condition);
         total_speed = (total_speed / path_data.length) / 60; //convert kph to kpm
@@ -561,6 +673,7 @@ class MapRouterClass {
         let map = MapHandler.map
         var infoWindow = new google.maps.InfoWindow(),
             marker, i;
+
         for (i = 0; i < this.tree.length; i++) {
             var position = new google.maps.LatLng(this.tree[i].coordinates.lat, this.tree[i].coordinates.lng);
             //bounds.extend(position);
@@ -594,7 +707,7 @@ class MapRouterClass {
                 }
             })(marker, i));
         }
-    }//placeTrafficPoints
+    } //placeTrafficPoints
 
 } //MapRouter
 

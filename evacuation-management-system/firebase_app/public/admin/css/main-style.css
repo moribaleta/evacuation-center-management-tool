@@ -68,7 +68,8 @@
     position: fixed;
     background-color: #4AC1E2;
     width: 80px;
-    height: 1000px;
+    /* height: 1000px; */
+    height: 100%;
     float: left;
     
     flex-direction: column;
@@ -143,7 +144,7 @@
 
 /*content*/
 .table-container {
-    height: 70%;
+    height: 100%;
     /* min-height: 700px; */
     overflow: auto;
     max-height: 600px;
@@ -181,4 +182,25 @@
 
 .input-select{
     width: 100%;
+}
+
+.fullview {
+    height: 90%;
+    width: 90%;
+    flex: auto;
+    position: absolute;
+    
+}
+
+.iframe {
+    height: 100%;
+    width: 100%;
+    min-height: 600px;
+    border: 0;
+}
+
+.section-footer {
+    position: absolute;
+    bottom: 0;
+    padding: 10px;
 }
