@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Map</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            height: 100%;
+            z-index: 0;
+        }
+    </style>
+
+    <link rel="shortcut icon" href="resources/images/favicon.ico" type="image/x-icon">
+    <!-- update the version number as needed -->
+    <script src="/__/firebase/7.19.1/firebase-app.js"></script>
+    <!-- include only the Firebase features as you need -->
+    <script src="/__/firebase/7.19.1/firebase-auth.js"></script>
+    <script src="/__/firebase/7.19.1/firebase-database.js"></script>
+    <script src="/__/firebase/7.19.1/firebase-messaging.js"></script>
+    <script src="/__/firebase/7.19.1/firebase-storage.js"></script>
+    <script src="/__/firebase/7.19.1/firebase-firestore.js"></script>
+    <!-- initialize the SDK after all desired features are loaded -->
+    <script src="/__/firebase/init.js"></script>
+
+    <script src="resources/js/jquery-3.0.0.min.js"></script>
+    <script src="resources/js/vue.js"></script>
+    <script src="resources/bootstrap/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="resources/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="resources/css/main.css">
+    <link rel="shortcut icon" href="resources/images/favicon.ico" type="image/x-icon">
+</head>
+
+<body>
+
+    <nav class="navbar navbar-inverse" id="navbar">
+        <div class="container-fluid" style="padding-top: 20px;">
+            <div class="navbar-header">
+            </div>
+            <div class="progress" id="progressDirection">
+                <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="40"
+                    aria-valuemin="0" aria-valuemax="100" style="width:100%">
+                    please wait...
+                </div>
+            </div>
+
+        </div>
+    </nav>
+    <div id="map"></div>
+    <!-- <div class="bottom-container">
+        <button class="bottom-button" id="button_add_new" onclick="mapApp.getLocation()">Get Location</button>
+        <button class="bottom-button" id="button_add_new" onclick="mapApp.locateEvac()">Locate Evacuation Center</button>
+    </div> -->
+    <!-- Modal -->
+
+    <script src="resources/js/dijkstra.js"></script>
+    <script src="resources/json/coordinates.js"></script>
+    <script src="resources/json/boundaries.js"></script>
+
+    <script src="../_global/js/utilities.js"></script>
+    <script src="../_global/js/objects.js"></script>
+    
+    <script src="resources/src/js/maphandler.js"></script>
+    <script src="resources/src/js/datahandler.js"></script>
+    <script src="resources/src/js/utilities.js"></script>
+    <script src="resources/src/js/map_app.js"></script>
+
+    <script>
+        MapHandler.setPinInteraction(false)
+        mapApp.showPathColor = true
+    </script>
+    <script
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBymq4YRMhZoMwnPUd2SfyzQQLEvUtafkM&libraries=places&callback=onInitializeMap"
+        async defer></script>
+</body>
+
+</html>

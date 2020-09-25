@@ -4,7 +4,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Evacuations</title>
+    <title>Map</title>
 
     <!-- update the version number as needed -->
     <script defer src="/__/firebase/7.19.1/firebase-app.js"></script>
@@ -63,22 +63,14 @@
                 <h1>Map</h1>
             </div>
 
-            <div class="loader-container" v-if="isLoading">
-                <div class="loader"></div>
-            </div>
-
             <div class="section fullview">
-                <iframe class="iframe" src="../evacuation-mapping/map_2.html"></iframe>
-                <div class="section-footer">
+                <iframe class="iframe" :src="'../evacuation-mapping/'+link"></iframe>
+                <div class="section">
                     <button type="button" id="add-report" class="btn btn-info button-view"
-                        v-on:click="editMap()">Edit Map
+                        v-on:click="onEditMap()">Edit Map
                     </button>
                     <button type="button" id="add-report" class="btn btn-info button-view"
-                        v-on:click="testMap(false)">Test Map
-                    </button>
-                    <button type="button" id="add-report" class="btn btn-info button-view"
-                         v-on:click="download()">Download
-                        Evacuation Center
+                        v-on:click="onTestMap()">Test Map
                     </button>
                 </div>
             </div>
@@ -96,19 +88,25 @@
         app = new Vue({
             el: '#content',
             data: {
-                evac_list: [],
-                headers: [],
-                data_input: null, //new EvacuationCenter(),
-                isEdit: false,
-                editEvacuationID: null,
-                conf_password: null,
-                municipalities: municipalities,
-                isLoading: false
+                user: new AdminUser(),
+                
+                ref_link: {
+                    viewer: 'map_view.html',
+                    editor: 'map_editor.html',
+                    test: 'map_2.html',
+                },
+                link: 'map_view.html',
             },
             methods: {
                 onStart() {
-                    
+                    this.user = header.user
                 },
+                onEditMap(){
+                    this.link = this.ref_link.editor
+                },
+                onTestMap(){
+                    this.link = this.ref_link.test
+                }
             }
         })
 

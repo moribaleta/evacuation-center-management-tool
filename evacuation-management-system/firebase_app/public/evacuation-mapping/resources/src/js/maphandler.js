@@ -13,6 +13,8 @@ class MapHandlerClass {
 
     map_boundaries
 
+    isPinEnabled = true
+
     /** initialize the display of map */
     configure(element, map_boundaries, onPlaceMarker){
         this.map_boundaries = map_boundaries
@@ -45,16 +47,17 @@ class MapHandlerClass {
         });
         
         google.maps.event.addListener(this.map, 'click', function(e) {
-            if (confirm("Do you want to add a road icon here?") ) {
-                try{
-                    onPlaceMarker(e.latLng)
-                }catch(err){
-                    placeMarker(e.latLng, this.map);
+            if (this.isPinEnabled) {
+                if (confirm("Do you want to add a road icon here?") ) {
+                    try{
+                        onPlaceMarker(e.latLng)
+                    }catch(err){
+                        placeMarker(e.latLng, this.map);
+                    }
+                    //this.onPlaceMarker(e.latLng)
                 }
-                
-                
-                //this.onPlaceMarker(e.latLng)
             }
+            
         });
         
         /* const boundsListener = google.maps.event.addListener((map), 'bounds_changed', function(event) {
@@ -104,6 +107,10 @@ class MapHandlerClass {
                 map: this.map
             });
         })
+    }
+
+    setPinInteraction(isEnabled) {
+        this.isPinEnabled = isEnabled
     }
 
     placeMarker(location){

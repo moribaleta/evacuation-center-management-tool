@@ -1,7 +1,7 @@
 #navbar{
     margin-bottom: 0px;
     border-radius: unset;
-    background: #CC5653!important;
+    background: #4AC1E2!important;
     border: none;
     color: white;
 }
@@ -11,7 +11,7 @@
 }
 
 .navbar-inverse .navbar-nav>.active>a, .navbar-inverse .navbar-nav>.active>a:focus, .navbar-inverse .navbar-nav>.active>a:hover{
-    background: #9d413e!important;
+    background: #3498db!important;
     border: none;
     color: white;
 }
@@ -26,7 +26,7 @@ body{
 #div-home{
     padding-top: 30%;
     text-align: center;
-    background: #CC5653;
+    background: #4AC1E2;
     background-image: url(../images/background.png);
     background-repeat: no-repeat;
     background-attachment: fixed;
@@ -63,6 +63,7 @@ body{
     position: fixed;
     z-index: 10;
     bottom: 0;
+    padding: 10px;
     align-items: 'stretch';
     justify-content: flex-end;
 }
@@ -73,7 +74,7 @@ body{
     border-radius: 100%;
     border:none;
     margin: 20px;
-    background: #CC5653;
+    background: #4AC1E2;
     color: white;
 }
 

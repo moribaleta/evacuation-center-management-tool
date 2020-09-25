@@ -17,16 +17,16 @@
     </style>
     <link rel="shortcut icon" href="resources/images/favicon.ico" type="image/x-icon">
     <!-- update the version number as needed -->
-    <script defer src="/__/firebase/7.19.1/firebase-app.js"></script>
+    <script src="/__/firebase/7.19.1/firebase-app.js"></script>
     <!-- include only the Firebase features as you need -->
-    <script defer src="/__/firebase/7.19.1/firebase-auth.js"></script>
-    <script defer src="/__/firebase/7.19.1/firebase-database.js"></script>
-    <script defer src="/__/firebase/7.19.1/firebase-messaging.js"></script>
-    <script defer src="/__/firebase/7.19.1/firebase-storage.js"></script>
-    <script defer src="/__/firebase/7.19.1/firebase-firestore.js"></script>
-    <script defer src="/__/firebase/7.19.1/firebase-functions.js"></script>
+    <script src="/__/firebase/7.19.1/firebase-auth.js"></script>
+    <script src="/__/firebase/7.19.1/firebase-database.js"></script>
+    <script src="/__/firebase/7.19.1/firebase-messaging.js"></script>
+    <script src="/__/firebase/7.19.1/firebase-storage.js"></script>
+    <script src="/__/firebase/7.19.1/firebase-firestore.js"></script>
+    <script src="/__/firebase/7.19.1/firebase-functions.js"></script>
     <!-- initialize the SDK after all desired features are loaded -->
-    <script defer src="/__/firebase/init.js"></script>
+    <script src="/__/firebase/init.js"></script>
     <script src="resources/json/coordinates.js"></script>
     <script src="resources/json/boundaries.js"></script>
     <script src="resources/js/jquery-3.0.0.min.js"></script>
@@ -47,7 +47,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span> 
                 </button>
-                <a class="navbar-brand" href="#">iEvacuate Map Maker</a>
+                <a class="navbar-brand" href="#">EDITOR</a>
             </div>
         </div>
     </nav>
@@ -96,7 +96,7 @@
                 </div>
                 <div class="modal-body" style="max-height: 500px; overflow: auto;">
                     <button type="button" class="btn btn-primary btn-success"   v-on:click="testPath()">test paths</button>
-                    <button type="button" class="btn btn-primary"               v-on:click="savePath()">Save</button>
+                    <button type="button" class="btn btn-primary"               v-on:click="savePath(i)">Save</button>
                     <button type="button" class="btn btn-primary"               v-on:click="printPath()">Save & Print</button>
                     <!-- <p id="path_value">{{road_map}}</p> -->
                 </div>
@@ -110,15 +110,84 @@
             </div>
         </div>
     </div>
+
+    <div  id="helpModal" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Help!</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" style="max-height: 500px; overflow: auto;">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Adding a path</div>
+                        <div class="panel-body">
+                            <ul>
+                                <li>you can add a path by clicking on the map</li>
+                                <li>a prompt will ask you if you want to add a point</li>
+                                <li>click yes to proceed</li>
+                                <li>an icon will show on the map</li>
+                            </ul>
+                        </div>
+                        <div class="panel-heading">Starting a new path</div>
+                        <div class="panel-body">
+                            <ul>
+                                <li>you can add a new path by pressing "Add New Path" button</li>
+                                <li>this will show an alert that you can now add a new point on the map</li>
+                                <li>
+                                    <p>the previous path will be added on the paths</p>
+                                    <p>`Note. the previous path is still not yet saved on the local storage`</p>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="panel-heading">Connecting a path</div>
+                        <div class="panel-body">
+                            <ul>
+                                <li>you can connect to an existing path by pressing the existing icon</li>
+                                <li>the icon will change to a square indicating its a connecting junction</li>
+                                <li>this will add the coordinates to your current path</li>
+                            </ul>
+                        </div>
+                        <div class="panel-heading">Deleting a point</div>
+                        <div class="panel-body">
+                            <ul>
+                                <li>you can delete the any point on the current path</li>
+                                <li>by clicking it again</li>
+                                <li>this will be removed from the map</li>
+                            </ul>
+                        </div>
+                        <div class="panel-heading">Deleting a Path</div>
+                        <div class="panel-body">
+                            <ul>
+                                <li>you can delete the path from the map</li>
+                                <li>by going to the show path</li>
+                                <li>select the path you want to delete</li>
+                                <li>press the group header</li>
+                                <li>press delete</li>
+                                <li>this will save the current coordinates and will reload the screen again</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <!-- <button type="button" class="btn btn-primary btn-danger"   v-on:click="clearAll()">Clear All Saved</button>
+                    <button type="button" class="btn btn-primary btn-success"   v-on:click="loadLatest()">Load Latest</button>
+                    <button type="button" class="btn btn-primary btn-success"   v-on:click="loadLocal()">Load Local</button>
+                    <button type="button" class="btn btn-primary btn-success"   v-on:click="uploadFile()">Upload</button> -->
+                </div>
+            </div>
+        </div>
+    </div>
     
     
     <div id="map"></div>   
     <!-- Modal -->
     <div class="bottom-container">
-        
-        <button class="bottom-button" id="button_add_new"   onclick="addNewPath()">add path</button>
-        <button class="bottom-button" id="button_add_new"   onclick="showPath()">show paths</button>
-        <!-- <button class="bottom-button" id="button_reload"    onclick="resetMarker()">back</button> -->
+        <button class="btn btn-success button-view" id="button_add_new" onclick="addNewPath()">Add New Path</button>
+        <button class="btn btn-info button-view"    id="button_add_new" onclick="showPath()">Show Paths</button>
+        <button class="btn btn-warning button-view" id="button_add_new" onclick="showHelp()">Help</button>
     </div>
     
     
@@ -290,6 +359,10 @@
             modal_vue.setList(path, road_map)
             $('#pathModal').modal('show');
         }//showPath
+
+        function showHelp(){
+            $('#helpModal').modal()
+        }
         
         /** removes all markers from the map */
         function clearMarkers() {
