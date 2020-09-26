@@ -45,17 +45,24 @@ class MapHandlerClass {
             }
             ]
         });
+
+        const isPinEnabled = this.isPinEnabled
+        //const placeMarker = this.placeMarker
+        //this.onPlaceMarker = onPlaceMarker
         
         google.maps.event.addListener(this.map, 'click', function(e) {
-            if (this.isPinEnabled) {
+            if (isPinEnabled) {
                 if (confirm("Do you want to add a road icon here?") ) {
-                    try{
+                    onPlaceMarker(e.latLng)
+                   /*  try{
                         onPlaceMarker(e.latLng)
-                    }catch(err){
-                        placeMarker(e.latLng, this.map);
-                    }
+                    }catch(err){ */
+                        //placeMarker(e.latLng, this.map);
+                    //}
                     //this.onPlaceMarker(e.latLng)
                 }
+            } else {
+                console.log("what the fuck is that?")
             }
             
         });

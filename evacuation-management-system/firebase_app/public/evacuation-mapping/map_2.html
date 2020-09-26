@@ -21,15 +21,15 @@
 
     <link rel="shortcut icon" href="resources/images/favicon.ico" type="image/x-icon">
     <!-- update the version number as needed -->
-    <script defer src="/__/firebase/7.19.1/firebase-app.js"></script>
+    <script src="/__/firebase/7.19.1/firebase-app.js"></script>
     <!-- include only the Firebase features as you need -->
-    <script defer src="/__/firebase/7.19.1/firebase-auth.js"></script>
-    <script defer src="/__/firebase/7.19.1/firebase-database.js"></script>
-    <script defer src="/__/firebase/7.19.1/firebase-messaging.js"></script>
-    <script defer src="/__/firebase/7.19.1/firebase-storage.js"></script>
-    <script defer src="/__/firebase/7.19.1/firebase-firestore.js"></script>
+    <script src="/__/firebase/7.19.1/firebase-auth.js"></script>
+    <script src="/__/firebase/7.19.1/firebase-database.js"></script>
+    <script src="/__/firebase/7.19.1/firebase-messaging.js"></script>
+    <script src="/__/firebase/7.19.1/firebase-storage.js"></script>
+    <script src="/__/firebase/7.19.1/firebase-firestore.js"></script>
     <!-- initialize the SDK after all desired features are loaded -->
-    <script defer src="/__/firebase/init.js"></script>
+    <script src="/__/firebase/init.js"></script>
     <script src="resources/json/boundaries.js"></script>
 
     <script src="resources/js/jquery-3.0.0.min.js"></script>
@@ -72,8 +72,6 @@
         </div>
     </nav>
 
-
-
     <div id="myModal" class="modal fade" role="dialog">
         <div class="modal-dialog">
 
@@ -88,14 +86,14 @@
                     <div class="panel panel-default">
                         <div class="panel-body" v-if='items!=null'>
                             <div class="panel panel-default" v-for='test,index in test_outputs'>
-                                <div class="panel-heading success">{{(index+1)+". "}} Name: {{test.output.best.evac.name}}</div>
+                                <div class="panel-heading success">{{(index+1)+". "}} Name: {{test.evac.name}}</div>
                                 <div class="panel-body">
                                     <div class="col-sm-4">Distance: {{items[index].distance+" km"}}</div>
-                                    <div class="col-sm-2">Capacity: {{test.output.best.evac.population_capacity}}</div>
-                                    <div class="col-sm-2">Floor Space: {{test.output.best.evac.floor_space}}</div>
-                                    <div class="col-sm-2">Objective Output: {{test.output.best.conflicts.toFixed(4)}}
+                                    <div class="col-sm-2">Capacity: {{test.evac.population_capacity}}</div>
+                                    <div class="col-sm-2">Floor Space: {{test.evac.floor_space}}</div>
+                                    <div class="col-sm-2">Objective Output: {{test.conflicts.toFixed(4)}}
                                     </div>
-                                    <div class="col-sm-2">Fitness Output: {{test.output.best.fitness.toFixed(4)}}</div>
+                                    <div class="col-sm-2">Fitness Output: {{test.fitness.toFixed(4)}}</div>
                                 </div>
                             </div>
                         </div>
@@ -122,8 +120,8 @@
     </div>
     <div id="map"></div>
     <div class="bottom-container">
-        <button class="bottom-button" id="button_add_new" onclick="mapApp.getLocation()">Get Location</button>
-        <button class="bottom-button" id="button_add_new" onclick="mapApp.locateEvac()">Locate Evacuation Center</button>
+        <button class="btn btn-info button-view" id="button_add_new" onclick="mapApp.getLocation()">Get Location</button>
+        <button class="btn btn-info button-view" id="button_add_new" onclick="mapApp.locateEvac()">Locate Evacuation Center</button>
     </div>
     <!-- Modal -->
 
@@ -141,11 +139,10 @@
     <script src="../_global/js/moabc/moabc.js"></script>
     <script src="../_global/js/moabc/test.js"></script>
     
-    <script src="resources/src/js/maphandler.js"></script>
+    <script  src="resources/src/js/maphandler.js"></script>
     <script src="resources/src/js/datahandler.js"></script>
     <script src="resources/src/js/utilities.js"></script>
-    <script src="resources/src/js/map_app.js"></script>
-
+    <script  src="resources/src/js/map_app.js"></script>
 
     <script
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBymq4YRMhZoMwnPUd2SfyzQQLEvUtafkM&libraries=places&callback=onInitializeMap"

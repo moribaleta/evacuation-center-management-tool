@@ -100,7 +100,7 @@ class EvacuationMarker extends EmergencyMarker {
 class MapApp {
 
     /** the pinned location of the user */
-    emergency_marker
+    emergency_marker = null
 
     /** contains all the evacuation centers */
     evacuation_center_list = []
@@ -191,45 +191,87 @@ class MapApp {
     /** function called when the user click on the screen */
     onPlaceMarker(position) {
         let locationMarker = EmergencyMarker.create(position, MapHandler.map)
-        this.emergency_marker = locationMarker
+        if (mapApp.emergency_marker) {
+            mapApp.emergency_marker.removeMarker()
+        } 
+        mapApp.emergency_marker = locationMarker
     }
 
 
     /** function called on get direction from emergency location event*/
     setDestination(id) {
-        let evacs = this.getAvailableEvacuation()
-        var path_detail = MapRouter.getNearestEvacuation(evacs, this.emergency_marker);
-        this.showDetail(path_detail, this.emergency_marker);
-        $("#button_modal").click();
+
+        let promise = new Promise(async (resolve, reject) => {
+            let evac = this.getAvailableEvacuation()
+            resolve(evac)
+        })
+
+        //let evacs = this.getAvailableEvacuation()
+        $("#progressDirection").show();
+        promise.then((evacs) => {
+            var path_detail = MapRouter.getNearestEvacuation(evacs, this.emergency_marker);
+            this.showDetail(path_detail, this.emergency_marker);
+            $("#progressDirection").hide();
+            $("#button_modal").click();
+        })
+        
     } //setDestination
 
 
     /** TODO use MOABC here
      * returns a list of evacuation center available */
-    getAvailableEvacuation() {
-        //return new Promise((resolve, reject) => {
-        var ids = []
-        var evacs = []
-
-        this.test_outputs = []
+    async getAvailableEvacuation() {
+        
         console.log("history list %o", this.history_list)
         console.log("params %o", this.model_param)
 
+        console.log("pos: %o %o", this.emergency_marker.position.lat(), this.emergency_marker.position.lng())
+
+        //FILTER LIST BASED ON ITS DISTANCE FROM THE ORIGIN
+        const _filter_evacs = this.evacuation_center_list.filter((evac) => {
+            let emergency_elem = {
+                lat: this.emergency_marker.position.lat(),
+                long: this.emergency_marker.position.lng()
+            }
+            let evac_location = {
+                lat: evac.location.lat,
+                long: evac.location.lng
+            }
+            let distance = calculate(emergency_elem, evac_location, 'km')
+            return distance < 30
+        })
+
+        console.log("filtered %o",_filter_evacs)
+
+        var output  = {}
+        var ids     = []
+        var evacs   = []
+        
+        //GENERATE 5 distinct probably best evacs : OPTIONAL
         while (evacs.length < 5) {
             let test = new TesterABC()
-            test.evacuations = this.evacuation_center_list
-            test.history_list = this.history_list
-            let test_output = test.generate(this.model_param)
+            test.evacuations    = _filter_evacs
+            test.history_list   = this.history_list
+            const test_output   = test.generate(this.model_param)
+            const best_value    = test_output.output.best
 
-            if (!ids.includes(test_output.output.best.evac.id)) {
-                let evac = test_output.output.best.evac
-                let id = evac.id
-                ids.push(id)
-                evacs.push(evac)
-                this.test_outputs.push(test_output)
+            if(!output[best_value.evac.id]) {
+                output[best_value.evac.id] = best_value
+                evacs.push(best_value.evac)
+            } else {
+                const prev = output[best_value.evac.id]
+                const _new = best_value
+
+                if (prev.conflicts > _new.conflicts) {
+                    output[best_value.evac.id] = _new
+                }
             }
         }
         //resolve(evacs)
+        this.test_outputs = Object.keys(output).map((key) => {
+            return output[key]
+        })
+
         return evacs
     }
 
@@ -248,14 +290,18 @@ class MapApp {
 
     /** gets the current location of the user */
     getLocation() {
+        
         if (navigator.geolocation) {
-            $("#progressDirection").show();
+            console.log("getting location")
+            //$("#progressDirection").show();
             navigator.geolocation.getCurrentPosition((val) => {
                 console.log("location %o", val)
                 $("#progressDirection").hide();
                 let position = new google.maps.LatLng(val.coords.latitude, val.coords.longitude)
                 this.onPlaceMarker(position)
-            });
+            }, (error) => {
+                console.log("error %o", error)
+            })
         } else {
             alert("cant get location, you can pin your location on the map")
         }
@@ -467,7 +513,11 @@ class MapRouterClass {
         var min = Infinity;
         var winner = null;
         for (var i = 0; i < this.tree.length; i++) {
-            var distance = getdistance(unit.lat, this.tree[i].coordinates.lat, unit.lng, this.tree[i].coordinates.lng);
+            var distance = getdistance(
+                            unit.lat,
+                            this.tree[i].coordinates.lat,
+                            unit.lng,
+                            this.tree[i].coordinates.lng);
             if (distance < min) {
                 winner = i;
                 min = distance;
