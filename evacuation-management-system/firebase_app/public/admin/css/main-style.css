@@ -204,3 +204,7 @@
     bottom: 0;
     padding: 10px;
 }
+
+.center {
+    text-align: center;
+}

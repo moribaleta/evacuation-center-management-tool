@@ -452,3 +452,155 @@ class EvacuationSupplyType extends Model {
         }
     }
 }//EvacuationSupplyType
+
+/** defines the object of Public User */
+class PublicUser extends Model {
+    
+    /** firstname of the public */
+    firstname
+    
+    /** lastname of the public */
+    lastname
+    
+    /** municipality the user is created */
+    municipality
+
+    /** username of the user used to login */
+    username
+
+    /** password of the user used to login */
+    password
+
+    /** email of the user used */
+    email
+    
+    /** birthdate of the user */
+    birthdate
+
+    /** phone number the user used*/
+    phone_number
+
+    /** home address of the user*/
+    address
+
+    static keys = [
+        'id',
+        'admin_type',
+        'created_by',
+        'date_created',
+        'date_updated',
+        'firstname',
+        'lastname',
+        'municipality',
+        'username',
+        'email',
+        'password'
+    ]
+
+    constructor(id, created_by, date_created, date_updated, firstname, lastname, municipality, username, password, email, birthdate, phone_number, address) {
+        super()
+        this.id = id || "publicuser-" + genID(5)
+        this.created_by = created_by
+        this.date_created = date_created || new Date()
+        this.date_updated = date_updated || new Date()
+
+        this.firstname    = firstname
+        this.lastname     = lastname
+        this.municipality = municipality
+        this.username     = username
+        this.password     = password
+        this.email        = email
+        this.birthdate    = birthdate
+        this.phone_number = phone_number
+        this.address      = address
+    }
+
+    toObject() {
+        return {
+            id: this.id,
+            created_by: this.created_by,
+            date_created: this.date_created,
+            date_updated: this.date_updated,
+            firstname   : this.firstname   ,
+            lastname    : this.lastname    ,
+            municipality: this.municipality,
+            username    : this.username    ,
+            password    : this.password    ,
+            email       : this.email       ,
+            birthdate   : this.birthdate   ,
+            phone_number: this.phone_number,
+            address     : this.address     ,
+        }
+    }
+
+    static parse(object = {}) {
+        return new PublicUser(
+            object.id,
+            object.created_by,
+            object.date_created,
+            object.date_updated,
+            object.firstname   ,
+            object.lastname    ,
+            object.municipality,
+            object.username    ,
+            object.password    ,
+            object.email       ,
+            object.birthdate   ,
+            object.phone_number,
+            object.address     ,
+        )
+    }
+} //PublicUser
+
+/** defines the object of history of each public user */
+class PublicUserHistory extends Model {
+    
+    /** user id of the history */
+    userid
+    /** evac id of the evacuation center*/
+    evac_id
+    /** date admitted */
+    date_admitted
+    /** date where the user has signed out */
+    date_cleared
+    
+    constructor(id, date_created, date_updated, created_by, userid, evac_id, date_admitted, date_cleared ) {
+        super()
+        this.id            = id || "publicuserhistory-" + genID(5)
+        this.date_created  = date_created   || new Date()
+        this.date_updated  = date_updated   || new Date()
+        this.date_admitted = date_admitted  || new Date()
+        this.date_cleared  = date_cleared   || ""
+        this.created_by    = created_by || '0'
+        this.userid        = userid
+        this.evac_id       = evac_id
+    }
+
+
+    toObject() {
+        return {
+            id           : this.id           ,
+            date_created : this.date_created ,
+            date_updated : this.date_updated ,
+            date_admitted: this.date_admitted,
+            date_cleared : this.date_cleared ,
+            created_by   : this.created_by   ,
+            userid       : this.userid       ,
+            evac_id      : this.evac_id      ,
+        }
+    }
+
+    static parse(object = {}) {
+        return new PublicUserHistory(
+            object.id,
+            object.date_created,
+            object.date_updated,
+            object.created_by,
+            object.userid,
+            object.evac_id,
+            object.date_admitted,
+            object.date_cleared,
+        )
+    }
+
+}//PublicUserHistory

@@ -1,11 +1,8 @@
 /**
  * User object structure
  */
-class AdminUser {
-    id
-    admin_type
-    created_by
-    date_created
+class AdminUser extends Model {
+    
     firstname
     lastname
     municipality
@@ -15,7 +12,8 @@ class AdminUser {
 
     static keys = ['admin_type', 'date_created', 'firstname', 'lastname', 'municipality', 'username', 'email']
 
-    constructor(id, admin_type, created_by, date_created, firstname, lastname, municipality, username, email, password) {
+    constructor(id, admin_type, created_by, date_created, date_updated, firstname, lastname, municipality, username, email, password) {
+        super()
         this.id = id || "admin-" + genID(5)
         this.admin_type = admin_type
         this.created_by = created_by
@@ -26,6 +24,7 @@ class AdminUser {
         this.username = username
         this.email = email
         this.password = password
+        this.date_updated = date_updated || new Date()
     }
 
     toObject() {
@@ -34,6 +33,7 @@ class AdminUser {
             admin_type: this.admin_type,
             created_by: this.created_by,
             date_created: this.date_created,
+            date_updated: this.date_updated,
             firstname: this.firstname,
             lastname: this.lastname,
             municipality: this.municipality,
@@ -49,6 +49,7 @@ class AdminUser {
             object.admin_type,
             object.created_by,
             object.date_created,
+            object.date_updated,
             object.firstname,
             object.lastname,
             object.municipality,
@@ -80,6 +81,7 @@ class UserHandler extends DataHandlerType {
         supply_types: 'supply_types',
         moabc: 'moabc',
         users: 'users',
+        public_user: 'public_user'
     }
 
     /** login function */
@@ -234,8 +236,100 @@ class UserHandler extends DataHandlerType {
     } //deleteEvacuationHistory
 } //UserHandler
 
+/** class functions handles public user data */
+class PublicUserHandler extends UserHandler {
+    /* <------------ USER --------------*/
+    /** gets user from the database */
+    getPublicUsers(municipality) {
+        return new Promise((resolve, reject) => {
+            const ref = this.firestore.collection(UserHandler.tables.public_user)
+            const query = (municipality != "admin") ? ref.where('municipality', '==', municipality) : ref
+
+            query.get().then(function (querySnapshot) {
+                    var users = []
+                    querySnapshot.forEach(function (doc) {
+                        console.log(doc.id, " => ", doc.data());
+                        let data = doc.data()
+                        let id = doc.id
+                        var object = {
+                            id,
+                            ...data
+                        }
+                        try {
+                            object.date_created = object.date_created.toDate()
+                            object.date_updated = object.date_updated.toDate()
+                        } catch (err) {
+                            console.log(err)
+                        }
+                        users.push(PublicUser.parse(object))
+                    });
+
+                    var message = new Message()
+
+                    message.data = users
+                    resolve(message)
+                }).catch(function (error) {
+                    console.log("Error getting documents: ", error);
+                    reject(error)
+                });
+        })
+    } //getUsers
+
+    addPublicUser(params = new PublicUser()) {
+        return new Promise((resolve, reject) => {
+            var ref = this.firestore.collection(UserHandler.tables.public_user)
+            ref.where('username','==',params.username)
+                .get().then(function (querySnapshot) {
+                var users = []
+                querySnapshot.forEach(function (doc) {
+                    let data = doc.data()
+                    let id = doc.id
+
+                    let object = {
+                        id,
+                        ...data
+                    }
+                    try {
+                        object.date_created = object.date_created.toDate()
+                        object.date_updated = object.date_updated.toDate()
+                    } catch (err) {
+                        //console.log(err)
+                    }
+                    users.push(PublicUser.parse(object))
+                });
+                let _users = users.filter((user) => {
+                    return user.id != params.id
+                })
+
+                if (_users.length > 0) {
+                    //throw "Username was already taken"    
+                    //reject("Username was already taken")
+                    let message = new Message()
+                    message.error = "Username was already taken"
+                    resolve(message)
+                } else {
+                    return DataHandler.addEntry(params.id, params.toObject(), UserHandler.tables.public_user)
+                }
+            }).then((data) => {
+                resolve(data)
+            }).catch(function (error) {
+                reject(error)
+            });
+        })
+
+
+        //return this.addEntry(params.id, params.toObject, UserHandler.tables.public_user)
+    } //addPublicUsers
+
+
+    deletePublicUser(id) {
+        return this.deleteEntry(id, UserHandler.tables.public_user)
+    } //deleteAdminUsers
+    /* ------------ USER -------------->*/
+}//PublicUserHandler
+
 /** class functions handles evacuation center data */
-class EvacuationHandler extends UserHandler {
+class EvacuationHandler extends PublicUserHandler {
 
     /*!--------- EVACUAITON CENTER ---------------!*/
 
