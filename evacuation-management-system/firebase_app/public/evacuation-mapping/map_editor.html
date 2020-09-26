@@ -596,10 +596,10 @@
         function onInitApp(){
             DataHandler.configure()
             console.log("boundaries %o", map_boundaries)
-            MapHandler.configure(document.getElementById('map'), map_boundaries)
+            MapHandler.configure(document.getElementById('map'), map_boundaries, placeMarker)
             placeEvacuationCenters()
             initPrevMarkers(MapHandler.map)
-            MapHandler.onPlaceMarker = placeMarker
+            //MapHandler.onPlaceMarker = placeMarker
         }
 
     </script>
