@@ -195,19 +195,8 @@ class AdminUser extends Model {
         
         
         deleteAdminUsers(params) {
-            /* return new Promise((resolve, reject) => {
-                this.firestore.collection('admin_user')
-                .doc(id).delete()
-                .then(function () {
-                    resolve("Document successfully deleted!");
-                }).catch(function (error) {
-                    reject(error)
-                });
-            }) */
             this.deleteImages(params.images).then((val) => {
-                return val.json()
-            }).then((deleted) => {
-                console.log("deleted successfuly %o", deleted)
+                console.log("deleted successfuly %o", val)
             })
             return this.deleteEntry(params.id, UserHandler.tables.admin_user)
         } //deleteAdminUsers
@@ -271,10 +260,10 @@ class AdminUser extends Model {
             console.log("images to delete %o", images)
             
             //wil return the array of the path of images
-            return fetch(DataHandlerType.api_host + 'deletefiles.php', {
-                method: 'POST',
-                body: JSON.stringify({filenames: images})
+            let promises = images.map((image) => {
+                return fetch(DataHandlerType.api_host + 'deletefiles.php?filename='+encodeURI(image))
             })
+            return Promise.all(promises)
         }
         
     } //UserHandler

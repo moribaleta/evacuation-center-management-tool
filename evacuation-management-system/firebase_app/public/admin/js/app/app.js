@@ -7,7 +7,7 @@ var header = new Vue({
         header_items: [{
             id: 'evacuations',
             href: "evacuations.html",
-            icon: 'group',
+            icon: 'home_work',
             title: 'Evacuations'
         },
         {
