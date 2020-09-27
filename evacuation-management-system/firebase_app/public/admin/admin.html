@@ -85,9 +85,9 @@
 
                             <div class="col col-md-6 input-container">
                                 <p>municipal</p>
-                                <p v-if="user.municipality != 0">{{user.municipality == '0' ? "admin" : user.municipality}}</p>
+                                <p v-if="user.municipality == 0">{{user.municipality == 0 ? "\"admin\"" : user.municipality}}</p>
                                 <select id="input-district" class="input input-item input-select"
-                                    v-model="data_input.municipality" v-if="user.municipality == 0">
+                                    v-model="data_input.municipality" v-if="user.municipality != 0">
                                     <option v-for="municipal in municipalities" v-bind:value="municipal">
                                         {{municipal}}</option>
                                 </select>
@@ -99,6 +99,11 @@
                                     <option v-for="admin_type,index in admint_types" v-bind:value="index">{{admin_type}}</option>
                                 </select>
                             </div>
+                            <div class="col col-md-12 input-container">
+                                <p>profile</p>
+                                <input id="input_images" type="file" name="files[]"/>
+                            </div>
+                            
 
                             <div class="col col-md-12">
                                 <p>password</p>
@@ -114,7 +119,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal"
-                            v-on:click="addUser()">Save</button>
+                            v-on:click="onSaveUser()">Save</button>
                         <button type="button" class="btn btn-default" data-dismiss="modal"
                             v-on:click="close()">Close</button>
                     </div>
@@ -128,6 +133,9 @@
             <div class="table-container" id="tableData">
                 <div class="well">
                     <div class="row">
+                        <div class="col col-xs-4 item-info">
+                        <img :src="cdn + user.images[0]" style="height: 50px; width: 50px; border-radius: 25;">
+                        </div>
                         <div class="col col-xs-4 item-info" v-for="key,index in headers" v-if="key !='id'">
                             <p class="item-label">
                                 {{key}}:
@@ -153,11 +161,14 @@
             <div class="table-container" id="tableData">
                 <div class="well" v-for="item,index in user_list">
                     <div class="row">
+                       
                         <div class="col col-xs-12 item-info">
                             <p class="item-label">
                                 {{index + 1}}.
                             </p>
+                            <img :src="cdn + item.images[0]" style="height: 50px; width: 50px; border-radius: 25;">
                         </div>
+                        
                         <div class="col col-xs-4 item-info" v-for="key,index in headers" v-if="key !='id'">
                             <p class="item-label">
                                 {{key}}:
@@ -168,7 +179,7 @@
                         </div>
 
                         <div class="col col-xs-12">
-                            <button class="btn btn-default btn-info" v-on:click="editItem(index)">edit</button>
+                            <button class="btn btn-default btn-info" v-on:click="editUser(index)">edit</button>
                             <button class="btn btn-default btn-danger" v-on:click="deleteItem(index)">delete</button>
                         </div>
                     </div>
@@ -178,7 +189,7 @@
         <div class="section">
             <div class="button-container">
                 <button type="button" id="add-report" class="btn btn-info button-view"
-                    v-on:click="openAddUserModal(false)">add User
+                    v-on:click="addNewUser()">add User
                 </button>
             </div>
         </div>
@@ -192,7 +203,7 @@
         app = new Vue({
             el: '#content',
             data: {
-                user: new AdminUser(),
+                user: null,
                 user_list: [],
                 headers: AdminUser.keys,
                 data_input: new AdminUser(),
@@ -200,18 +211,19 @@
                 editUserId: null,
                 conf_password: null,
                 municipalities: [],
-                admint_types: ['admin','basic'],
-                isLoading : false
+                admint_types: Object.keys(AdminUser.admin_types),
+                isLoading : false,
+                cdn: DataHandlerType.api_host
             },
             methods: {
                 onStart(){
-                    this.fetchUser()
                     this.user = header.user
                     this.municipalities = ["admin",...municipalities]
+                    this.fetchUser()
                 },
                 fetchUser() {
                     this.isLoading = true
-                    DataHandler.getAdminUsers(header.user.id).then((message) => {
+                    DataHandler.getAdminUsers(this.user.id).then((message) => {
                         this.setUser(message.data)
                     }).catch(err => {
                         console.log(err)
@@ -223,82 +235,62 @@
                     this.user_list = data
                     console.log(this.user_list)
                 },
-                openAddUserModal(isEdit) {
-                    this.isEdit = isEdit
-                    if (!this.isEdit) {
-                        this.data_input = new AdminUser()
-                    }
+                
+                
+                addNewUser(){
+                    this.isEdit     = false
+                    this.editUserId = null
+                    this.data_input = new AdminUser()
+                    this.data_input.created_by = this.user.id
                     $('#userModal').modal()
                 },
 
-                addUser() {
-                    if (this.data_input.password == this.conf_password) {
-                        if (this.isEdit) {
-                            this.onSaveEdit()
-                        } else {
-                            this.onSaveNewUser()
-                        }
-                        this.close()
-                    } else {
-                        alert("password doesn't match")
-                    }
+                editUser(index) {
+                    this.isEdit     = true
+                    const user = this.user_list[index]
+                    this.data_input = AdminUser.parse(user.toObject())
+                    this.data_input.date_updated = new Date()
+                    $('#userModal').modal()
                 },
 
-                onSaveEdit() {
-                    if(this.user.id != this.editUserId) {
-                        this.data_input.id = this.editUserId
-                        this.data_input.municipalities = this.data_input.municipalities == "admin" ? "0" : this.data_input.municipalities
-                    }
+                onSaveUser() {
+                    const file = document.getElementById('input_images').files[0];
+                    const upload = file != undefined ? [file] : []
+                    this.data_input.municipality = (this.data_input.municipality == "admin" || this.data_input.municipality == undefined) ? "0" : this.data_input.municipality    
+                    console.log(this.data_input)
 
-                    DataHandler.addAdminUsers(AdminUser.parse(this.data_input.toObject())).then((data) => {
-                        if (data.error) {
-                            alert(`Can't Edit User ${data.error}`)
-                        } else {
-                            alert(`User Have Been Edited Successfuly`)
-                            //REPLACES the admin user 
-                            if (this.user.id == this.editUserId) {
-                                alert("you need to login after updated your profile")
-                                header.onLogout()
-                            } else {
-                                this.fetchUser()
-                            }
-                            
-                        }
-                    })
-                },
-
-                onSaveNewUser() {
-                    this.data_input.municipalities  = this.data_input.municipalities == "admin" ? "0" : this.data_input.municipalities
-                    this.data_input.created_by      = this.user.id
-                    DataHandler.addAdminUsers(this.data_input).then((data) => {
+                    DataHandler.addAdminUsers(this.data_input, upload).then((data) => {
                         if (data.error) {
                             alert(`Can't Save User ${data.error}`)
                         } else {
                             alert(`User Have Been Added Successfuly`)
-                            this.fetchUser()
+                            if(this.user.id == this.data_input.id) {
+                                this.user = this.date_input
+                                alert("Admin needs to re login to continue")
+                                header.onLogout()
+                            } else {
+                                this.fetchUser()
+                            }
                         }
+                    }).catch((err) => {
+                        console.log(err)
+                    }).finally(() => {
+                        this.conf_password = null
                     })
-                },
-
-                editItem(index) {
-                    const user = this.user_list[index]
-                    this.editUserId = user.id
-                    this.data_input = AdminUser.parse(user.toObject())
-                    this.openAddUserModal(true)
                 },
 
                 editAdmin(){
                     const user      = this.user
-                    this.editUserId = user.id
+                    this.isEdit     = true
                     this.data_input = AdminUser.parse(user.toObject())
-                    this.openAddUserModal(true)
+                    $('#userModal').modal()
                 },
 
                 deleteItem(index) {
                     /*  deleteUser(this.user_list[index].id, this.initApp) */
                     let onConfirm = confirm('Deleting User\nPress confirm to proceed')
                     if (onConfirm) {
-                        DataHandler.deleteAdminUsers(this.user_list[index].id).then((data) => {
+                        DataHandler.deleteAdminUsers(this.user_list[index]).then((data) => {
                             console.log(data)
                             if (data.error) {
                                 alert(`Can't Delete User ${data.error}`)

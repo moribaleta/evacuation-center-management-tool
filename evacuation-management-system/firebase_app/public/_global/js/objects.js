@@ -10,6 +10,8 @@ class Model {
     date_created = new Date()
     /** date the model has been updated*/
     date_updated = new Date()
+    /** path of picture saved */
+    images = []
 } //Model
 
 
@@ -45,7 +47,29 @@ class EvacuationCenter extends Model {
     /**contact_numbers     = "09171231233"*/
     contact_numbers
 
-    constructor(id, name, location, population_capacity, floor_space, date_created = new Date(), date_updated = new Date(), created_by, exact_address, municipality, contact_numbers) {
+    /** user id that handles the evac */
+    admin_id
+
+    /** category of the the evacuation center */
+    category
+
+    /** any avialable facilities */
+    available_facilities = []
+
+    /** static enum contains type of categories used to define Evacuation Center */
+    static CategoryTypes = {
+        dedicated_evacuation_center: 'Dedicated Evacuation Center',
+        barangay_hall: 'Barangay Hall',
+        school: 'School',
+        chapel: 'Chapel',
+        others: 'Others'
+    }
+
+    constructor(id, name, location, population_capacity,
+         floor_space, date_created = new Date(),
+          date_updated = new Date(), created_by,
+           exact_address, municipality, contact_numbers,
+           admin_id, category, available_facilities = [], pictures = []) {
         super()
         this.id = id || "evac-" + genID(5)
         this.name = name
@@ -53,30 +77,38 @@ class EvacuationCenter extends Model {
             lat: null,
             lng: null
         }
-        this.population_capacity = population_capacity
-        this.floor_space = floor_space
-        this.date_created = date_created
-        this.date_updated   = date_updated
-        this.created_by = created_by
-        this.exact_address = exact_address
-        this.municipality = municipality
-        this.contact_numbers = contact_numbers
+        this.population_capacity  = population_capacity
+        this.floor_space          = floor_space
+        this.date_created         = date_created
+        this.date_updated         = date_updated
+        this.created_by           = created_by
+        this.exact_address        = exact_address
+        this.municipality         = municipality
+        this.contact_numbers      = contact_numbers
+        this.admin_id             = admin_id
+        this.category             = category
+        this.available_facilities = available_facilities || []
+        this.pictures             = pictures
     }
 
     /**returns instance to json object */
     toObject() {
         return {
-            id: this.id,
-            name: this.name,
-            location: this.location,
-            population_capacity: this.population_capacity,
-            floor_space: this.floor_space,
-            date_created: this.date_created,
-            date_updated: this.date_updated,
-            created_by: this.created_by,
-            exact_address: this.exact_address,
-            municipality: this.municipality,
-            contact_numbers: this.contact_numbers,
+            id                  : this.id,
+            name                : this.name,
+            location            : this.location,
+            population_capacity : this.population_capacity,
+            floor_space         : this.floor_space,
+            date_created        : this.date_created,
+            date_updated        : this.date_updated,
+            created_by          : this.created_by,
+            exact_address       : this.exact_address,
+            municipality        : this.municipality,
+            contact_numbers     : this.contact_numbers,
+            admin_id            : this.admin_id,
+            category            : this.category,
+            available_facilities: this.available_facilities,
+            pictures            : this.pictures,
         }
     }
 
@@ -93,7 +125,12 @@ class EvacuationCenter extends Model {
             object.created_by,
             object.exact_address,
             object.municipality,
-            object.contact_numbers)
+            object.contact_numbers,
+            object.admin_id            ,
+            object.category            ,
+            object.available_facilities,
+            object.pictures            ,
+            )
 
         return evac
     }

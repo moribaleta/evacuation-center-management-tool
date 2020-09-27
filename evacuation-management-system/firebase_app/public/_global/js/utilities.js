@@ -31,6 +31,9 @@ class DataHandlerType {
     /** app config */
     config
 
+    static cdn_host = 'https://ievacuate-laguna.000webhostapp.com/evacuation-center-management/evacuation-management-system/api/uploads/'
+    static api_host = 'https://ievacuate-laguna.000webhostapp.com/evacuation-center-management/evacuation-management-system/api/'
+
     /** configures firebase functionality */
     configure() {
 
