@@ -54,7 +54,21 @@ class EvacuationCenter extends Model {
     category
 
     /** any avialable facilities */
-    available_facilities = []
+    facilities
+
+    /** used to show the data of the evacuation center */
+    static headers = {
+        id: 'Evacuation Center Code',
+        name : 'Name',
+        population_capacity: 'Population Capacity',
+        floor_space: 'Area (sq)',
+        exact_address: 'Address',
+        location: 'LatLng',
+        contact_numbers: 'Contact Number',
+        admin_id: 'Evacuation Center In-charge',
+        category: 'Category',
+        facilities: 'Available Facilities',
+    }
 
     /** static enum contains type of categories used to define Evacuation Center */
     static CategoryTypes = {
@@ -69,7 +83,7 @@ class EvacuationCenter extends Model {
          floor_space, date_created = new Date(),
           date_updated = new Date(), created_by,
            exact_address, municipality, contact_numbers,
-           admin_id, category, available_facilities = [], pictures = []) {
+           admin_id, category, facilities = [], pictures = []) {
         super()
         this.id = id || "evac-" + genID(5)
         this.name = name
@@ -87,7 +101,7 @@ class EvacuationCenter extends Model {
         this.contact_numbers      = contact_numbers
         this.admin_id             = admin_id
         this.category             = category
-        this.available_facilities = available_facilities || []
+        this.facilities = facilities
         this.pictures             = pictures
     }
 
@@ -107,9 +121,13 @@ class EvacuationCenter extends Model {
             contact_numbers     : this.contact_numbers,
             admin_id            : this.admin_id,
             category            : this.category,
-            available_facilities: this.available_facilities,
+            facilities          : this.facilities,
             pictures            : this.pictures,
         }
+    }
+
+    get(key){
+        return this.toObject()[key]
     }
 
     /** converts object to EvacuationCenter instance */

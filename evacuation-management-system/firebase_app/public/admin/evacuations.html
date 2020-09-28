@@ -151,15 +151,42 @@
                                         </select>
                                     </div>
                                 </div>
+                                <div class="form-group">
+                                    <label class="col-md-4 control-label" for="municipality">Category</label>
+                                    <div class="col-md-4">
+                                        <select id="municipality" name="municipality" class="form-control"
+                                            v-model="data_input.category">
+                                            <option v-for="category in categories" v-bind:value="category">
+                                                {{category}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-md-4 control-label" for="municipality">Evacuation Center In-charge</label>
+                                    <div class="col-md-4">
+                                        <select id="admin" name="admin" class="form-control"
+                                            v-model="data_input.admin_id">
+                                            <option v-for="admin in admins" v-bind:value="admin.id">
+                                                {{admin.lastname, admin.firstname}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-md-4 control-label" for="exact_address">Available Facilities</label>
+                                    <div class="col-md-4">
+                                        <textarea class="form-control" id="exact_address" name="exact_address"
+                                            v-model="data_input.facilities"></textarea>
+                                    </div>
+                                </div>
+
 
                             </fieldset>
                         </form>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal"
-                            v-on:click="addEvacationCenter()">Save</button>
-                        <button type="button" class="btn btn-default" data-dismiss="modal"
-                            v-on:click="close()">Close</button>
+                            v-on:click="onSaveItem()">Save</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                     </div>
                 </div>
 
@@ -186,12 +213,12 @@
                                     {{key}}:
                                 </p>
                                 <p class="item-value">
-                                    {{item.toObject()[key]}}
+                                    {{item.get(key)}}
                                 </p>
                             </div>
 
                             <div class="col col-md-12">
-                                <button class="btn btn-default btn-info" v-on:click="editItem(index)">edit</button>
+                                <button class="btn btn-default btn-info" v-on:click="onEditItem(index)">edit</button>
                                 <button class="btn btn-default btn-danger"
                                     v-on:click="deleteItem(index)">delete</button>
                             </div>
@@ -204,7 +231,7 @@
                     v-on:click="importEvac()">Import Evacuation Center
                 </button>
                 <button type="button" id="add-report" class="btn btn-info button-view"
-                    v-on:click="openAddeditorModal(false)">Add Evacuation Center
+                    v-on:click="onAddItem()">Add Evacuation Center
                 </button>
                 <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="download()">Download
                     Evacuation Center
@@ -220,123 +247,70 @@
 
     <script>
 
-        let sample = {
-            id: genID(5),
-            name: "sampl1",
-            location: {
-                lat: 14.426700434748033,
-                lng: 121.43130540847778
-            },
-            population_capacity: 1000,
-            floor_space: 2000,
-            date_created: Date(),
-            created_by: 0,
-            exact_address: "mabitac rd",
-            municipality: "mabitac",
-            contact_numbers: "09171231233",
-        }
-
-        function prepareEvac(value) {
-            return {
-                id: value.id,
-                name: value.name,
-                location: JSON.stringify(value.location),
-                population_capacity: value.population_capacity,
-                floor_space: value.floor_space,
-                date_created: value.date_created,
-                created_by: value.created_by,
-                exact_address: value.exact_address,
-                municipality: value.municipality,
-                contact_numbers: value.contact_numbers,
-            }
-        }
-
         app = new Vue({
             el: '#content',
             data: {
+                user: null,
+                admins: [],
+                categories: [],
                 evac_list: [],
                 headers: [],
-                data_input: null, //new EvacuationCenter(),
+                data_input: new EvacuationCenter(), //new EvacuationCenter(),
                 isEdit: false,
-                editEvacuationID: null,
-                conf_password: null,
                 municipalities: municipalities,
                 isLoading: false
             },
             methods: {
                 onStart() {
+                    this.user = header.user
                     this.fetchEvacationCenter()
-                    //this.isLoading = false
-                },
+                    this.headers = Object.keys(EvacuationCenter.headers)
+                    this.categories = EvacuationCenter.CategoryTypes
+                    this.fetchAllAdmins()
+                },//onStart
 
                 fetchEvacationCenter() {
                     this.isLoading = true
                     DataHandler.getEvacuationCenters().then((data) => {
                         this.setEvacationCenter(data.data)
-                        this.isLoading = false
                     }).catch(err => {
+                        console.log(err)
+                    }).finally(() => {
                         this.isLoading = false
                     })
-                },
-                setEvacationCenter(data) {
-                    this.evac_list = data
-                    console.log(this.evac_list)
-                    if (this.evac_list.length > 0) {
-                        this.headers = Object.keys(sample)
-                    }
-                },
-                openAddeditorModal(isEdit) {
-                    this.isEdit = isEdit
-                    if (!this.isEdit) {
-                        this.data_input = new EvacuationCenter()
-                        this.data_input.location = {
-                            lat: null,
-                            lng: null
-                        }
-                        console.log("data_input %o", this.data_input)
-                    }
-                    $('#editorModal').modal()
-                },
-                importEvac(){
-                    let promises = evacs.map((evac) => {
-                        return DataHandler.addEvacationCenter(EvacuationCenter.parse(evac))
-                    })
+                },//fetchEvacationCenter
 
-                    Promise.all(promises).then(() => {
-                        this.fetchEvacationCenter()
-                    }).catch(error => {
+                fetchAllAdmins(){
+                    DataHandler.getAdminUsers(this.user.id).then((message) => {
+                        this.admins = message.data
+                    }).catch((error) => {
                         console.log(error)
                     })
                 },
-                addEvacationCenter() {
-                    if (this.data_input.password == this.conf_password) {
-                        if (this.isEdit) {
-                            this.onSaveEdit()
-                        } else {
-                            this.onSaveNewEvacationCenter()
-                        }
-                        this.close()
-                    } else {
-                        alert("password doesn't match")
+                
+                setEvacationCenter(data) {
+                    this.evac_list = data
+                    console.log(this.evac_list)
+                },//setEvacationCenter
+
+                onAddItem() {
+                    this.data_input = new EvacuationCenter()
+                    this.data_input.location = {
+                        lat: null,
+                        lng: null
                     }
-                },
+                    this.data_input.created_by = this.user.id
+                    $('#editorModal').modal()
+                },//onAddItem
 
-                onSaveEdit() {
-                    console.log("data %o", this.data_input)
-                    DataHandler.addEvacationCenter(this.data_input).then((data) => {
-                        if (data.error) {
-                            alert(`Can't Edit User ${data.error}`)
-                        } else {
-                            alert(`User Have Been Edited Successfuly`)
-                            this.data_input = new EvacuationCenter()
-                            this.fetchEvacationCenter()
-                        }
-                    })
-                },
+                onEditItem(index) {
+                    var evac = this.evac_list[index]
+                    this.data_input = EvacuationCenter.parse(evac.toObject())
+                    this.data_input.date_updated = new Date()
+                    $('#editorModal').modal()
+                },//onEditItem
 
-                onSaveNewEvacationCenter() {
-                    console.log("data %o", this.data_input)
-                    this.data_input.created_by = header.user.id
+                onSaveItem() {
                     DataHandler.addEvacationCenter(this.data_input).then((data) => {
                         if (data.error) {
                             console.log("params %o", data.params)
@@ -345,14 +319,10 @@
                             alert(`User Have Been Added Successfuly`)
                             this.fetchEvacationCenter()
                         }
+                    }).finally(() => {
+                        this.data_input = new EvacuationCenter()
                     })
-                },
-
-                editItem(index) {
-                    var evac = this.evac_list[index]
-                    this.data_input = EvacuationCenter.parse(evac.toObject())
-                    this.openAddeditorModal(true)
-                },
+                },//onSaveItem
 
                 deleteItem(index) {
                     let onConfirm = confirm('Deleting Item\nPress confirm to proceed')
@@ -367,12 +337,22 @@
                             }
                         })
                     }
-                },
+                },//deleteItem
 
-                close() {
-                    this.data_input = new EvacuationCenter()
-                    this.conf_password = null
-                    this.isEdit = false
+                onSelectAdmin(){
+
+                },//onSelectAdmin
+
+                importEvac(){
+                    let promises = evacs.map((evac) => {
+                        return DataHandler.addEvacationCenter(EvacuationCenter.parse(evac))
+                    })
+
+                    Promise.all(promises).then(() => {
+                        this.fetchEvacationCenter()
+                    }).catch(error => {
+                        console.log(error)
+                    })
                 },
 
                 download() {
