@@ -5,7 +5,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Public Users</title>
-    
+
     <!-- update the version number as needed -->
     <script defer src="/__/firebase/7.19.1/firebase-app.js"></script>
     <!-- include only the Firebase features as you need -->
@@ -17,7 +17,7 @@
     <script defer src="/__/firebase/7.19.1/firebase-functions.js"></script>
     <!-- initialize the SDK after all desired features are loaded -->
     <script defer src="/__/firebase/init.js"></script>
-    
+
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <script src="js/jquery-3.0.0.min.js"></script>
@@ -26,8 +26,8 @@
     <script src="js/vue.js"></script>
     <script src="../_global/js/objects.js"></script>
     <script src="../_global/js/utilities.js"></script>
-    
-    
+
+
 </head>
 
 <body>
@@ -35,8 +35,8 @@
         <div class="sidenav-item">
             <img class="nav-image" :src="logo" />
         </div>
-        
-        <div  v-for="item in header_items" v-bind:class="'sidenav-item ' + (active == item.id ? 'active' : '') ">
+
+        <div v-for="item in header_items" v-bind:class="'sidenav-item ' + (active == item.id ? 'active' : '') ">
             <a v-bind:href="item.href">
                 <div class="icon-block">
                     <i class="material-icons">{{item.icon}}</i>
@@ -44,7 +44,7 @@
                 </div>
             </a>
         </div>
-        
+
         <div class="sidenav-item">
             <a v-on:click="onLogout()">
                 <div class="icon-block">
@@ -66,46 +66,46 @@
                         <div class="row">
                             <div class="col col-md-12 input-container" v-for="key in formModelHeaders">
                                 <p>{{formModel[key].title}}</p>
-                                
+
                                 <input v-if="formModel[key].type == 'text'" type="text" class="input input-item"
-                                :id="'input_'+key" v-model="data_input[key]">
-                                
+                                    :id="'input_'+key" v-model="user_input[key]">
+
                                 <input v-if="formModel[key].type == 'password'" type="password" class="input input-item"
-                                :id="'input_'+key" v-model="data_input[key]">
-                                
+                                    :id="'input_'+key" v-model="user_input[key]">
+
                                 <input v-if="formModel[key].type == 'email'" type="email" class="input input-item"
-                                :id="'input_'+key" v-model="data_input[key]">
-                                
+                                    :id="'input_'+key" v-model="user_input[key]">
+
                                 <input v-if="formModel[key].type == 'number'" type="number" class="input input-item"
-                                :id="'input_'+key" v-model="data_input[key]">
-                                
+                                    :id="'input_'+key" v-model="user_input[key]">
+
                                 <input v-if="formModel[key].type == 'date'" type="date" class="input input-item"
-                                :id="'input_'+key" v-model="data_input[key]">
-                                
+                                    :id="'input_'+key" v-model="user_input[key]">
+
                                 <input v-if="formModel[key].type == 'datetime'" type="datetime" class="input input-item"
-                                :id="'input_'+key" v-model="data_input[key]">
-                                
+                                    :id="'input_'+key" v-model="user_input[key]">
+
                                 <textarea v-if="formModel[key].type == 'textarea'" class="form-control"
-                                :id="'input_'+key" name="exact_address" v-model="data_input[key]"></textarea>
-                                
-                                <select v-if="formModel[key].type == 'dropdown'" class="input input-item input-select" :id="'input_'+key" 
-                                v-model="data_input[key]">
-                                <option v-for="option in formModel[key].options" :value="option.value">
-                                    {{option.title}}</option>
+                                    :id="'input_'+key" name="exact_address" v-model="user_input[key]"></textarea>
+
+                                <select v-if="formModel[key].type == 'dropdown'" class="input input-item input-select"
+                                    :id="'input_'+key" v-model="user_input[key]">
+                                    <option v-for="option in formModel[key].options" :value="option.value">
+                                        {{option.title}}</option>
                                 </select>
-                            </div>  
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal"
-                        v-on:click="onSaveUser()">Save</button>
+                            v-on:click="onSaveUser()">Save</button>
                         <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                     </div>
                 </div>
-                
+
             </div>
         </div>
-        
+
         <div id="dependentModal" class="modal fade" role="dialog">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -117,48 +117,48 @@
                         <div class="row">
                             <div class="col col-md-12 input-container" v-for="key in dependentsHeaders">
                                 <p>{{formModel[key].title}}</p>
-                                
+
                                 <input v-if="formModel[key].type == 'text'" type="text" class="input input-item"
-                                :id="'input_'+key" v-model="data_input[key]">
-                                
+                                    :id="'depinput_'+key" v-model="dependent_input[key]">
+
                                 <input v-if="formModel[key].type == 'password'" type="password" class="input input-item"
-                                :id="'input_'+key" v-model="data_input[key]">
-                                
+                                    :id="'depinput_'+key" v-model="dependent_input[key]">
+
                                 <input v-if="formModel[key].type == 'email'" type="email" class="input input-item"
-                                :id="'input_'+key" v-model="data_input[key]">
-                                
+                                    :id="'depinput_'+key" v-model="dependent_input[key]">
+
                                 <input v-if="formModel[key].type == 'number'" type="number" class="input input-item"
-                                :id="'input_'+key" v-model="data_input[key]">
-                                
+                                    :id="'depinput_'+key" v-model="dependent_input[key]">
+
                                 <input v-if="formModel[key].type == 'date'" type="date" class="input input-item"
-                                :id="'input_'+key" v-model="data_input[key]">
-                                
+                                    :id="'depinput_'+key" v-model="dependent_input[key]">
+
                                 <input v-if="formModel[key].type == 'datetime'" type="datetime" class="input input-item"
-                                :id="'input_'+key" v-model="data_input[key]">
-                                
+                                    :id="'depinput_'+key" v-model="dependent_input[key]">
+
                                 <textarea v-if="formModel[key].type == 'textarea'" class="form-control"
-                                :id="'input_'+key" name="exact_address" v-model="data_input[key]"></textarea>
-                                
-                                <select v-if="formModel[key].type == 'dropdown'" class="input input-item input-select" :id="'input_'+key" 
-                                v-model="data_input[key]">
-                                <option v-for="option in formModel[key].options" :value="option.value">
-                                    {{option.title}}</option>
+                                    :id="'depinput_'+key" name="exact_address" v-model="dependent_input[key]"></textarea>
+
+                                <select v-if="formModel[key].type == 'dropdown'" class="input input-item input-select"
+                                    :id="'depinput_'+key" v-model="dependent_input[key]">
+                                    <option v-for="option in formModel[key].options" :value="option.value">
+                                        {{option.title}}</option>
                                 </select>
-                            </div>  
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal"
-                        v-on:click="onSaveDependent()">Save</button>
+                            v-on:click="onSaveDependent()">Save</button>
                         <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                     </div>
                 </div>
-                
+
             </div>
         </div>
-        
+
         <h1>Public Users</h1>
-        
+
         <h3>Users</h3>
         <div class="loader-container" v-if="isLoading">
             <div class="loader"></div>
@@ -176,39 +176,49 @@
                             <p class="item-label">
                                 {{key}}:
                             </p>
-                            <p class="item-value">
-                                {{item[key]}}
+                            <p class="item-value" v-if="key != 'sex'">
+                                {{item[key] || '--'}}
+                            </p>
+                            <p class="item-value" v-if="key == 'sex'">
+                                {{item[key] == 0 ? 'Male' : 'Female'}}
                             </p>
                         </div>
-                        
+
                         <div class="col col-xs-12">
-                            <button class="btn btn-default btn-info" :href="'#dependentrow'+index" data-toggle="collapse">View Dependents</button>
-                            <button class="btn btn-default btn-info" v-on:click="editItem(index)">edit</button>
-                            <button class="btn btn-default btn-danger" v-on:click="deleteItem(index)">delete</button>
+                            <button class="btn btn-default btn-info" :href="'#dependentrow'+index"
+                                data-toggle="collapse">View Dependents</button>
+                            <button class="btn btn-default btn-info" v-on:click="onEditItem(index)">edit</button>
+                            <button class="btn btn-default btn-danger" v-on:click="onDeleteItem(index)">delete</button>
                         </div>
                     </div>
-                    
+
                     <div :id="'dependentrow'+index" class="panel-collapse collapse">
                         <div class="panel-body">
                             <ul class="list-group">
-                                <li class="list-group-item"  v-if="!item.dependents || item.dependents.length <= 0">
+                                <li class="list-group-item" v-if="!item.dependents || item.dependents.length <= 0">
                                     <p>No Dependents</p>
                                 </li>
-                                
+
                                 <li class="list-group-item" v-for="dependent,index in item.dependents">
                                     <!-- <img :src="cdn+image" class="img-thumbnail img-grid"/> -->
                                     <div class="row">
-                                        <div class="col col-xs-4 item-info" v-for="key,index in dependentsHeaders" v-if="key !='id'">
+                                        <div class="col col-xs-4 item-info" v-for="key,index in dependentsHeaders"
+                                            v-if="key !='id'">
                                             <p class="item-label">
                                                 {{formModel[key].title}}:
                                             </p>
-                                            <p class="item-value">
-                                                {{dependent.get(key)}}
+                                            <p class="item-value" v-if="key != 'sex'">
+                                                {{dependent[key] || '--'}}
+                                            </p>
+                                            <p class="item-value" v-if="key == 'sex'">
+                                                {{dependent[key] == 0 ? 'Male' : 'Female'}}
                                             </p>
                                         </div>
                                         <div class="col col-xs-12">
-                                            <button class="btn btn-default btn-info" v-on:click="onEditDependent(item.id,index)">edit</button>
-                                            <button class="btn btn-default btn-danger" v-on:click="onDeleteDependent(item.id, index)">delete</button>
+                                            <button class="btn btn-default btn-info"
+                                                v-on:click="onEditDependent(item.id,index)">edit</button>
+                                            <button class="btn btn-default btn-danger"
+                                                v-on:click="onDeleteDependent(item.id, index)">delete</button>
                                         </div>
                                     </div>
                                 </li>
@@ -216,126 +226,224 @@
                         </div>
                         <div class="panel-footer">
                             <div class="row">
-                                <button class="btn btn-default btn-info" v-on:click="addNewDependent(index)">Add New Dependent</button>
+                                <button class="btn btn-default btn-info" v-on:click="onAddNewDependent(index)">Add New
+                                    Dependent</button>
                             </div>
                         </div>
                     </div>
-                    
+
                 </div>
             </div>
         </div>
 
         <div class="section">
             <div class="button-container">
-                <button type="button" id="add-report" class="btn btn-info button-view"
-                v-on:click="onAddNewUser()">add User
-            </button>
+                <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="onAddNewUser()">Add
+                    New User</button>
+            </div>
         </div>
     </div>
-</div>
 
-<script src="js/app/datahandler.js"></script>
-<script src="js/app/constants.js"></script>
-<script src="js/app/app.js"></script>
-<script>
-    
-    app = new Vue({
-        el: '#content',
-        data: {
-            user: new AdminUser(),
-            user_list: [],
-            data_input: {},
-            dependents: [],
-            
-            headers: Object.keys(PublicUser.headers),
-            formModelHeaders: Object.keys(PublicUser.formModel),
-            formModel: PublicUser.formModel,
-            dependentsHeaders: PublicUser.formDependent,
-            isEdit: false,
-            editUserId: null,
-            municipalities: [],
-            isLoading : false,
-        },
-        methods: {
-            onStart(){
-                this.user = header.user
-                this.municipalities = municipalities
-                this.formModel.municipality.options = municipalities.map((municipal) => {
-                    return {title: municipal, value: municipal}
-                })
+    <script src="js/app/datahandler.js"></script>
+    <script src="js/app/constants.js"></script>
+    <script src="js/app/app.js"></script>
+    <script>
+        app = new Vue({
+            el: '#content',
+            data: {
+                user: new AdminUser(),
+                user_list: [],
 
-                this.fetchUser()
-            },
-            fetchUser() {
-                this.isLoading = true
-                DataHandler.getPublicUsers(this.user.municipality).then((message) => {
-                    this.setUser(message.data)
-                }).catch(err => {
-                    console.log(err)
-                }).finally(() => {
-                    this.isLoading = false
-                })
-            },
-            
-            setUser(data) {
-                this.user_list = data
-                console.log("userlist %o",this.user_list)
-            },
-            
-            onAddNewUser() {    
-                this.data_input = (new PublicUser()).toObject()
-                this.data_input.created_by = this.user.id
-                this.isEdit = false
-                $('#userModal').modal()
-            },
-            
-            editItem(index) {
-                const user      = this.user_list[index]
-                this.isEdit     = true
-                this.data_input = user.toObject()
-                this.data_input.date_updated = new Date()
-                $('#userModal').modal()
-            },
-            
-            onSaveUser() {
-                const input = PublicUser.parse(this.data_input)
+                user_input: {},
+                dependent_input: {},
+
+                edit_dependent: {
+                    user_index: null,
+                    dep_index: null
+                },
+
+                headers: Object.keys(PublicUser.headers),
+                formModelHeaders: Object.keys(PublicUser.formModel),
+                formModel: PublicUser.formModel,
+                dependentsHeaders: DependentUser.formDependent,
                 
-                DataHandler.addPublicUser(input).then((data) => {
-                    if (data.error) {
-                        alert(`Can't Save User: ${data.error}`)
-                    } else {
-                        alert(`User Have Been Saved Successfuly`)
-                        this.fetchUser()
-                    }
-                }).catch(error =>{
-                    console.log(error)
-                })
+                isEdit: false,
+
+                editUserId: null,
+                municipalities: [],
+                isLoading: false,
             },
-            
-            
-            deleteItem(index) {
-                /*  deleteUser(this.user_list[index].id, this.initApp) */
-                let onConfirm = confirm('Deleting User\nPress confirm to proceed')
-                if (onConfirm) {
-                    DataHandler.deletePublicUser(this.user_list[index].id).then((data) => {
-                        console.log(data)
-                        if (data.error) {
-                            alert(`Can't Delete User ${data.error}`)
-                        } else {
-                            alert(`User Have Been Deleted Successfuly`)
-                            this.fetchUser()
+            methods: {
+                onStart() {
+                    this.user = header.user
+                    this.municipalities = municipalities
+                    this.formModel.municipality.options = municipalities.map((municipal) => {
+                        return {
+                            title: municipal,
+                            value: municipal
                         }
                     })
-                }
-                
-            },
-        }
-    })
-    
-    /* $(document).ready(() => {
-        header.onStart()
-    }) */
-</script>
+
+                    this.fetchUser()
+                },//onStart
+
+                fetchUser() {
+                    this.isLoading = true
+                    DataHandler.getPublicUsers(this.user.municipality).then((message) => {
+                        this.setUser(message.data)
+                    }).catch(err => {
+                        console.log(err)
+                    }).finally(() => {
+                        this.isLoading = false
+                    })
+                },//fetchUser
+
+                setUser(data) {
+                    this.user_list = data
+                    console.log("userlist %o", this.user_list)
+                },//setUser
+
+                //<!----------INDEPENDENT-USER--------------
+                onAddNewUser() {
+                    this.user_input = (new PublicUser()).toObject()
+                    this.user_input.created_by = this.user.id
+                    this.isEdit = false
+                    $('#userModal').modal()
+                },//onAddNewUser
+
+                onEditItem(index) {
+                    const user = this.user_list[index]
+                    this.isEdit = true
+                    this.user_input = user.toObject()
+                    this.user_input.date_updated = new Date()
+                    $('#userModal').modal()
+                },//onEditItem
+
+                onSaveUser() {
+                    const input = PublicUser.parse(this.user_input)
+
+                    DataHandler.addPublicUser(input).then((data) => {
+                        if (data.error) {
+                            alert(`Can't Save User: ${data.error}`)
+                        } else {
+                            alert(`User Have Been Saved Successfuly`)
+                            this.fetchUser()
+                        }
+                    }).catch(error => {
+                        console.log(error)
+                    })
+                },//onSaveUser
+
+                onDeleteItem(index) {
+                    let onConfirm = confirm('Deleting User\nPress confirm to proceed')
+                    if (onConfirm) {
+                        DataHandler.deletePublicUser(this.user_list[index].id).then((data) => {
+                            console.log(data)
+                            if (data.error) {
+                                alert(`Can't Delete User ${data.error}`)
+                            } else {
+                                alert(`User Have Been Deleted Successfuly`)
+                                this.fetchUser()
+                            }
+                        })
+                    }
+                },//onDeleteItem
+                //----------INDEPENDENT-USER--------------!>
+
+                //<!----------DEPENDENT-USER-----------------
+                onAddNewDependent(index) {
+                    if(!this.user_list[index]) {
+                        return
+                    }
+                    
+                    this.isEdit = false
+                    this.edit_dependent.user_index = index
+                    this.dependent_input = (new DependentUser()).toObject()
+                    this.dependent_input.created_by = this.user.id
+                    $('#dependentModal').modal()
+                },//onAddNewDependent
+
+                onEditDependent(id, dep_index) {
+                    let user_index = this.user_list.findIndex((val) => {
+                        return val.id == id
+                    })
+
+                    if (user_index != -1) {
+                        this.isEdit = true
+                        this.edit_dependent.user_index = user_index
+                        this.edit_dependent.dep_index = dep_index
+
+                        this.dependent_input = this.user_list[user_index].dependents[dep_index].toObject()
+                        this.dependent_input.date_updated = new Date()
+                        $('#dependentModal').modal()
+                    }
+                },//onEditDependent
+
+                onSaveDependent() {
+
+                    console.log("edit_dependent %o", this.edit_dependent)
+                    console.log("dependent %o", this.dependent_input)
+
+                    if (this.edit_dependent.user_index == undefined || this.edit_dependent.user_index == null) {
+                        return
+                    }
+                    
+                    const user_index = this.edit_dependent.user_index
+                    const dep_index = this.edit_dependent.dep_index
+
+                    let input = DependentUser.parse(this.dependent_input)
+                    if (dep_index) {
+                        this.user_list[user_index].dependents[dep_index] = input
+                    } else {
+                        this.user_list[user_index].dependents.push(input)
+                    }
+                    DataHandler.savePublicUser(this.user_list[user_index]).then((message) => {
+                        if (message.error) {
+                            alert(`Issue Persisting Data: ${message.error}`)
+                        } else {
+                            alert("Successfuly Updated Entry")
+                            this.fetchUser()
+                        }
+                        this.edit_dependent.user_index = null
+                        this.edit_dependent.dep_index = null
+                    }).catch(err => {
+                        console.log(err)
+                    })
+                },//onSaveDependent
+
+                onDeleteDependent(id, index) {
+
+                    let user_index = this.user_list.findIndex((val) => {
+                        return val.id == id
+                    })
+
+                    if (user_index != -1 && confirm("confirm delete entry?")) {
+                        let user = this.user_list[user_index]
+                        user.dependents.splice(index, 1)
+                        DataHandler.savePublicUser(this.user_list[user_index]).then((message) => {
+                            if (message.error) {
+                                alert(`Issue Persisting Data: ${message.error}`)
+                            } else {
+                                alert("Successfuly Updated Entry")
+                                this.fetchUser()
+                            }
+                            this.edit_dependent.user_index = null
+                            this.edit_dependent.dep_index = null
+                        }).catch(err => {
+                            console.log(err)
+                        })
+                    }
+                },//onDeleteDependent
+
+                //----------DEPENDENT-USER-----------------!>
+
+            }
+        })
+
+        /* $(document).ready(() => {
+            header.onStart()
+        }) */
+    </script>
 
 </body>
 

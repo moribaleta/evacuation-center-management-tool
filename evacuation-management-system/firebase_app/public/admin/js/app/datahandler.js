@@ -348,11 +348,13 @@ class AdminUser extends Model {
                     reject(error)
                 });
             })
-            
-            
             //return this.addEntry(params.id, params.toObject, UserHandler.tables.public_user)
         } //addPublicUsers
-        
+
+        /** as long as save user doesnt change username or password */
+        savePublicUser(params = new PublicUser()) {
+            return DataHandler.addEntry(params.id, params.toObject(), UserHandler.tables.public_user)
+        } //addPublicUsers
         
         deletePublicUser(id) {
             return this.deleteEntry(id, UserHandler.tables.public_user)

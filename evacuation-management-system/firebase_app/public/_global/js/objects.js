@@ -556,12 +556,6 @@ class PublicUser extends Model {
     /** sex/gender 0 male, 1 female */
     sex
 
-    /** 
-     * reference a public user pertains to head of family 
-     * header of family still will have an equal id and family_id
-     */
-    family_id
-
     /** determines if the person has disabilities*/
     disabilities
 
@@ -574,6 +568,7 @@ class PublicUser extends Model {
     /** number of dependents*/
     //number_dependents
 
+    /** array contains dependents users */
     dependents = []
 
     static headers = {
@@ -592,7 +587,6 @@ class PublicUser extends Model {
         phone_number: 'Contact Number',
         address: 'Exact Address',
         sex: 'Sex',
-        family_id: 'Family ID',
         disabilities: 'Disabilities',
         employment: 'Employment',
         medical_needs: 'Medical Needs',
@@ -677,7 +671,7 @@ class PublicUser extends Model {
 
     constructor(id, created_by, date_created, date_updated, firstname, lastname, middleinit,
         municipality, username, password, email, birthdate, phone_number, address, sex,
-        family_id, disabilities, employment, medical_needs, dependents) {
+        disabilities, employment, medical_needs, dependents) {
         super()
         this.id = id || "publicuser-" + genID(5)
         this.created_by = created_by
@@ -695,7 +689,6 @@ class PublicUser extends Model {
         this.phone_number = phone_number || ""
         this.address = address || ""
         this.sex = sex || 0
-        this.family_id = family_id || ""
         this.disabilities = disabilities || ""
         this.employment = employment || ""
         this.medical_needs = medical_needs || ""
@@ -722,7 +715,6 @@ class PublicUser extends Model {
             phone_number: this.phone_number,
             address: this.address,
             sex: this.sex,
-            family_id: this.family_id,
             disabilities: this.disabilities,
             employment: this.employment,
             medical_needs: this.medical_needs,
@@ -753,7 +745,6 @@ class PublicUser extends Model {
             object.phone_number,
             object.address,
             object.sex,
-            object.family_id,
             object.disabilities,
             object.employment,
             object.medical_needs,
@@ -768,6 +759,7 @@ class DependentUser extends PublicUser {
         'firstname',
         'lastname',
         'middleinit',
+        'email',
         'birthdate',
         'phone_number',
         'sex',
@@ -777,20 +769,21 @@ class DependentUser extends PublicUser {
 
     constructor(id, created_by, date_created, date_updated, firstname, lastname, middleinit,
         email, birthdate, phone_number, sex,
-        family_id, disabilities, medical_needs) {
+        disabilities, medical_needs) {
         super()
         this.id = id || "depuser-" + genID(5)
         this.created_by = created_by
         this.date_created = date_created || new Date()
         this.date_updated = date_updated || new Date()
-        this.firstname = firstname
-        this.lastname = lastname
+        
+        this.firstname  = firstname
+        this.lastname   = lastname
         this.middleinit = middleinit
+
         this.email = email || ""
         this.birthdate = birthdate
         this.phone_number = phone_number || ""
         this.sex = sex || 0
-        this.family_id = family_id || ""
         this.disabilities = disabilities || ""
         this.medical_needs = medical_needs || ""
     }
@@ -808,28 +801,26 @@ class DependentUser extends PublicUser {
             birthdate    : this.birthdate,
             phone_number : this.phone_number,
             sex          : this.sex,
-            family_id    : this.family_id,
             disabilities : this.disabilities,
             medical_needs: this.medical_needs,
         }
     }
 
     static parse(object = {}) {
-        return new PublicUser(
-            object.this.id,
-            object.this.created_by,
-            object.this.date_created,
-            object.this.date_updated,
-            object.this.firstname,
-            object.this.lastname,
-            object.this.middleinit,
-            object.this.email,
-            object.this.birthdate,
-            object.this.phone_number,
-            object.this.sex,
-            object.this.family_id,
-            object.this.disabilities,
-            object.this.medical_needs,
+        return new DependentUser(
+            object.id,
+            object.created_by,
+            object.date_created,
+            object.date_updated,
+            object.firstname,
+            object.lastname,
+            object.middleinit,
+            object.email,
+            object.birthdate,
+            object.phone_number,
+            object.sex,
+            object.disabilities,
+            object.medical_needs,
         )
     }
 }
@@ -848,27 +839,27 @@ class PublicUserHistory extends Model {
 
     constructor(id, date_created, date_updated, created_by, userid, evac_id, date_admitted, date_cleared) {
         super()
-        this.id = id || "publicuserhistory-" + genID(5)
-        this.date_created = date_created || new Date()
-        this.date_updated = date_updated || new Date()
+        this.id            = id || "publicuserhistory-" + genID(5)
+        this.date_created  = date_created || new Date()
+        this.date_updated  = date_updated || new Date()
         this.date_admitted = date_admitted || new Date()
-        this.date_cleared = date_cleared || ""
-        this.created_by = created_by || '0'
-        this.userid = userid
-        this.evac_id = evac_id
+        this.date_cleared  = date_cleared || ""
+        this.created_by    = created_by || '0'
+        this.userid        = userid
+        this.evac_id       = evac_id
     }
 
 
     toObject() {
         return {
-            id: this.id,
-            date_created: this.date_created,
-            date_updated: this.date_updated,
+            id           : this.id,
+            date_created : this.date_created,
+            date_updated : this.date_updated,
             date_admitted: this.date_admitted,
-            date_cleared: this.date_cleared,
-            created_by: this.created_by,
-            userid: this.userid,
-            evac_id: this.evac_id,
+            date_cleared : this.date_cleared,
+            created_by   : this.created_by,
+            userid       : this.userid,
+            evac_id      : this.evac_id,
         }
     }
 
