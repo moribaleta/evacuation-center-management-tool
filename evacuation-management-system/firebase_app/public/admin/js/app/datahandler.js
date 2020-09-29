@@ -275,7 +275,7 @@ class AdminUser extends Model {
         getPublicUsers(municipality) {
             return new Promise((resolve, reject) => {
                 const ref = this.firestore.collection(UserHandler.tables.public_user)
-                const query = (municipality != "admin") ? ref.where('municipality', '==', municipality) : ref
+                const query = (municipality != "0") ? ref.where('municipality', '==', municipality) : ref
                 
                 query.get().then(function (querySnapshot) {
                     var users = []

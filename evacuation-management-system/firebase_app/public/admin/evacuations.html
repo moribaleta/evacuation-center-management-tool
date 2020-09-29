@@ -5,7 +5,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Evacuations</title>
-
+    
     <!-- update the version number as needed -->
     <script defer src="/__/firebase/7.19.1/firebase-app.js"></script>
     <!-- include only the Firebase features as you need -->
@@ -17,7 +17,7 @@
     <script defer src="/__/firebase/7.19.1/firebase-functions.js"></script>
     <!-- initialize the SDK after all desired features are loaded -->
     <script defer src="/__/firebase/init.js"></script>
-
+    
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <script src="js/jquery-3.0.0.min.js"></script>
@@ -26,9 +26,9 @@
     <script src="js/vue.js"></script>
     <script src="../_global/js/objects.js"></script>
     <script src="../_global/js/utilities.js"></script>
-
-
-
+    
+    
+    
 </head>
 
 <body>
@@ -36,7 +36,7 @@
         <div class="sidenav-item">
             <img class="nav-image" :src="logo" />
         </div>
-
+        
         <div  v-for="item in header_items" v-bind:class="'sidenav-item ' + (active == item.id ? 'active' : '') ">
             <a v-bind:href="item.href">
                 <div class="icon-block">
@@ -45,7 +45,7 @@
                 </div>
             </a>
         </div>
-
+        
         <div class="sidenav-item">
             <a v-on:click="onLogout()">
                 <div class="icon-block">
@@ -73,483 +73,483 @@
                                     <label class="col-md-4 control-label" for="name">Name</label>
                                     <div class="col-md-4">
                                         <input id="name" name="name" type="text" placeholder="Evacuation Center"
-                                            class="form-control input-md" required="" v-model="data_input.name">
+                                        class="form-control input-md" required="" v-model="data_input.name">
                                         <span class="help-block">Enter Evacuation Center</span>
                                     </div>
                                 </div>
-
+                                
                                 <!-- Text input-->
                                 <div class="form-group">
                                     <label class="col-md-4 control-label" for="population_capacity">Population
                                         Capacity</label>
-                                    <div class="col-md-4">
-                                        <input id="population_capacity" name="population_capacity" type="text"
+                                        <div class="col-md-4">
+                                            <input id="population_capacity" name="population_capacity" type="text"
                                             placeholder="capacity" class="form-control input-md" required=""
                                             v-model="data_input.population_capacity">
-                                        <span class="help-block">Number of population the facility can hold</span>
+                                            <span class="help-block">Number of population the facility can hold</span>
+                                        </div>
                                     </div>
-                                </div>
-
-                                <!-- Text input-->
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label" for="floor_space">Floor space</label>
-                                    <div class="col-md-4">
-                                        <input id="floor_space" name="floor_space" type="text"
+                                    
+                                    <!-- Text input-->
+                                    <div class="form-group">
+                                        <label class="col-md-4 control-label" for="floor_space">Floor space</label>
+                                        <div class="col-md-4">
+                                            <input id="floor_space" name="floor_space" type="text"
                                             placeholder="area in square meters" class="form-control input-md"
                                             required="" v-model="data_input.floor_space">
-                                        <span class="help-block">The maximum space of the facility available</span>
+                                            <span class="help-block">The maximum space of the facility available</span>
+                                        </div>
                                     </div>
-                                </div>
-
-                                <!-- Text input-->
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label" for="contact_numbers">Contact Numbers</label>
-                                    <div class="col-md-4">
-                                        <input id="contact_numbers" name="contact_numbers" type="text"
+                                    
+                                    <!-- Text input-->
+                                    <div class="form-group">
+                                        <label class="col-md-4 control-label" for="contact_numbers">Contact Numbers</label>
+                                        <div class="col-md-4">
+                                            <input id="contact_numbers" name="contact_numbers" type="text"
                                             placeholder="eg. 0917..." class="form-control input-md"
                                             v-model="data_input.contact_numbers">
-                                        <span class="help-block">Contact numbers available</span>
+                                            <span class="help-block">Contact numbers available</span>
+                                        </div>
                                     </div>
-                                </div>
-
-                                <!-- Textarea -->
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label" for="exact_address">Exact Address</label>
-                                    <div class="col-md-4">
-                                        <textarea class="form-control" id="exact_address" name="exact_address"
+                                    
+                                    <!-- Textarea -->
+                                    <div class="form-group">
+                                        <label class="col-md-4 control-label" for="exact_address">Exact Address</label>
+                                        <div class="col-md-4">
+                                            <textarea class="form-control" id="exact_address" name="exact_address"
                                             v-model="data_input.exact_address"></textarea>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label" for="location">Location</label>
-                                    <div class="col-md-4">
-                                        <div>
-                                            <label class="control-label" for="location">Latitude</label>
-                                            <input id="lat" name="location" type="text" placeholder="120.123 ..."
+                                    <div class="form-group">
+                                        <label class="col-md-4 control-label" for="location">Location</label>
+                                        <div class="col-md-4">
+                                            <div>
+                                                <label class="control-label" for="location">Latitude</label>
+                                                <input id="lat" name="location" type="text" placeholder="120.123 ..."
                                                 class="form-control input-md" required=""
                                                 v-model="data_input.location.lat">
-                                            <span class="help-block">Latitude</span>
-                                        </div>
-                                        <div>
-                                            <label class="control-label" for="location">Longitude</label>
-                                            <input id="lng" name="location" type="text" placeholder="120.123 ..."
+                                                <span class="help-block">Latitude</span>
+                                            </div>
+                                            <div>
+                                                <label class="control-label" for="location">Longitude</label>
+                                                <input id="lng" name="location" type="text" placeholder="120.123 ..."
                                                 class="form-control input-md" required=""
                                                 v-model="data_input.location.lng">
-                                            <span class="help-block">Longitude</span>
+                                                <span class="help-block">Longitude</span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-
-                                <!-- Select Basic -->
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label" for="municipality">Municipality</label>
-                                    <div class="col-md-4">
-                                        <select id="municipality" name="municipality" class="form-control"
+                                    
+                                    <!-- Select Basic -->
+                                    <div class="form-group">
+                                        <label class="col-md-4 control-label" for="municipality">Municipality</label>
+                                        <div class="col-md-4">
+                                            <select id="municipality" name="municipality" class="form-control"
                                             v-model="data_input.municipality">
                                             <option v-for="municipal in municipalities" v-bind:value="municipal">
                                                 {{municipal}}</option>
-                                        </select>
+                                            </select>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label" for="municipality">Category</label>
-                                    <div class="col-md-4">
-                                        <select id="municipality" name="municipality" class="form-control"
+                                    <div class="form-group">
+                                        <label class="col-md-4 control-label" for="municipality">Category</label>
+                                        <div class="col-md-4">
+                                            <select id="municipality" name="municipality" class="form-control"
                                             v-model="data_input.category">
                                             <option v-for="category in categories" v-bind:value="category">
                                                 {{category}}</option>
-                                        </select>
+                                            </select>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label" for="municipality">Evacuation Center In-charge</label>
-                                    <div class="col-md-4">
-                                        <select id="admin" name="admin" class="form-control"
+                                    <div class="form-group">
+                                        <label class="col-md-4 control-label" for="municipality">Evacuation Center In-charge</label>
+                                        <div class="col-md-4">
+                                            <select id="admin" name="admin" class="form-control"
                                             v-model="data_input.admin_id">
                                             <option v-for="admin in admins" v-bind:value="admin.id">
                                                 {{admin.lastname, admin.firstname}}</option>
-                                        </select>
+                                            </select>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label" for="exact_address">Available Facilities</label>
-                                    <div class="col-md-4">
-                                        <textarea class="form-control" id="exact_address" name="exact_address"
+                                    <div class="form-group">
+                                        <label class="col-md-4 control-label" for="exact_address">Available Facilities</label>
+                                        <div class="col-md-4">
+                                            <textarea class="form-control" id="exact_address" name="exact_address"
                                             v-model="data_input.facilities"></textarea>
+                                        </div>
                                     </div>
-                                </div>
-
-
-                            </fieldset>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal"
-                            v-on:click="onSaveItem()">Save</button>
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-
-        <div class="subcontent">
-            <div class="section header">
-                <h1>Evacuation Facilities</h1>
-            </div>
-
-            <div class="loader-container" v-if="isLoading">
-                <div class="loader"></div>
-            </div>
-
-            <div class="section" style="height: 80%;" v-if="evac_list.length > 0">
-
-                <div class="table-container" id="tableData">
-                    <div class="well" v-for="item,index in evac_list">
-                        <div class="row">
-                            <div class="col col-md-12 item-info">
-                                <p class="item-label">
-                                    {{header_labels['id']}}:
-                                </p>
-                                <p class="item-value">
-                                    {{item.id}}
-                                </p>
-                            </div>
-
-                            <div class="col col-md-12 item-info">
-                                <p class="item-label">
-                                    {{header_labels['name']}}:
-                                </p>
-                                <p class="item-value">
-                                    {{item.name}}
-                                </p>
-                            </div>
-                            <div class="col col-md-12 item-info">
-                                <p class="item-label">
-                                    {{header_labels['admin_id']}}:
-                                </p>
-                                <p class="item-value">
-                                    {{admins_selection[item.admin_id]}}
-                                </p>
-                            </div>
-                            <div class="col col-md-3 item-info">
-                                <p class="item-label">
-                                    {{header_labels['population_capacity']}}:
-                                </p>
-                                <p class="item-value">
-                                    {{item.population_capacity}}
-                                </p>
-                            </div>
-                            <div class="col col-md-3 item-info">
-                                <p class="item-label">
-                                    {{header_labels['floor_space']}}:
-                                </p>
-                                <p class="item-value">
-                                    {{item.floor_space}}
-                                </p>
-                            </div>
-                            <div class="col col-md-3 item-info">
-                                <p class="item-label">
-                                    {{header_labels['contact_numbers']}}:
-                                </p>
-                                <p class="item-value">
-                                    {{item.contact_numbers}}
-                                </p>
-                            </div>
-                            <div class="col col-md-4 item-info">
-                                <p class="item-label">
-                                    {{header_labels['category']}}:
-                                </p>
-                                <p class="item-value">
-                                    {{item.category}}
-                                </p>
-                            </div>
-                            <div class="col col-md-12 item-info">
-                                <p class="item-label">
-                                    {{header_labels['facilities']}}:
-                                </p>
-                                <p class="item-value">
-                                    {{item.facilities}}
-                                </p>
-                            </div>
-                            <div class="col col-md-12 item-info">
-                                <p class="item-label">
-                                    {{header_labels['exact_address']}}:
-                                </p>
-                                <p class="item-value">
-                                    {{item.exact_address}}
-                                </p>
-                            </div>
-                            <div class="col col-md-12 item-info">
-                                <p class="item-label">
-                                    {{header_labels['location']}}:
-                                </p>
-                                <p class="item-value" style="margin-right: 10px;">
-                                    lat: {{item.location.lat}}
-                                </p>
-                                <p class="item-value">
-                                    lng: {{item.location.lng}}
-                                </p>
-                            </div>
-                            <div class="col col-md-12">
-                                <button class="btn btn-default btn-info" :href="'#imagerow'+index" data-toggle="collapse">view pictures</button>
-                                <button class="btn btn-default btn-warning" v-on:click="onEditItem(index)">edit</button>
-                                <button class="btn btn-default btn-danger"
-                                    v-on:click="deleteItem(index)">delete</button>
-                            </div>
+                                    
+                                    
+                                </fieldset>
+                            </form>
                         </div>
-                        <div :id="'imagerow'+index" class="panel-collapse collapse">
-                            <div class="panel-body">
-                                <div class="row">
-                                    <div class="col col-md-12" v-if="!item.images || item.images.length <= 0">
-                                        <p>Images are empty</p>
-                                    </div>
-                                    <div class="col col-md-2 item-info" v-for="image,index in item.images">
-                                        <!-- <img :src="cdn+image" class="img-thumbnail img-grid"/> -->
-                                        <div class="image-area">
-                                            <img :src="cdn+image"  alt="Preview">
-                                            <a class="remove-image" v-on:click="onDeleteImage(item.id, index)" style="display: inline;">&#215;</a>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal"
+                            v-on:click="onSaveItem()">Save</button>
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+            
+            <div class="subcontent">
+                <div class="section header">
+                    <h1>Evacuation Facilities</h1>
+                </div>
+                
+                <div class="loader-container" v-if="isLoading">
+                    <div class="loader"></div>
+                </div>
+                
+                <div class="section" style="height: 80%;" v-if="evac_list.length > 0">
+                    
+                    <div class="table-container" id="tableData">
+                        <div class="well" v-for="item,index in evac_list">
+                            <div class="row">
+                                <div class="col col-md-12 item-info">
+                                    <p class="item-label">
+                                        {{header_labels['id']}}:
+                                    </p>
+                                    <p class="item-value">
+                                        {{item.id}}
+                                    </p>
+                                </div>
+                                
+                                <div class="col col-md-12 item-info">
+                                    <p class="item-label">
+                                        {{header_labels['name']}}:
+                                    </p>
+                                    <p class="item-value">
+                                        {{item.name}}
+                                    </p>
+                                </div>
+                                <div class="col col-md-12 item-info">
+                                    <p class="item-label">
+                                        {{header_labels['admin_id']}}:
+                                    </p>
+                                    <p class="item-value">
+                                        {{admins_selection[item.admin_id]}}
+                                    </p>
+                                </div>
+                                <div class="col col-md-3 item-info">
+                                    <p class="item-label">
+                                        {{header_labels['population_capacity']}}:
+                                    </p>
+                                    <p class="item-value">
+                                        {{item.population_capacity}}
+                                    </p>
+                                </div>
+                                <div class="col col-md-3 item-info">
+                                    <p class="item-label">
+                                        {{header_labels['floor_space']}}:
+                                    </p>
+                                    <p class="item-value">
+                                        {{item.floor_space}}
+                                    </p>
+                                </div>
+                                <div class="col col-md-3 item-info">
+                                    <p class="item-label">
+                                        {{header_labels['contact_numbers']}}:
+                                    </p>
+                                    <p class="item-value">
+                                        {{item.contact_numbers}}
+                                    </p>
+                                </div>
+                                <div class="col col-md-4 item-info">
+                                    <p class="item-label">
+                                        {{header_labels['category']}}:
+                                    </p>
+                                    <p class="item-value">
+                                        {{item.category}}
+                                    </p>
+                                </div>
+                                <div class="col col-md-12 item-info">
+                                    <p class="item-label">
+                                        {{header_labels['facilities']}}:
+                                    </p>
+                                    <p class="item-value">
+                                        {{item.facilities}}
+                                    </p>
+                                </div>
+                                <div class="col col-md-12 item-info">
+                                    <p class="item-label">
+                                        {{header_labels['exact_address']}}:
+                                    </p>
+                                    <p class="item-value">
+                                        {{item.exact_address}}
+                                    </p>
+                                </div>
+                                <div class="col col-md-12 item-info">
+                                    <p class="item-label">
+                                        {{header_labels['location']}}:
+                                    </p>
+                                    <p class="item-value" style="margin-right: 10px;">
+                                        lat: {{item.location.lat}}
+                                    </p>
+                                    <p class="item-value">
+                                        lng: {{item.location.lng}}
+                                    </p>
+                                </div>
+                                <div class="col col-md-12">
+                                    <button class="btn btn-default btn-info" :href="'#imagerow'+index" data-toggle="collapse">view pictures</button>
+                                    <button class="btn btn-default btn-warning" v-on:click="onEditItem(index)">edit</button>
+                                    <button class="btn btn-default btn-danger"
+                                    v-on:click="deleteItem(index)">delete</button>
+                                </div>
+                            </div>
+                            <div :id="'imagerow'+index" class="panel-collapse collapse">
+                                <div class="panel-body">
+                                    <div class="row">
+                                        <div class="col col-md-12" v-if="!item.images || item.images.length <= 0">
+                                            <p>Images are empty</p>
+                                        </div>
+                                        <div class="col col-md-2 item-info" v-for="image,index in item.images">
+                                            <!-- <img :src="cdn+image" class="img-thumbnail img-grid"/> -->
+                                            <div class="image-area">
+                                                <img :src="cdn+image"  alt="Preview">
+                                                <a class="remove-image" v-on:click="onDeleteImage(item.id, index)" style="display: inline;">&#215;</a>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="panel-footer">
-                                <div class="row">
-                                    <p>Upload Images</p>
-                                    <input :id="'input_images'+index" type="file" name="files[]" multiple style="margin-bottom: 12px;"/>
-                                    <button class="btn btn-default btn-info" v-on:click="onAddImages(index)">upload pictures</button>
+                                <div class="panel-footer">
+                                    <div class="row">
+                                        <p>Upload Images</p>
+                                        <input :id="'input_images'+index" type="file" name="files[]" multiple style="margin-bottom: 12px;"/>
+                                        <button class="btn btn-default btn-info" v-on:click="onAddImages(index)">upload pictures</button>
+                                    </div>
                                 </div>
                             </div>
-                          </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="section">
-                <button type="button" id="add-report" class="btn btn-info button-view"
+                <div class="section">
+                    <button type="button" id="add-report" class="btn btn-info button-view"
                     v-on:click="importEvac()">Import Evacuation Center
                 </button>
                 <button type="button" id="add-report" class="btn btn-info button-view"
-                    v-on:click="onAddItem()">Add Evacuation Center
-                </button>
-                <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="download()">Download
-                    Evacuation Center
-                </button>
-            </div>
+                v-on:click="onAddItem()">Add Evacuation Center
+            </button>
+            <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="download()">Download
+                Evacuation Center
+            </button>
         </div>
-
     </div>
+    
+</div>
 
-    <script src="js/app/datahandler.js"></script>
-    <script src="js/app/constants.js"></script>
-    <script src="js/app/app.js"></script>
+<script src="js/app/datahandler.js"></script>
+<script src="js/app/constants.js"></script>
+<script src="js/app/app.js"></script>
 
-    <script>
-
-        app = new Vue({
-            el: '#content',
-            data: {
-                user: null,
-                admins: [],
-                admins_selection: {},
-                categories: [],
-                evac_list: [],
-                headers: [],
-                header_labels: {},
-                data_input: new EvacuationCenter(), //new EvacuationCenter(),
-                isEdit: false,
-                municipalities: municipalities,
-                isLoading: false,
-                cdn: DataHandlerType.api_host,
-            },
-            methods: {
-                onStart() {
-                    this.user       = header.user
-                    this.headers    = Object.keys(EvacuationCenter.headers)
-                    this.header_labels = EvacuationCenter.headers
-                    this.categories = EvacuationCenter.CategoryTypes
-
-                    this.fetchAllAdmins()
-                    this.fetchEvacationCenter()
-                },//onStart
-
-                fetchEvacationCenter() {
-                    this.isLoading = true
-
-                    DataHandler.getEvacuationCenters().then((data) => {
-                        this.setEvacationCenter(data.data)
-                    }).catch(err => {
-                        console.log(err)
-                    }).finally(() => {
-                        this.isLoading = false
-                    })
-                },//fetchEvacationCenter
-
-                fetchAllAdmins(){
-                    /* let evacs = this.evac_list
-                    this.evac_list = [] */
-                    DataHandler.getAdminUsers(this.user.id).then((message) => {
-                        this.admins = message.data
-                        this.admins.forEach(admin => {
-                            this.admins_selection[admin.id] = `${admin.lastname}, ${admin.firstname}`
-                        });
-                        //this.evac_list = evacs
-                    }).catch((error) => {
-                        console.log(error)
-                    })
-                },//fetchAllAdmins
+<script>
+    
+    app = new Vue({
+        el: '#content',
+        data: {
+            user: null,
+            admins: [],
+            admins_selection: {},
+            categories: [],
+            evac_list: [],
+            headers: [],
+            header_labels: {},
+            data_input: new EvacuationCenter(), //new EvacuationCenter(),
+            isEdit: false,
+            municipalities: municipalities,
+            isLoading: false,
+            cdn: DataHandlerType.api_host,
+        },
+        methods: {
+            onStart() {
+                this.user       = header.user
+                this.headers    = Object.keys(EvacuationCenter.headers)
+                this.header_labels = EvacuationCenter.headers
+                this.categories = EvacuationCenter.CategoryTypes
                 
-                setEvacationCenter(data) {
-                    this.evac_list = data
-                    console.log(this.evac_list)
-                },//setEvacationCenter
-
-                onAddItem() {
-                    this.data_input = new EvacuationCenter()
-                    this.data_input.location = {
-                        lat: null,
-                        lng: null
+                this.fetchAllAdmins()
+                this.fetchEvacationCenter()
+            },//onStart
+            
+            fetchEvacationCenter() {
+                this.isLoading = true
+                
+                DataHandler.getEvacuationCenters().then((data) => {
+                    this.setEvacationCenter(data.data)
+                }).catch(err => {
+                    console.log(err)
+                }).finally(() => {
+                    this.isLoading = false
+                })
+            },//fetchEvacationCenter
+            
+            fetchAllAdmins(){
+                /* let evacs = this.evac_list
+                this.evac_list = [] */
+                DataHandler.getAdminUsers(this.user.id).then((message) => {
+                    this.admins = message.data
+                    this.admins.forEach(admin => {
+                        this.admins_selection[admin.id] = `${admin.lastname}, ${admin.firstname}`
+                    });
+                    //this.evac_list = evacs
+                }).catch((error) => {
+                    console.log(error)
+                })
+            },//fetchAllAdmins
+            
+            setEvacationCenter(data) {
+                this.evac_list = data
+                console.log(this.evac_list)
+            },//setEvacationCenter
+            
+            onAddItem() {
+                this.data_input = new EvacuationCenter()
+                this.data_input.location = {
+                    lat: null,
+                    lng: null
+                }
+                this.data_input.created_by = this.user.id
+                $('#editorModal').modal()
+            },//onAddItem
+            
+            onEditItem(index) {
+                var evac = this.evac_list[index]
+                this.data_input = EvacuationCenter.parse(evac.toObject())
+                this.data_input.date_updated = new Date()
+                $('#editorModal').modal()
+            },//onEditItem
+            
+            onSaveItem() {
+                DataHandler.addEvacationCenter(this.data_input).then((data) => {
+                    if (data.error) {
+                        console.log("params %o", data.params)
+                        alert(`Can't Save User ${data.error}`)
+                    } else {
+                        alert(`User Have Been Added Successfuly`)
+                        this.fetchEvacationCenter()
                     }
-                    this.data_input.created_by = this.user.id
-                    $('#editorModal').modal()
-                },//onAddItem
-
-                onEditItem(index) {
-                    var evac = this.evac_list[index]
-                    this.data_input = EvacuationCenter.parse(evac.toObject())
-                    this.data_input.date_updated = new Date()
-                    $('#editorModal').modal()
-                },//onEditItem
-
-                onSaveItem() {
-                    DataHandler.addEvacationCenter(this.data_input).then((data) => {
+                }).finally(() => {
+                    this.data_input = new EvacuationCenter()
+                })
+            },//onSaveItem
+            
+            deleteItem(index) {
+                let onConfirm = confirm('Deleting Item\nPress confirm to proceed')
+                if (onConfirm) {
+                    DataHandler.deleteEvacationCenter(this.evac_list[index].id).then((data) => {
+                        console.log(data)
                         if (data.error) {
-                            console.log("params %o", data.params)
-                            alert(`Can't Save User ${data.error}`)
+                            alert(`Can't Delete Item ${data.error}`)
                         } else {
-                            alert(`User Have Been Added Successfuly`)
+                            alert(`Item Have Been Deleted Successfuly`)
                             this.fetchEvacationCenter()
                         }
-                    }).finally(() => {
-                        this.data_input = new EvacuationCenter()
                     })
-                },//onSaveItem
-
-                deleteItem(index) {
-                    let onConfirm = confirm('Deleting Item\nPress confirm to proceed')
-                    if (onConfirm) {
-                        DataHandler.deleteEvacationCenter(this.evac_list[index].id).then((data) => {
-                            console.log(data)
-                            if (data.error) {
-                                alert(`Can't Delete Item ${data.error}`)
-                            } else {
-                                alert(`Item Have Been Deleted Successfuly`)
-                                this.fetchEvacationCenter()
-                            }
-                        })
-                    }
-                },//deleteItem
-
-                onSelectAdmin(){
-
-                },//onSelectAdmin
-
-                onAddImages(index){
-                    const files = document.getElementById('input_images'+index).files;
-                    var uploads = []
-                    for(var i=0; i<files.length; i++){
-                        uploads.push(files[i])
-                    }
+                }
+            },//deleteItem
+            
+            onSelectAdmin(){
+                
+            },//onSelectAdmin
+            
+            onAddImages(index){
+                const files = document.getElementById('input_images'+index).files;
+                var uploads = []
+                for(var i=0; i<files.length; i++){
+                    uploads.push(files[i])
+                }
+                
+                if (uploads.length > 0) {
                     
-                    if (uploads.length > 0) {
-
-                        var value = EvacuationCenter.parse(this.evac_list[index].toObject()) 
-
-                        DataHandler.uploadImages(uploads).then((resp) => {
-                            return resp.json()
-                        }).then((saved_images) => {
-                            value.images = value.images || []
-                            value.images = value.images.concat(saved_images)
-                            return DataHandler.addEvacationCenter(value)
-                        }).then((message) => {
-                            if (!message.error) {
-                                alert("Item Persisted Successfuly")
-                                this.fetchEvacationCenter()
-                            } else {
-                                alert(`Failed to updated error: ${message.error}`)
-                            }
-                        }).catch(error => {
-                            console.log(error)
-                        })
-                    }
-                },
-
-                onDeleteImage(evac_id, image_index){
-                    let first = this.evac_list.filter((value) => {
-                        return value.id == evac_id
-                    })[0]
-                    if (first && confirm("Do you want to delete this image?")) {
-                        let image_to_delete = first.images.splice(image_index, 1)
-                        console.log("images to delete %o", image_to_delete)
-                        DataHandler.deleteImages(image_to_delete).then((removed) => {
-                            console.log(removed)
-                        }).catch((err) => {
-                            console.log(err)
-                        })
-                        DataHandler.addEvacationCenter(first).then((message) => {
+                    var value = EvacuationCenter.parse(this.evac_list[index].toObject()) 
+                    
+                    DataHandler.uploadImages(uploads).then((resp) => {
+                        return resp.json()
+                    }).then((saved_images) => {
+                        value.images = value.images || []
+                        value.images = value.images.concat(saved_images)
+                        return DataHandler.addEvacationCenter(value)
+                    }).then((message) => {
+                        if (!message.error) {
+                            alert("Item Persisted Successfuly")
                             this.fetchEvacationCenter()
-                        }).catch((err) => {
-                            console.log(err)
-                        })
-                    }
-                },
-
-                importEvac(){
-                    let promises = evacs.map((evac) => {
-                        return DataHandler.addEvacationCenter(EvacuationCenter.parse(evac))
-                    })
-
-                    Promise.all(promises).then(() => {
-                        this.fetchEvacationCenter()
+                        } else {
+                            alert(`Failed to updated error: ${message.error}`)
+                        }
                     }).catch(error => {
                         console.log(error)
                     })
-                },
-
-                download() {
-                    let text = JSON.stringify(this.evac_list)
-                    saveTextAsFile(text)
                 }
-
+            },
+            
+            onDeleteImage(evac_id, image_index){
+                let first = this.evac_list.filter((value) => {
+                    return value.id == evac_id
+                })[0]
+                if (first && confirm("Do you want to delete this image?")) {
+                    let image_to_delete = first.images.splice(image_index, 1)
+                    console.log("images to delete %o", image_to_delete)
+                    DataHandler.deleteImages(image_to_delete).then((removed) => {
+                        console.log(removed)
+                    }).catch((err) => {
+                        console.log(err)
+                    })
+                    DataHandler.addEvacationCenter(first).then((message) => {
+                        this.fetchEvacationCenter()
+                    }).catch((err) => {
+                        console.log(err)
+                    })
+                }
+            },
+            
+            importEvac(){
+                let promises = evacs.map((evac) => {
+                    return DataHandler.addEvacationCenter(EvacuationCenter.parse(evac))
+                })
+                
+                Promise.all(promises).then(() => {
+                    this.fetchEvacationCenter()
+                }).catch(error => {
+                    console.log(error)
+                })
+            },
+            
+            download() {
+                let text = JSON.stringify(this.evac_list)
+                saveTextAsFile(text)
             }
-        })
-
-        ///generates a file of json contains
-        function saveTextAsFile(text) {
-            const textToWrite = text
-            const textFileAsBlob = new Blob([textToWrite], {
-                type: 'text/plain'
-            });
-            const fileNameToSaveAs = "coordinates.json" //document.getElementById("").value;
-            let downloadLink = document.createElement("a");
-            downloadLink.download = fileNameToSaveAs;
-            downloadLink.innerHTML = "Download File";
-            if (window.webkitURL != null) {
-                // Chrome allows the link to be clicked
-                // without actually adding it to the DOM.
-                downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
-            } else {
-                // Firefox requires the link to be added to the DOM
-                // before it can be clicked.
-                downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
-                downloadLink.onclick = destroyClickedElement;
-                downloadLink.style.display = "none";
-                document.body.appendChild(downloadLink);
-            }
-
-            downloadLink.click();
-        } //saveTextAsFile
-    </script>
+            
+        }
+    })
+    
+    ///generates a file of json contains
+    function saveTextAsFile(text) {
+        const textToWrite = text
+        const textFileAsBlob = new Blob([textToWrite], {
+            type: 'text/plain'
+        });
+        const fileNameToSaveAs = "coordinates.json" //document.getElementById("").value;
+        let downloadLink = document.createElement("a");
+        downloadLink.download = fileNameToSaveAs;
+        downloadLink.innerHTML = "Download File";
+        if (window.webkitURL != null) {
+            // Chrome allows the link to be clicked
+            // without actually adding it to the DOM.
+            downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
+        } else {
+            // Firefox requires the link to be added to the DOM
+            // before it can be clicked.
+            downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
+            downloadLink.onclick = destroyClickedElement;
+            downloadLink.style.display = "none";
+            document.body.appendChild(downloadLink);
+        }
+        
+        downloadLink.click();
+    } //saveTextAsFile
+</script>
 
 </body>
 
