@@ -83,7 +83,7 @@ class EvacuationCenter extends Model {
          floor_space, date_created = new Date(),
           date_updated = new Date(), created_by,
            exact_address, municipality, contact_numbers,
-           admin_id, category, facilities = [], pictures = []) {
+           admin_id, category, facilities, images = []) {
         super()
         this.id = id || "evac-" + genID(5)
         this.name = name
@@ -101,8 +101,8 @@ class EvacuationCenter extends Model {
         this.contact_numbers      = contact_numbers
         this.admin_id             = admin_id
         this.category             = category
-        this.facilities = facilities
-        this.pictures             = pictures
+        this.facilities           = facilities
+        this.images               = images
     }
 
     /**returns instance to json object */
@@ -122,7 +122,7 @@ class EvacuationCenter extends Model {
             admin_id            : this.admin_id,
             category            : this.category,
             facilities          : this.facilities,
-            pictures            : this.pictures,
+            images              : this.images,
         }
     }
 
@@ -144,10 +144,10 @@ class EvacuationCenter extends Model {
             object.exact_address,
             object.municipality,
             object.contact_numbers,
-            object.admin_id            ,
-            object.category            ,
-            object.available_facilities,
-            object.pictures            ,
+            object.admin_id ,
+            object.category ,
+            object.facilities,
+            object.images ,
             )
 
         return evac

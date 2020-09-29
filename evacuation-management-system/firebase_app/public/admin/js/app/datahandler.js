@@ -399,9 +399,21 @@ class AdminUser extends Model {
             })
         } //getEvacuationCenters
         
-        
-        addEvacationCenter(params = new EvacuationCenter()) {
-            return new Promise((resolve, reject) => {
+        /** overrides images */
+        addEvacationCenter(params = new EvacuationCenter(), images = []) {
+            if (images.length > 0) {
+                return this.uploadImages(images).then((resp) => {
+                    console.log("response %o", resp)
+                    return resp.json()
+                }).then((new_images) => {
+                    params.images = params.images || []
+                    param.images  = params.images.concat(new_images)
+                    return this.addEntry(params.id, params.toObject(), UserHandler.tables.evacuation_centers)
+                })
+            } else {
+                return this.addEntry(params.id, params.toObject(), UserHandler.tables.evacuation_centers)
+            }
+            /* return new Promise((resolve, reject) => {
                 this.firestore.collection('evacuation_centers')
                 .doc(params.id)
                 .set(params.toObject())
@@ -410,7 +422,7 @@ class AdminUser extends Model {
                 }).catch(function (error) {
                     reject(error)
                 });
-            })
+            }) */
         } //addEvacationCenter
         
         

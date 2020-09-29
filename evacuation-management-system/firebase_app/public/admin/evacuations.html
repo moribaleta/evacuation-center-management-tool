@@ -208,21 +208,120 @@
                 <div class="table-container" id="tableData">
                     <div class="well" v-for="item,index in evac_list">
                         <div class="row">
-                            <div class="col col-md-3 item-info" v-for="key,index in headers" v-if="key !='id'">
+                            <div class="col col-md-12 item-info">
                                 <p class="item-label">
-                                    {{key}}:
+                                    {{header_labels['id']}}:
                                 </p>
                                 <p class="item-value">
-                                    {{item.get(key)}}
+                                    {{item.id}}
                                 </p>
                             </div>
 
+                            <div class="col col-md-12 item-info">
+                                <p class="item-label">
+                                    {{header_labels['name']}}:
+                                </p>
+                                <p class="item-value">
+                                    {{item.name}}
+                                </p>
+                            </div>
+                            <div class="col col-md-12 item-info">
+                                <p class="item-label">
+                                    {{header_labels['admin_id']}}:
+                                </p>
+                                <p class="item-value">
+                                    {{admins_selection[item.admin_id]}}
+                                </p>
+                            </div>
+                            <div class="col col-md-3 item-info">
+                                <p class="item-label">
+                                    {{header_labels['population_capacity']}}:
+                                </p>
+                                <p class="item-value">
+                                    {{item.population_capacity}}
+                                </p>
+                            </div>
+                            <div class="col col-md-3 item-info">
+                                <p class="item-label">
+                                    {{header_labels['floor_space']}}:
+                                </p>
+                                <p class="item-value">
+                                    {{item.floor_space}}
+                                </p>
+                            </div>
+                            <div class="col col-md-3 item-info">
+                                <p class="item-label">
+                                    {{header_labels['contact_numbers']}}:
+                                </p>
+                                <p class="item-value">
+                                    {{item.contact_numbers}}
+                                </p>
+                            </div>
+                            <div class="col col-md-4 item-info">
+                                <p class="item-label">
+                                    {{header_labels['category']}}:
+                                </p>
+                                <p class="item-value">
+                                    {{item.category}}
+                                </p>
+                            </div>
+                            <div class="col col-md-12 item-info">
+                                <p class="item-label">
+                                    {{header_labels['facilities']}}:
+                                </p>
+                                <p class="item-value">
+                                    {{item.facilities}}
+                                </p>
+                            </div>
+                            <div class="col col-md-12 item-info">
+                                <p class="item-label">
+                                    {{header_labels['exact_address']}}:
+                                </p>
+                                <p class="item-value">
+                                    {{item.exact_address}}
+                                </p>
+                            </div>
+                            <div class="col col-md-12 item-info">
+                                <p class="item-label">
+                                    {{header_labels['location']}}:
+                                </p>
+                                <p class="item-value" style="margin-right: 10px;">
+                                    lat: {{item.location.lat}}
+                                </p>
+                                <p class="item-value">
+                                    lng: {{item.location.lng}}
+                                </p>
+                            </div>
                             <div class="col col-md-12">
-                                <button class="btn btn-default btn-info" v-on:click="onEditItem(index)">edit</button>
+                                <button class="btn btn-default btn-info" :href="'#imagerow'+index" data-toggle="collapse">view pictures</button>
+                                <button class="btn btn-default btn-warning" v-on:click="onEditItem(index)">edit</button>
                                 <button class="btn btn-default btn-danger"
                                     v-on:click="deleteItem(index)">delete</button>
                             </div>
                         </div>
+                        <div :id="'imagerow'+index" class="panel-collapse collapse">
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col col-md-12" v-if="!item.images || item.images.length <= 0">
+                                        <p>Images are empty</p>
+                                    </div>
+                                    <div class="col col-md-2 item-info" v-for="image,index in item.images">
+                                        <!-- <img :src="cdn+image" class="img-thumbnail img-grid"/> -->
+                                        <div class="image-area">
+                                            <img :src="cdn+image"  alt="Preview">
+                                            <a class="remove-image" v-on:click="onDeleteImage(item.id, index)" style="display: inline;">&#215;</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="panel-footer">
+                                <div class="row">
+                                    <p>Upload Images</p>
+                                    <input :id="'input_images'+index" type="file" name="files[]" multiple style="margin-bottom: 12px;"/>
+                                    <button class="btn btn-default btn-info" v-on:click="onAddImages(index)">upload pictures</button>
+                                </div>
+                            </div>
+                          </div>
                     </div>
                 </div>
             </div>
@@ -252,25 +351,31 @@
             data: {
                 user: null,
                 admins: [],
+                admins_selection: {},
                 categories: [],
                 evac_list: [],
                 headers: [],
+                header_labels: {},
                 data_input: new EvacuationCenter(), //new EvacuationCenter(),
                 isEdit: false,
                 municipalities: municipalities,
-                isLoading: false
+                isLoading: false,
+                cdn: DataHandlerType.api_host,
             },
             methods: {
                 onStart() {
-                    this.user = header.user
-                    this.fetchEvacationCenter()
-                    this.headers = Object.keys(EvacuationCenter.headers)
+                    this.user       = header.user
+                    this.headers    = Object.keys(EvacuationCenter.headers)
+                    this.header_labels = EvacuationCenter.headers
                     this.categories = EvacuationCenter.CategoryTypes
+
                     this.fetchAllAdmins()
+                    this.fetchEvacationCenter()
                 },//onStart
 
                 fetchEvacationCenter() {
                     this.isLoading = true
+
                     DataHandler.getEvacuationCenters().then((data) => {
                         this.setEvacationCenter(data.data)
                     }).catch(err => {
@@ -281,12 +386,18 @@
                 },//fetchEvacationCenter
 
                 fetchAllAdmins(){
+                    /* let evacs = this.evac_list
+                    this.evac_list = [] */
                     DataHandler.getAdminUsers(this.user.id).then((message) => {
                         this.admins = message.data
+                        this.admins.forEach(admin => {
+                            this.admins_selection[admin.id] = `${admin.lastname}, ${admin.firstname}`
+                        });
+                        //this.evac_list = evacs
                     }).catch((error) => {
                         console.log(error)
                     })
-                },
+                },//fetchAllAdmins
                 
                 setEvacationCenter(data) {
                     this.evac_list = data
@@ -342,6 +453,56 @@
                 onSelectAdmin(){
 
                 },//onSelectAdmin
+
+                onAddImages(index){
+                    const files = document.getElementById('input_images'+index).files;
+                    var uploads = []
+                    for(var i=0; i<files.length; i++){
+                        uploads.push(files[i])
+                    }
+                    
+                    if (uploads.length > 0) {
+
+                        var value = EvacuationCenter.parse(this.evac_list[index].toObject()) 
+
+                        DataHandler.uploadImages(uploads).then((resp) => {
+                            return resp.json()
+                        }).then((saved_images) => {
+                            value.images = value.images || []
+                            value.images = value.images.concat(saved_images)
+                            return DataHandler.addEvacationCenter(value)
+                        }).then((message) => {
+                            if (!message.error) {
+                                alert("Item Persisted Successfuly")
+                                this.fetchEvacationCenter()
+                            } else {
+                                alert(`Failed to updated error: ${message.error}`)
+                            }
+                        }).catch(error => {
+                            console.log(error)
+                        })
+                    }
+                },
+
+                onDeleteImage(evac_id, image_index){
+                    let first = this.evac_list.filter((value) => {
+                        return value.id == evac_id
+                    })[0]
+                    if (first && confirm("Do you want to delete this image?")) {
+                        let image_to_delete = first.images.splice(image_index, 1)
+                        console.log("images to delete %o", image_to_delete)
+                        DataHandler.deleteImages(image_to_delete).then((removed) => {
+                            console.log(removed)
+                        }).catch((err) => {
+                            console.log(err)
+                        })
+                        DataHandler.addEvacationCenter(first).then((message) => {
+                            this.fetchEvacationCenter()
+                        }).catch((err) => {
+                            console.log(err)
+                        })
+                    }
+                },
 
                 importEvac(){
                     let promises = evacs.map((evac) => {
