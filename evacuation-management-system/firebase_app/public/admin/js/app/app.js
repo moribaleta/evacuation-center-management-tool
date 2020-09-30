@@ -41,6 +41,12 @@ var header = new Vue({
             title: 'Map'
         },
         {
+            id: 'donors',
+            href: 'donors.html',
+            icon: 'reduce_capacity',
+            title: 'Donors'
+        },
+        {
             id: 'users',
             href: 'users.html',
             icon: 'account_circle',

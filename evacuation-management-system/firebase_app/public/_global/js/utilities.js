@@ -10,6 +10,11 @@ function genID(length) {
     return result +"-"+ d;
 } //genID
 
+/** generates an key for models */
+function keyGenID(prefix, length = 5) {
+    return prefix +"-"+ this.genID(length) +"-"+ Date.now()
+}
+
 /**generates random value between min and max */
 function getRandomValue(min, max) {
     return Math.floor(Math.random() * (max - min) + min);

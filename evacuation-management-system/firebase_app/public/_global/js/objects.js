@@ -673,7 +673,7 @@ class PublicUser extends Model {
         municipality, username, password, email, birthdate, phone_number, address, sex,
         disabilities, employment, medical_needs, dependents) {
         super()
-        this.id = id || "publicuser-" + genID(5)
+        this.id = id || keyGenID("publicuser", 5)//"publicuser-" + genID(5)
         this.created_by = created_by
         this.date_created = date_created || new Date()
         this.date_updated = date_updated || new Date()
@@ -771,7 +771,7 @@ class DependentUser extends PublicUser {
         email, birthdate, phone_number, sex,
         disabilities, medical_needs) {
         super()
-        this.id = id || "depuser-" + genID(5)
+        this.id = id || keyGenID("depuser", 5) //"depuser-" + genID(5)
         this.created_by = created_by
         this.date_created = date_created || new Date()
         this.date_updated = date_updated || new Date()
@@ -839,7 +839,7 @@ class PublicUserHistory extends Model {
 
     constructor(id, date_created, date_updated, created_by, userid, evac_id, date_admitted, date_cleared) {
         super()
-        this.id            = id || "publicuserhistory-" + genID(5)
+        this.id            = id || keyGenID("publicuserhistory")//"publicuserhistory-" + genID(5)
         this.date_created  = date_created || new Date()
         this.date_updated  = date_updated || new Date()
         this.date_admitted = date_admitted || new Date()
@@ -877,3 +877,306 @@ class PublicUserHistory extends Model {
     }
 
 } //PublicUserHistory
+
+/** defines the object of an organization donor */
+class DonorsOrganization extends Model {
+    
+    /** name of the organization */
+    name
+
+    /** nature of business */
+    business
+
+    /** address */
+    address
+
+    /** email */
+    email
+
+    /** contact number */
+    phone_number
+
+    /** name of the person to be accounted for */
+    contact_person
+    
+    /** email of the person to be accounted for */
+    contact_email
+
+    /** phone of the person to be accounted for */
+    contact_phone_number
+
+    static headers = {
+        id: 'ID',
+        created_by: 'Issued By',
+        date_created: 'Date Created',
+        date_updated: 'Date Updated',
+        name: 'Name',
+        business: 'Nature of Business',
+        phone_number: 'Contact Number',
+        email: "Email",
+        address: 'Exact Address',
+        contact_person: 'Contact Person',
+        contact_email: 'Contact Email',
+        contact_phone_number: 'Personal Contact Number'
+    }
+
+    /** defines the form of the model to be shown to create an entry */
+    static formModel = {
+        name: {
+            title: 'Name',
+            type: FormModels.text
+        },
+        business: {
+            title: 'Nature of Business',
+            type: FormModels.text
+        },
+        phone_number: {
+            title: 'Phone Number',
+            type: FormModels.text
+        },
+        email: {
+            title: 'Email',
+            type: FormModels.email
+        },
+        
+        phone_number: {
+            title: 'Contact Number',
+            type: FormModels.text
+        },
+
+        address: {
+            title: 'Address',
+            type: FormModels.textarea
+        },
+
+        contact_person: {
+            title: 'Contact Name',
+            type: FormModels.text
+        },
+        contact_email: {
+            title: 'Contact Email',
+            type: FormModels.text
+        },
+        contact_phone_number: {
+            title: 'Personal Phone Number',
+            type: FormModels.text
+        },
+    }
+
+    constructor(id, created_by, date_created, date_updated,
+        name, business, address,
+        email, phone_number, contact_person,
+        contact_email, contact_phone_number) {
+        super()
+        this.id = id || keyGenID("donororg")//"donororg-" + genID(5)
+        this.created_by = created_by
+        this.date_created = date_created || new Date()
+        this.date_updated = date_updated || new Date()
+        this.name            = name
+        this.business        = business
+        this.address         = address
+        this.email           = email
+        this.phone_number = phone_number
+        this.contact_person = contact_person
+        this.contact_email = contact_email
+        this.contact_phone_number = contact_phone_number
+    }
+
+    toObject() {
+        return {
+            id             : this.id,
+            created_by     : this.created_by,
+            date_created   : this.date_created,
+            date_updated   : this.date_updated,
+            name           : this.name,
+            business       : this.business,
+            address        : this.address,
+            email          : this.email,
+            phone_number   : this.phone_number,
+            contact_person : this.contact_person,
+            contact_email: this.contact_email,
+            contact_phone_number: this.contact_phone_number,
+        }
+    }
+
+    static parse(object = {}) {
+        return new DonorsOrganization(
+            object.id,
+            object.created_by,
+            object.date_created,
+            object.date_updated,
+            object.name,
+            object.business,
+            object.address,
+            object.email,
+            object.phone_number,
+            object.contact_person,
+            object.contact_email,
+            object.contact_phone_number
+        )
+    }
+}
+
+class DonorsIndividual extends Model {
+    
+    /** firstname of the public */
+    firstname
+
+    /** lastname of the public */
+    lastname
+
+    /** middleinit of the public */
+    middleinit
+
+    /** email of the user used */
+    email
+
+    /** birthdate of the user */
+    birthdate
+
+    /** phone number the user used*/
+    phone_number
+
+    /** home address of the user*/
+    address
+
+    /** sex/gender 0 male, 1 female */
+    sex
+
+    /** position */
+    employment_position
+    /** nature of business */
+    employment_business
+    
+
+    static headers = {
+        id: 'ID',
+        created_by: 'Issued By',
+        date_created: 'Date Created',
+        date_updated: 'Date Updated',
+        firstname: 'Firstname',
+        lastname: 'Lastname',
+        middleinit: 'MiddleInit',
+        email: 'Email',
+        birthdate: 'Birthdate',
+        phone_number: 'Contact Number',
+        address: 'Exact Address',
+        sex: 'Sex',
+        employment_position: 'Employment Position',
+        employment_business: 'Nature of Business',
+    }
+
+    /** defines the form of the model to be shown to create an entry */
+    static formModel = {
+        firstname: {
+            title: 'Firstname',
+            type: FormModels.text
+        },
+        lastname: {
+            title: 'Lastname',
+            type: FormModels.text
+        },
+        middleinit: {
+            title: 'MiddleInit',
+            type: FormModels.text
+        },
+        email: {
+            title: 'Email',
+            type: FormModels.email
+        },
+        birthdate: {
+            title: 'Birthdate',
+            type: FormModels.date
+        },
+        phone_number: {
+            title: 'Contact Number',
+            type: FormModels.text
+        },
+        address: {
+            title: 'Exact Address',
+            type: FormModels.textarea
+        },
+        sex: {
+            title: 'Sex',
+            type: FormModels.dropdown,
+            options: [{
+                    title: 'Male',
+                    value: 0
+                },
+                {
+                    title: 'Female',
+                    value: 1
+                }
+            ]
+        },
+        employment_position: {
+            title: 'Employment Position',
+            type: FormModels.text
+        },
+        employment_business: {
+            title: 'Nature of Business',
+            type: FormModels.textarea
+        },
+    }
+
+
+
+    constructor(id, created_by, date_created, date_updated, firstname, lastname, middleinit,
+        email, birthdate, phone_number, address, sex,
+        employment_position, employment_business) {
+        super()
+        this.id = id || keyGenID("publicuser", 5)//"publicuser-" + genID(5)
+        this.created_by = created_by
+        this.date_created = date_created || new Date()
+        this.date_updated = date_updated || new Date()
+
+        this.firstname = firstname
+        this.lastname = lastname
+        this.middleinit = middleinit
+        this.email = email || ""
+        this.birthdate = birthdate
+        this.phone_number = phone_number || ""
+        this.address = address || ""
+        this.sex = sex || 0
+        this.employment_position = employment_position || ""
+        this.employment_business = employment_business || ""
+    }
+
+    toObject() {
+        return {
+            id                 : this.id,
+            created_by         : this.created_by,
+            date_created       : this.date_created,
+            date_updated       : this.date_updated,
+            firstname          : this.firstname,
+            lastname           : this.lastname,
+            middleinit         : this.middleinit,
+            email              : this.email,
+            birthdate          : this.birthdate,
+            phone_number       : this.phone_number,
+            address            : this.address,
+            sex                : this.sex,
+            employment_position: this.employment_position,
+            employment_business: this.employment_business,
+        }
+    }
+
+    static parse(object = {}) {
+        return new DonorsIndividual(
+            object.id,
+            object.created_by,
+            object.date_created,
+            object.date_updated,
+            object.firstname,
+            object.lastname,
+            object.middleinit,
+            object.email,
+            object.birthdate,
+            object.phone_number,
+            object.address,
+            object.sex,
+            object.employment_position,
+            object.employment_business,
+        )
+    }
+}
