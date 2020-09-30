@@ -90,7 +90,9 @@ class AdminUser extends Model {
             supply_types: 'supply_types',
             moabc: 'moabc',
             users: 'users',
-            public_user: 'public_user'
+            public_user: 'public_user',
+            donor_organization: 'donor_org',
+            donor_individual: 'donor_individual'
         }
         
         /** login function */
@@ -921,10 +923,92 @@ class AdminUser extends Model {
         }
     }
     
+    class DonorHandler extends MunicipalInventoryHandler {
+
+        /** returns the inventories of the evacuation centers */
+        getDonorOrganizations() {
+            return new Promise((resolve, reject) => {
+                this.firestore.collection(UserHandler.tables.donor_organization)
+                    .get().then(function (querySnapshot) {
+                        var donors = []
+                        querySnapshot.forEach(function (doc) {
+                            let data = doc.data()
+                            let id = doc.id
+
+                            let object = {
+                                id,
+                                ...data
+                            }
+                            try {
+                                object.date_created = object.date_created.toDate()
+                                object.date_updated = object.date_updated.toDate()
+                            } catch (err) {
+                                //console.log(err)
+                            }
+                            donors.push(DonorsOrganization.parse(object))
+                        });
+                        var message = new Message()
+                        message.data = donors
+                        resolve(message)
+                    }).catch(function (error) {
+                        reject(error)
+                    });
+            })
+        } //getDonorOrganizations
+
+        /** returns the inventories of the evacuation centers */
+        getDonorIndividual() {
+            return new Promise((resolve, reject) => {
+                this.firestore.collection(UserHandler.tables.donor_individual)
+                    .get().then(function (querySnapshot) {
+                        var donors = []
+                        querySnapshot.forEach(function (doc) {
+                            let data = doc.data()
+                            let id = doc.id
+
+                            let object = {
+                                id,
+                                ...data
+                            }
+                            try {
+                                object.date_created = object.date_created.toDate()
+                                object.date_updated = object.date_updated.toDate()
+                            } catch (err) {
+                                //console.log(err)
+                            }
+                            donors.push(DonorsIndividual.parse(object))
+                        });
+                        var message = new Message()
+                        message.data = donors
+                        resolve(message)
+                    }).catch(function (error) {
+                        reject(error)
+                    });
+            })
+        } //getDonorOrganizations
+
+        /** adds `DONOR ORG` or `DONOR INDV` from the database
+         * @param params - entry to be updated to the database
+         * @method UserHandler.addEntry()
+         */
+        addDonor(params, isOrg = true) {
+            return this.addEntry(params.id, params.toObject(), isOrg ? UserHandler.tables.donor_organization : UserHandler.tables.donor_individual )
+        } //getInventories
+
+        /**
+         * deletes `DONOR ORG` or `DONOR INDV` from the database
+         * @param id - entry id to be deleted
+         * @method UserHandler.deleteEntry()
+         */
+        deleteDonor(id, isOrg = true) {
+            return this.deleteEntry(id, isOrg ? UserHandler.tables.donor_organization : UserHandler.tables.donor_individual )
+        }
+    }
+
     /**
     * class for handling storage and database fetch
     */
-    class DataHandlerClass extends MunicipalInventoryHandler {
+    class DataHandlerClass extends DonorHandler {
         
         getReports() {
             return this.fetchApi(`${this.baseUrl}/getreports.php?i=1`)
