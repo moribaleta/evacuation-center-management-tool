@@ -51,6 +51,12 @@ var header = new Vue({
             href: 'users.html',
             icon: 'account_circle',
             title: 'Public'
+        },
+        {
+            id: 'content',
+            href: 'contents.html',
+            icon: 'language',
+            title: 'Contents'
         }
     ]
 },

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Contents</title>
+
+    <!-- update the version number as needed -->
+    <script defer src="/__/firebase/7.19.1/firebase-app.js"></script>
+    <!-- include only the Firebase features as you need -->
+    <script defer src="/__/firebase/7.19.1/firebase-auth.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-database.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-messaging.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-storage.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-firestore.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-functions.js"></script>
+    <!-- initialize the SDK after all desired features are loaded -->
+    <script defer src="/__/firebase/init.js"></script>
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <script src="js/jquery-3.0.0.min.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <link href="css/main-style.css" rel="stylesheet">
+    <script src="js/vue.js"></script>
+    <script src="../_global/js/objects.js"></script>
+    <script src="../_global/js/utilities.js"></script>
+
+</head>
+
+<body>
+
+    <div class="sidenav" id="header" attr="content">
+        <div class="sidenav-item">
+            <img class="nav-image" src="resources/images/logo.png" />
+        </div>
+
+        <div v-for="item in header_items" v-bind:class="'sidenav-item ' + (active == item.id ? 'active' : '') ">
+            <a v-bind:href="item.href">
+                <div class="icon-block">
+                    <i class="material-icons">{{item.icon}}</i>
+                    <h5 class="center">{{item.title}}</h5>
+                </div>
+            </a>
+        </div>
+
+        <div class="sidenav-item">
+            <a v-on:click="onLogout()">
+                <div class="icon-block">
+                    <i class="material-icons">close</i>
+                    <h5 class="center">Log Out</h5>
+                </div>
+            </a>
+        </div>
+    </div>
+    <div class="container" id="content">
+
+        <!-- CONTENT -->
+        <div class="section">
+            <h1>Public Contents</h1>
+            <div class="row selection-grid">
+                <div class="col col-md-3 selection-grid-item" v-for="item in selections">
+                    <div class="selection-grid-item-content" :style="'background:'+item.color">
+                        <a class="selection-grid-item-content-link" :href="item.href">
+                            <div class="selection-block">
+                                <i class="material-icons selection-icon">{{item.icon}}</i>
+                                <h5 class="center">{{item.title}}</h5>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app/datahandler.js"></script>
+    <script src="js/app/app.js"></script>
+    <script src="js/app/constants.js"></script>
+
+    <script>
+        app = new Vue({
+            el: '#content',
+            data: {
+                user: new AdminUser(),
+                selections: [
+                    {
+                        id: 'homepage',
+                        href: "content_homepage.html",
+                        icon: 'web',
+                        title: 'Content',
+                        color: '#32a852'
+                    },
+                    {
+                        id: 'events',
+                        href: "content_events.html",
+                        icon: 'today',
+                        title: 'Events',
+                        color: '#fcba03'
+                    },
+                    {
+                        id: 'documents',
+                        href: "content_documents.html",
+                        icon: 'article',
+                        title: 'Documents',
+                        color: '#4287f5'
+                    },
+                    {
+                        id: 'information',
+                        href: "content_information.html",
+                        icon: 'live_help',
+                        title: 'Other Informations',
+                        color: '#eb4034'
+                    },
+                ]
+            },
+            methods: {
+                onStart() {
+                    this.user = header.user
+                },
+                
+            }
+        })
+    </script>
+
+</body>
+
+</html>
