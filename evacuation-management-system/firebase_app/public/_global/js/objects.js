@@ -590,7 +590,6 @@ class PublicUser extends Model {
         disabilities: 'Disabilities',
         employment: 'Employment',
         medical_needs: 'Medical Needs',
-        //number_dependents: 'Number of Dependents'
     }
 
     /** defines the form of the model to be shown to create an entry */
@@ -1015,8 +1014,9 @@ class DonorsOrganization extends Model {
             object.contact_phone_number
         )
     }
-}
+}//DonorsOrganization
 
+/** defines the model of an individual donor */
 class DonorsIndividual extends Model {
     
     /** firstname of the public */
@@ -1179,4 +1179,146 @@ class DonorsIndividual extends Model {
             object.employment_business,
         )
     }
-}
+}//DonorsIndividual
+
+
+/** defines the model of the content to be shown on the public */
+class PublicContent extends Model {
+
+    /** title of the content */
+    title
+    /** content of the public can be html format */
+    content
+
+    static headers = {
+        id: 'ID',
+        created_by: 'Issued By',
+        date_created: 'Date Created',
+        date_updated: 'Date Updated',
+        title: 'Title',
+        content: 'Content',
+        images: 'Images'
+    }
+
+    constructor(id, date_created, date_updated, created_by,
+        title, content, images) {
+        super()
+        this.id = id || keyGenID('content', 5)
+        this.date_created = date_created || new Date()
+        this.date_updated = date_updated || new Date()
+        this.created_by   = created_by
+        
+        this.title      = title
+        this.content    = content
+        this.images     = images
+    }
+
+    toObject() {
+        return {
+                id          : this.id,
+                date_created: this.date_created,
+                date_updated: this.date_updated,
+                created_by  : this.created_by,
+                title       : this.title,
+                content     : this.content,
+                images      : this.images,
+        }
+    }
+
+    static parse(object = {}) {
+        return new PublicContent(
+                object.id,
+                object.date_created,
+                object.date_updated,
+                object.created_by,
+                object.title,
+                object.content,
+                object.images,
+        )
+    }
+}//PublicContent
+
+
+/** defines the model of an event to be shown on the public */
+class PublicEvent extends PublicContent {
+
+    /** date of the event */
+    date_event
+
+    constructor(id, date_created, date_updated, created_by,
+        title, content, images, date_event) {
+        super(id || keyGenID('event', 5), date_created, date_updated, created_by, title, content, images )
+        this.date_event = date_event
+    }
+
+    toObject() {
+        let object = super.toObject()
+        object['date_event'] = this.date_event
+        return object
+    }
+
+    static parse(object = {}) {
+        return new PublicEvent(
+            object.id,
+            object.date_created,
+            object.date_updated,
+            object.created_by,
+            object.title,
+            object.content,
+            object.images,
+            object.date_event
+        )
+    }
+
+}//PublicEvent
+
+
+/** defines the model of a file to be available/shown on the public */
+class PublicDocument extends Model {
+    /** title of the file */
+    title
+
+    /** description of the title*/
+    description
+
+    /** file destination saved on the server */
+    file_path
+
+    constructor(id, date_created, date_updated, created_by,
+        title, description, file_path) {
+        super()
+        this.id = id || keyGenID('document', 5)
+        this.date_created = date_created || new Date()
+        this.date_updated = date_updated || new Date()
+        this.created_by   = created_by
+        
+        this.title          = title
+        this.description    = description || ""
+        this.file_path      = file_path || ""
+    }
+
+    toObject() {
+        return {
+                id          : this.id,
+                date_created: this.date_created,
+                date_updated: this.date_updated,
+                created_by  : this.created_by,
+                title       : this.title,
+                description : this.description,
+                file_path   : this.file_path,
+        }
+    }
+
+    static parse(object = {}) {
+        return new PublicDocument(
+                object.id,
+                object.date_created,
+                object.date_updated,
+                object.created_by,
+                object.title,
+                object.description,
+                object.file_path,
+        )
+    }
+
+}//PublicDocument
