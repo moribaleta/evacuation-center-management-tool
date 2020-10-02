@@ -92,7 +92,10 @@ class AdminUser extends Model {
             users: 'users',
             public_user: 'public_user',
             donor_organization: 'donor_org',
-            donor_individual: 'donor_individual'
+            donor_individual: 'donor_individual',
+            public_document: 'public_document',
+            public_content: 'public_content',
+            public_events: 'public_events',
         }
         
         /** login function */
@@ -258,6 +261,7 @@ class AdminUser extends Model {
             })
         }//uploadImages
 
+        /** deletes all the images from the array */
         deleteImages(images = []){
             console.log("images to delete %o", images)
             
@@ -267,6 +271,60 @@ class AdminUser extends Model {
             })
             return Promise.all(promises)
         }
+
+        /**
+         *  returns a promise that resolves the query
+         * @param objecttype - defines the class which the promise will return
+         * @param table - determines the table that the query is pointing to
+         * @param offset 
+         * * start of the query index 
+         * * default = `0`
+         * @param limit  
+         * * the limit of the query to get
+         * * default = `Infinity`
+         * @param where
+         * * the query to filter to
+         * @param orderBy
+         * * the order of data to be displayed
+         *  */
+        getObjects(objecttype, table,  where = null, orderBy = ['date_created','desc'], offset = 0, limit = Infinity) {
+
+            var ref = this.firestore.collection(table)
+                    
+            if (where) {
+                ref = ref.where(...where)
+            }
+
+            ref = ref.orderBy(...orderBy).startAt(offset).limit(limit)
+
+            return new Promise((resolve, reject) => {
+                
+                    ref.get().then(function (querySnapshot) {
+                        var donors = []
+                        querySnapshot.forEach(function (doc) {
+                            let data = doc.data()
+                            let id = doc.id
+
+                            let object = {
+                                id,
+                                ...data
+                            }
+                            try {
+                                object.date_created = object.date_created.toDate()
+                                object.date_updated = object.date_updated.toDate()
+                            } catch (err) {
+                                //console.log(err)
+                            }
+                            donors.push(objecttype.parse(object))
+                        });
+                        var message = new Message()
+                        message.data = donors
+                        resolve(message)
+                    }).catch(function (error) {
+                        reject(error)
+                    });
+            })
+        } //getDonorOrganizations
         
     } //UserHandler
     
@@ -1003,12 +1061,73 @@ class AdminUser extends Model {
         deleteDonor(id, isOrg = true) {
             return this.deleteEntry(id, isOrg ? UserHandler.tables.donor_organization : UserHandler.tables.donor_individual )
         }
-    }
+    }//DonorHandler
+
+
+    /** defines the class that contains all public web files and contents */
+    class PublicWebHandler extends DonorHandler {
+
+        /** gets the public post if id is null it returns all the post descending */
+        getContentPost(id) {
+            return this.getObjects(PublicContent, UserHandler.tables.public_content, id ? ['id', '==', id] : null)
+        }
+
+        /** adds public entry from the database
+         * @param params - entry to be updated to the database
+         * @method UserHandler.addEntry()
+         */
+        addPublicEntry(params, images = [], table) {
+            if (images.length > 0) {
+                return this.uploadImages(images).then((resp) => {
+                    console.log("response %o", resp)
+                    return resp.json()
+                }).then((images) => {
+                    params.images = params.images || [] 
+                    params.images = params.concat(images || [])
+                    return this.addEntry(params.id, params.toObject(), table)
+                })
+            } else {
+                return this.addEntry(params.id, params.toObject(), table)
+            }
+        } //getInventories
+
+        /**
+         * deletes public entry from the database
+         * @param id - entry id to be deleted
+         * @method UserHandler.deleteEntry()
+         */
+        deletePublicEntry(params, table) {
+            this.deleteImages(params.images).then((val) => {
+                console.log("deleted successfuly %o", val)
+            })
+            return this.deleteEntry(params.id, table)
+        }
+
+        /**
+         * saves content entry on the database
+         * @param {*} params - object to be saved
+         * @param {*} images - images to be uploaded
+         */
+        addPublicPost(params, images) {
+            return this.addPublicEntry(params, images, UserHandler.tables.public_content)
+        }//addPublicPost
+
+        /**
+         * deletes the content entry on the databse
+         * @param {*} params - object to be delete
+         */
+        deletePublicPost(params) {
+            return this.deletePublicEntry(params, UserHandler.tables.public_content)
+        }
+
+    }//PublicWebHandler
+
+
 
     /**
     * class for handling storage and database fetch
     */
-    class DataHandlerClass extends DonorHandler {
+    class DataHandlerClass extends PublicWebHandler {
         
         getReports() {
             return this.fetchApi(`${this.baseUrl}/getreports.php?i=1`)

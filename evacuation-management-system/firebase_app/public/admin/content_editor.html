@@ -60,79 +60,38 @@
 
         <div class="subcontent">
             <div class="section header">
-                <h1>Public Post</h1>
+                <h1>Edit Post</h1>
             </div>
 
-            <div class="loader-container" v-if="isLoading">
-                <div class="loader"></div>
-            </div>
 
-            <div class="section" style="height: 80%;" v-if="post_list.length > 0">
-
-                <div class="table-container" id="tableData">
-                    <div class="well" v-for="item,index in post_list">
-                        <div class="row">
-                            <div class="col col-md-10">
-                                <div class="row">
-                                    <h3>{{index + 1}} {{item.title}}</h3>
-                                </div>
-                                <div class="row">
-                                    <h6>{{admins[item.created_by]}} | {{item.date_created}}</h6>
-                                </div>
-                            </div>
-                            <div class="col col-md-2">
-                                <div class="image-area">
-                                    <img :src="cdn+item.images[0]" alt="Preview">
-                                </div>
-                            </div>
-                            <div class="col col-md-12">
-                                <button class="btn btn-default btn-info" :href="'#imagerow'+index"
-                                    data-toggle="collapse">view pictures</button>
-                                <button class="btn btn-default btn-warning" v-on:click="onEditItem(index)">edit</button>
-                                <button class="btn btn-default btn-danger"  v-on:click="deleteItem(index)">delete</button>
-                            </div>
-                        </div>
-                        <div :id="'imagerow'+index" class="panel-collapse collapse">
-                            <div class="panel-body">
-                                <div class="row">
-                                    <div class="col col-md-12" v-if="!item.images || item.images.length <= 0">
-                                        <p>Images are empty</p>
-                                    </div>
-                                    <div class="col col-md-2 item-info" v-for="image,index in item.images">
-                                        <!-- <img :src="cdn+image" class="img-thumbnail img-grid"/> -->
-                                        <div class="image-area">
-                                            <img :src="cdn+image" alt="Preview">
-                                            <a class="remove-image" v-on:click="onDeleteImage(item.id, index)"
-                                                style="display: inline;">&#215;</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="panel-footer">
-                                <div class="row">
-                                    <p>Upload Images</p>
-                                    <input :id="'input_images'+index" type="file" name="files[]" multiple
-                                        style="margin-bottom: 12px;" />
-                                    <button class="btn btn-default btn-info" v-on:click="onAddImages(index)">upload
-                                        pictures</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
             <div class="section">
+                <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="onAddItem()">
+                    Save
+                </button>
                 <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="onAddItem()">
                     Create New Post
                 </button>
+                <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="onAddItem()">
+                    Delete Post
+                </button>
             </div>
+            <p></p>
+            <div class="loader-container" v-if="isLoading">
+                <div class="loader"></div>
+            </div>
+            <div class="section" id="editor" v-if="!isLoading">
+                <textarea id="texteditor" name="text"></textarea>
+            </div>
+
         </div>
 
     </div>
 
+    <script src="https://cdn.ckeditor.com/4.13.0/standard/ckeditor.js"></script>
     <script src="js/app/datahandler.js"></script>
     <script src="js/app/constants.js"></script>
     <script src="js/app/app.js"></script>
+
 
     <script>
         app = new Vue({
@@ -141,7 +100,6 @@
                 user: null,
                 admins: [],
                 admins_selection: [],
-                post_list: [],
                 data_input: new PublicContent(), //new EvacuationCenter(),
                 isEdit: false,
                 isLoading: false,
@@ -152,19 +110,34 @@
                     this.user = header.user
                     
                     this.fetchAllAdmins()
-                    this.fetchPost()
+                    
+
+                    const queryString = window.location.search;
+                    const urlParams = new URLSearchParams(queryString);
+                    const id = urlParams.get('id')
+                    
+                    this.fetchPost(id)
+                    
+                    
                 }, //onStart
 
-                fetchPost() {
+                fetchPost(id) {
                     this.isLoading = true
-
-                    DataHandler.getContentPost().then((data) => {
-                        this.setPost(data.data)
-                    }).catch(err => {
-                        console.log(err)
-                    }).finally(() => {
+                    if (id) {
+                        //Get Entry From DB
+                        DataHandler.getContentPost(id).then((data) => {
+                            this.setPost(data.data)
+                            $('#texteditor').text(this.data_input.content)
+                        }).catch(err => {
+                            console.log(err)
+                        }).finally(() => {
+                            this.isLoading = false
+                        })
+                    } else {
+                        //New Entry
                         this.isLoading = false
-                    })
+                        CKEDITOR.replace('editor');
+                    }
                 }, //fetchPost
 
                 fetchAllAdmins() {
@@ -180,18 +153,18 @@
                 }, //fetchAllAdmins
 
                 setPost(data) {
-                    this.post_list = data
+                    this.data_input = data
                     console.log(this.post_list)
+                    
                 }, //setPost
 
                 onAddItem() {
-                    window.open('content_editor.html')
+                    if (confirm("All Changes will be discarded")) {
+                        window.open('content_editor.html')
+                    }
                 }, //onAddItem
 
-                onEditItem(index) {
-                    var entry = this.post_list[index]
-                    window.open(`content_editor.html?id=${entry.id}`)
-                }, //onEditItem
+                onEditItem(index) {}, //onEditItem
 
                 deleteItem(index) {
                     if (confirm('Deleting Item\nPress confirm to proceed')) {
@@ -225,7 +198,7 @@
                             }
                         }).catch(error => {
                             console.log(error)
-                        }) 
+                        })
                     }
                 },
 
@@ -237,19 +210,19 @@
                     if (first && confirm("Do you want to delete this image?")) {
                         let image_to_delete = first.images.splice(image_index, 1)
                         console.log("images to delete %o", image_to_delete)
-                        
+
                         DataHandler.deleteImages(image_to_delete).then((removed) => {
-                            return DataHandler.addPublicPost(first)
-                        }).then((message) => {
-                            if (message.error) {
-                                throw message.error
-                            } else {
-                                this.fetchPost()
-                            }
-                        })
-                        .catch((err) => {
-                            console.log(err)
-                        })
+                                return DataHandler.addPublicPost(first)
+                            }).then((message) => {
+                                if (message.error) {
+                                    throw message.error
+                                } else {
+                                    this.fetchPost()
+                                }
+                            })
+                            .catch((err) => {
+                                console.log(err)
+                            })
                     }
                 },
             }
