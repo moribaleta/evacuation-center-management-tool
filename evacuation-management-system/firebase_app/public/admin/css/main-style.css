@@ -65,19 +65,23 @@
 
 /*sidenav*/
 .sidenav {
-    display: block;
+    display: flex;
     position: fixed;
     background-color: #4AC1E2;
     width: 80px;
     /* height: 1000px; */
     height: 100%;
     float: left;
-
+    overflow: auto;
     flex-direction: column;
 }
 
 .sidenav .sidenav-item {
     width: 100%;
+}
+
+.sidenav-item a .icon-block .center {
+    font-size: 12px;
 }
 
 .sidenav .sidenav-item .nav-image {
