@@ -57,7 +57,10 @@
     </div>
     <!-- <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#editorModal">Open Modal</button> -->
     <div class="container" id="content">
-
+        <ul class="breadcrumb">
+            <li><a href="contents.html">Contents</a></li>
+            <li><a href="#">Public Post</a></li>
+        </ul>
         <div class="subcontent">
             <div class="section header">
                 <h1>Public Post</h1>
@@ -72,15 +75,20 @@
                 <div class="table-container" id="tableData">
                     <div class="panel panel-default" v-for="item,index in post_list">
                         <div class="panel-heading">
-                            <label>{{index + 1}} {{item.title}}</label>
-                            <h6>{{admins_selection[item.created_by]}} | {{item.date_created}}</h6>
-                            
-                            <div class="col col-md-12">
-                                <button class="btn btn-default btn-info" :href="'#preview'+index"
-                                    data-toggle="collapse">preview</button>
-                                <button class="btn btn-default btn-warning" v-on:click="onEditItem(index)">edit</button>
-                                <button class="btn btn-default btn-danger"  v-on:click="deleteItem(index)">delete</button>
+                            <div class="row">
+                                <div class="col col-md-12">
+                                    <label>{{index + 1}} {{item.title}}</label>
+                                    <h6>{{admins_selection[item.created_by]}} | {{item.date_created}}</h6>
+                                </div>
+                                
+                                <div class="col col-md-12">
+                                    <button class="btn btn-default btn-info" :href="'#preview'+index"
+                                        data-toggle="collapse">preview</button>
+                                    <button class="btn btn-default btn-warning" v-on:click="onEditItem(index)">edit</button>
+                                    <button class="btn btn-default btn-danger"  v-on:click="deleteItem(index)">delete</button>
+                                </div>
                             </div>
+                            
                         </div>
                         <div :id="'preview'+index" class="panel-collapse collapse">
                             <div class="panel-body">

@@ -57,7 +57,11 @@
     </div>
     <!-- <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#editorModal">Open Modal</button> -->
     <div class="container" id="content">
-        
+        <ul class="breadcrumb">
+            <li><a href="contents.html">Contents</a></li>
+            <li><a href="content_homepage.html">Public Post</a></li>
+            <li><a href="#">Editor</a></li>
+        </ul>
         <div class="subcontent">
             <div class="section header">
                 <h1>Edit Post</h1>
@@ -215,8 +219,10 @@
                 onSaveEntry() {
                     var editorText = CKEDITOR.instances.contenteditor.getData();
                     
-                    const file = new File([editorText || ""], this.data_input.path != "" ? this.data_input.path : `${this.data_input.id}.txt`, {type: "text/plain", lastModified: new Date()})
+                    const file = new File([editorText || ""], (this.data_input.path && this.data_input.path != "") ? this.data_input.path : `${this.data_input.id}.txt`, {type: "text/plain", lastModified: new Date()})
                     
+                    console.log("file %o", file)
+
                     DataHandler.addPublicPost(this.data_input, file)
                         .then((message) => {
                             if(!message.error) {
