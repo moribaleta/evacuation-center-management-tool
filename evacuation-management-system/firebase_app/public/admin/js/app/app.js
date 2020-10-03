@@ -411,7 +411,7 @@ var municipalities =
         <input v-if="form[key].type == 'date'" type="date" class="input input-item"
         :id="'input_'+key" v-model="input[key]">
         
-        <input v-if="form[key].type == 'datetime'" type="datetime" class="input input-item"
+        <input v-if="form[key].type == 'datetime'" type="datetime-local" class="input input-item"
         :id="'input_'+key" v-model="input[key]">
         
         <textarea v-if="form[key].type == 'textarea'" class="form-control"

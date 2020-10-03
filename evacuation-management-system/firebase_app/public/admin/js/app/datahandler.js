@@ -1174,9 +1174,54 @@ class AdminUser extends Model {
         * @param {*} params - object to be delete
         */
         deletePublicPost(params) {
-            return this.deletePublicEntry(params, UserHandler.tables.public_content)
+            this.deleteImages([params.path]).then((val) => {
+                console.log("deleted successfuly %o", val)
+            })
+            return this.deleteEntry(params.id, table)
         }
         
+        /** returns list of events sorted by date_event desc*/
+        getPublicEvents(id = null) {
+            //const type = PublicContent
+            const ref =  this.firestore.collection(UserHandler.tables.public_events)
+            return new Promise((resolve, reject) => {
+                const doc = id != null ? ref.where('id','==',id) : ref
+                doc.orderBy('date_start','desc').get().then(function (querySnapshot) {
+                    var donors = []
+                    querySnapshot.forEach(function (doc) {
+                        let data = doc.data()
+                        let id = doc.id
+                        
+                        let object = {
+                            id,
+                            ...data
+                        }
+                        try {
+                            object.date_created = object.date_created.toDate()
+                            object.date_updated = object.date_updated.toDate()
+                            object.date_start   = object.date_start.toDate()
+                            object.date_end     = object.date_end.toDate()
+                        } catch (err) {
+                            //console.log(err)
+                        }
+                        donors.push(PublicEvent.parse(object))
+                    });
+                    var message = new Message()
+                    message.data = donors
+                    resolve(message)
+                }).catch(function (error) {
+                    reject(error)
+                });
+            })
+        }
+
+        addPublicEvent(params) {
+            return this.addEntry(params.id, params.toObject(), UserHandler.tables.public_events)
+        }
+        
+        deletePublicEvent(id) {
+            return this.deleteEntry(id, UserHandler.tables.public_events)
+        }
     }//PublicWebHandler
     
     

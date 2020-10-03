@@ -1237,15 +1237,45 @@ class PublicContent extends Model {
 
 /** defines the model of an event to be shown on the public */
 class PublicEvent extends Model {
-
+    /** title of the event */
+    title
     /** content of the public can be html format */
     content
 
-    /** date of the event */
-    date_event
+    /** start date of the event */
+    date_start
+
+    /** end date of the event */
+    date_end
+
+    static headers = {
+        title: 'Title',
+        content: 'Content',
+        date_start: 'Start Date',
+        date_end: 'End Date'
+    }
+
+    static formModel = {
+        title: {
+            title: 'Title',
+            type: FormModels.text
+        },
+        content: {
+            title: 'Content',
+            type: FormModels.textarea
+        },
+        date_start: {
+            title: 'Start Date',
+            type: FormModels.datetime
+        },
+        date_end: {
+            title: 'End Date',
+            type: FormModels.datetime
+        }
+    }
 
     constructor(id, date_created, date_updated, created_by,
-        title, content, images, date_event) {
+        title, content, date_start, date_end) {
         super()
         
         this.id = id || keyGenID('content', 5)
@@ -1255,15 +1285,22 @@ class PublicEvent extends Model {
         
         this.title      = title
         this.content    = content
-        this.images     = images
 
-        this.date_event = date_event
+        this.date_start = date_start
+        this.date_end   = date_end || ""
     }
 
     toObject() {
-        let object = super.toObject()
-        object['date_event'] = this.date_event
-        return object
+        return {
+            id : this.id,
+            date_created : this.date_created,
+            date_updated : this.date_updated,
+            created_by : this.created_by,
+            title : this.title,
+            content : this.content,
+            date_start : this.date_start,
+            date_end : this.date_end
+        }
     }
 
     static parse(object = {}) {
@@ -1274,8 +1311,8 @@ class PublicEvent extends Model {
             object.created_by,
             object.title,
             object.content,
-            object.images,
-            object.date_event
+            object.date_start,
+            object.date_end
         )
     }
 
