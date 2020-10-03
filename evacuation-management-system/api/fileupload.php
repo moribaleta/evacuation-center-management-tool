@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_FILES['files'])) {
         $errors = [];
         $path = 'uploads/';
-        $extensions = ['jpg', 'jpeg', 'png', 'gif'];
+        $extensions = ['jpg', 'jpeg', 'png', 'gif', 'html', 'txt', 'xml'];
 
         $all_files = count($_FILES['files']['tmp_name']);
         
@@ -72,12 +72,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $file_tmp = $_FILES['files']['tmp_name'][$i];
             $file_type = $_FILES['files']['type'][$i];
             $file_size = $_FILES['files']['size'][$i];
-            $file_ext = strtolower(end(explode('.', $_FILES['files']['name'][$i])));
+
+            $file_ext = trim(strtolower(end(explode('.', $_FILES['files']['name'][$i]))));
 
             $file = $path . $file_name;
 
             if (!in_array($file_ext, $extensions)) {
-                $errors[] = 'Extension not allowed: ' . $file_name . ' ' . $file_type;
+                $errors[] = 'Extension not allowed: ' . $file_name . ' ' . $file_ext;
             }
 
             if ($file_size > 2097152) {
@@ -85,13 +86,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             if (empty($errors)) {
-
-                $temp = explode(".", $file_name);
-                $newfilename = $path . generateRandomString(5) . round(microtime(true)) . '.' . end($temp);
+                if (file_exists($path . $file_name)) {
+                    unlink($path.$file_name);
+                    move_uploaded_file($file_tmp, $path . $file_name);
+                    $files[] = $path . $file_name;
+                } else {
+                    $temp = explode(".", $file_name);
+                    $trim = trim($newfilename = $path . generateRandomString(5) . round(microtime(true)) . '.' . end($temp));
                 //move_uploaded_file($_FILES["file"]["tmp_name"], "../img/imageDirectory/" . $newfilename);
 
-                move_uploaded_file($file_tmp, $newfilename);
-                $files[] = $newfilename;
+                    move_uploaded_file($file_tmp, $newfilename);
+                    $files[] = $newfilename;
+                }
+                
             }
         }
 

@@ -70,51 +70,24 @@
             <div class="section" style="height: 80%;" v-if="post_list.length > 0">
 
                 <div class="table-container" id="tableData">
-                    <div class="well" v-for="item,index in post_list">
-                        <div class="row">
-                            <div class="col col-md-10">
-                                <div class="row">
-                                    <h3>{{index + 1}} {{item.title}}</h3>
-                                </div>
-                                <div class="row">
-                                    <h6>{{admins[item.created_by]}} | {{item.date_created}}</h6>
-                                </div>
-                            </div>
-                            <div class="col col-md-2">
-                                <div class="image-area">
-                                    <img :src="cdn+item.images[0]" alt="Preview">
-                                </div>
-                            </div>
+                    <div class="panel panel-default" v-for="item,index in post_list">
+                        <div class="panel-heading">
+                            <label>{{index + 1}} {{item.title}}</label>
+                            <h6>{{admins_selection[item.created_by]}} | {{item.date_created}}</h6>
+                            
                             <div class="col col-md-12">
-                                <button class="btn btn-default btn-info" :href="'#imagerow'+index"
-                                    data-toggle="collapse">view pictures</button>
+                                <button class="btn btn-default btn-info" :href="'#preview'+index"
+                                    data-toggle="collapse">preview</button>
                                 <button class="btn btn-default btn-warning" v-on:click="onEditItem(index)">edit</button>
                                 <button class="btn btn-default btn-danger"  v-on:click="deleteItem(index)">delete</button>
                             </div>
                         </div>
-                        <div :id="'imagerow'+index" class="panel-collapse collapse">
+                        <div :id="'preview'+index" class="panel-collapse collapse">
                             <div class="panel-body">
-                                <div class="row">
-                                    <div class="col col-md-12" v-if="!item.images || item.images.length <= 0">
-                                        <p>Images are empty</p>
+                                <div :id="'preview-content'+index" class="preview-content">
+                                    <div v-html="content_list[item.id]">
+
                                     </div>
-                                    <div class="col col-md-2 item-info" v-for="image,index in item.images">
-                                        <!-- <img :src="cdn+image" class="img-thumbnail img-grid"/> -->
-                                        <div class="image-area">
-                                            <img :src="cdn+image" alt="Preview">
-                                            <a class="remove-image" v-on:click="onDeleteImage(item.id, index)"
-                                                style="display: inline;">&#215;</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="panel-footer">
-                                <div class="row">
-                                    <p>Upload Images</p>
-                                    <input :id="'input_images'+index" type="file" name="files[]" multiple
-                                        style="margin-bottom: 12px;" />
-                                    <button class="btn btn-default btn-info" v-on:click="onAddImages(index)">upload
-                                        pictures</button>
                                 </div>
                             </div>
                         </div>
@@ -141,6 +114,7 @@
                 user: null,
                 admins: [],
                 admins_selection: [],
+                content_list: null,
                 post_list: [],
                 data_input: new PublicContent(), //new EvacuationCenter(),
                 isEdit: false,
@@ -167,25 +141,48 @@
                     })
                 }, //fetchPost
 
+                setPost(data) {
+                    
+                    let pathObx = data.map((post) => {
+                        console.log("path %o", post.path)
+                        return DataHandler.getPublicPostContent(post.path)
+                    })
+                    console.log("data %o", data)
+                    Promise.all(pathObx).then((contents) => {
+                        this.content_list = {}
+
+                        data.forEach((post, index) => {
+                            this.content_list[post.id] = contents[index]
+                        })
+                        this.post_list = data
+                        
+                        console.log(contents)
+                    }).catch(err => {
+                        console.log(err)
+                    })
+
+                    console.log(this.post_list)
+
+                }, //setPost
+
                 fetchAllAdmins() {
                     DataHandler.getAdminUsers(this.user.id).then((message) => {
-                        this.admins = message.data
+                        this.admins = [this.user, ...message.data]
+                        
                         this.admins.forEach(admin => {
                             this.admins_selection[admin.id] =
                                 `${admin.lastname}, ${admin.firstname}`
                         });
+                        
                     }).catch((error) => {
                         console.log(error)
                     })
                 }, //fetchAllAdmins
 
-                setPost(data) {
-                    this.post_list = data
-                    console.log(this.post_list)
-                }, //setPost
+                
 
                 onAddItem() {
-                    window.open('content_editor.html')
+                    window.open('content_editor.html',"_self")
                 }, //onAddItem
 
                 onEditItem(index) {

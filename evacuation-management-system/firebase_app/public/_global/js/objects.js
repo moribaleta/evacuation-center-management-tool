@@ -1187,8 +1187,8 @@ class PublicContent extends Model {
 
     /** title of the content */
     title
-    /** content of the public can be html format */
-    content
+    /** path of the file from the server */
+    path
 
     static headers = {
         id: 'ID',
@@ -1196,21 +1196,19 @@ class PublicContent extends Model {
         date_created: 'Date Created',
         date_updated: 'Date Updated',
         title: 'Title',
-        content: 'Content',
-        images: 'Images'
+        path: 'Path',
     }
 
     constructor(id, date_created, date_updated, created_by,
-        title, content, images) {
+        title, path) {
         super()
         this.id = id || keyGenID('content', 5)
         this.date_created = date_created || new Date()
         this.date_updated = date_updated || new Date()
         this.created_by   = created_by
         
-        this.title      = title
-        this.content    = content
-        this.images     = images
+        this.title  = title
+        this.path   = path
     }
 
     toObject() {
@@ -1220,8 +1218,7 @@ class PublicContent extends Model {
                 date_updated: this.date_updated,
                 created_by  : this.created_by,
                 title       : this.title,
-                content     : this.content,
-                images      : this.images,
+                path        : this.path
         }
     }
 
@@ -1232,22 +1229,34 @@ class PublicContent extends Model {
                 object.date_updated,
                 object.created_by,
                 object.title,
-                object.content,
-                object.images,
+                object.path
         )
     }
 }//PublicContent
 
 
 /** defines the model of an event to be shown on the public */
-class PublicEvent extends PublicContent {
+class PublicEvent extends Model {
+
+    /** content of the public can be html format */
+    content
 
     /** date of the event */
     date_event
 
     constructor(id, date_created, date_updated, created_by,
         title, content, images, date_event) {
-        super(id || keyGenID('event', 5), date_created, date_updated, created_by, title, content, images )
+        super()
+        
+        this.id = id || keyGenID('content', 5)
+        this.date_created = date_created || new Date()
+        this.date_updated = date_updated || new Date()
+        this.created_by   = created_by
+        
+        this.title      = title
+        this.content    = content
+        this.images     = images
+
         this.date_event = date_event
     }
 
