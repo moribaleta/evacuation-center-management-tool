@@ -85,7 +85,7 @@
                                     <button class="btn btn-default btn-info" :href="'#preview'+index"
                                         data-toggle="collapse">preview</button>
                                     <button class="btn btn-default btn-warning" v-on:click="onEditItem(index)">edit</button>
-                                    <button class="btn btn-default btn-danger"  v-on:click="deleteItem(index)">delete</button>
+                                    <button class="btn btn-default btn-danger"  v-on:click="onDeleteItem(index)">delete</button>
                                 </div>
                             </div>
                             
@@ -187,18 +187,16 @@
                     })
                 }, //fetchAllAdmins
 
-                
-
                 onAddItem() {
                     window.open('content_editor.html',"_self")
                 }, //onAddItem
 
                 onEditItem(index) {
                     var entry = this.post_list[index]
-                    window.open(`content_editor.html?id=${entry.id}`)
+                    window.open(`content_editor.html?id=${entry.id}`, '_self')
                 }, //onEditItem
 
-                deleteItem(index) {
+                onDeleteItem(index) {
                     if (confirm('Deleting Item\nPress confirm to proceed')) {
                         DataHandler.deletePublicPost(this.post_list[index]).then((data) => {
                             console.log(data)
@@ -210,7 +208,7 @@
                             }
                         })
                     }
-                }, //deleteItem
+                }, //onDeleteItem
 
                 onAddImages(index) {
                     const files = document.getElementById('input_images' + index).files;

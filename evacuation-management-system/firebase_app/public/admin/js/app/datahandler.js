@@ -98,6 +98,7 @@ class AdminUser extends Model {
             public_document: 'public_document',
             public_content: 'public_content',
             public_events: 'public_events',
+            public_information: 'public_information'
         }
         
         /** login function */
@@ -1069,14 +1070,26 @@ class AdminUser extends Model {
     /** defines the class that contains all public web files and contents */
     class PublicWebHandler extends DonorHandler {
         
-        /** gets the public post if id is null it returns all the post descending */
-        getContentPost(id = null) {
+        /**
+         * gets the entries from the database
+         * @param {*} id 
+         * * id of the document to retrive
+         * * default to `null`
+         * @param {*} type 
+         * * object type to be converted to
+         * * default to `PublicContent`
+         * @param {*} table 
+         * * table to refer to on the db
+         * * default `UserHandler.tables.public_content`
+         * @returns {*} `Promise<Message>`
+         */
+        getContentPost(id = null, type = PublicContent, table = UserHandler.tables.public_content) {
             //const type = PublicContent
-            const ref =  this.firestore.collection(UserHandler.tables.public_content)
+            const ref =  this.firestore.collection(table)
             return new Promise((resolve, reject) => {
-                const doc = id != null ? ref.where('id','==',id) : ref
+                const doc = id != null ? ref.where('id','==', id) : ref.orderBy('date_updated', 'desc')
                 doc.get().then(function (querySnapshot) {
-                    var donors = []
+                    var entries = []
                     querySnapshot.forEach(function (doc) {
                         let data = doc.data()
                         let id = doc.id
@@ -1091,10 +1104,10 @@ class AdminUser extends Model {
                         } catch (err) {
                             //console.log(err)
                         }
-                        donors.push(PublicContent.parse(object))
+                        entries.push(type.parse(object))
                     });
                     var message = new Message()
-                    message.data = donors
+                    message.data = entries
                     resolve(message)
                 }).catch(function (error) {
                     reject(error)
@@ -1103,43 +1116,12 @@ class AdminUser extends Model {
             //eturn this.getObjects(PublicContent, UserHandler.tables.public_content, id ? ['id', '==', id] : null)
         }
         
-        /** adds public entry from the database
-        * @param params - entry to be updated to the database
-        * @method UserHandler.addEntry()
-        */
-        addPublicEntry(params, images = [], table) {
-            if (images.length > 0) {
-                return this.uploadImages(images).then((resp) => {
-                    console.log("response %o", resp)
-                    return resp.json()
-                }).then((images) => {
-                    params.images = params.images || [] 
-                    params.images = params.images.concat(images || [])
-                    return this.addEntry(params.id, params.toObject(), table)
-                })
-            } else {
-                return this.addEntry(params.id, params.toObject(), table)
-            }
-        } //getInventories
-        
-        /**
-        * deletes public entry from the database
-        * @param id - entry id to be deleted
-        * @method UserHandler.deleteEntry()
-        */
-        deletePublicEntry(params, table) {
-            this.deleteImages(params.images).then((val) => {
-                console.log("deleted successfuly %o", val)
-            })
-            return this.deleteEntry(params.id, table)
-        }
-        
         /**
         * saves content entry on the database
         * @param {*} params - object to be saved
-        * @param {*} images - images to be uploaded
+        * @param {*} file - images to be uploaded
         */
-        addPublicPost(params, file) {
+        addPublicPost(params, file, table = UserHandler.tables.public_content) {
             //return this.addPublicEntry(params, images, UserHandler.tables.public_content)
             return this.uploadImages([file]).then((resp) => {
                 console.log("response %o", resp)
@@ -1147,16 +1129,12 @@ class AdminUser extends Model {
             }).then((file_path) => {
                 console.log("filepath %o", file_path)
                 params.path = file_path[0]
-                return this.addEntry(params.id, params.toObject(), UserHandler.tables.public_content)
+                return this.addEntry(params.id, params.toObject(), table)
             })
         }//addPublicPost
         
+        /** gets the text content from the server file */
         getPublicPostContent(path){
-            /* console.log("path %o", DataHandlerType.api_host + path)
-            return fetch(this.api_host + path).then((resp) => {
-                return resp.text()
-            }) */
-            //let filePath = this.api_host + path
             let filePath = DataHandlerType.api_host+`getfile.php?path=${path}`
             console.log("hello? %o", filePath)
             
@@ -1166,19 +1144,20 @@ class AdminUser extends Model {
             }).catch(err =>{
                 console.log(err)
             })
-            
-        }
+        }//getPublicPostContent
         
         /**
         * deletes the content entry on the databse
         * @param {*} params - object to be delete
         */
-        deletePublicPost(params) {
+        deletePublicPost(params, table = UserHandler.tables.public_content) {
             this.deleteImages([params.path]).then((val) => {
                 console.log("deleted successfuly %o", val)
+            }).catch(err =>{
+                console.log(err)
             })
             return this.deleteEntry(params.id, table)
-        }
+        }//deletePublicPost
         
         /** returns list of events sorted by date_event desc*/
         getPublicEvents(id = null) {
@@ -1213,15 +1192,57 @@ class AdminUser extends Model {
                     reject(error)
                 });
             })
-        }
+        }//getPublicEvents
 
+        /** adds the event to the db */
         addPublicEvent(params) {
             return this.addEntry(params.id, params.toObject(), UserHandler.tables.public_events)
         }
         
+        /** deletes the event from the db */
         deletePublicEvent(id) {
             return this.deleteEntry(id, UserHandler.tables.public_events)
         }
+
+        /** returns list of events sorted by date_event desc*/
+        getPublicDocuments(id = null) {
+            return this.getContentPost(id, PublicDocument, UserHandler.tables.public_document)
+        }//getPublicDocuments
+
+        /** saves the document to the server and the db */
+        addPublicDocument(params, file = null) {
+            if (file) {
+                return this.addPublicPost(params, file, UserHandler.tables.public_document)
+            } else {
+                return this.addEntry(params.id, params.toObject(), UserHandler.tables.public_document)
+            }
+        }//addPublicDocument
+        
+        /** deletes the document from the server and the db */
+        deletePublicDocument(params) {
+            return this.deletePublicPost(params, UserHandler.tables.public_document)
+        }//deletePublicDocument
+
+        /** gets content information from database */
+        getPublicInformation(){
+            return this.getContentPost(null, PublicInformation, UserHandler.tables.public_information)
+        }//getContentInformation
+
+        /** saves the document to the server and the db */
+        addPublicInformation(params, file = null) {
+            if (file) {
+                return this.addPublicPost(params, file, UserHandler.tables.public_information)
+            } else {
+                return this.addEntry(params.id, params.toObject(), UserHandler.tables.public_information)
+            }
+        }//addPublicInformation
+        
+        /** deletes the document from the server and the db */
+        deletePublicInformation(params) {
+            return this.deletePublicPost(params, UserHandler.tables.public_information)
+        }//deletePublicInformation
+
+
     }//PublicWebHandler
     
     

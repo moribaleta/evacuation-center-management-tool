@@ -1328,10 +1328,21 @@ class PublicDocument extends Model {
     description
 
     /** file destination saved on the server */
-    file_path
+    path
+
+    static formModel = {
+        title: {
+            title: 'Title',
+            type: FormModels.text
+        },
+        description: {
+            title: 'Description',
+            type: FormModels.textarea
+        },
+    }
 
     constructor(id, date_created, date_updated, created_by,
-        title, description, file_path) {
+        title, description, path) {
         super()
         this.id = id || keyGenID('document', 5)
         this.date_created = date_created || new Date()
@@ -1340,7 +1351,7 @@ class PublicDocument extends Model {
         
         this.title          = title
         this.description    = description || ""
-        this.file_path      = file_path || ""
+        this.path      = path || ""
     }
 
     toObject() {
@@ -1351,7 +1362,7 @@ class PublicDocument extends Model {
                 created_by  : this.created_by,
                 title       : this.title,
                 description : this.description,
-                file_path   : this.file_path,
+                path   : this.path,
         }
     }
 
@@ -1363,8 +1374,57 @@ class PublicDocument extends Model {
                 object.created_by,
                 object.title,
                 object.description,
-                object.file_path,
+                object.path,
         )
     }
 
 }//PublicDocument
+
+/** defines the model shown on information and contact of the public website */
+class PublicInformation extends PublicContent {
+
+    /** email information for the website */
+    email
+
+    /** phone numbers available */
+    contact_numbers = []
+
+    /** social media links */
+    other_links = []
+
+    constructor(id, date_created, date_updated, created_by,
+        path, email, contact_numbers, other_links) {
+        super(id || keyGenID('information', 5), date_created, date_updated, created_by)
+        this.path            = path || ""
+        this.email           = email || ""
+        this.contact_numbers = contact_numbers || []
+        this.other_links     = other_links || []
+    }
+
+    toObject() {
+        return {
+                id          : this.id,
+                date_created: this.date_created,
+                date_updated: this.date_updated,
+                created_by  : this.created_by,
+                path        : this.path,
+                email : this.email          ,
+                contact_numbers : this.contact_numbers,
+                other_links : this.other_links    ,
+        }
+    }
+
+    static parse(object = {}) {
+        return new PublicInformation(
+                object.id,
+                object.date_created,
+                object.date_updated,
+                object.created_by,
+                object.path,
+                object.email,
+                object.contact_numbers,
+                object.other_links,
+        )
+    }
+
+}//PublicInformation

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Evacuations</title>
+    
+    <!-- update the version number as needed -->
+    <script defer src="/__/firebase/7.19.1/firebase-app.js"></script>
+    <!-- include only the Firebase features as you need -->
+    <script defer src="/__/firebase/7.19.1/firebase-auth.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-database.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-messaging.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-storage.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-firestore.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-functions.js"></script>
+    <!-- initialize the SDK after all desired features are loaded -->
+    <script defer src="/__/firebase/init.js"></script>
+    
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <script src="js/jquery-3.0.0.min.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <link href="css/main-style.css" rel="stylesheet">
+    <script src="js/vue.js"></script>
+    <script src="../_global/js/objects.js"></script>
+    <script src="../_global/js/utilities.js"></script>
+    
+    
+    
+</head>
+
+<body>
+    <div class="sidenav" id="header" attr="content">
+        <div class="sidenav-item">
+            <img class="nav-image" :src="logo" />
+        </div>
+        
+        <div v-for="item in header_items" v-bind:class="'sidenav-item ' + (active == item.id ? 'active' : '') ">
+            <a v-bind:href="item.href">
+                <div class="icon-block">
+                    <i class="material-icons">{{item.icon}}</i>
+                    <h5 class="center">{{item.title}}</h5>
+                </div>
+            </a>
+        </div>
+        
+        <div class="sidenav-item">
+            <a v-on:click="onLogout()">
+                <div class="icon-block">
+                    <i class="material-icons">close</i>
+                    <h5 class="center">Log Out</h5>
+                </div>
+            </a>
+        </div>
+    </div>
+    <!-- <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#editorModal">Open Modal</button> -->
+    <div class="container" id="content">
+        <ul class="breadcrumb">
+            <li><a href="contents.html">Contents</a></li>
+            <li><a href="#">Other Information</a></li>
+        </ul>
+        <div class="subcontent">
+            <div class="section">
+                <h3>Contact Information</h3>
+                <div class="loader_container" v-if="isLoading">
+                    <div class="loader"></div>
+                </div>
+                <ul class="list-group" v-if="!isLoading">
+                    <li class="list-group-item">
+                        Last Updated: {{data_input.date_updated}} by: {{admins_selection[data_input.created_by]}}
+                    </li>
+                    <li class="list-group-item">
+                        <div class="row">
+                            <div class="col col-md-12">
+                                <label>Email:</label>
+                                <p>{{data_input.email}}</p>
+                            </div>
+                            <div class="col col-md-12">
+                                <input id="email_input" type="email" name="email" v-model="input.email">
+                                <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="onSaveEmail()">
+                                    Save Email
+                                </button>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        
+                        <div class="row">
+                            <div class="col col-md-12">
+                                <label>Contact Numbers</label>
+                                <ul class="list-group">
+                                    <li class="list-group-item" v-for="number,index in data_input.contact_numbers">
+                                        <div class="row">
+                                            <div class="col col-md-2">
+                                                {{number}}
+                                            </div>
+                                            <div class="col col-md-3">
+                                                <button type="button" id="add-report" class="btn btn-danger" v-on:click="onDeleteNumber(index)">
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                            
+                            <div class="col col-md-12">
+                                <input id="numbers_input" type="url" name="numbers" v-model="input.numbers">
+                                <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="onSaveNumber()">
+                                    Add New Number
+                                </button>
+                            </div>
+                            
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        
+                        <div class="row">
+                            <div class="col col-md-12">
+                                <label>Links</label>
+                                <ul class="list-group">
+                                    <li class="list-group-item" v-for="links in data_input.other_links">
+                                        <div class="row">
+                                            <div class="col col-md-4">
+                                                <a  :href="links">{{links}}</a>
+                                            </div>
+                                            <div class="col col-md-3">
+                                                <button type="button" id="add-report" class="btn btn-danger" v-on:click="onDeleteNumber(index)">
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col col-md-12">
+                                <input id="link_input" type="url" name="links" v-model="input.links">
+                                <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="onSaveLink()">
+                                    Add New Link
+                                </button>
+                            </div>
+                            
+                        </div>
+                        
+                    </li>
+                </ul>
+            </div>
+            <div class="section">
+                <h3>About Us Page</h3>
+                <div class="panel panel-default">    
+                    <div class="panel-heading">
+                        <div class="button-container">
+                            <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="onEditContent()">Add
+                                Edit Content</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="information"  v-html="content" ></div>
+                    </div>
+                </div>
+                
+                
+            </div>
+            
+        </div>
+        
+        
+        
+        <script src="https://cdn.ckeditor.com/4.13.0/standard/ckeditor.js"></script>
+        <script src="js/app/datahandler.js"></script>
+        <script src="js/app/constants.js"></script>
+        <script src="js/app/app.js"></script>
+        
+        
+        <script>
+            app = new Vue({
+                el: '#content',
+                data: {
+                    user: null,
+                    admins: [],
+                    admins_selection: {},
+                    data_input: new PublicContent(), //new EvacuationCenter(),
+                    content: "",
+                    isEdit: false,
+                    isLoading: true,
+                    cdn: DataHandlerType.api_host,
+                    input: {
+                        email: "",
+                        numbers: "",
+                        links: ""
+                    }
+                },
+                methods: {
+                    onStart() {
+                        this.user = header.user
+                        
+                        this.fetchAllAdmins()
+                        this.fetchPost()
+                    }, //onStart
+                    
+                    fetchPost() {
+                        
+                        this.isLoading = true
+                        //Get Entry From DB
+                        DataHandler.getPublicInformation().then((data) => {
+                            this.data_input = data.data[0]
+                            console.log("entry %o", this.data_input)
+                            return DataHandler.getPublicPostContent(this.data_input.path)
+                        }).then((data) => {
+                            this.content = data
+                            console.log("content %o", data)
+                        }).catch(err => {
+                            console.log(err)
+                            this.data_input = new PublicInformation()
+                        }).finally(() => {
+                            this.isLoading = false
+                            this.data_input.created_by = this.user.id
+                        })
+                        
+                    }, //fetchPost
+                    
+                    fetchAllAdmins() {
+                        DataHandler.getAdminUsers(this.user.id).then((message) => {
+                            this.admins = message.data
+                            this.admins.forEach(admin => {
+                                this.admins_selection[admin.id] =
+                                `${admin.lastname}, ${admin.firstname}`
+                            });
+                        }).catch((error) => {
+                            console.log(error)
+                        })
+                    }, //fetchAllAdmins
+                    
+                    
+                    onEditContent() {
+                        window.open('content_information_editor.html','_self')
+                    },//onAddItem
+                    
+                    onSaveEmail(){
+                        //this.data_input.email = this.input.email 
+                        var data_input      = this.copyObject()
+                        data_input.email    = this.input.email
+                        this.input.email    = ""
+                        this.onSaveData(data_input)
+                    },
+                    
+                    onSaveLink(){
+                        var data_input      = this.copyObject()
+                        data_input.other_links.push(this.input.links)    //= this.input.email
+                        this.input.link     = ""
+                        this.onSaveData(data_input)
+                    },
+                    
+                    onSaveNumber(){
+                        var data_input      = this.copyObject()
+                        data_input.contact_numbers.push(this.input.numbers)    //= this.input.email
+                        this.input.numbers     = ""
+                        this.onSaveData(data_input)
+                    },
+                    
+                    copyObject(){
+                        return PublicInformation.parse(this.data_input.toObject())
+                    },
+                    
+                    onSaveData(data_input){
+                        data_input.date_updated = new Date()
+                        
+                        DataHandler.addPublicInformation(data_input, null)
+                        .then((data) => {
+                            if(data.error) {
+                                AlertMessages.error(error)
+                            } else {
+                                AlertMessages.success()
+                                this.data_input = data_input
+                            }
+                        })
+                    },
+
+                    onDeleteLink(index){
+                        var data_input      = this.copyObject()
+                        data_input.other_links.splice(index, 1)    //= this.input.email
+                        this.onSaveData(data_input)
+                    },
+                    
+                    onDeleteNumber(index){
+                        var data_input      = this.copyObject()
+                        data_input.contact_numbers.splice(index, 1)    //= this.input.email
+                        this.onSaveData(data_input)
+                    },
+                    
+                }
+            })
+        </script>
+        
+    </body>
+    
+    </html>

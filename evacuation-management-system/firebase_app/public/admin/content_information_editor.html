@@ -59,24 +59,17 @@
     <div class="container" id="content">
         <ul class="breadcrumb">
             <li><a href="contents.html">Contents</a></li>
-            <li><a href="content_homepage.html">Public Post</a></li>
+            <li><a href="content_information.html">Other Information</a></li>
             <li><a href="#">Editor</a></li>
         </ul>
         <div class="subcontent">
             <div class="section header">
-                <h1>Edit Post</h1>
+                <h1>Edit Information</h1>
             </div>
-            
             
             <div class="section">
                 <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="onSaveEntry()">
                     Save
-                </button>
-                <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="onNewEntry()">
-                    Create New Post
-                </button>
-                <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="onDeleteEntry()">
-                    Delete Post
                 </button>
             </div>
             <p></p>
@@ -85,45 +78,14 @@
             </div>
             <div class="section" id="editor" v-if="!isLoading">
                 <div class="row">
-                    <div class="col col-md-6">
-                        <label class="control-label" for="name">Title</label>
-                        <input id="name" name="name" type="text" placeholder="Title..." class="form-control input-item" required="" v-model="data_input.title">
-                    </div>
-                    <div class="col col-md-12">&nbsp;</div>
-                    <div class="col col-md-12">
-                        
-                    </div>
-                    <div class="col col-md-12">&nbsp;</div>
+                    
                 </div>
-                
-                <!-- <div id="imagerow" class="well">
-                    <div class="panel-body">
-                        <div class="row">
-                            <div class="col col-md-12" v-if="!data_input.images || data_input.images.length <= 0">
-                                <p>Images are empty</p>
-                            </div>
-                            <div class="col col-md-2 item-info" v-for="image,index in data_input.images">
-                                <div class="image-area">
-                                    <img :src="cdn+image"  alt="Preview">
-                                    <a class="remove-image" v-on:click="onDeleteImage(index)" style="display: inline;">&#215;</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="panel-footer">
-                        <div class="row">
-                            <p>Upload Images</p>
-                            <input id="input_images" type="file" name="files[]" multiple style="margin-bottom: 12px;"/>
-                            <button class="btn btn-default btn-info" v-on:click="onAddImages()">upload pictures</button>
-                        </div>
-                    </div>
-                </div> -->
             </div>
             
         </div>
         
     </div>
-
+    
     <div class="container">
         <textarea v-once id="contenteditor" name=""></textarea>
     </div>
@@ -131,9 +93,7 @@
     
     <script src="https://cdn.ckeditor.com/4.13.0/standard/ckeditor.js"></script>
     <script src="js/app/datahandler.js"></script>
-    <script src="js/app/constants.js"></script>
     <script src="js/app/app.js"></script>
-    
     
     <script>
         app = new Vue({
@@ -151,47 +111,30 @@
             methods: {
                 onStart() {
                     this.user = header.user
-                    
                     this.fetchAllAdmins()
-                    
-                    
-                    const queryString = window.location.search;
-                    const urlParams = new URLSearchParams(queryString);
-                    const id = urlParams.get('id')
-                    
-                    //this.onNewEditor()
-                    this.fetchPost(id)
-                    //this.onNewEditor()
+                    this.fetchPost()
                 }, //onStart
                 
-                fetchPost(id) {
-                    if (id) {
-                        this.isLoading = true
-                        //Get Entry From DB
-                        DataHandler.getContentPost(id).then((data) => {
-                            this.data_input = data.data[0]
-                            console.log("entry %o", this.data_input)
-                            return DataHandler.getPublicPostContent(this.data_input.path)
-                        }).then((data) => {
-                            this.content = data
-                            console.log("content %o", data)
-                            $('#contenteditor').val(data)
-                            
-                        }).catch(err => {
-                            console.log(err)
-                        }).finally(() => {
-                            this.isLoading = false
-                            this.onNewEditor()
-                        })
-                    } else {
-                        //New Entry
-                        this.data_input = new PublicContent()
-                        this.data_input.created_by = this.user.id
+                fetchPost() {
+                    this.isLoading = true
+                    //Get Entry From DB
+                    DataHandler.getPublicInformation().then((data) => {
+                        this.data_input = data.data[0] || new PublicInformation()
+                        console.log("entry %o", this.data_input)
+                        return DataHandler.getPublicPostContent(this.data_input.path)
+                    }).then((data) => {
+                        this.content = data
+                        console.log("content %o", data)
+                        $('#contenteditor').val(data)
+                    }).catch(err => {
+                        console.log(err)
+                    }).finally(() => {
+                        this.isLoading = false
                         this.onNewEditor()
-                    }
+                    })
                 }, //fetchPost
-
-
+                
+                
                 onNewEditor(){
                     CKEDITOR.replace('contenteditor');
                 },
@@ -208,41 +151,33 @@
                     })
                 }, //fetchAllAdmins
                 
-                
-                
-                onNewEntry() {
-                    if (confirm("All Changes will be discarded")) {
-                        window.open('content_editor.html')
-                    }
-                },//onAddItem
-                
                 onSaveEntry() {
                     var editorText = CKEDITOR.instances.contenteditor.getData();
                     
                     const file = new File([editorText || ""], (this.data_input.path && this.data_input.path != "") ? this.data_input.path : `${this.data_input.id}.txt`, {type: "text/plain", lastModified: new Date()})
                     
                     console.log("file %o", file)
-
-                    DataHandler.addPublicPost(this.data_input, file)
-                        .then((message) => {
-                            if(!message.error) {
-                                AlertMessages.success()
-                                this.fetchPost(this.data_input.id)
-                            } else {
-                                AlertMessages.error(message.error)
-                            }
-                        })
+                    
+                    DataHandler.addPublicInformation(this.data_input, file)
+                    .then((message) => {
+                        if(!message.error) {
+                            AlertMessages.success()
+                            this.fetchPost()
+                        } else {
+                            AlertMessages.error(message.error)
+                        }
+                    })
                 },//onSaveEntry
                 
                 onDeleteEntry() {
                     if (confirm('Deleting Item\nPress confirm to proceed')) {
-                        DataHandler.deletePublicPost(this.data_input).then((data) => {
+                        DataHandler.deletePublicInformation(this.data_input).then((data) => {
                             console.log(data)
                             if (data.error) {
                                 AlertMessages.error(data.error)
                             } else {
                                 AlertMessages.deleted()
-                                this.fetchPost()
+                                window.history.back()
                             }
                         })
                     }

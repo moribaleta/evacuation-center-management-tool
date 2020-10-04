@@ -151,7 +151,7 @@ var municipalities =
         }
 
         static confirmDelete(message) {
-            return confirm(`Delete Item? ${message}`)
+            return confirm(`Confirm Delete Item? ${message || ""}`)
         }
     }
     
