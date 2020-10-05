@@ -1428,3 +1428,45 @@ class PublicInformation extends PublicContent {
     }
 
 }//PublicInformation
+
+class PublicGallery extends PublicDocument {
+
+    constructor(id, date_created, date_updated, created_by,
+        title, description, images) {
+        super()
+        this.id = id || keyGenID('gallery', 5)
+        this.date_created   = date_created || new Date()
+        this.date_updated   = date_updated || new Date()
+        this.created_by     = created_by
+        
+        this.title          = title
+        this.description    = description || ""
+        this.images         = images || []
+    }
+
+    toObject() {
+        return {
+            id              : this.id,
+            date_created    : this.date_created,
+            date_updated    : this.date_updated,
+            created_by      : this.created_by,
+            path            : this.path,
+            title           : this.title,
+            description     : this.description,
+            images          : this.images,
+        }
+    }
+
+    static parse(object = {}) {
+        return new PublicGallery(
+            object.id,
+            object.date_created,
+            object.date_updated,
+            object.created_by,
+            object.title,
+            object.description,
+            object.images,
+        )
+    }
+
+}

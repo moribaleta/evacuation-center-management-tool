@@ -98,7 +98,8 @@ class AdminUser extends Model {
             public_document: 'public_document',
             public_content: 'public_content',
             public_events: 'public_events',
-            public_information: 'public_information'
+            public_information: 'public_information',
+            public_images: 'public_images'
         }
         
         /** login function */
@@ -1070,6 +1071,7 @@ class AdminUser extends Model {
     /** defines the class that contains all public web files and contents */
     class PublicWebHandler extends DonorHandler {
         
+        /* ---------- CONTENT ------------------- */
         /**
          * gets the entries from the database
          * @param {*} id 
@@ -1159,6 +1161,8 @@ class AdminUser extends Model {
             return this.deleteEntry(params.id, table)
         }//deletePublicPost
         
+        /* ------------------ EVENTS -------------------- */
+
         /** returns list of events sorted by date_event desc*/
         getPublicEvents(id = null) {
             //const type = PublicContent
@@ -1204,11 +1208,13 @@ class AdminUser extends Model {
             return this.deleteEntry(id, UserHandler.tables.public_events)
         }
 
+        /* -------------- DOCUMENTS --------------------- */
+
         /** returns list of events sorted by date_event desc*/
         getPublicDocuments(id = null) {
             return this.getContentPost(id, PublicDocument, UserHandler.tables.public_document)
         }//getPublicDocuments
-
+        
         /** saves the document to the server and the db */
         addPublicDocument(params, file = null) {
             if (file) {
@@ -1223,9 +1229,11 @@ class AdminUser extends Model {
             return this.deletePublicPost(params, UserHandler.tables.public_document)
         }//deletePublicDocument
 
+        /* ------------- OTHER INFORMATION --------------- */
+
         /** gets content information from database */
-        getPublicInformation(){
-            return this.getContentPost(null, PublicInformation, UserHandler.tables.public_information)
+        getPublicInformation(id = null){
+            return this.getContentPost(id, PublicInformation, UserHandler.tables.public_information)
         }//getContentInformation
 
         /** saves the document to the server and the db */
@@ -1242,6 +1250,36 @@ class AdminUser extends Model {
             return this.deletePublicPost(params, UserHandler.tables.public_information)
         }//deletePublicInformation
 
+        /* ------------- IMAGES ----------------------- */
+
+        getPublicImages(id = null){
+            return this.getContentPost(id, PublicGallery, UserHandler.tables.public_images)
+        }//getPublicImages
+
+        addPublicImages(params, images = []) {
+            if (images.length > 0) {
+                return this.uploadImages(images).then((resp) => {
+                    console.log("response %o", resp)
+                    return resp.json()
+                }).then((image_paths) => {
+                    console.log("filepath %o", image_paths)
+                    params.image = params.image || []
+                    params.images = params.images.concat(image_paths || [])
+                    return this.addEntry(params.id, params.toObject(), UserHandler.tables.public_images)
+                })
+            } else {
+                return this.addEntry(params.id, params.toObject(), UserHandler.tables.public_images)
+            }
+        }//addPublicImages
+
+        deletePublicImages(params) {
+            this.deleteImages(params.images = []).then((val) => {
+                console.log("deleted successfuly %o", val)
+            }).catch(err =>{
+                console.log(err)
+            })
+            return this.deleteEntry(params.id, table)
+        }//deletePublicImages
 
     }//PublicWebHandler
     
