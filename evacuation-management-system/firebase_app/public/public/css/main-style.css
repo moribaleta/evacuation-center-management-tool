@@ -73,7 +73,9 @@ body {
 
 .jumbotron {
     /* background: black; */
-    background-image: url('../resources/images/banner_bg02_18Aug2018.png') ; 
+    background-image: url('../resources/images/background.jpg') ;
+    background-size: cover;
+    background-position: center; 
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -82,12 +84,14 @@ body {
     height: 120px;
     padding: 10px;
     margin: 0;
+    background-clip: padding-box;
 }
 
 .jumbotron img {
     height: auto;
     width: 100%;
-    max-width: 450px;
+    background-size: cover;
+    /* max-width: 450px; */
 }
 
 .jumbotron .time {
@@ -100,19 +104,31 @@ body {
     background: black;
 }
 
-.banner-carousel .carousel-inner {
+.banner-carousel .carousel-inner .item img {
+    position: relative;
+    background-size: cover;
+    height: 350px;
+    width: 100%;
+    
+    background-position: top;
+    object-fit: cover;
+    flex: auto;
+}
+
+/* .banner-carousel .carousel-inner {
     height: 100%;
     width: 100%;
     display: flex;
     flex: 1;
     flex-direction: column;
     align-items: center;
-    /* justify-content: center; */
 }
 
 .banner-carousel .carousel-inner .item {
     width: 100%;
     height: 100%;
+    min-height: 200px;
+    min-width: 200px;
 }
 
 .banner-carousel .carousel-inner  .item .background{
@@ -124,7 +140,9 @@ body {
     align-items: center;
     z-index: 0;
     filter: blur(20px);
-    opacity: 0.8
+    opacity: 0.8;
+    min-height: 200px;
+    min-width: 200px;
 }
 
 .banner-carousel .carousel-inner   .item .image-foreground-container{
@@ -135,13 +153,15 @@ body {
     flex-direction: column;
     align-items: center;
     z-index: 1;
-    /* display: none; */
+    min-height: 200px;
+    min-width: 200px;
 }
 
 .banner-carousel .carousel-inner   .item .image-foreground-container .foreground{
-
+    min-height: 200px;
+    min-width: 200px;
 }
-
+ */
 
 
 

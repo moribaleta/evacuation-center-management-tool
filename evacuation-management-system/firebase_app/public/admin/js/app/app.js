@@ -4,7 +4,14 @@ var header = new Vue({
         user: new AdminUser(),
         active: "",
         logo: "resources/images/logo.png",
-        header_items: [{
+        header_items: [
+            {
+                id: 'content',
+                href: 'contents.html',
+                icon: 'language',
+                title: 'Contents'
+            },
+            {
             id: 'evacuations',
             href: "evacuations.html",
             icon: 'home_work',
@@ -52,12 +59,7 @@ var header = new Vue({
             icon: 'account_circle',
             title: 'Public'
         },
-        {
-            id: 'content',
-            href: 'contents.html',
-            icon: 'language',
-            title: 'Contents'
-        }
+        
     ]
 },
 methods: {

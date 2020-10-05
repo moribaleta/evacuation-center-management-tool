@@ -60,7 +60,7 @@
         <div class="section">
             <h1>Public Contents</h1>
             <div class="row selection-grid">
-                <div class="col col-md-3 selection-grid-item" v-for="item in selections">
+                <div class="col col-md-4 selection-grid-item" v-for="item in selections">
                     <div class="selection-grid-item-content" :style="'background:'+item.color">
                         <a class="selection-grid-item-content-link" :href="item.href">
                             <div class="selection-block">
@@ -90,6 +90,13 @@
                         icon: 'web',
                         title: 'Content',
                         color: '#32a852'
+                    },
+                    {
+                        id: 'gallery',
+                        href: "content_gallery.html",
+                        icon: 'perm_media',
+                        title: 'Gallery',
+                        color: '#60A244'
                     },
                     {
                         id: 'events',
