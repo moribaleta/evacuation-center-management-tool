@@ -17,6 +17,12 @@ var header = new Vue({
                 title: 'GALLERY'
             },
             {
+                id: 'event',
+                href: "events.html",
+                icon: 'image',
+                title: 'EVENTS'
+            },
+            {
                 id   : 'map',
                 href : "map.html",
                 icon : 'room',

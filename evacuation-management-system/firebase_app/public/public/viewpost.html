@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>iEvacuate</title>
+    <link rel="shortcut icon" href="resources/images/logo.png" />
+
+    <!-- update the version number as needed -->
+    <script defer src="/__/firebase/7.19.1/firebase-app.js"></script>
+    <!-- include only the Firebase features as you need -->
+    <script defer src="/__/firebase/7.19.1/firebase-auth.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-database.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-messaging.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-storage.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-firestore.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-functions.js"></script>
+    <!-- initialize the SDK after all desired features are loaded -->
+    <script defer src="/__/firebase/init.js"></script>
+
+    <!-- CSS  -->
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <script src="js/jquery-3.0.0.min.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.2.2/jquery.form.min.js"></script>
+
+    <link href="css/main-style.css" rel="stylesheet">
+    <script src="js/vue.js"></script>
+    <!-- <script src="js/materialize.js"></script> -->
+    <script src="../_global/js/objects.js"></script>
+    <script src="../_global/js/utilities.js"></script>
+</head>
+
+<body>
+    <nav class="navbar navbar-light bg-light navbar-fixed-top" id="header" attr="home">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="index.html">
+                    <p class="img-large">GOV PH</p>
+                    <img class="img-small" src="resources/images/logo.png">
+                </a>
+            </div>
+
+            <div class="collapse navbar-collapse" id="myNavbar">
+                <img class="img-small" src="resources/images/logo1.png">
+                <ul class="nav navbar-nav">
+                    <li v-for="item in header_items"  :class="active == item.id ? 'active' : ''">
+                        <a :href="item.href">{{item.title}}</a>
+                    </li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="https://bfpforecast.000webhostapp.com/admin/login.html?"><span
+                                class="glyphicon glyphicon-user"></span>
+                            Login</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    
+
+    <div id="container">
+
+        <div class="container">
+            <!-- <h1>{{post.title}}</h1> -->
+            
+            <div v-html="content"></div>
+            <div>&nbsp;</div>
+            <label>{{post.date_updated}}</label>
+            <h6>{{post.created_by}}</h6>
+            <div>&nbsp;</div>
+        </div>
+
+        <div class="footer">
+            <img class="footer-img" src="resources/images/govph-seal-mono-footer.jpg">
+            <div class="footer-item">
+                <p class="footer-label">REPUBLIC OF THE PHILIPPINES</p>
+                <p>All content is in the public domain unless otherwise stated.</p>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!--  Scripts-->
+    <script src="js/app/datahandler.js"></script>
+    <script src="js/app/app.js"></script>
+    
+
+    <script>
+        var app = new Vue({
+            el: '#container',
+            data: {
+                post: new PublicContent(),
+                cdn: DataHandlerType.api_host,
+                //admins_selection: [],
+                //admins: [],
+                content: "",
+            },
+            methods: {
+                onStart() {
+                    //this.fetchAllAdmins()
+                    const queryString = window.location.search;
+                    const urlParams = new URLSearchParams(queryString);
+                    const id = urlParams.get('id')
+                    this.fetchPost(id)
+                }, //onStart
+                
+                fetchPost(id) {
+                    if (id) {
+                        this.isLoading = true
+                        //Get Entry From DB
+                        DataHandler.getContentPost(id).then((data) => {
+                            this.post = data.data[0]
+                            console.log("entry %o", this.post)
+                            return DataHandler.getPublicPostContent(this.post.path)
+                        }).then((data) => {
+                            this.content = data
+                            console.log("content %o", data)
+                        }).catch(err => {
+                            console.log(err)
+                        }).finally(() => {
+                            this.isLoading = false
+                            this.onNewEditor()
+                        })
+                    }
+                }, //fetchPost
+
+                /* fetchAllAdmins() {
+                    DataHandler.getAdminUsers(this.user.id).then((message) => {
+                        this.admins = message.data
+                        this.admins.forEach(admin => {
+                            this.admins_selection[admin.id] =
+                            `${admin.lastname}, ${admin.firstname}`
+                        });
+                    }).catch((error) => {
+                        console.log(error)
+                    })
+                }, //fetchAllAdmins */
+            }
+        })
+
+    </script>
+    <script src="js/jumbotron.js"></script>
+</body>
+
+</html>

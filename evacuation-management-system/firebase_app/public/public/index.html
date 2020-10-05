@@ -30,8 +30,6 @@
     <!-- <script src="js/materialize.js"></script> -->
     <script src="../_global/js/objects.js"></script>
     <script src="../_global/js/utilities.js"></script>
-    
-
 </head>
 
 <body>
@@ -77,11 +75,8 @@
 
         <div id="myCarousel" class="carousel banner-carousel" data-ride="carousel">
             <ol class="carousel-indicators">
-                <li data-target="#myCarousel" v-for="image,index in images" :data-slide-to="index" class="active"></li>
-                <!-- <li data-target="#myCarousel" data-slide-to="1"></li>
-                <li data-target="#myCarousel" data-slide-to="2"></li>
-                <li data-target="#myCarousel" data-slide-to="3"></li> -->
-                <!-- <li data-target="#myCarousel" data-slide-to="4"></li> -->
+                <li data-target="#myCarousel" v-for="image,index in images"
+                    :data-slide-to="index" class="active"></li>
             </ol>
 
             <!-- Wrapper for slides -->
@@ -94,9 +89,12 @@
                 </div>
             </div> -->
             <div class="carousel-inner">
-                <div class="item active"  v-for="image,index in images">
+                <!-- <div class="item active"  v-for="image,index in images">
                   <img :src="cdn + image" alt="Los Angeles">
-                </div>
+                </div> -->
+                <div class="carousel-item active" v-for="image,index in images">
+                    <img :src="cdn + image" alt="First slide">
+                  </div>
             </div>
 
             <!-- Left and right controls -->
@@ -110,46 +108,40 @@
             </a>
         </div>
 
-
-        <div class="row" style="padding-left: 10px; padding-right: 10px; margin-top: 50px;">
-            <div class="col col-md-3">
-                <ul class="list grid">
-                    <li class="row well well-lg" style="padding: 20px">
-                        <img class="image" src="resources/images/bfpnhq_ISO_Certified_19Dec2018.jpg">
-                    </li>
-                    <li class="row well well-lg" style="padding: 20px">
-                        <img class="image" src="resources/images/fdir_banago_07Dedc2017.jpg">
-                    </li>
-                    <li class="row well well-lg" style="padding: 20px">
-                        <img class="image" src="resources/images/transparency_seal_2017.jpg">
-                    </li>
-                    <li class="row well well-lg" style="padding: 20px">
-                        <img class="image" src="resources/images/FOI.jpg">
-                    </li>
-                </ul>
-            </div>
-            <div class="col col-md-9">
-                <div class="page-header">
-                    <h1>News and Articles</h1>
-                </div>
-
-                <ul class="list grid" v-if="posts.length > 0">
-                    <li class="row well well-lg" v-for="(item,index) in posts" v-on:click="viewItem(index)">
-                        <div class="post-list-image">
-                            <div class="image-container">
-                                <img class="image" v-if="item.images == null">
-                                <img class="image" v-if="item.images != null" :src="image_url + item.images[0]">
+        <div class="container">
+            <div class="row" style="padding-left: 10px; padding-right: 10px; margin-top: 50px;">
+            
+                <div class="col col-md-9">
+                    <div class="page-header">
+                        <h1>News and Articles</h1>
+                    </div>
+    
+                    <ul class="list grid" v-if="posts.length > 0">
+                        <li class="row well well-lg" v-for="(item,index) in posts" v-on:click="viewItem(index)">                        
+                            <div class="post-list-item">
+                                <h3 class="title">{{item.title}}</h3>
+                                <p class="time">{{item.date_updated}}</p>
                             </div>
-                        </div>
-                        <div class="post-list-item">
-                            <h3 class="title">{{item.title}}</h3>
-                            <p class="detail">{{item.content}}</p>
-                            <p class="time">{{item.date}}</p>
-                        </div>
-                    </li>
-                </ul>
+                        </li>
+                    </ul>
+                </div>
+    
+                <div class="col col-md-3">
+                    <div class="page-header">
+                        <h3>Events</h3>
+                    </div>
+                    <ul class="list grid">
+                        <li class="well well-sm"v-for="event in events">
+                            <div class="post-list-item">
+                                <h6 class="title">{{event.title}}</h6>
+                                <p class="time">{{event.date_start}}</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
+        
 
         <div class="footer">
             <img class="footer-img" src="resources/images/govph-seal-mono-footer.jpg">
@@ -198,13 +190,23 @@
                     }).catch((error) => {
                         console.log(error)
                     })
-                
+
+                    DataHandler.getContentPost().then((message) => {
+                        this.posts = message.data
+                    }).catch((error) => {
+                        console.log(error)
+                    })
+                    
+                    DataHandler.getPublicEvents().then((message) => {
+                        this.events = message.data
+                    }).catch((err) => {
+                        console.log(err)
+                    })
 
                 },
                 
                 viewItem(index) {
-                    sessionStorage.setItem('post', JSON.stringify(this.posts[index]))
-                    window.open('viewPost.html', '_self')
+                    window.open(`viewPost.html?id=${this.posts[index].id}`, '_self')
                 },
 
                 onStartTime() {
