@@ -44,39 +44,42 @@ var header = new Vue({
     },
     methods: {
         onStart() {
-            
-            /* try {
-                let user = JSON.parse(sessionStorage.getItem('user'))
-                user = AdminUser.parse(user)
-                console.log("user %o", user)
-                if (user != undefined && user != null) {
-                    console.log(user)
-                    this.user = user
-                    app.onStart()
-                } else {
-                    throw "login user"
-                }
-            } catch (error) {
-                console.error(error)
-                alert('login user account')
-                this.onLogout()
-            } */
             DataHandler.configure()
-            app.onStart()
+            this.onAppWillLoad()
             this.active = $('#header').attr('attr')
-            
+            app.onStart()
         },
 
-        /* onSetUser(user) {
-            sessionStorage.setItem('user', JSON.stringify(user))
-            this.user = user
-        },
+        /** adds additional functions on app*/
+        onAppWillLoad() {
+            app.onStartTime = (() => {
+                let date = new Date()
+                app.time = date.toLocaleString()
 
-        onLogout() {
-            sessionStorage.clear()
-            window.open('login.html', '_self')
-        }, */
+                setInterval(() => {
+                    app.time = (new Date()).toLocaleString()
+                }, 1000)
+            })
 
+            app.formatDate = ((date) => {
+                let _date = new Date(date)
+                return _date.toLocaleDateString()
+            })
+
+            app.formateDateRange = ((d1, d2) => {
+                var datestring = ""
+                if (d1 && d1.trim() != "") {
+                    datestring += app.formatDate(d1)
+                }
+                if (d2 && d2.trim() != "") {
+                    if (datestring != "") {
+                        datestring += " - "
+                    }
+                    datestring += app.formatDate(d2)
+                }
+                return datestring
+            })
+        }
     }
 })
 
@@ -432,3 +435,51 @@ var municipalities =
     })
     
     Vue.component('form-generator', FormGenerator)
+
+
+
+    const SlideshowContainer = Vue.extend({
+        template: 
+        `
+        <div id="galleryCarousel" class="carousel slide banner-carousel" data-ride="carousel">
+                            <!-- Indicators -->
+                            <ol class="carousel-indicators">
+                                <li v-for="image,index in images"
+                                    v-on:click="curr_index = index" :class="index == curr_index ? 'active':''"></li>
+                            </ol>
+
+                            <!-- Wrapper for slides -->
+                            <div class="carousel-inner">
+                                <div v-for="image,index in images" :class="curr_index == index ? 'item active' : 'item' ">
+                                    <img :src="cdn + image" alt="image">
+                                </div>
+                            </div>
+
+                            <!-- Left and right controls -->
+                            <a class="left carousel-control" href="#galleryCarousel" v-on:click="curr_index -= curr_index > 0 ? 1 : 0">
+                                <span class="glyphicon glyphicon-chevron-left"></span>
+                                <span class="sr-only">Previous</span>
+                            </a>
+                            <a class="right carousel-control" href="#galleryCarousel" v-on:click="curr_index += (curr_index < images.length - 1) ? 1 : 0">
+                                <span class="glyphicon glyphicon-chevron-right"></span>
+                                <span class="sr-only">Next</span>
+                            </a>
+                        </div>
+        `,
+        props: {
+            images : [],
+            cdn : String
+        }, 
+        
+        data() {
+            return {
+                curr_index: 0
+            }
+        },
+
+        created: function () {
+            
+        },
+    })
+    
+    Vue.component('slideshow-container', SlideshowContainer)

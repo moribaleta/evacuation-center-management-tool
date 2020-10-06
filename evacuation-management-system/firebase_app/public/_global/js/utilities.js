@@ -94,3 +94,4 @@ function saveTextAsFile(title, text) {
     
     downloadLink.click();
 }//saveTextAsFile
+

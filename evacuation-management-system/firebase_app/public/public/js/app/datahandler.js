@@ -1084,12 +1084,13 @@ class PublicWebHandler extends DonorHandler {
     /* ------------------ EVENTS -------------------- */
 
     /** returns list of events sorted by date_event desc*/
-    getPublicEvents(id = null) {
+    getPublicEvents(id = null, limit = 100) {
         //const type = PublicContent
         const ref = this.firestore.collection(UserHandler.tables.public_events)
         return new Promise((resolve, reject) => {
             const doc = id != null ? ref.where('id', '==', id) : ref
-            doc.orderBy('date_start', 'desc').get().then(function (querySnapshot) {
+            doc.orderBy('date_start', 'desc')
+            .limit(limit).get().then(function (querySnapshot) {
                 var donors = []
                 querySnapshot.forEach(function (doc) {
                     let data = doc.data()

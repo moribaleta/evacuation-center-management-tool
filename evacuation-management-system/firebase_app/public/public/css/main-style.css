@@ -133,7 +133,13 @@ body {
     align-items: center;
 }
 
-.banner-carousel .carousel-inner .carousel-item img {
+.banner-carousel .carousel-inner .item{
+    height: 100%;
+}
+
+.banner-carousel .carousel-inner .carousel-item img,
+.banner-carousel .carousel-inner .item img
+ {
     position: relative;
     background-size: cover;
     height: 100%;
