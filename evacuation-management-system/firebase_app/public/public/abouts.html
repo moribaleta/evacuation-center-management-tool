@@ -33,7 +33,7 @@
 </head>
 
 <body>
-    <nav class="navbar navbar-light bg-light navbar-fixed-top" id="header" attr="gallery">
+    <nav class="navbar navbar-light bg-light navbar-fixed-top" id="header" attr="home">
         <div class="container-fluid">
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
@@ -67,60 +67,52 @@
 
     <div id="post-container">
 
-        <div id="galleryModal" class="modal fade" role="dialog">
-            <div class="modal-dialog" v-if="view_post != null">
-
-                <!-- Modal content-->
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">{{view_post.title}}</h4>
-                    </div>
-                    <div class="modal-body">
-                        <p>{{view_post.description}}</p>
-                        <slideshow-container :images="view_post.images" :cdn="cdn" ></slideshow-container>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-
         <div class="container">
+            
             <div id="jumbotron" class="jumbotron">
                 <!-- <img class="foreground backgroundesources/images/logo1.png"> -->
                 <!-- <img class="foreground" src="resources/images/background.jpg"> -->
                 <p class="time">Today: {{time}}</p>
             </div>
-            <div class="page-header">
-                <h3>Latest Photos</h3>
-            </div>
-            <slideshow-container :images="images" :cdn="cdn"></slideshow-container>
 
 
-            <div class="row" style="padding-left: 10px; padding-right: 10px; margin-top: 10px;">
-                <div class="page-header">
-                    <h3>Gallery</h3>
-                </div>
+            <div v-html="content"></div>
+            <div>&nbsp;</div>
 
-                <div class="row" v-if="posts.length > 0">
-                    <div class="col col-md-4 well well-lg" v-for="(item,index) in posts" v-on:click="viewItem(index)">
-                        <div class="post-list-item">
-                            <img :src="cdn + item.images[0]" alt=""
-                                style="height: 100px; width: '100%'; background-size: contain;">
-                            <h3 class="title">{{item.title}}</h3>
-                            <p class="time">{{item.date_updated}}</p>
+            <div class="section">
+                <h3>Contact Information</h3>
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <div class="row">
+                            <div class="col col-md-12">
+                                <label>Email as @:</label>
+                                <p>{{post.email}}</p>
+                            </div>
                         </div>
-                    </div>
-                </div>
+                    </li>
+                    <li class="list-group-item">
+
+                        <label>Contact Numbers</label>
+                        <ul class="list-group">
+                            <li class="list-group-item" v-for="number,index in post.contact_numbers">
+                                {{number}}
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="list-group-item">
+                        <label>Links</label>
+                        <ul class="list-group">
+                            <li class="list-group-item" v-for="links in post.other_links">
+                                <a :href="links">{{links}}</a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
             </div>
+            <label>{{formatDate(post.date_updated)}}</label>
+            <h6>{{post.created_by}}</h6>
             <div>&nbsp;</div>
         </div>
-
-
 
         <div class="footer">
             <img class="footer-img" src="resources/images/govph-seal-mono-footer.jpg">
@@ -142,39 +134,28 @@
         app = new Vue({
             el: '#post-container',
             data: {
-                posts: [],
-                view_post: null,
-                images: [],
+                post: new PublicContent(),
                 cdn: DataHandlerType.api_host,
-                time: "",
+                content: "",
+                time: ""
             },
             methods: {
                 onStart() {
+                    this.fetchPost()
                     this.onStartTime()
-                    this.fetchData()
-                },
-                fetchData() {
-                    DataHandler.getPublicImages().then((message) => {
-                        this.posts = message.data
-                        this.images = message.data.map((val) => {
-                            return val.images
-                        }).filter((val, index) => {
-                            return index < 10
-                        }).reduce((prev = [], images) => {
-                            return prev.concat(images)
-                        })
+                }, //onStart
 
-                        console.log(this.images)
+                fetchPost() {
+                    DataHandler.getPublicInformation().then((data) => {
+                        this.post = data.data[0] || new PublicInformation()
+                        console.log("entry %o", this.data_input)
+                        return DataHandler.getPublicPostContent(this.post.path)
+                    }).then((data) => {
+                        this.content = data
                     }).catch((error) => {
                         console.log(error)
                     })
-                },
-
-                viewItem(index) {
-                    this.view_post = this.posts[index]
-                    console.log(this.view_post)
-                    $('#galleryModal').modal()
-                },
+                }, //fetchPost
 
             }
         })

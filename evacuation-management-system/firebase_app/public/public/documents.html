@@ -33,7 +33,7 @@
 </head>
 
 <body>
-    <nav class="navbar navbar-light bg-light navbar-fixed-top" id="header" attr="gallery">
+    <nav class="navbar navbar-light bg-light navbar-fixed-top" id="header" attr="events">
         <div class="container-fluid">
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
@@ -67,55 +67,34 @@
 
     <div id="post-container">
 
-        <div id="galleryModal" class="modal fade" role="dialog">
-            <div class="modal-dialog" v-if="view_post != null">
-
-                <!-- Modal content-->
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">{{view_post.title}}</h4>
-                    </div>
-                    <div class="modal-body">
-                        <p>{{view_post.description}}</p>
-                        <slideshow-container :images="view_post.images" :cdn="cdn" ></slideshow-container>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-
         <div class="container">
             <div id="jumbotron" class="jumbotron">
                 <!-- <img class="foreground backgroundesources/images/logo1.png"> -->
                 <!-- <img class="foreground" src="resources/images/background.jpg"> -->
                 <p class="time">Today: {{time}}</p>
             </div>
-            <div class="page-header">
-                <h3>Latest Photos</h3>
-            </div>
-            <slideshow-container :images="images" :cdn="cdn"></slideshow-container>
-
 
             <div class="row" style="padding-left: 10px; padding-right: 10px; margin-top: 10px;">
                 <div class="page-header">
-                    <h3>Gallery</h3>
+                    <h1>Public Documents</h1>
                 </div>
 
-                <div class="row" v-if="posts.length > 0">
-                    <div class="col col-md-4 well well-lg" v-for="(item,index) in posts" v-on:click="viewItem(index)">
-                        <div class="post-list-item">
-                            <img :src="cdn + item.images[0]" alt=""
-                                style="height: 100px; width: '100%'; background-size: contain;">
-                            <h3 class="title">{{item.title}}</h3>
-                            <p class="time">{{item.date_updated}}</p>
+                <div class="col col-md-12" v-for="item,index in posts">
+                    <div class="panel panel-default">
+                        <!-- <img :src="cdn + item.images[0]" alt="" style="height: 100px; width: '100%'; background-size: contain;"> -->
+                        <div class="panel-heading">
+                            <label class="title">{{item.title}}</label>
+                            <p class="time">Date Uploaded: {{formatDate(item.date_updated)}}</p>
+                        </div>
+                        <div class="panel-body">
+                            <p>{{item.description}}</p>
+                        </div>
+                        <div class="panel-footer">
+                            <button class="btn btn-default btn-success" v-on:click="onDownload(index)">download</button>
                         </div>
                     </div>
                 </div>
+
             </div>
             <div>&nbsp;</div>
         </div>
@@ -143,8 +122,6 @@
             el: '#post-container',
             data: {
                 posts: [],
-                view_post: null,
-                images: [],
                 cdn: DataHandlerType.api_host,
                 time: "",
             },
@@ -154,28 +131,20 @@
                     this.fetchData()
                 },
                 fetchData() {
-                    DataHandler.getPublicImages().then((message) => {
+                    DataHandler.getPublicDocuments().then((message) => {
+                        console.log("document_list: %o", message.data)
                         this.posts = message.data
-                        this.images = message.data.map((val) => {
-                            return val.images
-                        }).filter((val, index) => {
-                            return index < 10
-                        }).reduce((prev = [], images) => {
-                            return prev.concat(images)
-                        })
-
-                        console.log(this.images)
-                    }).catch((error) => {
-                        console.log(error)
+                    }).catch(err => {
+                        console.log(err)
                     })
                 },
 
-                viewItem(index) {
-                    this.view_post = this.posts[index]
-                    console.log(this.view_post)
-                    $('#galleryModal').modal()
-                },
-
+                onDownload(index) {
+                    const doc = this.posts[index]
+                    if (doc.path && doc.path != "") {
+                        window.open(this.cdn + `downloadfile.php?file=${encodeURI(doc.path)}`)
+                    }
+                } //onDownload
             }
         })
     </script>
