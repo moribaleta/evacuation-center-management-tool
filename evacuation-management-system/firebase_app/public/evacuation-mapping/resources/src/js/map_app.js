@@ -1,3 +1,7 @@
+
+const { map, filter } = rxjs.operators;
+const { Observable} = rxjs;
+
 /**
  * class defines the marker of the user pinned on the map
  */
@@ -199,28 +203,49 @@ class MapApp {
 
 
     /** function called on get direction from emergency location event*/
-    setDestination(id) {
-
-        let promise = new Promise(async (resolve, reject) => {
+    setDestination() {
+        
+        /* let promise = new Promise(async (resolve, reject) => {
             let evac = this.getAvailableEvacuation()
             resolve(evac)
-        })
+        }) */
 
+        $("#progressDirection").show();
+
+        let obx = new Observable((obs) => {
+            let evac = this.getAvailableEvacuation()
+            obs.next(evac)
+            obs.complete()
+        })
+        
+        obx.subscribe({
+            next(evacs) { 
+                mapApp.showDetail(evacs, this.emergency_marker);
+                $("#button_modal").click();
+                console.log('got value ' + x);
+            },
+            error(err) { console.error('something wrong occurred: ' + err); },
+            complete() { 
+                $("#progressDirection").hide();
+             }
+        });
+        
         //let evacs = this.getAvailableEvacuation()
         $("#progressDirection").show();
-        promise.then((evacs) => {
+        /* promise.then((evacs) => {
+            
             var path_detail = MapRouter.getNearestEvacuation(evacs, this.emergency_marker);
             this.showDetail(path_detail, this.emergency_marker);
             $("#progressDirection").hide();
             $("#button_modal").click();
-        })
+        }) */
         
     } //setDestination
 
 
     /** TODO use MOABC here
      * returns a list of evacuation center available */
-    async getAvailableEvacuation() {
+    getAvailableEvacuation() {
         
         console.log("history list %o", this.history_list)
         console.log("params %o", this.model_param)
@@ -290,7 +315,6 @@ class MapApp {
 
     /** gets the current location of the user */
     getLocation() {
-        
         if (navigator.geolocation) {
             console.log("getting location")
             //$("#progressDirection").show();
