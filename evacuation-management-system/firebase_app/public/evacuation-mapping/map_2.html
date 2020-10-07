@@ -88,40 +88,43 @@
             <div class="modal-content" id="modal-body">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title">Evacuation Route Directions</h4>
+                    <h4 class="modal-title">Evacuation Recommendation Results</h4>
                 </div>
                 <div class="modal-body">
                     <!--<div class="container">-->
                     <div class="panel panel-default">
                         <div class="panel-body" v-if='items!=null'>
-                            <div class="panel panel-default" v-for='test,index in test_outputs'>
+                            <div class="panel panel-default" v-for='test,index in items'>
                                 <div class="panel-heading success">{{(index+1)+". "}} Name: {{test.evac.name}}</div>
                                 <div class="panel-body">
-                                    <div class="col-sm-4">Distance: {{items[index].distance+" km"}}</div>
-                                    <div class="col-sm-2">Capacity: {{test.evac.population_capacity}}</div>
-                                    <div class="col-sm-2">Floor Space: {{test.evac.floor_space}}</div>
-                                    <div class="col-sm-2">Objective Output: {{test.conflicts.toFixed(4)}}
+                                    <div class="col-md-4">Distance: {{test.evac.distance+" km"}}</div>
+                                    <div class="col-md-2">Capacity: {{test.evac.population_capacity}}</div>
+                                    <div class="col-md-2">Floor Space: {{test.evac.floor_space}}</div>
+                                    <div class="col-md-2">Objective Output: {{test.conflicts.toFixed(4)}}
                                     </div>
-                                    <div class="col-sm-2">Fitness Output: {{test.fitness.toFixed(4)}}</div>
+                                    <div class="col-md-2">Fitness Output: {{test.fitness.toFixed(4)}}</div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
 
-                    <div class="panel panel-default" v-if='winner!=null'>
-                        <div class="panel-heading">The Best:</div>
+                    <div class="panel panel-success" v-if='winner!=null'>
+                        <div class="panel-heading">The Best: {{winner.evac.name}}</div>
                         <div class="panel-body">
-                            <div class="col-sm-7">{{winner.evacuation_detail.name}}</div>
-                            <div class="col-sm-2">{{winner.distance+" km"}}</div>
+                            <div class="col-md-4">Distance: {{winner.evac.distance+" km"}}</div>
+                            <div class="col-md-2">Capacity: {{winner.evac.population_capacity}}</div>
+                            <div class="col-md-2">Floor Space: {{winner.evac.floor_space}}</div>
+                            <div class="col-md-2">Objective Output: {{winner.conflicts.toFixed(4)}}
+                            </div>
+                            <div class="col-md-2">Fitness Output: {{winner.fitness.toFixed(4)}}</div>
                         </div>
                     </div>
                     <!--</div>-->
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-success" v-on:click="proceed()">Proceed</button>
-                    <button type="button" id='button-modal-close' class="btn btn-danger"
-                        data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-success" v-on:click="proceed()" data-dismiss="modal">Proceed</button>
+                    <button type="button" id='button-modal-close' class="btn btn-danger" data-dismiss="modal">Close</button>
                 </div>
             </div>
 
