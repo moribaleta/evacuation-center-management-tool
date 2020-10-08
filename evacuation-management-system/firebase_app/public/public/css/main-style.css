@@ -431,3 +431,22 @@ body {
     }
 
 }
+
+/*content*/
+.table-container {
+    height: 100%;
+    /* min-height: 700px; */
+    overflow: auto;
+    max-height: 800px;
+    padding: 10px;
+}
+
+.item-info {
+    display: flex;
+    flex-direction: row;
+}
+
+.item-info .item-label {
+    font-weight: 700;
+    margin-right: 10px;
+}

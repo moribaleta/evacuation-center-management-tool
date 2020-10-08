@@ -663,6 +663,22 @@ class PublicUser extends Model {
         medical_needs: 'Medical Needs',
     }
 
+    static visiblekeys = [
+        'firstname',
+        'lastname',
+        'middleinit',
+        'municipality',
+        'username',
+        'email',
+        'birthdate',
+        'phone_number',
+        'address',
+        'sex',
+        'disabilities',
+        'employment',
+        'medical_needs',
+    ]
+
     /** defines the form of the model to be shown to create an entry */
     static formModel = {
         firstname: {

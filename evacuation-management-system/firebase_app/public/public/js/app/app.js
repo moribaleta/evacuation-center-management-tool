@@ -40,6 +40,20 @@ var header = new Vue({
                 icon: 'info',
                 title: 'ABOUTS'
             },
+        ],
+        right_header: [
+            {
+                id: 'users',
+                href:'users.html',
+                icon: 'glyphicon-user',
+                title: 'Users'
+            },
+            {
+                id: 'donors',
+                href: 'donors.html',
+                icon: 'glyphicon-gift',
+                title: 'Donors'
+            }
         ]
     },
     methods: {

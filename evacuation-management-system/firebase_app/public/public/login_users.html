@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>iEvacuate</title>
+    <link rel="shortcut icon" href="resources/images/logo.png" />
+    
+    <!-- update the version number as needed -->
+    <script defer src="/__/firebase/7.19.1/firebase-app.js"></script>
+    <!-- include only the Firebase features as you need -->
+    <script defer src="/__/firebase/7.19.1/firebase-auth.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-database.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-messaging.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-storage.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-firestore.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-functions.js"></script>
+    <!-- initialize the SDK after all desired features are loaded -->
+    <script defer src="/__/firebase/init.js"></script>
+    
+    <!-- CSS  -->
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <script src="js/jquery-3.0.0.min.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.2.2/jquery.form.min.js"></script>
+    
+    <link href="css/main-style.css" rel="stylesheet">
+    <script src="js/vue.js"></script>
+    <!-- <script src="js/materialize.js"></script> -->
+    <script src="../_global/js/objects.js"></script>
+    <script src="../_global/js/utilities.js"></script>
+    
+    <style>
+        .login-page {
+            width: 360px;
+            padding: 8% 0 0;
+            margin: auto;
+        }
+        
+        .form {
+            position: relative;
+            z-index: 1;
+            background: rgba(255, 255, 255, 0.9);
+            width: 100%;
+            max-width: 350px;
+            margin: 0 auto 100px;
+            padding: 45px;
+            text-align: center;
+            border-radius: 8px;
+            box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+        }
+        
+        .header-container {
+            display: flex;
+            /* height: 200px; */
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .header-image {
+            height: 150px;
+            width: auto;
+        }
+        
+        .header-title {}
+        
+        
+        .form input {
+            font-family: "Roboto", sans-serif;
+            outline: 0;
+            background: #f2f2f2;
+            width: 100%;
+            margin: 0 0 15px;
+            padding: 15px;
+            box-sizing: border-box;
+            font-size: 14px;
+            border: solid 1px rgb(187, 187, 187);
+            border-radius: 8px;
+        }
+        
+        .form button {
+            font-family: "Roboto", sans-serif;
+            text-transform: uppercase;
+            outline: 0;
+            background: #4AC1E2;
+            width: 100%;
+            border: 0;
+            padding: 15px;
+            color: #FFFFFF;
+            font-size: 14px;
+            
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all .3s ease-in-out
+        }
+        
+        .form button:hover,
+        .form button:active,
+        .form button:focus {
+            background: #1D6E83;
+        }
+        
+        .form .message {
+            margin: 15px 0 0;
+            color: #b3b3b3;
+            font-size: 12px;
+        }
+        
+        .form .message a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+        
+        .form .register-form {
+            display: none;
+        }
+        
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+        
+        .container:before,
+        .container:after {
+            content: "";
+            display: block;
+            clear: both;
+        }
+        
+        .container .info {
+            margin: 50px auto;
+            text-align: center;
+        }
+        
+        .container .info h1 {
+            margin: 0 0 15px;
+            padding: 0;
+            font-size: 36px;
+            font-weight: 300;
+            color: #1a1a1a;
+        }
+        
+        .container .info span {
+            color: #4d4d4d;
+            font-size: 12px;
+        }
+        
+        .container .info span a {
+            color: #000000;
+            text-decoration: none;
+        }
+        
+        .container .info span .fa {
+            color: #EF3B3A;
+        }
+        
+        .loader {
+            flex: 1;
+            display: inline-flex;
+            border: 10px solid #f3f3f3;
+            /* Light grey */
+            border-top: 10px solid #3498db;
+            /* Blue */
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        
+        body {
+            background-image: url('resources/images/background.jpg');
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-light bg-light navbar-fixed-top" id="header" attr="home">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="index.html">
+                    <p class="img-large">GOV PH</p>
+                    <img class="img-small" src="resources/images/logo.png">
+                </a>
+            </div>
+            
+            <div class="collapse navbar-collapse" id="myNavbar">
+                <img class="img-small" src="resources/images/logo.png">
+                <ul class="nav navbar-nav">
+                    <li v-for="item in header_items"  :class="active == item.id ? 'active' : ''">
+                        <a :href="item.href">{{item.title}}</a>
+                    </li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                        <li v-for="item in right_header">
+                            <a :href="item.href" >
+                                <span :class="'glyphicon '+item.icon"></span>
+                                {{item.title}}
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        
+        
+        
+        <div id="container">
+            
+            <div class="login-page" id='content'>
+                <div class="form">
+                    
+                    <div class="header-container">
+                        <img class="header-image" src="resources/images/logo.png">
+                        <h1 class="header-title">iEvacuate</h1>
+                    </div>
+                    <div class="loader" v-if="isloading"></div>
+                    <div class="login-form" v-if="!isloading">
+                        <input type="text" placeholder="username" v-model="username" />
+                        <input type="password" placeholder="password" v-model="password" />
+                        <button v-on:click="onLogin">login</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer">
+                <img class="footer-img" src="resources/images/govph-seal-mono-footer.jpg">
+                <div class="footer-item">
+                    <p class="footer-label">REPUBLIC OF THE PHILIPPINES</p>
+                    <p>All content is in the public domain unless otherwise stated.</p>
+                </div>
+            </div>
+            
+        </div>
+        
+        
+        <!--  Scripts-->
+        <script src="js/app/datahandler.js"></script>
+        <script src="js/app/app.js"></script>
+        
+        
+        <script>
+            var app = new Vue({
+                el: '#container',
+                data: {
+                    username: null,
+                    password: null,
+                    cdn: DataHandlerType.api_host,
+                },
+                methods: {
+                    onStart() {
+                        const localuser = localStorage.getItem('user') || "{}"
+                        if (localuser != "{}") {
+                            window.open('users.html','_self')
+                        } 
+                    }, //onStart
+                    
+                    onLogin() {
+                        DataHandler.loginPublicUser(this.username, this.password)
+                        .then((message) => {
+                            if (message.error) {
+                                throw message.error
+                            } else {
+                                alert("Login Success")
+                                let user = message.data
+                                localStorage.setItem('user', JSON.stringify(user.toObject()))
+                                window.open('users.html','_self')
+                            }
+                        }).catch((error) => {
+                            console.log(error)
+                            AlertMesssages.error(error)
+                        })
+                    },
+                    
+                }
+            })
+            
+        </script>
+        <script src="js/jumbotron.js"></script>
+    </body>
+    
+    </html>

@@ -55,9 +55,15 @@
                     </li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
-                    <li><a href="https://bfpforecast.000webhostapp.com/admin/login.html?"><span
+                    <!-- <li><a href="https://bfpforecast.000webhostapp.com/admin/login.html?"><span
                                 class="glyphicon glyphicon-user"></span>
-                            Login</a></li>
+                            Login</a></li> -->
+                            <li v-for="item in right_header">
+                                <a :href="item.href" >
+                                    <span :class="'glyphicon '+item.icon"></span>
+                                    {{item.title}}
+                                </a>
+                            </li>
                 </ul>
             </div>
         </div>
@@ -78,7 +84,7 @@
                 <div class="page-header">
                     <h1>Maps</h1>
                 </div>
-                <iframe src="../evacuation-mapping/map_2.html" style="height: 650px; width: 100%;"></iframe>
+                <iframe src="../evacuation-mapping/map_2.html" style="height: 650px; width: 100%; border-width: 0;"></iframe>
             </div>
             <div>&nbsp;</div>
         </div>

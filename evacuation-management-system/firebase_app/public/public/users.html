@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>iEvacuate</title>
     <link rel="shortcut icon" href="resources/images/logo.png" />
-
+    
     <!-- update the version number as needed -->
     <script defer src="/__/firebase/7.19.1/firebase-app.js"></script>
     <!-- include only the Firebase features as you need -->
@@ -18,18 +18,19 @@
     <script defer src="/__/firebase/7.19.1/firebase-functions.js"></script>
     <!-- initialize the SDK after all desired features are loaded -->
     <script defer src="/__/firebase/init.js"></script>
-
+    
     <!-- CSS  -->
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <script src="js/jquery-3.0.0.min.js"></script>
     <script src="bootstrap/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.2.2/jquery.form.min.js"></script>
-
+    
     <link href="css/main-style.css" rel="stylesheet">
     <script src="js/vue.js"></script>
     <!-- <script src="js/materialize.js"></script> -->
     <script src="../_global/js/objects.js"></script>
     <script src="../_global/js/utilities.js"></script>
+    
 </head>
 
 <body>
@@ -46,7 +47,7 @@
                     <img class="img-small" src="resources/images/logo.png">
                 </a>
             </div>
-
+            
             <div class="collapse navbar-collapse" id="myNavbar">
                 <img class="img-small" src="resources/images/logo.png">
                 <ul class="nav navbar-nav">
@@ -55,22 +56,19 @@
                     </li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
-                    <!-- <li><a href="https://bfpforecast.000webhostapp.com/admin/login.html?"><span
-                                class="glyphicon glyphicon-user"></span>
-                            Login</a></li> -->
-                            <li v-for="item in right_header">
-                                <a :href="item.href" >
-                                    <span :class="'glyphicon '+item.icon"></span>
-                                    {{item.title}}
-                                </a>
-                            </li>
+                    <li v-for="item in right_header">
+                        <a :href="item.href" >
+                            <span :class="'glyphicon '+item.icon"></span>
+                            {{item.title}}
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>
     </nav>
-
     
-
+    
+    
     <div id="post-container">
         <div class="container">
             <div id="jumbotron" class="jumbotron">
@@ -79,41 +77,80 @@
                 <p class="time">Today: {{time}}</p>
             </div>
             <div>&nbsp;</div>
-            <slideshow-container :images="images" :cdn="cdn" ></slideshow-container>
-            <div class="row" style="padding-left: 10px; padding-right: 10px; margin-top: 10px;">
-                <div class="col col-md-9">
-                    <div class="page-header">
-                        <h1>News and Articles</h1>
+            
+            <div class="page-header">
+                <h1>Public User</h1>
+            </div>
+            
+            <div class="table-container" id="tableData">
+                <div class="well">
+                    <div class="row" v-if="user != null">
+                        <div class="col col-md-6 item-info" v-for="key,index in headers" v-if="key !='id'">
+                            <p class="item-label">
+                                {{key}}:
+                            </p>
+                            <p class="item-value" v-if="key != 'sex'">
+                                {{user[key] || '--'}}
+                            </p>
+                            <p class="item-value" v-if="key == 'sex'">
+                                {{user[key] == 0 ? 'Male' : 'Female'}}
+                            </p>
+                        </div>
+                        
+                        <div class="col col-xs-12">
+                            <button class="btn btn-default btn-info" href="#dependentrow"
+                            data-toggle="collapse">View Dependents</button>
+                            <button class="btn btn-default btn-info" v-on:click="onEditItem()">edit</button>
+                        </div>
                     </div>
-    
-                    <ul class="list grid" v-if="posts.length > 0">
-                        <li class="row well well-lg" v-for="(item,index) in posts" v-on:click="viewItem(index)">                        
-                            <div class="post-list-item">
-                                <h3 class="title">{{item.title}}</h3>
-                                <p class="time">{{item.date_updated}}</p>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-    
-                <div class="col col-md-3">
-                    <div class="page-header">
-                        <h3>Events</h3>
-                        <a href="events.html">view all</a>
+                    
+                    <div id="dependentrow" class="panel-collapse collapse">
+                        <div class="panel-body">
+                            <ul class="list-group">
+                                <li class="list-group-item" v-if="!user.dependents || user.dependents.length <= 0">
+                                    <p>No Dependents</p>
+                                </li>
+                                
+                                <li class="list-group-item" v-for="dependent,index in user.dependents">
+                                    <!-- <img :src="cdn+image" class="img-thumbnail img-grid"/> -->
+                                    <div class="row">
+                                        <div class="col col-md-4 item-info" v-for="key,index in dependentsHeaders"
+                                        v-if="key !='id'">
+                                        <p class="item-label">
+                                            {{formModel[key].title}}:
+                                        </p>
+                                        <p class="item-value" v-if="key != 'sex'">
+                                            {{dependent[key] || '--'}}
+                                        </p>
+                                        <p class="item-value" v-if="key == 'sex'">
+                                            {{dependent[key] == 0 ? 'Male' : 'Female'}}
+                                        </p>
+                                    </div>
+                                    <div class="col col-xs-12">
+                                        <button class="btn btn-default btn-info"
+                                        v-on:click="onEditDependent(user.id,index)">edit</button>
+                                        <button class="btn btn-default btn-danger"
+                                        v-on:click="onDeleteDependent(user.id, index)">delete</button>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
                     </div>
-                    <ul class="list grid">
-                        <li class="well well-sm"v-for="event in events">
-                            <div class="post-list-item">
-                                <h6 class="title">{{event.title}}</h6>
-                                <p class="time">{{event.date_start}}</p>
+                    <div class="panel-footer">
+                        <div class="row">
+                            <button class="btn btn-default btn-info" v-on:click="onAddNewDependent(index)">Add New
+                                Dependent</button>
                             </div>
-                        </li>
-                    </ul>
+                        </div>
+                    </div>
+                    
                 </div>
+                
+                
             </div>
         </div>
         
-
+        
         <div class="footer">
             <img class="footer-img" src="resources/images/govph-seal-mono-footer.jpg">
             <div class="footer-item">
@@ -121,24 +158,27 @@
                 <p>All content is in the public domain unless otherwise stated.</p>
             </div>
         </div>
-
+        
     </div>
-
-
+    
+    
     <!--  Scripts-->
     <script src="js/app/datahandler.js"></script>
     <script src="js/app/app.js"></script>
     
-
+    
     <script>
         
         app = new Vue({
             el: '#post-container',
             data: {
-                posts: [],
-                events: [],
-                images: [],
+                reports: [],
+                history: [],
+                user: null,
+                headers: PublicUser.visiblekeys,
+                dependentsHeaders: DependentUser.formDependent,
                 cdn: DataHandlerType.api_host,
+                formModel: PublicUser.formModel,
                 time: "",
             },
             methods: {
@@ -147,8 +187,18 @@
                     this.fetchData()
                 },
                 fetchData() {
-
-                    DataHandler.getPublicImages().then((message) => {
+                    
+                    const localuser = localStorage.getItem('user') || "{}"
+                    if (localuser != "{}") {
+                        this.user = PublicUser.parse(JSON.parse(localuser))
+                    } else {
+                        window.open('login_users.html','_self')
+                        return
+                    }
+                    
+                    //DataHandler.getUserHistory(this.user.id).then()
+                    
+                    /* DataHandler.getPublicImages().then((message) => {
                         this.images = message.data.map((val) => {
                             return val.images
                         }).filter((val, index) => {return index < 10}).reduce((prev = [],images) => {
@@ -158,7 +208,7 @@
                     }).catch((error) => {
                         console.log(error)
                     })
-
+                    
                     DataHandler.getContentPost().then((message) => {
                         this.posts = message.data
                     }).catch((error) => {
@@ -169,8 +219,8 @@
                         this.events = message.data
                     }).catch((err) => {
                         console.log(err)
-                    })
-
+                    }) */
+                    
                 },
                 
                 viewItem(index) {
@@ -178,7 +228,7 @@
                 },
             }
         })
-
+        
     </script>
 </body>
 
