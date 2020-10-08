@@ -54,6 +54,7 @@ class EmergencyMarker extends Model {
 class EvacuationMarker extends EmergencyMarker {
 
     evacuation_center = new EvacuationCenter()
+    nearest_node
 
     constructor(id, position, marker, evacuation) {
         super()
@@ -61,6 +62,7 @@ class EvacuationMarker extends EmergencyMarker {
         this.position = position
         this.marker = marker
         this.evacuation_center = evacuation
+        this.nearest
     }
 
     static create(evac, position, map) {
@@ -96,7 +98,7 @@ class EvacuationMarker extends EmergencyMarker {
 
         return new EvacuationMarker(id, position, emergencymarker, evac)
     }
-}
+}//EvacuationMarker
 
 /**
  * class app of the map
@@ -114,6 +116,7 @@ class MapApp {
 
     /** contains all the history of the evacuation centers */
     history_list = []
+
     /** defines the parameters of the MOAB*/
     model_param = {}
 
@@ -133,11 +136,21 @@ class MapApp {
     initializeMap() {
         DataHandler.configure()
         MapHandler.configure(document.getElementById('map'), this.map_boundaries, this.onPlaceMarker)
-        let promiseEvac = this.initEvacuationCenters()
-        let promiseRoute = this.initializeMapRouter()
+        
+        const promiseRoute  = this.initializeMapRouter()
+        const promiseEvac   = this.initEvacuationCenters()
+        
 
-        Promise.all([promiseEvac, promiseRoute]).then((val) => {
+        /* Promise.all(promiseRoute,promiseEvac).then((val) => {
             $("#progressDirection").hide();
+        }).catch((err) => {
+            console.log(err)
+        }) */
+        promiseRoute.then(() => {
+            return promiseEvac
+        }).then(() => {
+            $("#progressDirection").hide();
+            this.getNearestNodeForEvacs()
         }).catch((err) => {
             console.log(err)
         })
@@ -181,7 +194,8 @@ class MapApp {
                 this.evacuation_center_list.forEach(evac => {
                     var position = new google.maps.LatLng(evac.location.lat, evac.location.lng);
                     bounds.extend(position);
-                    this.evacuation_center_markers.push(EvacuationMarker.create(evac, position, MapHandler.map))
+                    const marker  = EvacuationMarker.create(evac, position, MapHandler.map)
+                    this.evacuation_center_markers.push(marker)
                     MapHandler.map.fitBounds(bounds);
                 });
                 resolve(true)
@@ -191,6 +205,24 @@ class MapApp {
             })
         })
     } //initEvacuationCenters
+
+    getNearestNodeForEvacs(){
+        this.evacuation_center_list.forEach((evac) => {
+
+            let index = MapRouter.getNearest(evac.location)
+            let nearest = MapRouter.tree[index]
+
+            evac['node'] = nearest
+
+            var position = new google.maps.LatLng(nearest.coordinates.lat, nearest.coordinates.lng);
+            
+            var nearestmarker = new google.maps.Marker({
+                position: position,
+                map: MapHandler.map,
+                icon: 'resources/images/border-dot-point-25-good.png',
+            });
+        })
+    }
 
     /** function called when the user click on the screen */
     onPlaceMarker(position) {
@@ -243,19 +275,28 @@ class MapApp {
 
         console.log("pos: %o %o", this.emergency_marker.position.lat(), this.emergency_marker.position.lng())
 
+        const emergency_location = {
+            lat: this.emergency_marker.position.lat(),
+            lng: this.emergency_marker.position.lng()
+        }
+
+        const emergency_node = MapRouter.getNearestNode(emergency_location)
+
         //FILTER LIST BASED ON ITS DISTANCE FROM THE ORIGIN
         const _filter_evacs = this.evacuation_center_list.map((evac) => {
-            let emergency_elem = {
+            /* let emergency_elem = {
                 lat: this.emergency_marker.position.lat(),
                 lng: this.emergency_marker.position.lng()
-            }
-            let evac_location = {
+            } */
+            /* let evac_location = {
                 lat: evac.location.lat,
                 lng: evac.location.lng
-            }
+            } */
             //let distance = DistanceCalculator.calculate(emergency_elem, evac_location, 'km')
-            let distance = MapRouter.getPathDistance(emergency_elem, evac_location)
-            evac['distance'] = distance
+            //let distance = MapRouter.getPathDistance(emergency_elem, evac_location)
+            let distance = MapRouter.getPathOfTwoPoints(emergency_node, evac.node, emergency_location, evac.location)
+            console.log("distance %o", distance)
+            evac['distance'] = distance.distance
             return evac
         }).filter((evac) => {
             return evac.distance < 30
@@ -523,23 +564,40 @@ class MapRouterClass {
         }
     } //initializeDjikstra
 
-    /** gets the nearest node based on the distance */
+    /**returns the index of the nearest node based on the distance */
     getNearest(location) {
-        var min = Infinity;
+        var min = 100;
         var winner = null;
-        for (var i = 0; i < this.tree.length; i++) {
-            var distance = getdistance(
+        //split the search in two parts to decrease runtime
+        for (var i = 0, j = this.tree.length - 1; i < this.tree.length / 2; i++, j--) {
+            let distance1 = getdistance(
                             location.lat,
                             this.tree[i].coordinates.lat,
                             location.lng,
                             this.tree[i].coordinates.lng);
-            if (distance < min) {
-                winner = i;
-                min = distance;
+
+            let distance2 = getdistance(
+                            location.lat,
+                            this.tree[j].coordinates.lat,
+                            location.lng,
+                            this.tree[j].coordinates.lng);
+            
+            const distance = distance1 < distance2 ? {val: distance1, index: i} : {val: distance2, index: j}
+
+            if (distance.val < min) {
+                winner = distance.index;
+                min = distance.val;
             }
         }
+        
         return winner;
     } //getNearest
+
+    /** returns the neareast node from the tree of a given location */
+    getNearestNode(location){
+        const i = this.getNearest(location)
+        return this.tree[i]
+    }
 
     /** nearest evacuation center */
     getNearestEvacuation(evacuation = [], emergency) {
@@ -647,43 +705,54 @@ class MapRouterClass {
     } //getNearestEvacuation
 
 
+    /** returns the path generated between two locations */
     getPathDistance(location1, location2) {
+        let node1 = this.getNearestNode(location1)
+        let node2 = this.getNearestNode(location2)
+        return this.getPathOfTwoPoints(node1, node2, location1, location2)
+    }
 
-        let node1 = this.getNearest(location1)
-        let node2 = this.getNearest(location2)
+    /** returns the path generated between two points */
+    getPathOfTwoPoints(node1, node2, location1, location2) {
 
-        console.log("%o", location1)
-        console.log("%o", location2)
+        console.log("%o %o",node1,node2)
 
-        const start = this.tree[node1].node_id;
-        const finish = this.tree[node2].node_id;
+        const start     = node1.node_id;
+        const finish    = node2.node_id;
 
-        var path = this.djikstra.shortestPath(start + '', finish + '').concat([start + '']).reverse();
+        const path      = this.djikstra.shortestPath(start + '', finish + '').concat([start + '']).reverse()
 
-        var path_data = [];
-        for (var i = 0; i < path.length; i++) {
+        //var path_data = [];
+        
+        /* for (var i = 0; i < path.length; i++) {
             for (var j = 0; j < this.tree.length; j++) {
                 if (this.tree[j].node_id == Number.parseInt(path[i])) {
                     path_data.push(this.tree[j]);
                 }
             }
-        }
+        } */
+        const path_data = this.tree.filter((node) => {
+            return path.includes(node.node_id + "")
+        })
+
+        console.log(path)
+
         //initial distance from evacuation to nearest coordinate
-        var path_distance = getdistance(path_data[0].coordinates.lat, location2.lat,
-            path_data[0].coordinates.lng, location2.lng);
+        var distance = getdistance(path_data[0].coordinates.lat, location1.lat, path_data[0].coordinates.lng, location1.lng);
+        
 
         for (var i = 0; i < path_data.length - 1; i++) {
-            path_distance += Number.parseFloat(getdistance(
+            distance += Number.parseFloat(getdistance(
                 path_data[i].coordinates.lat, path_data[i + 1].coordinates.lat,
                 path_data[i].coordinates.lng, path_data[i + 1].coordinates.lng
             ));
         }
 
         //added distance from emergency location to nearest coordinate
-        path_distance += getdistance(path_data[path_data.length - 1].coordinates.lat, location2.lat,
-            path_data[path_data.length - 1].coordinates.lng, location2.lng);
+        distance += getdistance(path_data[path_data.length - 1].coordinates.lat, location2.lat,
+                                        path_data[path_data.length - 1].coordinates.lng, location2.lng);
 
-        return path_distance
+        return {path, distance}
     }
 
 
