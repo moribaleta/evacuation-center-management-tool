@@ -95,3 +95,19 @@ function saveTextAsFile(title, text) {
     downloadLink.click();
 }//saveTextAsFile
 
+/** search an object from a given string */
+function SearchObject(object = {}, searchTerm = "") {
+    let filter = Object.keys(object).filter((key) => {
+        return (object[key] + "").toLowerCase().includes(searchTerm.toLowerCase())
+    })
+    return filter.length > 0;
+}
+
+
+Array.prototype.isEmpty = function() {
+    return this.length <= 0
+}
+
+String.prototype.isEmpty = function () {
+    return this.length <= 0
+}

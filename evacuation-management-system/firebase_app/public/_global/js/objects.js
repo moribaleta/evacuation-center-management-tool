@@ -923,6 +923,8 @@ class PublicUserHistory extends Model {
     /** date where the user has signed out */
     date_cleared
 
+    
+
     constructor(id, date_created, date_updated, created_by, userid, evac_id, date_admitted, date_cleared) {
         super()
         this.id = id || keyGenID("publicuserhistory") //"publicuserhistory-" + genID(5)

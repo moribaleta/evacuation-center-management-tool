@@ -13,6 +13,7 @@ class UserHandler extends DataHandlerType {
         moabc: 'moabc',
         users: 'users',
         public_user: 'public_user',
+        public_user_history: 'public_user_history',
         donor_organization: 'donor_org',
         donor_individual: 'donor_individual',
         public_document: 'public_document',
@@ -256,11 +257,16 @@ class UserHandler extends DataHandlerType {
 class PublicUserHandler extends UserHandler {
     /* <------------ USER --------------*/
     /** gets user from the database */
-    getPublicUsers(municipality) {
+    getPublicUsers(municipality, id = "") {
         return new Promise((resolve, reject) => {
             const ref = this.firestore.collection(UserHandler.tables.public_user)
-            const query = (municipality != "0") ? ref.where('municipality', '==', municipality) : ref
-            
+            var query = ref
+            if (municipality && !municipality.trim().isEmpty() && municipality != 0) {
+                query = ref.where('municipality', '==', municipality)
+            } else if (!id.trim().isEmpty()) {
+                query = ref.where('id', '==', id)
+            }
+        
             query.get().then(function (querySnapshot) {
                 var users = []
                 querySnapshot.forEach(function (doc) {
@@ -282,7 +288,12 @@ class PublicUserHandler extends UserHandler {
                 
                 var message = new Message()
                 
-                message.data = users
+                if (!id.isEmpty()) {
+                    message.data = users[0]
+                } else {
+                    message.data = users
+                }
+                
                 resolve(message)
             }).catch(function (error) {
                 console.log("Error getting documents: ", error);
@@ -344,6 +355,51 @@ class PublicUserHandler extends UserHandler {
         return this.deleteEntry(id, UserHandler.tables.public_user)
     } //deleteAdminUsers
     /* ------------ USER -------------->*/
+
+    /** returns the public history of the user or general if given empty id */
+    getPublicUserHistory(id) {
+        return new Promise((resolve, reject) => {
+            const ref = this.firestore.collection(UserHandler.tables.public_user_history)
+            //const query = (municipality != "0") ? ref.where('municipality', '==', municipality) : ref
+            const query = (id && !id.isEmpty) ? ref.where('user_id','==', id) : ref
+            
+            query.get().then(function (querySnapshot) {
+                var history = []
+                querySnapshot.forEach(function (doc) {
+                    console.log(doc.id, " => ", doc.data());
+                    let data = doc.data()
+                    let id = doc.id
+                    var object = {
+                        id,
+                        ...data
+                    }
+                    try {
+                        object.date_created = object.date_created.toDate()
+                        object.date_updated = object.date_updated.toDate()
+                    } catch (err) {
+                        console.log(err)
+                    }
+                    history.push(PublicUserHistory.parse(object))
+                });
+                var message = new Message()
+                message.data = history
+                resolve(message)
+            }).catch(function (error) {
+                console.log("Error getting documents: ", error);
+                reject(error)
+            });
+        })
+    }//getPublicUserHistory
+
+    addPublicUserHistory(params = new PublicUserHistory) {
+        return this.addEntry(params.id, params.toObject(), UserHandler.tables.public_user_history)
+    }
+
+    deletePublicUserHistory(id) {
+        return this.deleteEntry(id, UserHandler.tables.public_user_history)
+    }
+
+
 }//PublicUserHandler
 
 /** class functions handles evacuation center data */

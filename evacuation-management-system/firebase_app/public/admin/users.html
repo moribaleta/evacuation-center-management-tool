@@ -63,38 +63,7 @@
                         <h4 class="modal-title">{{isEdit ? 'Edit ': 'Add '}} Account</h4>
                     </div>
                     <div class="modal-body">
-                        <div class="row">
-                            <div class="col col-md-12 input-container" v-for="key in formModelHeaders">
-                                <p>{{formModel[key].title}}</p>
-
-                                <input v-if="formModel[key].type == 'text'" type="text" class="input input-item"
-                                    :id="'input_'+key" v-model="user_input[key]">
-
-                                <input v-if="formModel[key].type == 'password'" type="password" class="input input-item"
-                                    :id="'input_'+key" v-model="user_input[key]">
-
-                                <input v-if="formModel[key].type == 'email'" type="email" class="input input-item"
-                                    :id="'input_'+key" v-model="user_input[key]">
-
-                                <input v-if="formModel[key].type == 'number'" type="number" class="input input-item"
-                                    :id="'input_'+key" v-model="user_input[key]">
-
-                                <input v-if="formModel[key].type == 'date'" type="date" class="input input-item"
-                                    :id="'input_'+key" v-model="user_input[key]">
-
-                                <input v-if="formModel[key].type == 'datetime'" type="datetime" class="input input-item"
-                                    :id="'input_'+key" v-model="user_input[key]">
-
-                                <textarea v-if="formModel[key].type == 'textarea'" class="form-control"
-                                    :id="'input_'+key" name="exact_address" v-model="user_input[key]"></textarea>
-
-                                <select v-if="formModel[key].type == 'dropdown'" class="input input-item input-select"
-                                    :id="'input_'+key" v-model="user_input[key]">
-                                    <option v-for="option in formModel[key].options" :value="option.value">
-                                        {{option.title}}</option>
-                                </select>
-                            </div>
-                        </div>
+                        <form-generator :form="formModel" :input.sync="user_input"></form-generator>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal"
@@ -114,38 +83,7 @@
                         <h4 class="modal-title">{{isEdit ? 'Edit ': 'Add '}} Dependent Account</h4>
                     </div>
                     <div class="modal-body">
-                        <div class="row">
-                            <div class="col col-md-12 input-container" v-for="key in dependentsHeaders">
-                                <p>{{formModel[key].title}}</p>
-
-                                <input v-if="formModel[key].type == 'text'" type="text" class="input input-item"
-                                    :id="'depinput_'+key" v-model="dependent_input[key]">
-
-                                <input v-if="formModel[key].type == 'password'" type="password" class="input input-item"
-                                    :id="'depinput_'+key" v-model="dependent_input[key]">
-
-                                <input v-if="formModel[key].type == 'email'" type="email" class="input input-item"
-                                    :id="'depinput_'+key" v-model="dependent_input[key]">
-
-                                <input v-if="formModel[key].type == 'number'" type="number" class="input input-item"
-                                    :id="'depinput_'+key" v-model="dependent_input[key]">
-
-                                <input v-if="formModel[key].type == 'date'" type="date" class="input input-item"
-                                    :id="'depinput_'+key" v-model="dependent_input[key]">
-
-                                <input v-if="formModel[key].type == 'datetime'" type="datetime" class="input input-item"
-                                    :id="'depinput_'+key" v-model="dependent_input[key]">
-
-                                <textarea v-if="formModel[key].type == 'textarea'" class="form-control"
-                                    :id="'depinput_'+key" name="exact_address" v-model="dependent_input[key]"></textarea>
-
-                                <select v-if="formModel[key].type == 'dropdown'" class="input input-item input-select"
-                                    :id="'depinput_'+key" v-model="dependent_input[key]">
-                                    <option v-for="option in formModel[key].options" :value="option.value">
-                                        {{option.title}}</option>
-                                </select>
-                            </div>
-                        </div>
+                        <form-generator :form="formDependent" :input.sync="dependent_input"></form-generator>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal"
@@ -163,16 +101,65 @@
         <div class="loader-container" v-if="isLoading">
             <div class="loader"></div>
         </div>
+        <div class="well input-container" style="padding:10px; width: 100%; min-height: 70px">
+            <div class="col col-md-1">
+                <p class="input-label">YEAR</p>
+                <select id="input-type" class="input input-select" v-model="filter.year">
+                    <option v-for="(item,index) in selections.years" :selected="index == filter.year ? true : false">{{item ? item : "NOT AVAILABLE"}}</option>
+                </select>
+            </div>
+            <div class="col col-md-2">
+                <p class="input-label">MONTH</p>
+                <select id="input-type" class="input input-select" v-model="filter.month">
+                    <option v-for="(item,index) in selections.months" :selected="index == filter.month ? true : false"> {{item}}</option>
+                </select>
+            </div>
+            <!-- <div class="col col-md-4">
+                <p class="input-label">EVACUATION CENTER</p>
+                <select id="input-district" class="input input-select" v-model="filter.station">
+                    <option :selected="filter.station == 'all' ? true : false"> all</option>
+                    <option v-for="(item,index) in evac_list" :selected="index == filter.station ? true : false"> {{item.name}}</option>
+                </select>
+            </div>
+            <div class="col col-md-2">
+                <p class="input-label">MUNICIPAL</p>
+                <select id="input-district" class="input input-select" v-model="filter.municipal">
+                    <option :selected="filter.municipal == 'all' ? true : false">
+                        all</option>
+                    <option v-for="(item,index) in municipalities" :selected="index == filter.municipal ? true : false">
+                        {{item.toUpperCase()}}</option>
+                </select>
+            </div> -->
+            <div class="col col-md-3 button-filter-container">
+                <div>&nbsp;</div>
+                <button type="button" class="btn btn-warning button-view" v-on:click="filterList()">filter
+                </button>
+                <button type="button" class="btn btn-danger button-view " href="#searchbox" data-toggle="collapse">Show Search
+                </button>
+            </div>
+        </div>
+        <div class="section">
+            <div id="searchbox" class="panel-collapse collapse">
+                <div class="panel-body well">
+                    <p class="input-label">Search</p>
+                    <input id="input_searchTerm" class="input input-text" type="text" v-model="filter.searchTerm" >
+                    <button type="button" class="btn btn-warning button-view" v-on:click="onSearch()">Search
+                    </button>
+                    <button type="button" class="btn btn-danger button-view" v-if="filter.searchTerm.length > 0" v-on:click="onCancelSearch()">Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
         <div class="section" v-if="!isLoading">
             <div class="table-container" id="tableData">
-                <div class="well" v-for="item,index in user_list">
+                <div class="well" v-for="item,index in view_user_list">
                     <div class="row">
-                        <div class="col col-xs-12 item-info">
+                        <div class="col col-md-12 item-info">
                             <p class="item-label">
                                 {{index + 1}}.
                             </p>
                         </div>
-                        <div class="col col-xs-4 item-info" v-for="key,index in headers" v-if="key !='id'">
+                        <div class="col col-md-4 item-info" v-for="key,index in headers" v-if="key !='id'">
                             <p class="item-label">
                                 {{key}}:
                             </p>
@@ -184,9 +171,11 @@
                             </p>
                         </div>
 
-                        <div class="col col-xs-12">
+                        <div class="col col-md-12">
                             <button class="btn btn-default btn-info" :href="'#dependentrow'+index"
                                 data-toggle="collapse">View Dependents</button>
+                            <button class="btn btn-default btn-info" v-on:click="onViewHistory(item.id)">View
+                                History</button>
                             <button class="btn btn-default btn-info" v-on:click="onEditItem(index)">edit</button>
                             <button class="btn btn-default btn-danger" v-on:click="onDeleteItem(index)">delete</button>
                         </div>
@@ -202,7 +191,7 @@
                                 <li class="list-group-item" v-for="dependent,index in item.dependents">
                                     <!-- <img :src="cdn+image" class="img-thumbnail img-grid"/> -->
                                     <div class="row">
-                                        <div class="col col-xs-4 item-info" v-for="key,index in dependentsHeaders"
+                                        <div class="col col-md-4 item-info" v-for="key,index in dependentsHeaders"
                                             v-if="key !='id'">
                                             <p class="item-label">
                                                 {{formModel[key].title}}:
@@ -214,7 +203,7 @@
                                                 {{dependent[key] == 0 ? 'Male' : 'Female'}}
                                             </p>
                                         </div>
-                                        <div class="col col-xs-12">
+                                        <div class="col col-md-12">
                                             <button class="btn btn-default btn-info"
                                                 v-on:click="onEditDependent(item.id,index)">edit</button>
                                             <button class="btn btn-default btn-danger"
@@ -248,11 +237,26 @@
     <script src="js/app/constants.js"></script>
     <script src="js/app/app.js"></script>
     <script>
+        /* let formDependent = DependentUser.formDependent.reduce((prev, key) => {
+            prev = prev || {}
+            prev[key] = PublicUser.formModel[key]
+            console.log("prev %o", prev)
+            return prev
+        }) */
+        var formDependent = {}
+        DependentUser.formDependent.forEach((key) => {
+            formDependent[key] = PublicUser.formModel[key]
+        })
+
+        console.log("formdependent %o", formDependent)
+
         app = new Vue({
             el: '#content',
             data: {
                 user: new AdminUser(),
                 user_list: [],
+
+                view_user_list: [],
 
                 user_input: {},
                 dependent_input: {},
@@ -265,13 +269,56 @@
                 headers: Object.keys(PublicUser.headers),
                 formModelHeaders: Object.keys(PublicUser.formModel),
                 formModel: PublicUser.formModel,
+
                 dependentsHeaders: DependentUser.formDependent,
-                
+                formDependent: formDependent,
+
                 isEdit: false,
 
                 editUserId: null,
                 municipalities: [],
                 isLoading: false,
+
+                filter: {
+                    year: 'all',
+                    month: 'all',
+                    station: 'all',
+                    municipal: 'all',
+                    searchTerm: ''
+                },
+                selections: {
+                    years: ['all'],
+                    months: [
+                        'all',
+                        'JANUARY',
+                        'FEBRUARY',
+                        'MARCH',
+                        'APRIL',
+                        'MAY',
+                        'JUNE',
+                        'JULY',
+                        'AUGUST',
+                        'SEPTEMBER',
+                        'OCTOBER',
+                        'NOVEMBER',
+                        'DECEMBER',
+                    ],
+                    months_only: [
+                        'JANUARY',
+                        'FEBRUARY',
+                        'MARCH',
+                        'APRIL',
+                        'MAY',
+                        'JUNE',
+                        'JULY',
+                        'AUGUST',
+                        'SEPTEMBER',
+                        'OCTOBER',
+                        'NOVEMBER',
+                        'DECEMBER',
+                    ],
+                    stations: ['']
+                },
             },
             methods: {
                 onStart() {
@@ -283,9 +330,8 @@
                             value: municipal
                         }
                     })
-
                     this.fetchUser()
-                },//onStart
+                }, //onStart
 
                 fetchUser() {
                     this.isLoading = true
@@ -296,12 +342,13 @@
                     }).finally(() => {
                         this.isLoading = false
                     })
-                },//fetchUser
+                }, //fetchUser
 
                 setUser(data) {
+                    this.view_user_list = data
                     this.user_list = data
                     console.log("userlist %o", this.user_list)
-                },//setUser
+                }, //setUser
 
                 //<!----------INDEPENDENT-USER--------------
                 onAddNewUser() {
@@ -309,7 +356,7 @@
                     this.user_input.created_by = this.user.id
                     this.isEdit = false
                     $('#userModal').modal()
-                },//onAddNewUser
+                }, //onAddNewUser
 
                 onEditItem(index) {
                     const user = this.user_list[index]
@@ -317,7 +364,7 @@
                     this.user_input = user.toObject()
                     this.user_input.date_updated = new Date()
                     $('#userModal').modal()
-                },//onEditItem
+                }, //onEditItem
 
                 onSaveUser() {
                     const input = PublicUser.parse(this.user_input)
@@ -332,7 +379,7 @@
                     }).catch(error => {
                         console.log(error)
                     })
-                },//onSaveUser
+                }, //onSaveUser
 
                 onDeleteItem(index) {
                     let onConfirm = confirm('Deleting User\nPress confirm to proceed')
@@ -347,21 +394,43 @@
                             }
                         })
                     }
-                },//onDeleteItem
+                }, //onDeleteItem
+
+                onViewHistory(id) {
+                    window.open(`user_history.html?id=${id}`, '_self')
+                }, //onViewHistory
+
+                onSearch(){
+                    this.view_user_list = this.user_list.filter((user) => {
+                        const _user = user.toObject()
+                        let contains_user = SearchObject(_user, this.filter.searchTerm)
+                        let contains_dep = user.dependents.filter((dependent) => {
+                            return SearchObject(dependent.toObject(), this.filter.searchTerm)
+                        })
+                        return contains_user || (contains_dep.length > 0)
+                    })
+                    console.log("searchTerm %o",this.filter.searchTerm)
+                    console.log("onSearch %o",this.view_user_list)
+                },
+                
+                onCancelSearch() {
+                    this.filter.searchTerm = ""
+                    this.view_user_list = this.user_list
+                },
                 //----------INDEPENDENT-USER--------------!>
 
                 //<!----------DEPENDENT-USER-----------------
                 onAddNewDependent(index) {
-                    if(!this.user_list[index]) {
+                    if (!this.user_list[index]) {
                         return
                     }
-                    
+
                     this.isEdit = false
                     this.edit_dependent.user_index = index
                     this.dependent_input = (new DependentUser()).toObject()
                     this.dependent_input.created_by = this.user.id
                     $('#dependentModal').modal()
-                },//onAddNewDependent
+                }, //onAddNewDependent
 
                 onEditDependent(id, dep_index) {
                     let user_index = this.user_list.findIndex((val) => {
@@ -377,7 +446,7 @@
                         this.dependent_input.date_updated = new Date()
                         $('#dependentModal').modal()
                     }
-                },//onEditDependent
+                }, //onEditDependent
 
                 onSaveDependent() {
 
@@ -387,7 +456,7 @@
                     if (this.edit_dependent.user_index == undefined || this.edit_dependent.user_index == null) {
                         return
                     }
-                    
+
                     const user_index = this.edit_dependent.user_index
                     const dep_index = this.edit_dependent.dep_index
 
@@ -409,7 +478,7 @@
                     }).catch(err => {
                         console.log(err)
                     })
-                },//onSaveDependent
+                }, //onSaveDependent
 
                 onDeleteDependent(id, index) {
 
@@ -433,7 +502,7 @@
                             console.log(err)
                         })
                     }
-                },//onDeleteDependent
+                }, //onDeleteDependent
 
                 //----------DEPENDENT-USER-----------------!>
 
