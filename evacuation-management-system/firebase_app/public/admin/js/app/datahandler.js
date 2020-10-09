@@ -361,8 +361,10 @@ class PublicUserHandler extends UserHandler {
         return new Promise((resolve, reject) => {
             const ref = this.firestore.collection(UserHandler.tables.public_user_history)
             //const query = (municipality != "0") ? ref.where('municipality', '==', municipality) : ref
-            const query = (id && !id.isEmpty) ? ref.where('user_id','==', id) : ref
+            var query = (id && !id.isEmpty) ? ref.where('user_id','==', id) : ref
             
+            query = query.orderBy('date_admitted', 'desc')
+
             query.get().then(function (querySnapshot) {
                 var history = []
                 querySnapshot.forEach(function (doc) {
@@ -376,6 +378,8 @@ class PublicUserHandler extends UserHandler {
                     try {
                         object.date_created = object.date_created.toDate()
                         object.date_updated = object.date_updated.toDate()
+                        object.date_admitted = object.date_admitted.toDate()
+                        object.date_cleared = object.date_cleared.toDate()
                     } catch (err) {
                         console.log(err)
                     }

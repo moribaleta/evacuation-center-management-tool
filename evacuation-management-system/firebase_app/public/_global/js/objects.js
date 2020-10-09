@@ -915,7 +915,7 @@ class DependentUser extends PublicUser {
 class PublicUserHistory extends Model {
 
     /** user id of the history */
-    userid
+    user_id
     /** evac id of the evacuation center*/
     evac_id
     /** date admitted */
@@ -923,17 +923,41 @@ class PublicUserHistory extends Model {
     /** date where the user has signed out */
     date_cleared
 
+    static formModel = {
+        evac_id: {
+            title: 'Evacuation Center', 
+            type: FormModels.dropdown,
+            options: []
+        },
+        date_admitted: {
+            title: 'Date Admitted',
+            type: FormModels.datetime,
+        },
+        date_cleared: {
+            title: 'Date Cleared',
+            type: FormModels.datetime
+        }
+    }
+
+    static headers = [
+        'user_id',
+        'evac_id',
+        'date_admitted',
+        'date_cleared',
+        'date_created',
+        'date_updated'
+    ]
     
 
-    constructor(id, date_created, date_updated, created_by, userid, evac_id, date_admitted, date_cleared) {
+    constructor(id, date_created, date_updated, created_by, user_id, evac_id, date_admitted, date_cleared) {
         super()
         this.id = id || keyGenID("publicuserhistory") //"publicuserhistory-" + genID(5)
-        this.date_created = date_created || new Date()
-        this.date_updated = date_updated || new Date()
-        this.date_admitted = date_admitted || new Date()
-        this.date_cleared = date_cleared || ""
-        this.created_by = created_by || '0'
-        this.userid = userid
+        this.date_created = date_created    || new Date()
+        this.date_updated = date_updated    || new Date()
+        this.date_admitted = date_admitted  || new Date()
+        this.date_cleared = date_cleared    || ""
+        this.created_by = created_by        || '0'
+        this.user_id = user_id
         this.evac_id = evac_id
     }
 
@@ -946,7 +970,7 @@ class PublicUserHistory extends Model {
             date_admitted: this.date_admitted,
             date_cleared: this.date_cleared,
             created_by: this.created_by,
-            userid: this.userid,
+            user_id: this.user_id,
             evac_id: this.evac_id,
         }
     }
@@ -957,7 +981,7 @@ class PublicUserHistory extends Model {
             object.date_created,
             object.date_updated,
             object.created_by,
-            object.userid,
+            object.user_id,
             object.evac_id,
             object.date_admitted,
             object.date_cleared,

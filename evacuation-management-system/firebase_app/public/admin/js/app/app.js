@@ -395,7 +395,7 @@ var municipalities =
         template: 
         `
         <div class="row">
-        <div class="col col-md-12 input-container" v-for="key in headers">
+        <div class="col col-md-12 input-container" v-for="key in headers" v-if="!(form[key].isHidden || false)">
         <p>{{form[key].title}}</p>
         
         <input v-if="form[key].type == 'text'" type="text" class="input input-item"

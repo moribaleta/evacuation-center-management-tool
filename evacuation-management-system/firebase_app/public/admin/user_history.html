@@ -4,7 +4,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>History</title>
+    <title>User</title>
 
     <!-- update the version number as needed -->
     <script defer src="/__/firebase/7.19.1/firebase-app.js"></script>
@@ -31,7 +31,7 @@
 
 <body>
 
-    <div class="sidenav" id="header" attr="history">
+    <div class="sidenav" id="header" attr="users">
         <div class="sidenav-item">
             <img class="nav-image" src="resources/images/logo.png" />
         </div>
@@ -55,72 +55,89 @@
         </div>
     </div>
     <div class="container" id="content">
-
+        <ul class="breadcrumb">
+            <li><a href="users.html">Users</a></li>
+            <li><a href="#">User History</a></li>
+        </ul>
         <!-- MODAL -->
         <div id="editorModal" class="modal fade" role="dialog">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">{{isEdit ? 'Edit ': 'Add '}} Evacuation History</h4>
+                        <h4 class="modal-title">{{isEdit ? 'Edit ': 'Add '}} User History</h4>
                     </div>
                     <div class="modal-body">
-                        <form class="form-horizontal" v-if="data_input != null">
-                            <fieldset>
-
-                                <!-- Select Basic -->
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label" for="evacuation_center">Evacuation
-                                        Center</label>
-                                    <div class="col-md-4">
-                                        <select id="evacuation_center" name="evacuation_center" class="form-control"
-                                            v-model="data_input.evac_id">
-                                            <option v-for="evac in evac_list" v-bind:value="evac.id">
-                                                {{evac.name}}</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <!-- Text input-->
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label" for="name">Population</label>
-                                    <div class="col-md-4">
-                                        <input id="name" name="name" type="text" placeholder="0"
-                                            class="form-control input-md" required="" v-model="data_input.name">
-                                        <span class="help-block">peek population size</span>
-                                    </div>
-                                </div>
-
-                                <!-- Text input-->
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label" for="report_date">Report Date</label>
-                                    <div class="col-md-4">
-                                        <input id="report_date" name="report_date" type="datetime-local"
-                                            class="form-control input-md" v-model="data_input.report_date">
-                                        <span class="help-block">date of entry recorded</span>
-                                    </div>
-                                </div>
-
-                            </fieldset>
-                        </form>
+                        <form-generator :form="formModel" :input.sync="data_input" ></form-generator>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal"
                             v-on:click="saveHistory()">Save</button>
-                        <button type="button" class="btn btn-default" data-dismiss="modal"
-                            v-on:click="close()">Close</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                     </div>
                 </div>
 
             </div>
         </div><!-- MODAL -->
 
+        <h1>Public User History</h1>
+
+        <div class="section">
+        <div class="well">
+                    <div class="row">
+                        <div class="col col-md-4 item-info" v-for="key,index in public_user_headers" v-if="key !='id'">
+                            <p class="item-label">
+                                {{key}}:
+                            </p>
+                            <p class="item-value" v-if="key != 'sex'">
+                                {{public_user[key] || '--'}}
+                            </p>
+                            <p class="item-value" v-if="key == 'sex'">
+                                {{public_user[key] == 0 ? 'Male' : 'Female'}}
+                            </p>
+                        </div>
+
+                        <div class="col col-md-12">
+                            <button class="btn btn-default btn-info" href="#dependentrow"
+                                data-toggle="collapse">View Dependents</button>
+                        </div>
+                    </div>
+
+                    <div id="dependentrow" class="panel-collapse collapse">
+                        <div class="panel-body">
+                            <ul class="list-group">
+                                <li class="list-group-item" v-if="!public_user.dependents || public_user.dependents.length <= 0">
+                                    <p>No Dependents</p>
+                                </li>
+
+                                <li class="list-group-item" v-for="dependent,index in public_user.dependents">
+                                    <!-- <img :src="cdn+image" class="img-thumbnail img-grid"/> -->
+                                    <div class="row">
+                                        <div class="col col-md-4 item-info" v-for="key,index in dependentsHeaders"
+                                            v-if="key !='id'">
+                                            <p class="item-label">
+                                                {{formModel[key].title}}:
+                                            </p>
+                                            <p class="item-value" v-if="key != 'sex'">
+                                                {{dependent[key] || '--'}}
+                                            </p>
+                                            <p class="item-value" v-if="key == 'sex'">
+                                                {{dependent[key] == 0 ? 'Male' : 'Female'}}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                </div>
+        </div>
 
         <!-- CONTENT -->
         <div class="section">
             <!-- HEADER FILTER -->
             <div class="header-container">
-                <h1>Public User History</h1>
                 <div class="well input-container" style="padding:10px; width: 100%; min-height: 70px">
                     <div class="col col-md-1">
                         <p class="input-label">YEAR</p>
@@ -169,7 +186,7 @@
                     <button type="button" class="btn btn-info button-view" v-on:click="addHistory()">
                         ADMIT USER
                     </button>
-                    <button type="button" class="btn btn-info button-view" v-on:click="addHistory()">
+                    <button type="button" class="btn btn-info button-view" v-on:click="addPastHistory()">
                         ADD
                         PAST HISTORY
                     </button>
@@ -193,7 +210,7 @@
                             <div class="col col-md-3 item-info">
                                 <p class="item-value">{{index + 1}}.</p>
                             </div>
-                            <div class="col col-md-3 item-info " v-for="info,index in Object.keys(item)">
+                            <div class="col col-md-3 item-info " v-for="info,index in header">
                                 <div v-if="info == 'evac_id'">
                                     <p class="item-label">EVACUATION NAME</p>
                                     <p class="item-value">{{getEvacFromId(item.evac_id).name}}</p>
@@ -265,11 +282,15 @@
                     station: 'all',
                     municipal: 'all'
                 },
-                data_input: new EvacuationHistory(),
+                data_input: {},
                 municipalities: [],
                 isDataLoading: true,
                 isEdit: false,
-                header: []
+                header: PublicUserHistory.headers,
+                
+                formModel: PublicUserHistory.formModel,
+                public_user_headers: PublicUserHistory.visiblekeys,
+                public_user: new PublicUser(),
             },
             methods: {
                 onStart() {
@@ -277,8 +298,10 @@
                     const queryString = window.location.search;
                     const urlParams = new URLSearchParams(queryString);
                     const id = urlParams.get('id') || null
+                    this.formModel = PublicUserHistory.formModel
                     this.fetchHistory(id)
                     this.municipalities = municipalities
+                    
                 },
 
                 fetchHistory(id, isAll) {
@@ -293,8 +316,10 @@
                     })
 
                     if (id) {
-                        DataHandler.getPublicUsers(this.user.municipality, id).then((message) => {
-                            this.setUser(message.data)
+                        DataHandler.getPublicUsers(null, id).then((message) => {
+                            console.log("public user %o",message.data)
+                            this.public_user = message.data
+                            this.public_user_headers = PublicUser.visiblekeys
                         }).catch(err => {
                             console.log(err)
                         })
@@ -302,6 +327,13 @@
 
                     DataHandler.getEvacuationCenters().then((data) => {
                         this.evac_list = data.data
+
+                        this.formModel.evac_id.options = this.evac_list.map((evac) => {
+                            return  {
+                                title: evac.name,
+                                value: evac.id
+                            }
+                        })
                     }).catch(err => {
                         console.log("err %o", err)
                     })
@@ -320,56 +352,25 @@
                 setData: function (data) {
                     console.log("data %o", data)
                     if (data.length > 0) {
-                        this.header = Object.keys(data[0])
                         this.reports = data
                         this.reports_view = this.reports
                         this.getDistinctParams()
                     }
                 },
 
-                createSampleReport() {
-                    var reports = []
-                    let year = [2018, 2019, 2020]
-                    this.evac_list.forEach((evac = new EvacuationHistory()) => {
-                        year.forEach((year) => {
-                            this.selections.months_only.forEach((month, index) => {
-                                let samplePop = getRandomValue(evac
-                                    .population_capacity / 2, evac
-                                    .population_capacity)
-                                let date = new Date(year, (index + 1), 1);
-                                let history = new EvacuationHistory(null, evac.id,
-                                    samplePop, 0, date, null)
-                                reports.push(history)
-                            })
-                        })
-                    });
-                    DataHandler.setDataEvacuationHistory(reports).then((data) => {
-                        alert("added reports")
-                        this.fetchReports()
-                    }).catch((err) => {
-                        console.log("error")
-                    })
-                },
-
                 getDistinctParams() {
                     this.selections.years = ['all']
                     this.selections.stations = ['all']
 
-                    this.reports.map((report = new EvacuationHistory()) => {
-                        let date = report.report_date
+                    this.reports.map((report = new PublicUserHistory()) => {
+                        let date = report.date_admitted
                         var year = date.getFullYear()
                         //var month = date.getMonth()
 
                         if (!this.selections.years.includes(year)) {
                             this.selections.years.push(year)
                         }
-
-                        /* if (!this.selections.stations.includes(report.evac_id)) {
-                            this.selections.stations.push(report.evac_id)
-                        } */
                     })
-
-
                 },
 
                 setLoading(isLoading) {
@@ -378,7 +379,7 @@
 
                 filterList() {
                     //year
-                    this.reports_view = this.reports.filter((item = new EvacuationHistory()) => {
+                    this.reports_view = this.reports.filter((item = new PublicUserHistory()) => {
                         let item_year = item.report_date.getFullYear()
                         if (!this.filter.year || this.filter.year == 'all' || this.filter.year ==
                             item_year) {
@@ -393,7 +394,7 @@
 
                     let index_selection_month = this.selections.months.indexOf(this.filter.month)
                     console.log("month index %o", index_selection_month)
-                    this.reports_view = this.reports_view.filter((item = new EvacuationHistory()) => {
+                    this.reports_view = this.reports_view.filter((item = new PublicUserHistory()) => {
                         let item_month = item.report_date.getMonth()
                         if (!this.filter.month || this.filter.month == 'all' || item_month ==
                             index_selection_month) {
@@ -404,7 +405,7 @@
                     })
 
                     //evacuation center
-                    this.reports_view = this.reports_view.filter((item = new EvacuationHistory()) => {
+                    this.reports_view = this.reports_view.filter((item = new PublicUserHistory()) => {
                         let evac = this.getEvacFromId(item.evac_id)
                         if (!this.filter.station || this.filter.station == 'all' || this.filter
                             .station == evac.name) {
@@ -415,7 +416,7 @@
                     })
 
                     //municipalities
-                    this.reports_view = this.reports_view.filter((item = new EvacuationHistory()) => {
+                    this.reports_view = this.reports_view.filter((item = new PublicUserHistory()) => {
                         let evac = this.getEvacFromId(item.evac_id)
                         if (!this.filter.municipal || this.filter.municipal == 'all' || this.filter
                             .municipal.toLowerCase() == evac.municipality.toLowerCase()) {
@@ -434,35 +435,41 @@
                 },
 
                 editItem(index) {
-                    this.data_input = EvacuationHistory.parse(this.reports_view[index].toObject())
+                    this.data_input = PublicUserHistory.parse(this.reports_view[index].toObject())
+                    this.data_input.date_updated = new Date()
                     this.isEdit = true
                     $('#editorModal').modal()
                 },
 
                 addHistory() {
-                    this.data_input = new EvacuationHistory()
+                    this.data_input = new PublicUserHistory()
+                    this.data_input.user_id = this.public_user.id
+                    this.data_input.created_by = this.user.id
                     this.isEdit = false
+                    this.formModel.date_cleared.isHidden = true
                     $('#editorModal').modal()
                 },
 
-                saveHistory() {
-                    this.data_input.report_date = new Date(this.data_input.report_date)
-                    if (!this.isEdit) {
-                        this.data_input.created_by = header.user.id
-                    }
+                addPastHistory() {
+                    this.addHistory()
+                    this.formModel.date_cleared.isHidden = false
+                    this.data_input.date_admitted = new Date()
+                },
 
-                    DataHandler.addEvacuationHistory(this.data_input).then((data) => {
+                saveHistory() {
+
+                    DataHandler.addPublicUserHistory(this.data_input).then((data) => {
                         console.log('response %o', data)
                         if (data.error) {
-                            alert("error " + data.error)
+                            throw date.error
                         } else {
-                            alert("item deleted successfuly")
-                            this.fetchReports()
+                            AlertMessages.success()
+                            location.reload()
                         }
                     }).catch(err => {
-                        console.log(err)
+                        AlertMessages.error(err)
                     }).finally(() => {
-                        this.data_input = new EvacuationHistory()
+                        this.data_input = new PublicUserHistory()
                     })
                 },
 
@@ -473,11 +480,13 @@
                         DataHandler.deleteEvacuationHistory(id).then((data) => {
                             console.log('response %o', data)
                             if (data.error) {
-                                alert("error " + data.error)
+                                throw data.error
                             } else {
-                                alert("item deleted successfuly")
-                                this.fetchReports()
+                                AlertMessages.deleted()
+                                location.reload()
                             }
+                        }).catch(err => {
+                            AlertMessages.error(err)
                         })
                     }
                 },
