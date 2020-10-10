@@ -14,13 +14,15 @@ class UserHandler extends DataHandlerType {
         users: 'users',
         public_user: 'public_user',
         public_user_history: 'public_user_history',
+        public_user_report: 'public_user_report',
         donor_organization: 'donor_org',
         donor_individual: 'donor_individual',
         public_document: 'public_document',
         public_content: 'public_content',
         public_events: 'public_events',
         public_information: 'public_information',
-        public_images: 'public_images'
+        public_images: 'public_images',
+        donor_reports: 'donor_reports'
     }
     
     /** login function */
@@ -361,7 +363,7 @@ class PublicUserHandler extends UserHandler {
         return new Promise((resolve, reject) => {
             const ref = this.firestore.collection(UserHandler.tables.public_user_history)
             //const query = (municipality != "0") ? ref.where('municipality', '==', municipality) : ref
-            var query = (id && !id.isEmpty) ? ref.where('user_id','==', id) : ref
+            var query = (id && !id.isEmpty()) ? ref.where('user_id','==', id) : ref
             
             query = query.orderBy('date_admitted', 'desc')
 
@@ -403,6 +405,55 @@ class PublicUserHandler extends UserHandler {
         return this.deleteEntry(id, UserHandler.tables.public_user_history)
     }
 
+
+    /** returns the public history of the user or general if given empty id */
+    getPublicUserReports(user_id) {
+        return new Promise((resolve, reject) => {
+            const ref = this.firestore.collection(UserHandler.tables.public_user_report)
+            //const query = (municipality != "0") ? ref.where('municipality', '==', municipality) : ref
+            var query = (user_id && !user_id.isEmpty()) ? ref.where('user_id','==', user_id) : ref
+            
+            query = query.orderBy('date_updated', 'desc')
+
+            query.get().then(function (querySnapshot) {
+                var reports = []
+                querySnapshot.forEach(function (doc) {
+                    console.log(doc.id, " => ", doc.data());
+                    let data = doc.data()
+                    let id = doc.id
+                    var object = {
+                        id,
+                        ...data
+                    }
+                    try {
+                        object.date_created = object.date_created.toDate()
+                    } catch (err) {
+                        console.log(err)
+                    }
+                    try {
+                        object.date_updated = object.date_updated.toDate()
+                    } catch (err) {
+                        console.log(err)
+                    }
+                    reports.push(PublicUserReport.parse(object))
+                });
+                var message = new Message()
+                message.data = reports
+                resolve(message)
+            }).catch(function (error) {
+                console.log("Error getting documents: ", error);
+                reject(error)
+            });
+        })
+    }//getPublicUserReports
+
+    addPublicUserReport(params = new PublicUserReport) {
+        return this.addEntry(params.id, params.toObject(), UserHandler.tables.public_user_report)
+    }
+
+    deletePublicUserReport(id) {
+        return this.deleteEntry(id, UserHandler.tables.public_user_report)
+    }
 
 }//PublicUserHandler
 
@@ -968,10 +1019,12 @@ class MunicipalInventoryHandler extends InventoryHandler {
 class DonorHandler extends MunicipalInventoryHandler {
     
     /** returns the inventories of the evacuation centers */
-    getDonorOrganizations() {
+    getDonorOrganizations(id) {
         return new Promise((resolve, reject) => {
-            this.firestore.collection(UserHandler.tables.donor_organization)
-            .get().then(function (querySnapshot) {
+            const ref = this.firestore.collection(UserHandler.tables.donor_organization)
+            const query = (id && !id.isEmpty()) ? ref.where('id','==', id) : ref
+
+            query.get().then(function (querySnapshot) {
                 var donors = []
                 querySnapshot.forEach(function (doc) {
                     let data = doc.data()
@@ -990,7 +1043,11 @@ class DonorHandler extends MunicipalInventoryHandler {
                     donors.push(DonorsOrganization.parse(object))
                 });
                 var message = new Message()
-                message.data = donors
+                if (id && !id.isEmpty()) {
+                    message.data = donors[0]
+                } else {
+                    message.data = donors
+                }
                 resolve(message)
             }).catch(function (error) {
                 reject(error)
@@ -999,10 +1056,12 @@ class DonorHandler extends MunicipalInventoryHandler {
     } //getDonorOrganizations
     
     /** returns the inventories of the evacuation centers */
-    getDonorIndividual() {
+    getDonorIndividual(id) {
         return new Promise((resolve, reject) => {
-            this.firestore.collection(UserHandler.tables.donor_individual)
-            .get().then(function (querySnapshot) {
+            const ref = this.firestore.collection(UserHandler.tables.donor_individual)
+            const query = (id && !id.isEmpty()) ? ref.where('id','==', id) : ref
+
+            query.get().then(function (querySnapshot) {
                 var donors = []
                 querySnapshot.forEach(function (doc) {
                     let data = doc.data()
@@ -1021,7 +1080,11 @@ class DonorHandler extends MunicipalInventoryHandler {
                     donors.push(DonorsIndividual.parse(object))
                 });
                 var message = new Message()
-                message.data = donors
+                if (id && !id.isEmpty()) {
+                    message.data = donors[0]
+                } else {
+                    message.data = donors
+                }
                 resolve(message)
             }).catch(function (error) {
                 reject(error)
@@ -1044,6 +1107,55 @@ class DonorHandler extends MunicipalInventoryHandler {
     */
     deleteDonor(id, isOrg = true) {
         return this.deleteEntry(id, isOrg ? UserHandler.tables.donor_organization : UserHandler.tables.donor_individual )
+    }
+
+    /** returns the public history of the user or general if given empty id */
+    getDonorReports(user_id) {
+        return new Promise((resolve, reject) => {
+            const ref = this.firestore.collection(UserHandler.tables.donor_reports)
+            //const query = (municipality != "0") ? ref.where('municipality', '==', municipality) : ref
+            var query = (user_id && !user_id.isEmpty()) ? ref.where('user_id','==', user_id) : ref
+            
+            query = query.orderBy('date_updated', 'desc')
+
+            query.get().then(function (querySnapshot) {
+                var reports = []
+                querySnapshot.forEach(function (doc) {
+                    console.log(doc.id, " => ", doc.data());
+                    let data = doc.data()
+                    let id = doc.id
+                    var object = {
+                        id,
+                        ...data
+                    }
+                    try {
+                        object.date_created = object.date_created.toDate()
+                    } catch (err) {
+                        console.log(err)
+                    }
+                    try {
+                        object.date_updated = object.date_updated.toDate()
+                    } catch (err) {
+                        console.log(err)
+                    }
+                    reports.push(DonorsReport.parse(object))
+                });
+                var message = new Message()
+                message.data = reports
+                resolve(message)
+            }).catch(function (error) {
+                console.log("Error getting documents: ", error);
+                reject(error)
+            });
+        })
+    }//getPublicUserReports
+
+    addDonorsReport(params = new DonorsReport) {
+        return this.addEntry(params.id, params.toObject(), UserHandler.tables.donor_reports)
+    }
+
+    deleteDonorsReport(id) {
+        return this.deleteEntry(id, UserHandler.tables.donor_reports)
     }
 }//DonorHandler
 

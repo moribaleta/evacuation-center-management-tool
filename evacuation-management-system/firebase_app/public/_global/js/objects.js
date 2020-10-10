@@ -990,6 +990,70 @@ class PublicUserHistory extends Model {
 
 } //PublicUserHistory
 
+/** defines the model of the report to be requested by the public user */
+class PublicUserReport extends Model {
+    
+    /** public user */
+    user_id
+
+    /** evacuation center */
+    evac_id
+
+    /** items to be report to ask for evacuation supplies */
+    reports = []
+
+    static formModel = {
+        evac_id: {
+            title: 'Evacuation Center', 
+            type: FormModels.dropdown,
+            options: []
+        },
+    }
+
+    static headers = [
+        'user_id',
+        'evac_id',
+        'date_created',
+        'date_updated'
+    ]
+
+    constructor(id, date_created, date_updated, created_by, user_id, evac_id, reports) {
+        super()
+        this.id = id || keyGenID("publicuserreport") //"publicuserhistory-" + genID(5)
+        this.date_created = date_created    || new Date()
+        this.date_updated = date_updated    || new Date()
+        this.created_by = created_by        || '0'
+        this.user_id    = user_id
+        this.evac_id    = evac_id
+        this.reports    = reports || []
+    }
+
+    toObject() {
+        return {
+            id: this.id,
+            date_created: this.date_created,
+            date_updated: this.date_updated,
+            created_by: this.created_by,
+            user_id: this.user_id,
+            evac_id: this.evac_id,
+            reports: this.reports
+        }
+    }
+
+    static parse(object = {}) {
+        return new PublicUserReport(
+            object.id,
+            object.date_created,
+            object.date_updated,
+            object.created_by,
+            object.user_id,
+            object.evac_id,
+            object.reports
+        )
+    }
+
+}//PublicUserReport
+
 /** defines the object of an organization donor */
 class DonorsOrganization extends Model {
 
@@ -1238,7 +1302,7 @@ class DonorsIndividual extends Model {
         email, birthdate, phone_number, address, sex,
         employment_position, employment_business) {
         super()
-        this.id = id || keyGenID("publicuser", 5) //"publicuser-" + genID(5)
+        this.id = id || keyGenID("donorindv", 5) //"publicuser-" + genID(5)
         this.created_by = created_by
         this.date_created = date_created || new Date()
         this.date_updated = date_updated || new Date()
@@ -1294,6 +1358,69 @@ class DonorsIndividual extends Model {
     }
 } //DonorsIndividual
 
+/** defines the model of a donor to send donations */
+class DonorsReport extends Model {
+
+    /** donor id */
+    user_id
+
+    /** evac id appointing to can be empty */
+    evac_id = ""
+
+    /** donations to give */
+    reports = []
+
+    static formModel = {
+        evac_id: {
+            title: 'Evacuation Center', 
+            type: FormModels.dropdown,
+            options: []
+        },
+    }
+
+    static headers = [
+        'user_id',
+        'evac_id',
+        'date_created',
+        'date_updated'
+    ]
+
+    constructor(id, date_created, date_updated, created_by, user_id,  evac_id, reports) {
+        super()
+        this.id = id || keyGenID("donorreport") //"publicuserhistory-" + genID(5)
+        this.date_created = date_created    || new Date()
+        this.date_updated = date_updated    || new Date()
+        this.created_by = created_by        || '0'
+        this.user_id    = user_id
+        this.evac_id    = evac_id || ""
+        this.reports    = reports || []
+    }
+
+    toObject() {
+        return {
+            id: this.id,
+            date_created: this.date_created,
+            date_updated: this.date_updated,
+            created_by: this.created_by,
+            user_id: this.user_id,
+            evac_id: this.evac_id,
+            reports: this.reports
+        }
+    }
+
+    static parse(object = {}) {
+        return new DonorsReport(
+            object.id,
+            object.date_created,
+            object.date_updated,
+            object.created_by,
+            object.user_id,
+            object.evac_id,
+            object.reports
+        )
+    }
+
+}
 
 /** defines the model of the content to be shown on the public */
 class PublicContent extends Model {

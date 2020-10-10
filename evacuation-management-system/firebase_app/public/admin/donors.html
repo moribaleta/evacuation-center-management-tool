@@ -123,6 +123,7 @@
                         </div>
 
                         <div class="col col-xs-12">
+                            <button class="btn btn-default btn-info"   v-on:click="viewReports(item.id)">View Reports</button>
                             <button class="btn btn-default btn-info" v-on:click="onEditOrg(index)">edit</button>
                             <button class="btn btn-default btn-danger" v-on:click="onDeleteOrg(index)">delete</button>
                         </div>
@@ -162,6 +163,7 @@
                         </div>
 
                         <div class="col col-xs-12">
+                            <button class="btn btn-default btn-info"   v-on:click="viewReports(item.id)">View Reports</button>
                             <button class="btn btn-default btn-info"   v-on:click="onEditIndv(index)">edit</button>
                             <button class="btn btn-default btn-danger" v-on:click="onDeleteIndv(index)">delete</button>
                         </div>
@@ -241,6 +243,10 @@
                         this.isLoading.indv = false
                     })
                 },//fetchIndv
+
+                viewReports(id) {
+                    window.open(`donors_reports.html?id=${id}`,'_self')
+                },
 
                 //<!----------INDEPENDENT-USER--------------
                 onAddNewOrg() {

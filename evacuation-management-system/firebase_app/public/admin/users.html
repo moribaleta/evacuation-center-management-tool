@@ -174,8 +174,8 @@
                         <div class="col col-md-12">
                             <button class="btn btn-default btn-info" :href="'#dependentrow'+index"
                                 data-toggle="collapse">View Dependents</button>
-                            <button class="btn btn-default btn-info" v-on:click="onViewHistory(item.id)">View
-                                History</button>
+                            <button class="btn btn-default btn-info" v-on:click="onViewHistory(item.id)">View History</button>
+                            <button class="btn btn-default btn-info" v-on:click="onViewReports(item.id)">View Reports</button>
                             <button class="btn btn-default btn-info" v-on:click="onEditItem(index)">edit</button>
                             <button class="btn btn-default btn-danger" v-on:click="onDeleteItem(index)">delete</button>
                         </div>
@@ -399,6 +399,10 @@
                 onViewHistory(id) {
                     window.open(`user_history.html?id=${id}`, '_self')
                 }, //onViewHistory
+
+                onViewReports(id) {
+                    window.open(`user_reports.html?id=${id}`,'_self')
+                }, //onViewReports
 
                 onSearch(){
                     this.view_user_list = this.user_list.filter((user) => {
