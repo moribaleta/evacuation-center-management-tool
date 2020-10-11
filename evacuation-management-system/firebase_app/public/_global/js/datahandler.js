@@ -377,14 +377,29 @@ class PublicUserHandler extends UserHandler {
                         id,
                         ...data
                     }
-                    try {
+
+                
+                    
+                    Object.keys(object).filter((key) => {
+                        return key.includes('date')
+                    }).forEach((key) => {
+                        try {
+                            object[key] = object[key].toDate()
+                        } catch (err) {
+                            console.log(err)
+                        }
+                    })
+
+                    
+
+                    /* try {
                         object.date_created = object.date_created.toDate()
                         object.date_updated = object.date_updated.toDate()
                         object.date_admitted = object.date_admitted.toDate()
                         object.date_cleared = object.date_cleared.toDate()
                     } catch (err) {
                         console.log(err)
-                    }
+                    } */
                     history.push(PublicUserHistory.parse(object))
                 });
                 var message = new Message()
@@ -396,6 +411,8 @@ class PublicUserHandler extends UserHandler {
             });
         })
     }//getPublicUserHistory
+
+    
 
     addPublicUserHistory(params = new PublicUserHistory) {
         return this.addEntry(params.id, params.toObject(), UserHandler.tables.public_user_history)

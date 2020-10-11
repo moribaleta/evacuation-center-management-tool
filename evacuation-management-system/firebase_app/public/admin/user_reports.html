@@ -305,12 +305,12 @@
                     stations: ['']
                 },
                 filter: {
-                    year: 'all',
-                    month: 'all',
-                    station: 'all',
+                    year     : 'all',
+                    month    : 'all',
+                    station  : 'all',
                     municipal: 'all'
                 },
-                data_input: new PublicUserReport(),
+                data_input    : new PublicUserReport(),
                 municipalities: municipalities,
                 
                 isDataLoading: true,
@@ -383,7 +383,6 @@
                     }).catch(err => {
                         console.log("err %o", err)
                     })
-                    
                     
                     DataHandler.getPublicUserReports(id).then((message) => {
                         this.setData(message.data)
