@@ -70,59 +70,24 @@
 
     <div id="post-container">
 
-        <!-- MODAL -->
-        <!-- <div id="reportModal" class="modal fade" role="dialog">
-            <div class="modal-dialog">
+        <div id="inventoryModal" class="modal fade" role="dialog">
+            <div class="modal-dialog" v-if="view_inventory != null">
+                <!-- Modal content-->
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">{{isEdit ? 'Edit ': 'Add '}} User Request Report</h4>
+                        <h4 class="modal-title">{{view_post.title}}</h4>
                     </div>
                     <div class="modal-body">
-                        <form-generator :form="reportFormModel" :input.sync="report_data_input" ></form-generator>
-                        <div>&nbsp;</div>
-                        <ol class="list-group">
-                            <li class="list-group-item danger">
-                                <button type="button" class="btn btn-info" v-on:click="addInputInventory()">Add Item Request</button>
-                            </li>
-                            
-                            <li class="list-group-item" v-for="report,index in report_data_input.reports">
-                                <form-generator :form="reportItemFormModel" :input.sync="report" ></form-generator>
-                                <div>&nbsp;</div>
-                                <button type="button" class="btn btn-danger" v-on:click="removeInputInventory(index)">Remove</button>
-                            </li>
-                        </ol>
+                        <p>{{view_post.description}}</p>
+                        <slideshow-container :images="view_post.images" :cdn="cdn"></slideshow-container>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal" v-on:click="saveReport()">Save</button>
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                     </div>
                 </div>
-                
             </div>
-        </div> -->
-        <!-- MODAL -->
-
-        <!-- <div id="historyModal" class="modal fade" role="dialog">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">Admit</h4>
-                    </div>
-                    <div class="modal-body">
-                        <form-generator :form="historyFormModel" :input.sync="history_data_input" ></form-generator>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal"
-                                v-on:click="saveHistory()">Admit</button>
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    </div>
-                </div>
-                
-            </div>
-        </div> -->
-
+        </div>
 
         <div class="container">
             <div id="jumbotron" class="jumbotron">
@@ -134,71 +99,150 @@
                 <h1>Donors</h1>
             </div>
             <!---->
-            <!-- <div class="table-container" id="tableData">
-                <div class="page-subheader">
-                    <h3>Evacuation Center</h3>
-                    <button class="btn btn-default btn-info" v-on:click="addNewRequest()">Add New Request
-                        Report</button>
+            <div class="subcontent">
+                <div class="section header">
+                    <h1>Inventory</h1>
                 </div>
-                <div>&nbsp;</div>
-                <div class="well" v-for="item,index in reports">
-                    <div class="row">
-                        <div class="col col-md-12 item-info">
-                            <p class="item-value">{{index + 1}}.</p>
-                        </div>
-                        <div class="col col-md-3 item-info " v-for="key,index in report_headers">
-                            <div v-if="key == 'evac_id'">
-                                <p class="item-label">EVACUATION NAME</p>
-                                <p class="item-value">{{item.evac_id.isEmpty() ? 'public' : evac_names[item.evac_id]}}
-                                </p>
-                            </div>
-                            <div v-if="key != 'evac_id'">
-                                <p class="item-label">{{key.replace(/_/g,' ').toUpperCase() +": "}}</p>
-                                <p class="item-value">{{item[key] ? item[key] : 'N/A'}}</p>
-                            </div>
-                        </div>
-                        <div class="col col-md-12">
-                            <button class="btn btn-default btn-info" :href="'#requestrow-'+index"
-                                data-toggle="collapse">View Request</button>
-                        </div>
-                    </div>
-                    <div :id="'requestrow-'+index" class="panel-collapse collapse">
-                        <div class="panel-body">
-                            <ul class="list-group">
-                                <li class="list-group-item" v-if="item.reports.isEmpty()">
-                                    <p>No Request</p>
-                                </li>
 
-                                <li class="list-group-item" v-for="report,index in item.reports">
-                                    <div class="row">
-                                        <div class="col col-md-12 item-info">
-                                            <p class="item-label">
-                                                {{ index + 1 }}. {{supply_types[report.inventory_type].name}}
-                                            </p>
-                                        </div>
-                                        <div class="col col-md-12 item-info">
-                                            <p class="item-label">
-                                                QTY:
-                                            </p>
-                                            <p class="item-value">
-                                                {{report.qty}}
-                                            </p>
-                                        </div>
-                                        <div class="col col-md-12 item-info">
-                                            <p class="item-label">
-                                                remarks:
-                                            </p>
-                                            <p class="item-value">
-                                                {{report.remarks}}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </li>
-                            </ul>
+                <div class="section" v-if="muni_inv_list.length > 0">
+                    <div class="section header">
+                        <h4>Municipal Inventory</h4>
+                    </div>
+                    <div class="table-container" id="tableData">
+                        <div class="panel-group" v-for="muni_inv,index in muni_inv_list">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <p class="item-value">
+                                            {{index + 1}}. {{muni_inv.name}}
+                                        </p>
+                                        <p class="item-value">
+                                            {{muni_inv.municipality}}
+                                        </p>
+                                        <p class="item-value">
+                                            {{muni_inv.date_created}}
+                                        </p>
+                                        <p class="item-value">
+                                            {{muni_inv.date_updated}}
+                                        </p>
+                                        <p class="item-value">
+                                            {{muni_inv.description}}
+                                        </p>
+                                    </h4>
+                                </div>
+                                <div class="panel-body">
+                                    <button type="button" id="add-report" class="btn btn-success button-view"
+                                        v-on:click="onViewMuniInventory(muni_inv.id)">
+                                        View Inventory
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div> -->
+
+
+                <div class="section">
+                    <div class="section header">
+                        <h4>Evacuation Center Inventory</h4>
+                    </div>
+                    <div class="table-container" id="tableData">
+                        <div class="panel-group" v-for="evac,index in evac_list">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <p class="item-value">
+                                            {{index + 1}}. {{evac.name}}
+                                        </p>
+
+                                        <p class="item-value">
+                                            {{evac.exact_address}}
+                                        </p>
+                                        <p class="item-value">
+                                            inventories: {{evacuation_inventories[evac.id].length}}
+                                        </p>
+                                    </h4>
+                                </div>
+                                <div class="panel-body">
+                                    <ul class="list-group"
+                                        v-if="evacuation_inventories[evac.id] == undefined ||evacuation_inventories[evac.id].length <= 0">
+                                        <div class="col col-md-8">
+                                            <p class="item-value">No Inventory</p>
+                                        </div>
+                                    </ul>
+                                    <ul class="list-group" v-for="inventory,index in evacuation_inventories[evac.id]">
+                                        <li class="list-group-item">
+                                            <div class="row">
+                                                <div class="col col-md-12">
+                                                    <p class="item-value">{{index+1}}. {{inventory.name}}</p>
+                                                </div>
+                                                <div class="col col-md-5">
+                                                    <p class="item-value">{{inventory.description}}</p>
+                                                </div>
+                                                <div class="col col-md-3">
+                                                    <p class="item-value">date created:
+                                                        {{formatDate(inventory.date_created)}}
+                                                    </p>
+                                                </div>
+                                                <div class="col col-md-3">
+                                                    <p class="item-value">
+                                                        date updated: {{formatDate(inventory.date_updated)}}
+                                                    </p>
+                                                </div>
+                                                <div class="col col-md-12">
+                                                    <button type="button" id="add-report" class="btn btn-info button-view"
+                                                            :href="'#'+inventory.id" data-toggle="collapse">View Supplies</button>
+                                                </div>
+                                            </div>
+                                            <div :id="inventory.id" class="panel-collapse collapse">
+                                                <div class="panel-body">
+                                                    <ul class="list-group">
+                                                        <li class="list-group-item" v-for="supply,index in inventory_supplies[inventory.id]">
+                                                            <div class="row">
+                                                                <div class="col col-md-4 item-info">
+                                                                    <p class="item-label">
+                                                                        Name:
+                                                                    </p>
+                                                                    <p class="item-value">
+                                                                        {{supply_types[supply.inventory_type].name}}
+                                                                    </p>
+                                                                </div>
+                                                                <div class="col col-md-2 item-info">
+                                                                    <p class="item-label">
+                                                                        Quantity:
+                                                                    </p>
+                                                                    <p class="item-value">
+                                                                        {{supply.qty}}
+                                                                    </p>
+                                                                </div>
+                                                                <div class="col col-md-4 item-info">
+                                                                    <p class="item-label">
+                                                                        Date Supplied:
+                                                                    </p>
+                                                                    <p class="item-value">
+                                                                        {{supply.date_supplied}}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="panel-footer">
+                                <button type="button" id="add-report" class="btn btn-info button-view"
+                                    v-on:click="donateEvac(evac.id)">
+                                    Donate
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
 
         </div>
 
@@ -236,6 +280,7 @@
                 //EVAC
                 evac_list: [],
                 evac_names: {},
+                muni_inv_list: [],
 
                 //SUPPLIES
                 supply_types: {},
@@ -245,29 +290,35 @@
                 //INVENTORIES
                 public_inventories: [],
                 evacuation_inventories: {},
-                inventory_supplies: []
+                inventory_supplies: {},
+                
+                view_inventory: null
             },
             methods: {
                 onStart() {
                     this.onStartTime()
-                    //this.historyFormModel.date_cleared.isHidden = true
-                    //this.fetchData()
                     this.fetchReports()
                 },
 
-                fetchData() {
-
-
-                }, //fetchData
-
                 fetchReports() {
 
+                    DataHandler.getSupplyTypes().then((message) => {
+                        this.supply_types_option = message.data.map((supply) => {
+                            this.supply_types[supply.id] = supply
+                            return {
+                                title: supply.name,
+                                value: supply.id
+                            }
+                        })
+                        console.log("supply types %o", this.supply_types)
+                    }).catch(err => {
+                        console.log("err %o", err)
+                    })
+
                     DataHandler.getEvacuationCenters().then((data) => {
-                        this.evac_list = data.data
-
-                        var promiseInv = []
-
-                        let evac_options = this.evac_list.map((evac) => {
+                        this.evac_list      = data.data
+                        var promiseInv      = []
+                        let evac_options    = this.evac_list.map((evac) => {
                             this.evac_names[evac.id] = evac.name
                             promiseInv.push(DataHandler.getInventories(evac.id))
                             return {
@@ -275,24 +326,25 @@
                                 value: evac.id
                             }
                         })
-
-                        /* this.reportFormModel.evac_id.options = evac_options
-                        this.historyFormModel.evac_id.options = evac_options */
-
                         return Promise.all(promiseInv)
                     }).then((data) => {
                         var promiseInvSupp = []
                         data.forEach(message => {
                             const inventory = message.data
-                            this.evacuation_inventories[inventory.id] = inventory.inventories
-                            let ids = DataHandler.getSupplies(inventory.inventories.map(inv => { return inv.id}))
+                            this.evacuation_inventories[inventory.id] = inventory.inventories || []
+                            let ids = DataHandler.getSupplies(inventory.inventories.map(inv => {
+                                return inv.id
+                            }))
                             promiseInvSupp.push(ids)
                         });
-                        return Promise.all(promiseInvSupp) //DataHandler.getSupplies(inventory_ids)
+                        return Promise.all(promiseInvSupp)
                     }).then((data) => {
-                        data.forEach((message) => {
-                            this.inventory_supplies = this.inventory_supplies.concat(message.data) //{...this.inventory_supplies, ...message.data}
+                        data.forEach((val) => {
+                            val.data.forEach((supply) => {
+                                this.inventory_supplies[supply.inventory_id] = supply.supplies
+                            })
                         })
+
                         console.log("evacs %o", this.evac_list)
                         console.log("inventories %o", this.evacuation_inventories)
                         console.log("inventory supplies %o", this.inventory_supplies)
@@ -300,17 +352,14 @@
                         console.log("err %o", err)
                     })
 
-                   /*  DataHandler.getSupplyTypes().then((data) => {
-                        this.reportItemFormModel.inventory_type.options = data.data.map((supply) => {
-                            this.supply_types[supply.id] = supply
-                            return {
-                                title: supply.name,
-                                value: supply.id
-                            }
-                        })
-                    }).catch(err => {
-                        console.log("err %o", err)
-                    }) */
+                    DataHandler.getMunicipalInventories(this.user.municipality).then((data) => {
+                        this.muni_inv_list = data.data
+                        console.log("muni list %o", this.muni_inv_list)
+                    }).catch((err) => {
+                        console.log(err)
+                    })
+
+                    
 
 
 
