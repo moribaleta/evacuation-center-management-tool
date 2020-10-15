@@ -100,9 +100,7 @@
             </div>
             <!---->
             <div class="subcontent">
-                <div class="section header">
-                    <h1>Inventory</h1>
-                </div>
+
 
                 <div class="section" v-if="muni_inv_list.length > 0">
                     <div class="section header">
@@ -141,106 +139,188 @@
                     </div>
                 </div>
 
-
                 <div class="section">
-                    <div class="section header">
-                        <h4>Evacuation Center Inventory</h4>
-                    </div>
-                    <div class="table-container" id="tableData">
-                        <div class="panel-group" v-for="evac,index in evac_list">
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    <h4 class="panel-title">
-                                        <p class="item-value">
-                                            {{index + 1}}. {{evac.name}}
-                                        </p>
+                    <button type="button" id="add-report" class="btn btn-info button-view">Recommend Evacuation
+                        Center</button>
+                    <div>&nbsp;</div>
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a data-toggle="tab" href="#evacuation_centers">Evacuation Centers</a></li>
+                        <li><a data-toggle="tab" href="#supplies">Supplies</a></li>
+                        <li><a data-toggle="tab" href="#donors">Donor Supply</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane active table-container" id="evacuation_centers">
+                            <div class="panel-group" v-for="evac,index in evac_list">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">
+                                            <p class="item-value">
+                                                {{index + 1}}. {{evac.name}}
+                                            </p>
 
-                                        <p class="item-value">
-                                            {{evac.exact_address}}
-                                        </p>
-                                        <p class="item-value">
-                                            inventories: {{evacuation_inventories[evac.id].length}}
-                                        </p>
-                                    </h4>
+                                            <p class="item-value">
+                                                {{evac.exact_address}}
+                                            </p>
+                                            <p class="item-value">
+                                                inventories: {{evacuation_inventories[evac.id].length}}
+                                            </p>
+                                        </h4>
+                                    </div>
+                                    <div class="panel-body">
+                                        <ul class="list-group"
+                                            v-if="evacuation_inventories[evac.id] == undefined ||evacuation_inventories[evac.id].length <= 0">
+                                            <div class="col col-md-8">
+                                                <p class="item-value">No Inventory</p>
+                                            </div>
+                                        </ul>
+                                        <ul class="list-group"
+                                            v-for="inventory,index in evacuation_inventories[evac.id]">
+                                            <li class="list-group-item">
+                                                <div class="row">
+                                                    <div class="col col-md-12">
+                                                        <p class="item-value">{{index+1}}. {{inventory.name}}</p>
+                                                    </div>
+                                                    <div class="col col-md-5">
+                                                        <p class="item-value">{{inventory.description}}</p>
+                                                    </div>
+                                                    <div class="col col-md-3">
+                                                        <p class="item-value">date created:
+                                                            {{formatDate(inventory.date_created)}}
+                                                        </p>
+                                                    </div>
+                                                    <div class="col col-md-3">
+                                                        <p class="item-value">
+                                                            date updated: {{formatDate(inventory.date_updated)}}
+                                                        </p>
+                                                    </div>
+                                                    <div class="col col-md-12">
+                                                        <button type="button" id="add-report"
+                                                            class="btn btn-info button-view" :href="'#'+inventory.id"
+                                                            data-toggle="collapse">View Supplies</button>
+                                                    </div>
+                                                </div>
+                                                <div :id="inventory.id" class="panel-collapse collapse">
+                                                    <div class="panel-body">
+                                                        <ul class="list-group">
+                                                            <li class="list-group-item"
+                                                                v-for="supply,index in inventory_supplies[inventory.id]">
+                                                                <div class="row">
+                                                                    <div class="col col-md-4 item-info">
+                                                                        <p class="item-label">
+                                                                            Name:
+                                                                        </p>
+                                                                        <p class="item-value">
+                                                                            {{supply_types[supply.inventory_type].name}}
+                                                                        </p>
+                                                                    </div>
+                                                                    <div class="col col-md-2 item-info">
+                                                                        <p class="item-label">
+                                                                            Quantity:
+                                                                        </p>
+                                                                        <p class="item-value">
+                                                                            {{supply.qty}}
+                                                                        </p>
+                                                                    </div>
+                                                                    <div class="col col-md-4 item-info">
+                                                                        <p class="item-label">
+                                                                            Date Supplied:
+                                                                        </p>
+                                                                        <p class="item-value">
+                                                                            {{supply.date_supplied}}
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
-                                <div class="panel-body">
-                                    <ul class="list-group"
-                                        v-if="evacuation_inventories[evac.id] == undefined ||evacuation_inventories[evac.id].length <= 0">
-                                        <div class="col col-md-8">
-                                            <p class="item-value">No Inventory</p>
-                                        </div>
-                                    </ul>
-                                    <ul class="list-group" v-for="inventory,index in evacuation_inventories[evac.id]">
-                                        <li class="list-group-item">
-                                            <div class="row">
-                                                <div class="col col-md-12">
-                                                    <p class="item-value">{{index+1}}. {{inventory.name}}</p>
-                                                </div>
-                                                <div class="col col-md-5">
-                                                    <p class="item-value">{{inventory.description}}</p>
-                                                </div>
-                                                <div class="col col-md-3">
-                                                    <p class="item-value">date created:
-                                                        {{formatDate(inventory.date_created)}}
-                                                    </p>
-                                                </div>
-                                                <div class="col col-md-3">
-                                                    <p class="item-value">
-                                                        date updated: {{formatDate(inventory.date_updated)}}
-                                                    </p>
-                                                </div>
-                                                <div class="col col-md-12">
-                                                    <button type="button" id="add-report" class="btn btn-info button-view"
-                                                            :href="'#'+inventory.id" data-toggle="collapse">View Supplies</button>
-                                                </div>
-                                            </div>
-                                            <div :id="inventory.id" class="panel-collapse collapse">
-                                                <div class="panel-body">
-                                                    <ul class="list-group">
-                                                        <li class="list-group-item" v-for="supply,index in inventory_supplies[inventory.id]">
-                                                            <div class="row">
-                                                                <div class="col col-md-4 item-info">
-                                                                    <p class="item-label">
-                                                                        Name:
-                                                                    </p>
-                                                                    <p class="item-value">
-                                                                        {{supply_types[supply.inventory_type].name}}
-                                                                    </p>
-                                                                </div>
-                                                                <div class="col col-md-2 item-info">
-                                                                    <p class="item-label">
-                                                                        Quantity:
-                                                                    </p>
-                                                                    <p class="item-value">
-                                                                        {{supply.qty}}
-                                                                    </p>
-                                                                </div>
-                                                                <div class="col col-md-4 item-info">
-                                                                    <p class="item-label">
-                                                                        Date Supplied:
-                                                                    </p>
-                                                                    <p class="item-value">
-                                                                        {{supply.date_supplied}}
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                        </li>
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                        </li>
-                                    </ul>
+                                <div class="panel-footer">
+                                    <button type="button" id="add-report" class="btn btn-info button-view"
+                                        v-on:click="donateEvac(evac.id)">
+                                        Donate
+                                    </button>
                                 </div>
                             </div>
-                            <div class="panel-footer">
-                                <button type="button" id="add-report" class="btn btn-info button-view"
-                                    v-on:click="donateEvac(evac.id)">
-                                    Donate
-                                </button>
+
+                        </div>
+                        <div class="tab-pane table-container" id="supplies">
+                            <div class="panel-group" v-for="entry,index in supply_types_option">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">
+                                            <p class="item-value">
+                                                {{index + 1}}. {{entry.title}}
+                                            </p>
+                                        </h4>
+                                    </div>
+                                </div>
                             </div>
                         </div>
+                        <div class="tab-pane table-container" id="donors">
+                            <div class="well" v-for="item,index in donor_report_list">
+                                <div class="row">
+                                    <div class="col col-md-12 item-info">
+                                        <p class="item-value">{{index + 1}}.</p>
+                                    </div>
+                                    <div class="col col-md-12">
+                                        <donor-container :donor="getDonor(item.user_id)" ></donor-container>
+                                    </div>
+                                    <div class="col col-md-4 item-info " v-for="info,index in donor_report_headers" v-if="info != 'user_id'">
+                                        <div v-if="info == 'evac_id'">
+                                            <p class="item-label">EVACUATION NAME</p>
+                                            <p class="item-value">
+                                                {{item.evac_id.isEmpty() ? 'public' : evac_names[item.evac_id]}}</p>
+                                        </div>
+                                        <div v-if="info != 'evac_id' && !info.includes('date')">
+                                            <p class="item-label">{{info.replace(/_/g,' ').toUpperCase() +": "}}</p>
+                                            <p class="item-value">{{item[info] ? item[info] : 'N/A'}}</p>
+                                        </div>
+                                        <div v-if="info.includes('date')">
+                                            <p class="item-label">{{info.replace(/_/g,' ').toUpperCase() +": "}}</p>
+                                            <p class="item-value">{{item[info] ? formatDate(item[info]): 'N/A'}}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col col-md-12">
+                                        <button class="btn btn-default btn-info" :href="'#requestrow-'+index"
+                                            data-toggle="collapse">View Request</button>
+                                    </div>
+                                </div>
+                                <div :id="'requestrow-'+index" class="panel-collapse collapse">
+                                    <div class="panel-body">
+                                        <ul class="list-group">
+                                            <li class="list-group-item" v-if="item.reports.isEmpty()">
+                                                <p>No Request</p>
+                                            </li>
 
+                                            <li class="list-group-item" v-for="report,index in item.reports">
+                                                <div class="row">
+                                                    <div class="col col-md-12 item-info">
+                                                        <p class="item-label">
+                                                            {{ index + 1 }}.
+                                                            {{supply_types[report.inventory_type].name}}
+                                                        </p>
+                                                    </div>
+                                                    <div class="col col-md-12 item-info">
+                                                        <p class="item-label">
+                                                            QTY:
+                                                        </p>
+                                                        <p class="item-value">
+                                                            {{report.qty}}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+
                 </div>
             </div>
 
@@ -263,6 +343,73 @@
 
 
     <script>
+        const DonorComponent = Vue.extend({
+            template: `
+                <div class="row" v-if="indv != null">
+                    <div class="col col-md-4 item-info" v-for="key,index in indv_headers" v-if="key !='id'">
+                        <p class="item-label">
+                            {{key.replace(/_/g,' ').toUpperCase() +": "}}
+                        </p>
+                        <p class="item-value">
+                            {{ getValue(key, indv[key]) || '--'}}
+                        </p>
+                    </div>
+                </div>
+                <!-- Individual -->
+                <!-- Organization -->
+                <div class="row" v-else-if="org != null">
+                    <div class="col col-md-4 item-info" v-for="key,index in org_headers" v-if="key !='id'">
+                        <p class="item-label">
+                            {{key}}:
+                        </p>
+                        <p class="item-value">
+                            {{ getValue(key, org[key]) || '--'}}
+                        </p>
+                    </div>
+                </div>
+        `,
+            props: {
+                donor: Object,
+            },
+
+            data() {
+                return {
+                    org: null,
+                    indv: null,
+                    org_headers: Object.keys(DonorsOrganization.headers),        
+                    indv_headers: Object.keys(DonorsIndividual.headers),
+                }
+            },
+
+            created: function () {
+                console.log("donor %o", this.donor)
+                if (this.donor.id.includes('org')) {
+                    this.org = this.donor
+                } else {
+                    this.indv = this.donor
+                }
+            },
+
+            methods: {
+                formatDate(date){
+                    return app.formatDate(date)
+                },
+
+                getValue(key, value) {
+                    console.log("key: %o, value: %o", key, value)
+                    if (key.includes('date')) {
+                        return this.formatDate(value)
+                    } else if (key.includes('sex')) {
+                        return value == 0 ? 'Male' : 'Female'
+                    }
+                    return value
+                }
+            }
+        })
+
+        Vue.component('donor-container', DonorComponent)
+
+
         app = new Vue({
             el: '#post-container',
             data: {
@@ -274,8 +421,20 @@
                 //DONORS
                 donor_inv_input: new DonorsIndividual(),
                 donor_org_input: new DonorsOrganization(),
+                donor_report_input: new DonorsReport(),
+
                 donor_inv_form: DonorsIndividual.formModel,
                 donor_org_form: DonorsOrganization.formModel,
+                donor_report_form: DonorsReport.formModel,
+
+                donor_org_headers: DonorsOrganization.headers,
+                donor_inv_headers: DonorsIndividual.headers,
+                donor_report_headers: DonorsReport.headers,
+
+                donor_org_list: [],
+                donor_inv_list: [],
+                donor_report_list: [],
+
 
                 //EVAC
                 evac_list: [],
@@ -291,7 +450,7 @@
                 public_inventories: [],
                 evacuation_inventories: {},
                 inventory_supplies: {},
-                
+
                 view_inventory: null
             },
             methods: {
@@ -316,9 +475,9 @@
                     })
 
                     DataHandler.getEvacuationCenters().then((data) => {
-                        this.evac_list      = data.data
-                        var promiseInv      = []
-                        let evac_options    = this.evac_list.map((evac) => {
+                        this.evac_list = data.data
+                        var promiseInv = []
+                        let evac_options = this.evac_list.map((evac) => {
                             this.evac_names[evac.id] = evac.name
                             promiseInv.push(DataHandler.getInventories(evac.id))
                             return {
@@ -331,7 +490,8 @@
                         var promiseInvSupp = []
                         data.forEach(message => {
                             const inventory = message.data
-                            this.evacuation_inventories[inventory.id] = inventory.inventories || []
+                            this.evacuation_inventories[inventory.id] = inventory.inventories ||
+                                []
                             let ids = DataHandler.getSupplies(inventory.inventories.map(inv => {
                                 return inv.id
                             }))
@@ -341,7 +501,8 @@
                     }).then((data) => {
                         data.forEach((val) => {
                             val.data.forEach((supply) => {
-                                this.inventory_supplies[supply.inventory_id] = supply.supplies
+                                this.inventory_supplies[supply.inventory_id] = supply
+                                    .supplies
                             })
                         })
 
@@ -352,25 +513,45 @@
                         console.log("err %o", err)
                     })
 
-                    DataHandler.getMunicipalInventories(this.user.municipality).then((data) => {
+                    DataHandler.getMunicipalInventories().then((data) => {
                         this.muni_inv_list = data.data
                         console.log("muni list %o", this.muni_inv_list)
                     }).catch((err) => {
                         console.log(err)
                     })
 
-                    
+                    let promiseDonorOrg = DataHandler.getDonorOrganizations()
+                    let promiseDonorInv = DataHandler.getDonorIndividual()
+                    let promiseDonorReports = DataHandler.getDonorReports()
 
+                    Promise.all([promiseDonorOrg, promiseDonorInv, promiseDonorReports]).then((value) => {
+                        this.donor_org_list = value[0].data
+                        this.donor_inv_list = value[1].data
+                        this.donor_report_list = value[2].data
 
+                        console.log('this.donor_org_list   %o', this.donor_org_list)
+                        console.log('this.donor_inv_list   %o', this.donor_inv_list)
+                        console.log('this.donor_report_list%o', this.donor_report_list)
 
-                }, //fetchReports
+                    }).catch(err => {
+                        console.log(err)
+                    })
 
-                getEvacFromId(id) {
-                    for (var i = 0; i < this.evac_list.length; i++) {
-                        if (this.evac_list[i].id == id) {
-                            return this.evac_list[i]
+                }, //fetchReports   
+
+                getDonor(user_id) {
+                    for(var i = 0; i < this.donor_inv_list.length; i++) {
+                        if(this.donor_inv_list[i].id == user_id) {
+                            return this.donor_inv_list[i]
                         }
                     }
+
+                    for(var i = 0; i < this.donor_org_list.length; i++) {
+                        if(this.donor_org_list[i].id == user_id) {
+                            return this.donor_inv_list[i]
+                        }
+                    }
+
                     return null
                 },
 

@@ -941,7 +941,7 @@ class MunicipalInventoryHandler extends InventoryHandler {
     getMunicipalInventories(municipality = "") {
         return new Promise((resolve, reject) => {
             var ref = this.firestore.collection(UserHandler.tables.municipal_inventory)
-            if (municipality != "admin") {
+            if (municipality != "admin" && !municipality.isEmpty()) {
                 ref = ref.where('municipality', '==', municipality)
             }
             

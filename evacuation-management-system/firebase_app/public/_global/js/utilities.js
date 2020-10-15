@@ -112,6 +112,7 @@ String.prototype.isEmpty = function () {
     return this.length <= 0
 }
 
+/** parses all date string to date */
 /* function parseDate(object = {}) {
     Object.keys(object).filter((key) => {
         return key.includes('date')
