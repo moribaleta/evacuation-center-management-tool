@@ -108,6 +108,10 @@ Array.prototype.isEmpty = function() {
     return this.length <= 0
 }
 
+Array.prototype.first = function() {
+    return this[0]
+}
+
 String.prototype.isEmpty = function () {
     return this.length <= 0
 }
@@ -173,6 +177,7 @@ const FormGenerator = Vue.extend({
     <option v-for="option in form[key].options" :value="option.value">
     {{option.title}}</option>
     </select>
+    <div>&nbsp</div>
     </div>
     </div>
     `,

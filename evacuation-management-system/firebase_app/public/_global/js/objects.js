@@ -1385,6 +1385,22 @@ class DonorsReport extends Model {
         'date_updated'
     ]
 
+    static reportItemFormModel = {
+        inventory_type: {
+            title: 'Supply Type',
+            type: FormModels.dropdown,
+            options: [] 
+        },
+        qty: {
+            title: 'QTY',
+            type: FormModels.number
+        },
+        remarks: {
+            title: 'Remarks',
+            type: FormModels.textarea
+        }
+    }
+
     constructor(id, date_created, date_updated, created_by, user_id,  evac_id, reports) {
         super()
         this.id = id || keyGenID("donorreport") //"publicuserhistory-" + genID(5)

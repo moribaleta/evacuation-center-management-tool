@@ -301,7 +301,7 @@
                 
                 header      : DonorsReport.headers,
                 formModel   : DonorsReport.formModel,
-                formReportModel : {},
+                formReportModel : DonorsReport.reportItemFormModel,
                 
                 /* public user */
                 org_headers: Object.keys(DonorsOrganization.headers),
@@ -323,22 +323,6 @@
                     const urlParams = new URLSearchParams(queryString);
                     const id = urlParams.get('id') || null
                     this.fetchReports(id)
-                    
-                    this.formReportModel = {
-                        inventory_type: {
-                            title: 'Supply Type',
-                            type: FormModels.dropdown,
-                            options: [] 
-                        },
-                        qty: {
-                            title: 'QTY',
-                            type: FormModels.number
-                        },
-                        remarks: {
-                            title: 'Remarks',
-                            type: FormModels.textarea
-                        }
-                    }
                     
                     this.form
                 },
