@@ -1145,7 +1145,7 @@ class DonorsOrganization extends Model {
         contact_email, contact_phone_number) {
         super()
         this.id = id || keyGenID("donororg") //"donororg-" + genID(5)
-        this.created_by = created_by
+        this.created_by = created_by || '0'
         this.date_created = date_created || new Date()
         this.date_updated = date_updated || new Date()
         this.name = name
@@ -1303,7 +1303,7 @@ class DonorsIndividual extends Model {
         employment_position, employment_business) {
         super()
         this.id = id || keyGenID("donorindv", 5) //"publicuser-" + genID(5)
-        this.created_by = created_by
+        this.created_by = created_by || '0'
         this.date_created = date_created || new Date()
         this.date_updated = date_updated || new Date()
 

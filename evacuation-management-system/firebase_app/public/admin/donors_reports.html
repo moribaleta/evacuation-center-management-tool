@@ -26,7 +26,7 @@
     <script src="js/vue.js"></script>
     <script src="../_global/js/objects.js"></script>
     <script src="../_global/js/utilities.js"></script>
-    
+    <script src="../_global/js/datahandler.js"></script>
 </head>
 
 <body>
@@ -167,7 +167,7 @@
                     </div>
                 </div>
                 <div class="button-container">
-                    <button type="button" class="btn btn-info button-view" v-on:click="addReport()">ADD REQUEST REPORT</button>
+                    <button v-if="org || indv" type="button" class="btn btn-info button-view" v-on:click="addReport()">ADD REQUEST REPORT</button>
                     <button type="button" class="btn btn-info button-view" v-on:click="openGenerateReport()">GENERATE REPORT DATA</button>
                 </div>
             </div>
@@ -185,6 +185,10 @@
                             <div class="col col-md-12 item-info">
                                 <p class="item-value">{{index + 1}}.</p>
                             </div>
+                            <div class="col col-md-12 item-info">
+                                <p class="item-label">USER</p>
+                                <p class="item-value">{{getUser(item.user_id)}}</p>
+                            </div>
                             <div class="col col-md-3 item-info " v-for="info,index in header">
                                 <div v-if="info == 'evac_id'">
                                     <p class="item-label">EVACUATION NAME</p>
@@ -192,7 +196,7 @@
                                 </div>
                                 <div v-if="info != 'evac_id'">
                                     <p class="item-label">{{info.replace(/_/g,' ').toUpperCase() +": "}}</p>
-                                    <p class="item-value">{{item[info] ? item[info] : 'N/A'}}</p>
+                                    <p class="item-value">{{getValue(info, item[info]) || 'N/A'}}</p>
                                 </div>
                             </div>
                             <div class="col col-md-12">
@@ -243,7 +247,6 @@
             </div>
         </div>
     </div>
-    <script src="js/app/datahandler.js"></script>
     <script src="js/app/app.js"></script>
     
     <script>
@@ -296,6 +299,8 @@
                 data_input: new DonorsReport(),
                 municipalities: municipalities,
                 
+                donor_ref: {},
+                
                 isDataLoading: true,
                 isEdit: false,
                 
@@ -327,16 +332,16 @@
                     this.form
                 },
                 
-                fetchReports(id, isAll) {
+                fetchReports(id) {
                     this.setLoading(true)
                     
                     DataHandler.getEvacuationCenters().then((data) => {
                         this.evac_list = data.data
                         this.formModel.evac_id.options = [
-                            {
-                                title: 'Public',
-                                value: ''
-                            }
+                        {
+                            title: 'Public',
+                            value: ''
+                        }
                         ]
                         this.formModel.evac_id.options = this.formModel.evac_id.options.concat(this.evac_list.map((evac) => {
                             return  {
@@ -361,15 +366,6 @@
                         console.log("err %o", err)
                     })
                     
-                    console.log("user id %o", id)
-                    DataHandler.getDonorReports(id).then((message) => {
-                        this.setData(message.data)
-                    }).catch(error => {
-                        console.log(error)
-                    }).finally(() => {
-                        this.setLoading(false)
-                    })
-                    
                     if (id) {
                         try {
                             id = id || ""
@@ -391,9 +387,28 @@
                         }catch(err) {
                             console.log(err)
                         }
-                        
-                        
+                    } else {
+                        let promiseIndv = DataHandler.getDonorIndividual()
+                        let promiseOrg  = DataHandler.getDonorOrganizations()
+                        Promise.all([promiseIndv, promiseOrg]).then((responses) => {
+                            responses.map((message) => {
+                                message.data.forEach((donor) => {
+                                    this.donor_ref[donor.id] = donor
+                                })
+                            })
+                        }).catch(err => {
+                            console.log(err)
+                        })
                     }
+
+                    console.log("user id %o", id)
+                    DataHandler.getDonorReports(id).then((message) => {
+                        this.setData(message.data)
+                    }).catch(error => {
+                        console.log(error)
+                    }).finally(() => {
+                        this.setLoading(false)
+                    })
                     
                     
                 },
@@ -503,13 +518,13 @@
                 addReport() {
                     this.data_input = new DonorsReport()
                     //this.data_input.user_id = this.public_user.id
-
+                    
                     if(this.org) {
                         this.data_input.user_id = this.org.id
                     } else {
                         this.data_input.user_id = this.indv.id
                     }
-
+                    
                     this.data_input.created_by = this.user.id
                     this.isEdit = false
                     $('#editorModal').modal()
@@ -553,8 +568,28 @@
                 
                 removeInputInventory(index) {
                     this.data_input.reports.splice(index, 1)
-                }
+                },
                 
+                getValue(key, value) {
+                    if (key.includes('date')) {
+                        return this.formatDate(value)
+                    } else if (key.includes('sex')) {
+                        return value == 0 ? 'Male' : 'Female'
+                    }
+                    return value
+                },
+
+                getUser(id){
+                    const donor = this.donor_ref[id]
+                    if (donor) {
+                        if (id.includes('org')) {
+                        return donor.name + ' - ' + donor.contact_person
+                    } else {
+                        return donor.lastname +', '+donor.firstname
+                    }
+                    } 
+                    return "N/A"
+                }
             }
         })
     </script>

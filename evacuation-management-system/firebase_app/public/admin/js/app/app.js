@@ -72,6 +72,7 @@ methods: {
             if (user != undefined && user != null) {
                 console.log(user)
                 this.user = user
+                this.onConfigureApp()
                 app.onStart()
             } else {
                 throw "login user"
@@ -95,6 +96,26 @@ methods: {
         window.open('login.html', '_self')
     },
     
+    onConfigureApp() {
+        app.formatDate = ((date) => {
+            let _date = new Date(date)
+            return _date.toLocaleDateString()
+        })
+
+        app.formateDateRange = ((d1, d2) => {
+            var datestring = ""
+            if (d1 && d1.trim() != "") {
+                datestring += app.formatDate(d1)
+            }
+            if (d2 && d2.trim() != "") {
+                if (datestring != "") {
+                    datestring += " - "
+                }
+                datestring += app.formatDate(d2)
+            }
+            return datestring
+        })
+    }
 }
 })
 

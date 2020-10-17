@@ -389,17 +389,6 @@ class PublicUserHandler extends UserHandler {
                             console.log(err)
                         }
                     })
-
-                    
-
-                    /* try {
-                        object.date_created = object.date_created.toDate()
-                        object.date_updated = object.date_updated.toDate()
-                        object.date_admitted = object.date_admitted.toDate()
-                        object.date_cleared = object.date_cleared.toDate()
-                    } catch (err) {
-                        console.log(err)
-                    } */
                     history.push(PublicUserHistory.parse(object))
                 });
                 var message = new Message()
@@ -1126,13 +1115,13 @@ class DonorHandler extends MunicipalInventoryHandler {
     }
 
     /** returns the public history of the user or general if given empty id */
-    getDonorReports(user_id) {
+    getDonorReports(user_id, limit = 100) {
         return new Promise((resolve, reject) => {
             const ref = this.firestore.collection(UserHandler.tables.donor_reports)
             //const query = (municipality != "0") ? ref.where('municipality', '==', municipality) : ref
             var query = (user_id && !user_id.isEmpty()) ? ref.where('user_id','==', user_id) : ref
             
-            query = query.orderBy('date_updated', 'desc')
+            query = query.orderBy('date_updated', 'desc').limit(limit)
 
             query.get().then(function (querySnapshot) {
                 var reports = []
@@ -1144,16 +1133,16 @@ class DonorHandler extends MunicipalInventoryHandler {
                         id,
                         ...data
                     }
-                    try {
-                        object.date_created = object.date_created.toDate()
-                    } catch (err) {
-                        console.log(err)
-                    }
-                    try {
-                        object.date_updated = object.date_updated.toDate()
-                    } catch (err) {
-                        console.log(err)
-                    }
+
+                    Object.keys(object).filter((key) => {
+                        return key.includes('date')
+                    }).forEach((key) => {
+                        try {
+                            object[key] = object[key].toDate()
+                        } catch (err) {
+                            console.log(err)
+                        }
+                    })
                     reports.push(DonorsReport.parse(object))
                 });
                 var message = new Message()
@@ -1419,4 +1408,4 @@ class DataHandlerClass extends PublicWebHandler {
     
 } //DataHandlerClass
 
-let DataHandler = new DataHandlerClass()
+const DataHandler = new DataHandlerClass()
