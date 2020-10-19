@@ -469,7 +469,7 @@ class EvacuationHandler extends PublicUserHandler {
     /*!--------- EVACUAITON CENTER ---------------!*/
     getEvacuationCenters() {
         return new Promise((resolve, reject) => {
-            this.firestore.collection('evacuation_centers')
+            this.firestore.collection(UserHandler.tables.evacuation_centers)
             .get().then(function (querySnapshot) {
                 var evacuations = []
                 querySnapshot.forEach(function (doc) {

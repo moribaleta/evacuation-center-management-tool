@@ -24,14 +24,14 @@ export const helloWorld = functions.https.onRequest((request, response) => {
 export const getUsers = functions.https.onRequest((request, respose) => {
        const app = configure()
        const db = admin.firestore(app);
-
+       
        db.collection("users")
-              .onSnapshot(function (snapshot) {
-                     snapshot.forEach(function (userSnapshot) {
-                            //console.log(userSnapshot.data())
-                            respose.send(userSnapshot.data())
-                     });
+       .onSnapshot(function (snapshot) {
+              snapshot.forEach(function (userSnapshot) {
+                     //console.log(userSnapshot.data())
+                     respose.send(userSnapshot.data())
               });
+       });
 })
 
 /* export  const createUser = functions.https.onRequest((request, respose) => {
@@ -45,41 +45,102 @@ export const getUsers = functions.https.onRequest((request, respose) => {
        })
 }) */
 
-
-export const testHoneyBee = functions.https.onRequest(async (request, response) => {
+export const recommendEvacuationSupply = functions.https.onRequest((request, response) => {
        const app = configure()
        const db = admin.firestore(app);
+       
+       const evac_promise = db.collection(DB_tables.evacuation_centers)
+       .get().then((query) => {
+              return convert<EvacuationCenter>(query)
+       })
+       
+       const supply_types = db.collection(DB_tables.supply_types)
+       .get().then((query) => {
+              return convert<EvacuationSupplyType>(query)
+       })
+       
+       const evacuation_inventory = db.collection(DB_tables.evacuation_inventory)
+       .get().then((query) => {
+              return convert<EvacuationInventory>(query)
+       })
+       
+       const evacuation_supply = db.collection(DB_tables.evacuation_supply).get().then((query) => {
+              return convert<EvacuationSupply>(query)
+       })
+       
+       const promise = Promise.all([evac_promise, supply_types, evacuation_inventory, evacuation_supply])
+       
+       promise.then((datas) => {
+              const evacs = datas[0]
+              const types = datas[1]
+              const inventories = datas[2]
+              const supplies = datas[3]
+              
+              
+              const evac_data = evacs.map((evac) => {
 
-       response.set('Access-Control-Allow-Origin', '*');
+                     let inv : string[] = []
 
-       await db.collection("moabc").orderBy('date_created', 'desc').limit(1)
-              .onSnapshot((snapshot) => {
-                     let params: MOABCParameters[] = []
-                     snapshot.forEach((param) => {
-                            let value = param.data() as MOABCParameters
-                            params.push(value)
+                     const evac_inventory = inventories.filter((inventory) => {
+                            if (inventory.evac_id == evac.id) {
+                                   inv.push(inventory.id)
+                                   return true
+                            } 
+                            return false
                      })
-                     let message = {
-                            data: {},
-                            error: ""
-                     }
-                     if (params.length > 0) {
-                            const param = params[0]
-                            let writer = main.generate(param)
-                            message.data = writer
-                     } else {
-                            message.error = "empty list"
-                     }
-                     response.send(message)
-              }, (error) => {
-                     let message = {
-                            data: null,
-                            error: error
-                     }
-                     response.send(message)
-              })
 
+                     var supply_total = 0
+
+                     const evac_supplies = types.map((type) => {
+                            let qtyTotal = 0
+                            supplies.filter((supply) => {
+                                   return supply.inventory_type == type.id && inv.includes(supply.inventory_id)
+                            }).map((supply) => {
+                                   qtyTotal += Number(supply.qty)
+                            })
+
+                            supply_total += Number(qtyTotal)
+
+                            return {
+                                   type,
+                                   qty: qtyTotal,
+                            }
+                     })
+
+                     return {
+                            evac,
+                            inventory: evac_inventory,
+                            supplies: evac_supplies,
+                            total: supply_total
+                     }
+              }).sort((lhs, rhs) => {
+                     return (lhs.total - rhs.total)
+              })
+              
+              response.json({result: evac_data})
+       }).catch((error) => {
+              response.json({error})
+       })
+       
 })
+
+function convert<T>(query: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>) : Promise<T[]> {
+       return new Promise((resolve, reject) => {
+              let array : T[] = []
+              query.forEach((doc) => {
+                     //console.log(doc.id, " => ", doc.data());
+                     const data = doc.data()
+                     const id = doc.id
+                     
+                     const object = {
+                            id,
+                            ...data
+                     }
+                     array.push(object as unknown as T)
+              });
+              resolve(array)
+       })
+}
 
 export const pingFunctionWithCorsAllowed = functions.https.onRequest((request, response) => {
        response.set("Access-Control-Allow-Origin", "*");
@@ -87,65 +148,17 @@ export const pingFunctionWithCorsAllowed = functions.https.onRequest((request, r
        response.set("Access-Control-Allow-Headers", "Content-Type");
        response.set("Access-Control-Max-Age", "3600");
        response.status(200)
-              .json({ body: request.body ,message: `Ping from Firebase (with CORS handling)! ${new Date().toISOString()}`});
+       .json({ body: request.body ,message: `Ping from Firebase (with CORS handling)! ${new Date().toISOString()}`});
 });
-
-export const testHoneyBeeModel = functions.https.onRequest((request, response) => {
-       
-
-       response.set("Access-Control-Allow-Origin", "*");
-       response.set("Access-Control-Allow-Methods", "*");
-       response.set("Access-Control-Allow-Headers", "Content-Type");
-       response.set("Access-Control-Max-Age", "3600");
-
-       const app = configure()
-       const db = admin.firestore(app);
-
-
-              db.collection("moabc").where('id', '==', request.body.id).limit(1)
-              .onSnapshot((snapshot) => {
-                     let params: MOABCParameters[] = []
-                     snapshot.forEach((param) => {
-                            let value = param.data() as MOABCParameters
-                            value.max_val = 200
-                            params.push(value)
-                     })
-                     let message = {
-                            data: {},
-                            error: ""
-                     }
-                     if (params.length > 0) {
-                            const param = params[0]
-                            let writer = main.generate(param)
-                            message.data = writer
-                     } else {
-                            message.error = "empty list"
-                     }
-                     
-                     //response.send(message)
-                     response.status(200).json(message);
-              }, (error) => {
-                     let message = {
-                            data: null,
-                            error: error
-                     }
-                     response.status(200).json(message);
-              })
-              //response.send(`Ping from Firebase (with CORS handling)! ${new Date().toISOString()}`);
-      
-
-       
-
-})
 
 
 function configure(): admin.app.App {
-
+       
        if (admin.apps.length > 0) {
               return admin.app()
        }
-
-       var firebaseConfig = {
+       
+       const firebaseConfig = {
               apiKey: "AIzaSyDkbPEnpffZuVgv2R1hjs_wb_uvz5sfYpg",
               authDomain: "ievacuate-laguna.firebaseapp.com",
               databaseURL: "https://ievacuate-laguna.firebaseio.com",
@@ -158,3 +171,138 @@ function configure(): admin.app.App {
        // Initialize Firebase
        return admin.initializeApp(firebaseConfig);
 }
+
+const DB_tables = {
+       admin_user: 'admin_user',
+       evacuation_centers: 'evacuation_centers',
+       evacuation_history: 'evacuation_history',
+       evacuation_inventory: 'evacuation_inventory',
+       evacuation_supply: 'evacuation_supply',
+       municipal_inventory: 'municipal_inventory',
+       supply_types: 'supply_types',
+       moabc: 'moabc',
+       users: 'users',
+       public_user: 'public_user',
+       public_user_history: 'public_user_history',
+       public_user_report: 'public_user_report',
+       donor_organization: 'donor_org',
+       donor_individual: 'donor_individual',
+       public_document: 'public_document',
+       public_content: 'public_content',
+       public_events: 'public_events',
+       public_information: 'public_information',
+       public_images: 'public_images',
+       donor_reports: 'donor_reports'
+}
+
+/**
+* superclass defines the model of any object created
+*/
+interface Model {
+       /** id model */
+       id : string
+       /** id of the admin that created the model */
+       created_by : string
+       /** date created*/
+       date_created: Date
+       /** date the model has been updated*/
+       date_updated: Date
+} //Model
+
+interface Location {
+       lat: number
+       lng: number
+}
+
+/**
+* object structure of Evacuation Center
+*/
+interface EvacuationCenter extends Model {
+       
+       /**name     = "sampl1"*/
+       name : string
+       /**
+       * lat lng values
+       * ```
+       * location = {
+              lat = 14.426700434748033,
+              lng = 121.43130540847778
+       }
+       ```
+       */
+       location: Location
+       
+       /**population_capacity = 1000*/
+       population_capacity : number
+       /**floor_space         = 2000*/
+       floor_space : number
+       /**exact_address       = "mabitac rd"*/
+       exact_address : string
+       /**municipality        = "mabitac"*/
+       municipality : string
+       /**contact_numbers     = "09171231233"*/
+       contact_numbers : string
+       
+       /** user id that handles the evac */
+       admin_id : string
+       
+       /** category of the the evacuation center */
+       category : string
+       
+       /** any avialable facilities */
+       facilities : string
+       
+}
+
+interface InventoryType extends Model {
+       
+       /** name of the inventory */
+       name : string
+       
+       /** description of the inventory */
+       description : string
+       
+       supplies: EvacuationSupply[]
+}
+
+/**
+* object defines the inventory/warehouse of the evacuation center
+*/
+interface EvacuationInventory extends InventoryType {
+       /** id of the evacuation */
+       evac_id : string
+} //EvacuationInventory
+
+/**
+* object defines the inventory supply
+*/
+interface EvacuationSupply extends Model {
+       
+       /** id of the inventory reference can either be from Municipal or Evacuation*/
+       inventory_id : string
+       
+       /** type of supply definition */
+       inventory_type : string
+       
+       /** number of quantity */
+       qty : number
+       
+       /** date of the item supplied */
+       date_supplied : Date
+       
+       /** any remarks or descriptions */
+       remarks : string
+} //EvacuationSupply
+
+/**
+* defines the type of evacuation supply is given
+*/
+interface EvacuationSupplyType extends Model {
+       
+       /** name of the item */
+       name : string
+       /** description of the item */
+       description : string
+       /** amount per package given */
+       amount : number       
+} //EvacuationSupplyType
