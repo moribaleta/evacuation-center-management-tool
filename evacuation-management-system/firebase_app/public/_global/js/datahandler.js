@@ -784,9 +784,11 @@ class InventoryHandler extends MOABParamsHandler {
     /** returns the supplies of the evacuation centers */
     getSupplies(inventory_ids = []) {
         return new Promise((resolve, reject) => {
-            this.firestore.collection(UserHandler.tables.evacuation_supply)
-            .where('inventory_id', 'in', inventory_ids)
-            .get().then(function (querySnapshot) {
+            const ref = this.firestore.collection(UserHandler.tables.evacuation_supply)
+            //.where('inventory_id', 'in', inventory_ids)
+            const query = inventory_ids.isEmpty() ? ref : ref.where('inventory_id', 'in', inventory_ids)
+
+            query.get().then(function (querySnapshot) {
                 var supplies = []
                 querySnapshot.forEach(function (doc) {
                     let data = doc.data()
@@ -805,16 +807,21 @@ class InventoryHandler extends MOABParamsHandler {
                     supplies.push(EvacuationSupply.parse(object))
                 });
                 
-                const _supplies = inventory_ids.map((inventory_id) => {
-                    const filtered_supplies = supplies.filter((supply) => {
-                        return supply.inventory_id == inventory_id
-                    })
-                    return {
-                        inventory_id,
-                        supplies: filtered_supplies
-                    }
-                })
-                
+                var _supplies = []
+                if (inventory_ids.isEmpty()) {
+                    _supplies = supplies
+                } else {
+                    _supplies = inventory_ids.map((inventory_id) => {
+                        const filtered_supplies = supplies.filter((supply) => {
+                            return supply.inventory_id == inventory_id
+                        })
+                        return {
+                            inventory_id,
+                            supplies: filtered_supplies
+                        }
+                    })    
+                }
+               
                 var message = new Message()
                 message.data = _supplies
                 
@@ -1019,6 +1026,22 @@ class MunicipalInventoryHandler extends InventoryHandler {
             })
         })
     }
+
+    /**
+     * generates the list of evacuation center ranked by the lowest inventory status
+     */
+    recommendEvacuationCenter(){
+        return new Promise((resolve, reject) => {
+            const ref = this.func.httpsCallable('recommendEvacuationSupply')
+            ref().then((data) => {
+                var message = new Message()
+                message.data = data
+                resolve(message)
+            }).catch((err) => {
+                reject(err)
+            })
+        })
+    }//recommendEvacuationCenter
 }
 
 class DonorHandler extends MunicipalInventoryHandler {

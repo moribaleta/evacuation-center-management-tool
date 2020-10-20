@@ -23,7 +23,7 @@ function getRandomValue(min, max) {
 /** super class that contains object for firebase implementation */
 class DataHandlerType {
     /** firebase functions */
-    functions
+    func
     
     /** firebase firestore */
     firestore
@@ -59,10 +59,11 @@ class DataHandlerType {
             this.config = firebase.initializeApp(firebaseConfig);
         }
         
-        this.storage = this.config.storage()
-        this.database = this.config.database()
-        this.firestore = firebase.firestore(this.config)
-        //this.functions  = firebase.functions()
+        this.storage    = this.config.storage()
+        this.database   = this.config.database()
+        this.firestore  = firebase.firestore(this.config)
+        
+        this.func   = firebase.functions()
     } //configure
     
 } //DataHandlerType

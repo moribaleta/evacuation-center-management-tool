@@ -46,6 +46,13 @@ export const getUsers = functions.https.onRequest((request, respose) => {
 }) */
 
 export const recommendEvacuationSupply = functions.https.onRequest((request, response) => {
+
+       response.set("Access-Control-Allow-Origin", "*");
+       response.set("Access-Control-Allow-Methods", "GET");
+       response.set("Access-Control-Allow-Headers", "Content-Type");
+       response.set("Access-Control-Max-Age", "3600");
+       
+
        const app = configure()
        const db = admin.firestore(app);
        
@@ -116,8 +123,7 @@ export const recommendEvacuationSupply = functions.https.onRequest((request, res
               }).sort((lhs, rhs) => {
                      return (lhs.total - rhs.total)
               })
-              
-              response.json({result: evac_data})
+              response.status(200).json({result: evac_data})
        }).catch((error) => {
               response.json({error})
        })
