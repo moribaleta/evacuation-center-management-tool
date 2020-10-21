@@ -10,6 +10,7 @@ class Model {
     date_created = new Date()
     /** date the model has been updated*/
     date_updated = new Date()
+
     /** path of picture saved */
     images = []
 } //Model
@@ -1453,10 +1454,11 @@ class PublicContent extends Model {
         date_updated: 'Date Updated',
         title: 'Title',
         path: 'Path',
+        images: 'Images'
     }
 
     constructor(id, date_created, date_updated, created_by,
-        title, path) {
+        title, path, images) {
         super()
         this.id = id || keyGenID('content', 5)
         this.date_created = date_created || new Date()
@@ -1465,6 +1467,7 @@ class PublicContent extends Model {
 
         this.title = title
         this.path = path
+        this.images = images || []
     }
 
     toObject() {
@@ -1474,7 +1477,8 @@ class PublicContent extends Model {
             date_updated: this.date_updated,
             created_by: this.created_by,
             title: this.title,
-            path: this.path
+            path: this.path,
+            images: this.images 
         }
     }
 
@@ -1485,7 +1489,8 @@ class PublicContent extends Model {
             object.date_updated,
             object.created_by,
             object.title,
-            object.path
+            object.path,
+            object.images
         )
     }
 } //PublicContent

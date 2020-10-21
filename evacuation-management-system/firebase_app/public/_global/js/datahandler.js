@@ -214,7 +214,7 @@ class UserHandler extends DataHandlerType {
     * @param orderBy
     * * the order of data to be displayed
     *  */
-    getObjects(objecttype, table,  where = null, orderBy = ['date_created','desc'], offset = 0, limit = 100) {
+    getObjects(objecttype, table,  where = null, orderBy = ['date_created','desc'], limit = 100) {
         
         var ref = this.firestore.collection(table)
         
@@ -222,7 +222,7 @@ class UserHandler extends DataHandlerType {
             ref = ref.where(...where)
         }
         
-        ref = ref.orderBy(...orderBy).startAt(offset).limit(limit)
+        ref = ref.orderBy(...orderBy).limit(limit)
         
         return new Promise((resolve, reject) => {
             
@@ -236,12 +236,15 @@ class UserHandler extends DataHandlerType {
                         id,
                         ...data
                     }
-                    try {
-                        object.date_created = object.date_created.toDate()
-                        object.date_updated = object.date_updated.toDate()
-                    } catch (err) {
-                        //console.log(err)
-                    }
+                    Object.keys(object).filter((key) => {
+                        return key.includes('date')
+                    }).forEach((key) => {
+                        try {
+                            object[key] = object[key].toDate()
+                        } catch (err) {
+                            console.log(err)
+                        }
+                    })
                     donors.push(objecttype.parse(object))
                 });
                 var message = new Message()
@@ -279,12 +282,15 @@ class PublicUserHandler extends UserHandler {
                         id,
                         ...data
                     }
-                    try {
-                        object.date_created = object.date_created.toDate()
-                        object.date_updated = object.date_updated.toDate()
-                    } catch (err) {
-                        console.log(err)
-                    }
+                    Object.keys(object).filter((key) => {
+                        return key.includes('date')
+                    }).forEach((key) => {
+                        try {
+                            object[key] = object[key].toDate()
+                        } catch (err) {
+                            console.log(err)
+                        }
+                    })
                     users.push(PublicUser.parse(object))
                 });
                 
@@ -1243,17 +1249,51 @@ class PublicWebHandler extends DonorHandler {
     * @param {*} params - object to be saved
     * @param {*} file - images to be uploaded
     */
-    addPublicPost(params, file, table = UserHandler.tables.public_content) {
+    addPublicPost(params, file, images = [], table = UserHandler.tables.public_content) {
         //return this.addPublicEntry(params, images, UserHandler.tables.public_content)
-        return this.uploadImages([file]).then((resp) => {
+        /* return this.uploadImages([file]).then((resp) => {
             console.log("response %o", resp)
             return resp.json()
         }).then((file_path) => {
             console.log("filepath %o", file_path)
             params.path = file_path[0]
+            return this.uploadImages(images)
+        }).then((resp) =>{
+            return resp.json()
+        }).then((images) => {
+            params.images = (params.images || []).concat(images)
             return this.addEntry(params.id, params.toObject(), table)
-        })
+        }) */
+
+        if (images.isEmpty()) {
+            return this.uploadImages([file]).then((resp) => {
+                console.log("response %o", resp)
+                return resp.json()
+            }).then((file_path) => {
+                console.log("filepath %o", file_path)
+                params.path = file_path[0]
+                return this.updatePublicPost(params, table )
+            })
+        } else {
+            return this.uploadImages([file]).then((resp) => {
+                console.log("response %o", resp)
+                return resp.json()
+            }).then((file_path) => {
+                console.log("filepath %o", file_path)
+                params.path = file_path[0]
+                return this.uploadImages(images)
+            }).then((resp) =>{
+                return resp.json()
+            }).then((images) => {
+                params.images = (params.images || []).concat(images || [])
+                return this.updatePublicPost(params, table )
+            }) 
+        }
     }//addPublicPost
+
+    updatePublicPost(params, table = UserHandler.tables.public_content) {
+        return this.addEntry(params.id, params.toObject(), table)
+    }
     
     /** gets the text content from the server file */
     getPublicPostContent(path){
@@ -1273,7 +1313,8 @@ class PublicWebHandler extends DonorHandler {
     * @param {*} params - object to be delete
     */
     deletePublicPost(params, table = UserHandler.tables.public_content) {
-        this.deleteImages([params.path]).then((val) => {
+        let toDelete = params.images.concat([params.path])
+        this.deleteImages(toDelete).then((val) => {
             console.log("deleted successfuly %o", val)
         }).catch(err =>{
             console.log(err)

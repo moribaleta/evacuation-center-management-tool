@@ -93,6 +93,24 @@
                         <div :id="'preview'+index" class="panel-collapse collapse">
                             <div class="panel-body">
                                 <div :id="'preview-content'+index" class="preview-content">
+                                    <label>Images</label>
+                                    <div class="row">
+                                        <div class="col col-md-12"
+                                            v-if="!item.images || item.images.length <= 0">
+                                            <p>Images are empty</p>
+                                        </div>
+                                        <div class="col col-md-2 item-info" v-for="image,index in item.images"
+                                            v-if="item.images && item.images.length > 0">
+                                            <!-- <img :src="cdn+image" class="img-thumbnail img-grid"/> -->
+                                            <div class="image-area">
+                                                <a :href="cdn+image">
+                                                    <img :src="cdn+image" alt="Preview">
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div >&nbsp;</div>
+                                    <label>Content</label>
                                     <div v-html="content_list[item.id]">
 
                                     </div>

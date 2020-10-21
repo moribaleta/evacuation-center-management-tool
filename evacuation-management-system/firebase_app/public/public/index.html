@@ -8,16 +8,16 @@
     <link rel="shortcut icon" href="resources/images/logo.png" />
 
     <!-- update the version number as needed -->
-    <script defer src="/__/firebase/7.19.1/firebase-app.js"></script>
+    <script src="/__/firebase/7.24.0/firebase-app.js"></script>
     <!-- include only the Firebase features as you need -->
-    <script defer src="/__/firebase/7.19.1/firebase-auth.js"></script>
-    <script defer src="/__/firebase/7.19.1/firebase-database.js"></script>
-    <script defer src="/__/firebase/7.19.1/firebase-messaging.js"></script>
-    <script defer src="/__/firebase/7.19.1/firebase-storage.js"></script>
-    <script defer src="/__/firebase/7.19.1/firebase-firestore.js"></script>
-    <script defer src="/__/firebase/7.19.1/firebase-functions.js"></script>
+    <script src="/__/firebase/7.24.0/firebase-auth.js"></script>
+    <script src="/__/firebase/7.24.0/firebase-database.js"></script>
+    <script src="/__/firebase/7.24.0/firebase-messaging.js"></script>
+    <script src="/__/firebase/7.24.0/firebase-storage.js"></script>
+    <script src="/__/firebase/7.24.0/firebase-firestore.js"></script>
+    <script src="/__/firebase/7.24.0/firebase-functions.js"></script>
     <!-- initialize the SDK after all desired features are loaded -->
-    <script defer src="/__/firebase/init.js"></script>
+    <script src="/__/firebase/init.js"></script>
 
     <!-- CSS  -->
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -88,11 +88,23 @@
                     </div>
     
                     <ul class="list grid" v-if="posts.length > 0">
-                        <li class="row well well-lg" v-for="(item,index) in posts" v-on:click="viewItem(index)">                        
-                            <div class="post-list-item">
-                                <h3 class="title">{{item.title}}</h3>
-                                <p class="time">{{item.date_updated}}</p>
-                            </div>
+                        <li class="row well well-lg" v-for="(item,index) in posts" v-on:click="viewItem(index)">   
+                            <div class="col col-md-2">
+                                <div class="image-area">
+                                    <img :src="cdn+item.images[0]" style="
+                                    height: 100px;
+                                    width: 100px;
+                                    display: block;
+                                    margin-left: auto;
+                                    margin-right: auto;"  alt="Preview">
+                                </div>
+                            </div>       
+                            <div class="col col-md-10">
+                                <div class="post-list-item">
+                                    <h3 class="title">{{item.title}}</h3>
+                                    <p class="time">{{item.date_updated}}</p>
+                                </div>
+                            </div>              
                         </li>
                     </ul>
                 </div>

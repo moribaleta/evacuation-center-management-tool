@@ -327,7 +327,7 @@
                                     <div class="panel-heading">
                                         <h4 class="panel-title">
                                             <p class="item-value">
-                                                {{index + 1}}. {{entry.title}}
+                                                {{index + 1}}. {{entry.title}} - Total qty: {{supply_types[entry.value].qty}}
                                             </p>
                                         </h4>
                                     </div>
@@ -602,8 +602,19 @@
                 fetchReports() {
                     
                     DataHandler.getSupplyTypes().then((message) => {
+                        var suppliesPromise = []
                         this.supply_types_option = message.data.map((supply) => {
                             this.supply_types[supply.id] = supply
+
+                            let promiseSupply = DataHandler.getObjects(EvacuationSupply, UserHandler.tables.evacuation_supply, ['inventory_type','==', supply.id])
+                                                .then((message) => {
+                                                    return {
+                                                        id: supply.id,
+                                                        data: message.data
+                                                    }
+                                                })
+
+                            suppliesPromise.push(promiseSupply)
                             return {
                                 title: supply.name,
                                 value: supply.id
@@ -611,6 +622,13 @@
                         })
                         this.donor_report_item_form.inventory_type.options = this.supply_types_option
                         console.log("supply types %o", this.supply_types)
+
+                        //return DataHandler.getObjects(EvacuationSupply, UserHandler.tables.evacuation_supply, ['inventory_type','==',''])
+                        return Promise.all(suppliesPromise)
+                    }).then((list) => {
+                        list.forEach((val) => {
+                            this.supply_types[val.id].qty = val.data.length 
+                        })
                     }).catch(err => {
                         console.log("err %o", err)
                     })

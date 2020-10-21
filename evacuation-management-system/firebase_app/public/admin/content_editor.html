@@ -5,7 +5,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Evacuations</title>
-    
+
     <!-- update the version number as needed -->
     <script defer src="/__/firebase/7.19.1/firebase-app.js"></script>
     <!-- include only the Firebase features as you need -->
@@ -17,7 +17,7 @@
     <script defer src="/__/firebase/7.19.1/firebase-functions.js"></script>
     <!-- initialize the SDK after all desired features are loaded -->
     <script defer src="/__/firebase/init.js"></script>
-    
+
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <script src="js/jquery-3.0.0.min.js"></script>
@@ -26,9 +26,8 @@
     <script src="js/vue.js"></script>
     <script src="../_global/js/objects.js"></script>
     <script src="../_global/js/utilities.js"></script>
-    
-    
-    
+    <script src="../_global/js/datahandler.js"></script>
+
 </head>
 
 <body>
@@ -36,7 +35,7 @@
         <div class="sidenav-item">
             <img class="nav-image" :src="logo" />
         </div>
-        
+
         <div v-for="item in header_items" v-bind:class="'sidenav-item ' + (active == item.id ? 'active' : '') ">
             <a v-bind:href="item.href">
                 <div class="icon-block">
@@ -45,7 +44,7 @@
                 </div>
             </a>
         </div>
-        
+
         <div class="sidenav-item">
             <a v-on:click="onLogout()">
                 <div class="icon-block">
@@ -66,8 +65,8 @@
             <div class="section header">
                 <h1>Edit Post</h1>
             </div>
-            
-            
+
+
             <div class="section">
                 <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="onSaveEntry()">
                     Save
@@ -87,54 +86,56 @@
                 <div class="row">
                     <div class="col col-md-6">
                         <label class="control-label" for="name">Title</label>
-                        <input id="name" name="name" type="text" placeholder="Title..." class="form-control input-item" required="" v-model="data_input.title">
+                        <input id="name" name="name" type="text" placeholder="Title..." class="form-control input-item"
+                            required="" v-model="data_input.title">
                     </div>
                     <div class="col col-md-12">&nbsp;</div>
                     <div class="col col-md-12">
-                        
+
                     </div>
                     <div class="col col-md-12">&nbsp;</div>
                 </div>
-                
-                <!-- <div id="imagerow" class="well">
-                    <div class="panel-body">
-                        <div class="row">
-                            <div class="col col-md-12" v-if="!data_input.images || data_input.images.length <= 0">
-                                <p>Images are empty</p>
-                            </div>
-                            <div class="col col-md-2 item-info" v-for="image,index in data_input.images">
-                                <div class="image-area">
-                                    <img :src="cdn+image"  alt="Preview">
-                                    <a class="remove-image" v-on:click="onDeleteImage(index)" style="display: inline;">&#215;</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="panel-footer">
-                        <div class="row">
-                            <p>Upload Images</p>
-                            <input id="input_images" type="file" name="files[]" multiple style="margin-bottom: 12px;"/>
-                            <button class="btn btn-default btn-info" v-on:click="onAddImages()">upload pictures</button>
-                        </div>
-                    </div>
-                </div> -->
+
             </div>
-            
+
         </div>
-        
+        <label class="control-label" for="name">Images</label>
+        <div id="images" class="panel panel-default">
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col col-md-12" v-if="!data_input.images || data_input.images.length <= 0">
+                        <p>Images are empty</p>
+                    </div>
+                    <div class="col col-md-2 item-info" v-for="image,index in data_input.images"
+                        v-if="data_input.images && data_input.images.length > 0">
+                        <!-- <img :src="cdn+image" class="img-thumbnail img-grid"/> -->
+                        <div class="image-area">
+                            <img :src="cdn+image" alt="Preview">
+                            <a class="remove-image" v-on:click="onDeleteImage(index)"
+                                style="display: inline;">&#215;</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-footer">
+                <p>Upload Images</p>
+                <input id="input_images" type="file" name="files[]" multiple style="margin-bottom: 12px;" />
+                <button class="btn btn-default btn-info" v-on:click="onAddImages()">upload pictures</button>
+            </div>
+        </div>
     </div>
 
     <div class="container">
+        <label class="control-label" for="name">Content</label>
         <textarea v-once id="contenteditor" name=""></textarea>
     </div>
-    
-    
+
+
+
     <script src="https://cdn.ckeditor.com/4.13.0/standard/ckeditor.js"></script>
-    <script src="js/app/datahandler.js"></script>
-    <script src="js/app/constants.js"></script>
     <script src="js/app/app.js"></script>
-    
-    
+
+
     <script>
         app = new Vue({
             el: '#content',
@@ -151,19 +152,19 @@
             methods: {
                 onStart() {
                     this.user = header.user
-                    
+
                     this.fetchAllAdmins()
-                    
-                    
+
+
                     const queryString = window.location.search;
                     const urlParams = new URLSearchParams(queryString);
                     const id = urlParams.get('id')
-                    
+
                     //this.onNewEditor()
                     this.fetchPost(id)
                     //this.onNewEditor()
                 }, //onStart
-                
+
                 fetchPost(id) {
                     if (id) {
                         this.isLoading = true
@@ -176,7 +177,7 @@
                             this.content = data
                             console.log("content %o", data)
                             $('#contenteditor').val(data)
-                            
+
                         }).catch(err => {
                             console.log(err)
                         }).finally(() => {
@@ -192,48 +193,54 @@
                 }, //fetchPost
 
 
-                onNewEditor(){
-                    CKEDITOR.replace('contenteditor');
+                onNewEditor() {
+                    CKEDITOR.replace('contenteditor', {
+                        height: 500
+                    });
                 },
-                
+
                 fetchAllAdmins() {
                     DataHandler.getAdminUsers(this.user.id).then((message) => {
                         this.admins = message.data
                         this.admins.forEach(admin => {
                             this.admins_selection[admin.id] =
-                            `${admin.lastname}, ${admin.firstname}`
+                                `${admin.lastname}, ${admin.firstname}`
                         });
                     }).catch((error) => {
                         console.log(error)
                     })
                 }, //fetchAllAdmins
-                
-                
-                
+
+
+
                 onNewEntry() {
                     if (confirm("All Changes will be discarded")) {
                         window.open('content_editor.html')
                     }
-                },//onAddItem
-                
+                }, //onAddItem
+
                 onSaveEntry() {
                     var editorText = CKEDITOR.instances.contenteditor.getData();
-                    
-                    const file = new File([editorText || ""], (this.data_input.path && this.data_input.path != "") ? this.data_input.path : `${this.data_input.id}.txt`, {type: "text/plain", lastModified: new Date()})
-                    
+
+                    const file = new File([editorText || ""], (this.data_input.path && this.data_input.path !=
+                        "") ? this.data_input.path : `${this.data_input.id}.txt`, {
+                        type: "text/plain",
+                        lastModified: new Date()
+                    })
+
                     console.log("file %o", file)
 
                     DataHandler.addPublicPost(this.data_input, file)
                         .then((message) => {
-                            if(!message.error) {
+                            if (!message.error) {
                                 AlertMessages.success()
                                 this.fetchPost(this.data_input.id)
                             } else {
                                 AlertMessages.error(message.error)
                             }
                         })
-                },//onSaveEntry
-                
+                }, //onSaveEntry
+
                 onDeleteEntry() {
                     if (confirm('Deleting Item\nPress confirm to proceed')) {
                         DataHandler.deletePublicPost(this.data_input).then((data) => {
@@ -246,12 +253,65 @@
                             }
                         })
                     }
-                },//onDeleteEntry
-                
+                }, //onDeleteEntry
+
+                onDeleteImage(index) {
+                    if (confirm("Do you want to delete this image?")) {
+                        let image_to_delete = this.data_input.images.splice(index, 1)
+                        console.log("images to delete %o", image_to_delete)
+                        DataHandler.deleteImages(image_to_delete).then((removed) => {
+                            console.log(removed)
+                        }).catch((err) => {
+                            console.log(err)
+                        })
+                        DataHandler.updatePublicPost(this.data_input).then((message) => {
+                            AlertMessages.deleted()
+                        }).catch((err) => {
+                            AlertMessages.error(err)
+                        })
+                        /* DataHandler.addEvacationCenter(first).then((message) => {
+                            this.fetchEvacationCenter()
+                        }).catch((err) => {
+                            console.log(err)
+                        }) */
+                    }
+                },
+
+                onAddImages() {
+                    const files = document.getElementById('input_images').files;
+                    var uploads = []
+                    for (var i = 0; i < files.length; i++) {
+                        uploads.push(files[i])
+                    }
+                    if (uploads.length > 0) {
+
+                        var value = PublicContent.parse(this.data_input.toObject())
+
+                        DataHandler.uploadImages(uploads).then((resp) => {
+                            return resp.json()
+                        }).then((saved_images) => {
+                            value.images = value.images || []
+                            value.images = value.images.concat(saved_images)
+                            return DataHandler.updatePublicPost(value)
+                        }).then((message) => {
+                            if (!message.error) {
+                                AlertMessages.success()
+                                this.data_input = value
+                            } else {
+                                throw message.error
+                            }
+                        }).catch(error => {
+                            AlertMessages.error(error)
+                            console.log(error)
+                        })
+
+                    }
+                }
+
             }
         })
     </script>
-    
+
 </body>
 
 </html>
