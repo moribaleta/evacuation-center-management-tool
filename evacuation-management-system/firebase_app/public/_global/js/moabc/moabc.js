@@ -36,6 +36,11 @@ var ArtificialBeeColony = (function () {
         this.solutions = [];
         var done = false;
         var epoch = 0;
+
+        if (this.FOOD_NUMBER <= 1) {
+            throw "FOOD NUMBER IS EMPTY"
+        }
+
         this.initialize();
         this.memorizeBestFoodSource();
         while (!done) {
@@ -96,6 +101,7 @@ var ArtificialBeeColony = (function () {
         var currentBee;
         var neighborBee;
         for (var i = 0; i < this.FOOD_NUMBER; i++) {
+            console.log("food number %o", this.FOOD_NUMBER)
             neighborBeeIndex = this.getExclusiveRandomNumber(this.FOOD_NUMBER - 1, i);
             currentBee = this.foodSources[i];
             neighborBee = this.foodSources[neighborBeeIndex];
@@ -206,6 +212,7 @@ var ArtificialBeeColony = (function () {
         var getRand = 0;
         while (!done) {
             getRand = HoneyUtilities.randomNumberMax(high);
+            console.log("getRand %o && except %o % high: %o", getRand, except, high)
             if (getRand != except) {
                 done = true;
             }

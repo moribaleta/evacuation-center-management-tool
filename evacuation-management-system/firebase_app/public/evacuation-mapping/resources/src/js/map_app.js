@@ -253,7 +253,6 @@ class MapApp {
                 $("#progressDirection").hide();
                 showDetail(evacs);
                 $("#button_modal").click();
-                console.log('got value ' + x);
             },
             error(err) { 
                 console.error('something wrong occurred: ' + err);
