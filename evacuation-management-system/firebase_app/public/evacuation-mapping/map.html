@@ -902,12 +902,6 @@
             for (var i = 0; i < tree.length; i++) {
                 for (var j = 0; j < tree_temp.length; j++) {
                     if (i != j) {
-                        /* if (tree[i].coordinates.lat == tree_temp[j].coordinates.lat &&
-                            tree[i].coordinates.lng == tree_temp[j].coordinates.lng) { */
-                        /* const distance = getDistance(
-                            tree[i].coordinates.lat, tree_temp[j].coordinates.lat,
-                            tree[i].coordinates.lng, tree_temp[j].coordinates.lng) */
-
                         if ((tree[i].coordinates.lat == tree_temp[j].coordinates.lat &&
                                 tree[i].coordinates.lng == tree_temp[j].coordinates.lng)) {
                             console.log("match: " + i + " vs " + j + " distance: " + distance);

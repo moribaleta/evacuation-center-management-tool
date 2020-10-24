@@ -29,6 +29,7 @@
         <script src="resources/js/jquery-3.0.0.min.js"></script>        
         <script src="resources/js/xmlparser.js"></script>
         <link rel="shortcut icon" href="resources/images/favicon.ico" type="image/x-icon">
+        <script src="resources/src/js/utilities.js"></script>
     </head>
     <body>
 
@@ -63,29 +64,27 @@
 
 
         <script>
-
+            console.log("roads %o", localStorage.getItem('roads'))
             var road_coord = JSON.parse(localStorage.getItem("roads")) || [];
             var path_data;
             var start_location;
             var finish_location;
             var tree;
 
-            function getDistance(x1,x2,y1,y2){
-                return Math.sqrt( Math.pow((x1-x2), 2) + Math.pow((y1-y2), 2) );
-            }
-
+            
             function initRoute(){
 
                 console.log("roads_coord %o", road_coord)
-
-                tree = [];
-                var node_id = 0;
+                
+                tree = JSON.parse(localStorage.getItem('roadTree')).data
+                var tree_dict = {}
+                 /* var node_id = 0;
                 for(var i = 0; i< road_coord.length; i++){        
 
                     for(var j=0; j<road_coord[i].coordinates.length; j++){
                         var vertex = [];
                         if(j<road_coord[i].coordinates.length-1){
-                            var distance = getDistance(
+                            var distance = getdistance(
                                 road_coord[i].coordinates[j].lat,road_coord[i].coordinates[j+1].lat,
                                 road_coord[i].coordinates[j].lng,road_coord[i].coordinates[j+1].lng,
                             );
@@ -95,7 +94,7 @@
                             });
                         }
                         if(j>0){
-                            var distance = getDistance(
+                            var distance = getdistance(
                                 road_coord[i].coordinates[j].lat,road_coord[i].coordinates[j-1].lat,
                                 road_coord[i].coordinates[j].lng,road_coord[i].coordinates[j-1].lng,
                             );                        
@@ -122,11 +121,6 @@
                 for (var i = 0; i < tree.length; i++) {
                     for (var j = 0; j < tree_temp.length; j++) {
                         if (i != j) {
-                            /* if (tree[i].coordinates.lat == tree_temp[j].coordinates.lat &&
-                                tree[i].coordinates.lng == tree_temp[j].coordinates.lng) { */
-                            /* const distance = getDistance(
-                                tree[i].coordinates.lat, tree_temp[j].coordinates.lat,
-                                tree[i].coordinates.lng, tree_temp[j].coordinates.lng) */
                             
                             if ((tree[i].coordinates.lat == tree_temp[j].coordinates.lat &&
                                 tree[i].coordinates.lng == tree_temp[j].coordinates.lng)) {
@@ -142,7 +136,7 @@
                             }
                         }
                     }
-                }
+                } */
 
                 //console.log(""+JSON.stringify(tree));
 
@@ -151,12 +145,12 @@
                 var g = new Graph();
                 for(var i = 0; i<tree.length;i++){
                     var vertex = {};
+                    tree_dict[tree[i].node_id] = tree[i]
                     for(var j = 0; j<tree[i].vertex.length; j++){
                         vertex[""+tree[i].vertex[j].node] = tree[i].vertex[j].distance;
                     }
                     //console.log(tree[i].node_id+", %o",vertex);
                     g.addVertex(tree[i].node_id+"",vertex);
-
                 }
                 
                 var url_data = window.location.href.split('route.html?').pop();
@@ -193,15 +187,14 @@
                 //console.log("path %o",path);
                 path_data = [];
 
-                for(var i = 0; i<path.length; i++){
-                    for(var j = 0; j<tree.length;j++){
-                        if(tree[j].node_id == Number.parseInt(path[i])){
-                            //console.log("index: %o",tree[j]);
-                            path_data.push(tree[j]);
-                        }
+                for (var i = 0; i < path.length; i++) {
+                    let node = tree_dict[Number.parseInt(path[i])]
+                    if (node) {
+                        path_data.push(node)
                     }
                 }
-                var path_distance = 0;
+
+                /* var path_distance = 0;
                 for(var i = 0; i<path_data.length-1;i++){
                     path_distance += Number.parseFloat(getdistance(
                         path_data[i].coordinates.lat,path_data[i+1].coordinates.lat,
@@ -209,12 +202,12 @@
                     ));
                     console.log(path_distance);
                 }
-                console.log("total distance: "+path_distance);
+                console.log("total distance: "+path_distance); */
 
             }
 
 
-            function getdistance(lat1, lat2, lon1, lon2) {
+            /* function getdistance(lat1, lat2, lon1, lon2) {
                 var p = 0.017453292519943295;    // Math.PI / 180
                 var c = Math.cos;
                 var a = 0.5 - c((lat2 - lat1) * p)/2 + 
@@ -222,7 +215,7 @@
                     (1 - c((lon2 - lon1) * p))/2;
 
                 return 12742 * Math.asin(Math.sqrt(a)); // 2 * R; R = 6371 km
-            }
+            } */
 
             function getNearest(unit,tree){
                 var min = 100;
@@ -326,8 +319,8 @@
                 marker = new google.maps.Marker({
                     position: start_position,
                     map: map,
-                    title: "hospital",
-                    icon: 'resources/images/hospital_32.png'
+                    title: "Evacuation",
+                    icon: 'resources/images/evac_32.png'
                 });
                 map.fitBounds(bounds);
 
@@ -336,7 +329,7 @@
                 marker = new google.maps.Marker({
                     position: end_position,
                     map: map,
-                    title: "emergency!!",
+                    title: "User Location",
                     icon: 'resources/images/emergency_32.png'
                 });
                 map.fitBounds(bounds);

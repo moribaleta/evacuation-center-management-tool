@@ -140,13 +140,7 @@ class MapApp {
         const promiseRoute  = this.initializeMapRouter()
         const promiseEvac   = this.initEvacuationCenters()
         
-
-        /* Promise.all(promiseRoute,promiseEvac).then((val) => {
-            $("#progressDirection").hide();
-        }).catch((err) => {
-            console.log(err)
-        }) */
-        promiseRoute.then(() => {
+        promiseRoute.then((message) => {
             return promiseEvac
         }).then(() => {
             $("#progressDirection").hide();
@@ -163,6 +157,7 @@ class MapApp {
 
         DataHandler.getModelParams().then((message) => {
             this.model_param = message.data[0]
+            console.log(this.model_param)
         }).catch(error => {
             console.log(err)
         })
@@ -171,15 +166,14 @@ class MapApp {
 
     /** gets the road coordinates from the database */
     initializeMapRouter() {
-        return new Promise((resolve, reject) => {
-            DataHandler.getRoadMap().then((message) => {
-                MapRouter.configure(message.data || [], this.showPathColor)
-                localStorage.setItem('roads', JSON.stringify(message.data))
-                resolve(true)
-            }).catch((error) => {
-                console.log(error)
-                reject(error)
-            })
+        /* return DataHandler.getRoadTreeStructure().then(((message) => {
+            console.log(message.data)
+            MapRouter.loadTree(message.data, this.showPathColor)
+            return true
+        })) */
+        return DataHandler.getRoadMap().then((message) => {
+            MapRouter.configure(message.data, true)
+            return true
         })
     } //initializeMapRouter
 
@@ -391,39 +385,7 @@ const mapApp = new MapApp()
 
 function onInitializeMap() {
     mapApp.initializeMap()
-    //MapHandler.onPlaceMarker = onPlaceMarker
 }
-
-/* function saveResponseTime(hospital, emergency_loc) {
-    
-    //var responseTime = hospital.response_time.toFixed(3);
-    hospital.response_time = hospital.response_time + " min";
-    //hospital['name'] = hospital.hospital_detail.name;
-    hospital['emergency_location'] = tree[emergency_loc].coordinates;
-    var currentDate = new Date()
-    var day = currentDate.getDate()
-    var month = currentDate.getMonth() + 1
-    var year = currentDate.getFullYear()
-    //document.write(today);
-    hospital['date'] = "" + day + "/" + month + "/" + year + "";
-    console.log('saveResponseTime: hospital %o', hospital);
-    var history_list = JSON.parse(localStorage.getItem("experiment_paper"));
-    var today = new Date().getHours();
-    if (today > 5 && today <= 10) {
-        history_list[0].timeframe.push(hospital);
-    } else if (today > 10 && today <= 16) {
-        history_list[1].timeframe.push(hospital);
-    } else if (today > 16 && today <= 22) {
-        history_list[2].timeframe.push(hospital);
-    } else {
-        history_list[3].timeframe.push(hospital);
-    }
-    localStorage.setItem("experiment_paper", JSON.stringify(history_list));
-} */
-
-
-
-
 
 var modal_vue = new Vue({
     el: '#modal-body',
@@ -456,8 +418,14 @@ var modal_vue = new Vue({
                 }
             }
 
+            evac_elem = {
+                lat: evacuation_center.location.lat,
+                lng: evacuation_center.location.lng,
+            }
+
             console.log("emergency location %o", emergency_elem)
             window.open('route.html?' + JSON.stringify(evacuation_center) + "**" + JSON.stringify(emergency_elem),'_self');
+            //window.open(`route_2.html?evac=${JSON.stringify(evac_elem)}&emergency=${JSON.stringify(emergency_elem)}`, '_self')
         },
     }
 }) //modal_vue
@@ -480,6 +448,17 @@ class MapRouterClass {
 
     map
 
+    /** loads the tree to app */
+    loadTree(tree = [], showColor) {
+        this.tree = tree
+        this.showColor = showColor
+
+        this.initializeDjikstra()
+        this.placeTrafficPoints()
+        this.displayColor(this.showColor)
+    }
+
+
     /** initializes dijkstra path nodes */
     configure(road_map = [], showColor = false) {
 
@@ -488,6 +467,8 @@ class MapRouterClass {
         this.showColor = showColor
         var node_id = 0;
         this.map = MapHandler.map
+
+        console.log(road_map)
 
         ///generates the node of each coordinates from the path of each road_map
         for (var i = 0; i < this.road_map.length; i++) {
@@ -525,7 +506,7 @@ class MapRouterClass {
             }
         }
 
-        var tree_temp = [...this.tree];
+        var tree_temp = this.tree;
         var added = [];
 
         ///checks for each nodes if they have a junction to be included that connect multiple roads in one vertex
@@ -546,9 +527,13 @@ class MapRouterClass {
                 }
             }
         }
+
+        localStorage.setItem('roadTree',JSON.stringify({data: this.tree}))
+        localStorage.setItem('roads', JSON.stringify(road_map))
+
         this.initializeDjikstra()
         this.placeTrafficPoints()
-        this.displayColor(this.isShowColor)
+        this.displayColor(this.showColor)
     } //initRoute
 
     /** reinitializes djikstra and insert vertices from the tree generated */
@@ -561,6 +546,9 @@ class MapRouterClass {
             }
             this.djikstra.addVertex(this.tree[i].node_id + "", vertex);
         }
+
+        localStorage.setItem('djikstra', JSON.stringify(this.djikstra.vertices))
+
     } //initializeDjikstra
 
     /**returns the index of the nearest node based on the distance */
@@ -788,33 +776,22 @@ class MapRouterClass {
     placeTrafficPoints() {
         let map = MapHandler.map
         var infoWindow = new google.maps.InfoWindow(),
-            marker, i;
+            marker, i, j;
 
-        for (i = 0; i < this.tree.length; i++) {
+            
+
+        for (i = 0, j = this.tree.length - 1 ; i < this.tree.length / 2; i++, j--) {
+        
             var position = new google.maps.LatLng(this.tree[i].coordinates.lat, this.tree[i].coordinates.lng);
-            //bounds.extend(position);
             var condition = 'resources/images/border-dot-point-25-good.png';
-            var speed;
-            /* try {
-                speed = getAveSpeed(i).toFixed(2);
-                if (speed < 20 && speed > 15) {
-                    condition = 'resources/images/border-dot-point-25-caution.png'
-                } else if (speed <= 15 && speed > 0) {
-                    condition = 'resources/images/border-dot-point-25-warning.png'
-                }
-            } catch (e) { */
             condition = 'resources/images/border-dot-point-25.png'
-            speed = "0";
-            //console.log(e);
-            //}
-
+            
             marker = new google.maps.Marker({
                 position: position,
                 map: map,
-                title: this.tree[i].node_id + ". " + this.tree[i].name + " position " + this.tree[i].coordinates.lat + " , " + this.tree[i].coordinates.lng + " ave speed: " + speed,
+                title: this.tree[i].node_id + ". " + this.tree[i].name + " position " + this.tree[i].coordinates.lat + " , " + this.tree[i].coordinates.lng,
                 icon: condition
             });
-
 
             google.maps.event.addListener(marker, 'click', (function (marker, i) {
                 return function () {
@@ -823,13 +800,34 @@ class MapRouterClass {
                     infoWindow.open(map, marker);
                 }
             })(marker, i));
+
+            //half point
+
+            var position = new google.maps.LatLng(this.tree[j].coordinates.lat, this.tree[j].coordinates.lng);
+            var condition = 'resources/images/border-dot-point-25-good.png';
+            condition = 'resources/images/border-dot-point-25.png'
+            
+            marker = new google.maps.Marker({
+                position: position,
+                map: map,
+                title: this.tree[j].node_id + ". " + this.tree[j].name + " position " + this.tree[j].coordinates.lat + " , " + this.tree[j].coordinates.lng,
+                icon: condition
+            });
+
+            google.maps.event.addListener(marker, 'click', (function (marker, i) {
+                return function () {
+                    var contentMessage = '<p>' + this.tree[j].name + " location: " + this.tree[j].coordinates.lat + "," + this.tree[j].coordinates.lng + '</p>';
+                    infoWindow.setContent(contentMessage);
+                    infoWindow.open(map, marker);
+                }
+            })(marker, j));
         }
     } //placeTrafficPoints
 
     path_lines = []
 
-    displayColor(isShowColor) {
-        this.isShowColor = isShowColor
+    displayColor(showColor) {
+        this.showColor = showColor
         
         if (this.path_lines.length > 0) {
             this.path_lines.forEach((path) => {
@@ -839,11 +837,21 @@ class MapRouterClass {
         }
 
         if (this.showColor) {
+
+            var colors = []
+
             this.path_lines = this.road_map.map((road) => {
+
+                var color = getRandomColor()
+
+                while(colors.includes(color)) {
+                    color = getRandomColor()
+                }
+
                 return new google.maps.Polyline({
                     path: road.coordinates,
                     geodesic: true,
-                    strokeColor: '#02DBFF',
+                    strokeColor: color,
                     strokeOpacity: 1.0,
                     strokeWeight: 2,
                     map: this.map
