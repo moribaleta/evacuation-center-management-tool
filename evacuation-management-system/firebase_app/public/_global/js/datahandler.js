@@ -364,6 +364,52 @@ class PublicUserHandler extends UserHandler {
     } //deleteAdminUsers
     /* ------------ USER -------------->*/
 
+    loginPublicUser(username, password) {
+        this.configure()
+        return new Promise((resolve, reject) => {
+            console.log(username + "--" + password)
+            this.firestore.collection(UserHandler.tables.public_user)
+                .where("username", "==", username)
+                .where("password", "==", password)
+                .get().then(function (querySnapshot) {
+                    var users = []
+                    querySnapshot.forEach(function (doc) {
+                        console.log(doc.id, " => ", doc.data());
+                        let data = doc.data()
+                        let id = doc.id
+                        let object = {
+                            id,
+                            ...data
+                        }
+                        try {
+                            object.date_created = object.date_created.toDate()
+                            object.date_updated = object.date_updated.toDate()
+                        } catch (err) {
+                            console.log(err)
+                        }
+
+                        users.push(PublicUser.parse(object))
+                    });
+
+                    var message = new Message()
+
+                    if (users.length > 0) {
+                        message.data = users[0]
+                        resolve(message)
+                    } else {
+                        message.data = "error"
+                        message.error = "Invalid Username and Password"
+                        reject(message)
+                    }
+
+                })
+                .catch(function (error) {
+                    console.log("Error getting documents: ", error);
+                    reject(error)
+                });
+        })
+    } //login
+
     /** returns the public history of the user or general if given empty id */
     getPublicUserHistory(id) {
         return new Promise((resolve, reject) => {
