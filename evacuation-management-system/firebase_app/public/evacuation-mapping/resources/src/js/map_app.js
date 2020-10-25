@@ -162,20 +162,27 @@ class MapApp {
             console.log(err)
         })
 
+        this.getRoadMap()
     } //initializeMap
 
     /** gets the road coordinates from the database */
     initializeMapRouter() {
-        /* return DataHandler.getRoadTreeStructure().then(((message) => {
+        return DataHandler.getRoadTreeStructure().then(((message) => {
             console.log(message.data)
             MapRouter.loadTree(message.data, this.showPathColor)
             return true
-        })) */
-        return DataHandler.getRoadMap().then((message) => {
-            MapRouter.configure(message.data, true)
-            return true
-        })
+        }))
     } //initializeMapRouter
+
+    getRoadMap(){
+        DataHandler.getRoadMap().then((message) => {
+            //MapRouter.configure(message.data, true)
+            localStorage.setItem('roads', JSON.stringify(message.data))
+            MapRouter.displayColor(this.showPathColor)
+        }).catch(err => {
+            console.log(err)
+        })
+    }
 
     /** gets the evacuation centers from the database */
     initEvacuationCenters() {
@@ -455,7 +462,7 @@ class MapRouterClass {
 
         this.initializeDjikstra()
         this.placeTrafficPoints()
-        this.displayColor(this.showColor)
+        //this.displayColor(this.showColor)
     }
 
 

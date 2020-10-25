@@ -169,9 +169,18 @@
             </div>
         </div>
         
+        <h3>Donors Users</h3>
+        <div class="section">
+            <div class="button-container">
+                <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="onAddNewOrg()">Add New Organization</button>
+                <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="onAddNewIndv()">Add New Individual</button>
+            </div>
+            <div>&nbsp;</div>
+        </div>
+        
         <!--------- ORGANIZATION ------------->
         <div class="section">
-            <h3>Organization Donor</h3>
+            <h4>Organization</h4>
             
             <div class="loader-container" v-if="isLoading.org">
                 <div class="loader"></div>
@@ -208,7 +217,7 @@
         <!--------- INDIVIDUAL --------------->
         <div class="section">
             
-            <h3>Individual Donor</h3>
+            <h4>Individual</h4>
             
             <div class="loader-container" v-if="isLoading.indv">
                 <div class="loader"></div>
@@ -245,317 +254,310 @@
         </div>
         <!--------- INDIVIDUAL --------------->
         
-        <div class="section">
-            <div class="button-container">
-                <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="onAddNewOrg()">Add
-                    New Organization</button>
-                    <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="onAddNewIndv()">Add
-                        New Individual</button>
-                    </div>
+        
+    </div>
+    
+    
+    <script src="js/app/app.js"></script>
+    <script>
+        
+        const filterheaders = [
+        'date_created',
+        'date_updated',
+        'firstname',
+        'lastname',
+        'middleinit',
+        'email',
+        'birthdate',
+        'phone_number',
+        'address',
+        'sex',
+        ]
+        const DonorComponent = Vue.extend({
+            template: `
+            <div class="row" v-if="indv != null">
+                <div class="col col-md-4 item-info" v-for="key,index in indv_headers" v-if="key !='id'">
+                    <p class="item-label">
+                        {{key.replace(/_/g,' ').toUpperCase() +": "}}
+                    </p>
+                    <p class="item-value">
+                        {{ getValue(key, indv[key]) || '--'}}
+                    </p>
                 </div>
             </div>
+            <!-- Individual -->
+            <!-- Organization -->
+            <div class="row" v-else-if="org != null">
+                <div class="col col-md-4 item-info" v-for="key,index in org_headers" v-if="key !='id'">
+                    <p class="item-label">
+                        {{key.replace(/_/g,' ').toUpperCase() +": "}}
+                    </p>
+                    <p class="item-value">
+                        {{ getValue(key, org[key]) || '--'}}
+                    </p>
+                </div>
+            </div>
+            `,
+            props: {
+                donor: Object,
+            },
             
+            data() {
+                return {
+                    org: null,
+                    indv: null,
+                    org_headers: Object.keys(DonorsOrganization.headers).filter((val)=>{return filterheaders.includes(val)}),
+                    indv_headers: Object.keys(DonorsIndividual.headers).filter((val)=>{return filterheaders.includes(val)}),
+                }
+            },
             
-            <script src="js/app/app.js"></script>
-            <script>
+            created: function () {
+                console.log("donor %o", this.donor)
+                if (this.donor.id.includes('org')) {
+                    this.org = this.donor
+                } else {
+                    this.indv = this.donor
+                }
+            },
+            
+            methods: {
+                formatDate(date) {
+                    return app.formatDate(date)
+                },
                 
-                const filterheaders = [
-                'date_created',
-                'date_updated',
-                'firstname',
-                'lastname',
-                'middleinit',
-                'email',
-                'birthdate',
-                'phone_number',
-                'address',
-                'sex',
-                ]
-                const DonorComponent = Vue.extend({
-                    template: `
-                    <div class="row" v-if="indv != null">
-                        <div class="col col-md-4 item-info" v-for="key,index in indv_headers" v-if="key !='id'">
-                            <p class="item-label">
-                                {{key.replace(/_/g,' ').toUpperCase() +": "}}
-                            </p>
-                            <p class="item-value">
-                                {{ getValue(key, indv[key]) || '--'}}
-                            </p>
-                        </div>
-                    </div>
-                    <!-- Individual -->
-                    <!-- Organization -->
-                    <div class="row" v-else-if="org != null">
-                        <div class="col col-md-4 item-info" v-for="key,index in org_headers" v-if="key !='id'">
-                            <p class="item-label">
-                                {{key.replace(/_/g,' ').toUpperCase() +": "}}
-                            </p>
-                            <p class="item-value">
-                                {{ getValue(key, org[key]) || '--'}}
-                            </p>
-                        </div>
-                    </div>
-                    `,
-                    props: {
-                        donor: Object,
-                    },
+                getValue(key, value) {
+                    if (key.includes('date')) {
+                        return this.formatDate(value)
+                    } else if (key.includes('sex')) {
+                        return value == 0 ? 'Male' : 'Female'
+                    }
+                    return value
+                }
+            }
+        })
+        
+        Vue.component('donor-container', DonorComponent)
+        
+        app = new Vue({
+            el: '#content',
+            data: {
+                user: new AdminUser(),
+                
+                //REFERENCES
+                evac_list: [],
+                evac_names: {},
+                supply_types: {},
+                
+                //ENTRIES
+                orgs_list: [],
+                indv_list: [],
+                donor_ref: {},
+                donor_report_list: [],
+                
+                //MODEL INPUTS
+                orgs_input: {},
+                indv_input: {},
+                
+                //FORM MODELS
+                org_headers: Object.keys(DonorsOrganization.headers),
+                org_formmodel: DonorsOrganization.formModel,
+                indv_headers: Object.keys(DonorsIndividual.headers),
+                indv_formmodel: DonorsIndividual.formModel,
+                
+                isEdit: false,
+                isLoading: {
+                    indv : false,
+                    org  : false,
+                    reports: false
+                },
+            },
+            methods: {
+                onStart() {
+                    this.user = header.user
+                    this.municipalities = municipalities
                     
-                    data() {
-                        return {
-                            org: null,
-                            indv: null,
-                            org_headers: Object.keys(DonorsOrganization.headers).filter((val)=>{return filterheaders.includes(val)}),
-                            indv_headers: Object.keys(DonorsIndividual.headers).filter((val)=>{return filterheaders.includes(val)}),
-                        }
-                    },
-                    
-                    created: function () {
-                        console.log("donor %o", this.donor)
-                        if (this.donor.id.includes('org')) {
-                            this.org = this.donor
-                        } else {
-                            this.indv = this.donor
-                        }
-                    },
-                    
-                    methods: {
-                        formatDate(date) {
-                            return app.formatDate(date)
-                        },
-                        
-                        getValue(key, value) {
-                            if (key.includes('date')) {
-                                return this.formatDate(value)
-                            } else if (key.includes('sex')) {
-                                return value == 0 ? 'Male' : 'Female'
+                    this.fetchData()
+                },//onStart
+                
+                fetchData(){
+                    this.fetchOrg()
+                    this.fetchIndv()
+                    this.fetchReports()
+                },//fetchData
+                
+                fetchOrg() {
+                    this.isLoading.org = true
+                    DataHandler.getDonorOrganizations().then((message) => {
+                        this.orgs_list = message.data
+                        this.orgs_list.forEach((org) => {
+                            this.donor_ref[org.id] = org
+                        })
+                    }).catch(err => {
+                        console.log(err)
+                    }).finally(() => {
+                        this.isLoading.org = false
+                    })
+                },//fetchOrg
+                
+                fetchIndv(){
+                    this.isLoading.indv = true
+                    DataHandler.getDonorIndividual().then((message) => {
+                        this.indv_list = message.data
+                        this.indv_list.forEach((indv) => {
+                            this.donor_ref[indv.id] = indv
+                        })
+                    }).catch(err => {
+                        console.log(err)
+                    }).finally(() => {
+                        this.isLoading.indv = false
+                    })
+                },//fetchIndv
+                
+                fetchReports(){
+                    DataHandler.getSupplyTypes().then((message) => {
+                        this.supply_types_option = message.data.map((supply) => {
+                            this.supply_types[supply.id] = supply
+                            return {
+                                title: supply.name,
+                                value: supply.id
                             }
-                            return value
+                        })
+                        //this.donor_report_item_form.inventory_type.options = this.supply_types_option
+                        console.log("supply types %o", this.supply_types)
+                    }).catch(err => {
+                        console.log("err %o", err)
+                    })
+                    
+                    DataHandler.getEvacuationCenters().then((data) => {
+                        this.evac_list = data.data
+                        let evac_options = this.evac_list.map((evac) => {
+                            this.evac_names[evac.id] = evac.name
+                        })
+                    }).catch(err => {
+                        console.log("err %o", err)
+                    })
+                    
+                    this.isLoading.reports = true
+                    DataHandler.getDonorReports(null, 10).then((message) => {
+                        this.donor_report_list = message.data
+                        console.log("reports %o", this.donor_report_list)
+                    }).catch(err => {
+                        console.log(err)
+                    }).finally(() => {
+                        this.isLoading.reports = false
+                    })
+                },
+                
+                viewReports(id) {
+                    window.open(`donors_reports.html?id=${id}`,'_self')
+                },
+                
+                //<!----------INDEPENDENT-USER--------------
+                    onAddNewOrg() {
+                        this.orgs_input = (new DonorsOrganization()).toObject()
+                        this.orgs_input.created_by = this.user.id
+                        this.isEdit = false
+                        $('#orgsModal').modal()
+                    },//onAddNewOrg
+                    
+                    onEditOrg(index) {
+                        const donor = this.orgs_list[index]
+                        this.isEdit = true
+                        this.orgs_input = donor.toObject()
+                        this.orgs_input.date_updated = new Date()
+                        $('#orgsModal').modal()
+                    },//onEditOrg
+                    
+                    onSaveOrgDonor() {
+                        const input = DonorsOrganization.parse(this.orgs_input)
+                        
+                        DataHandler.addDonor(input, true).then((data) => {
+                            if (data.error) {
+                                alert(`Can't Save Entry: ${data.error}`)
+                            } else {
+                                alert(`Entry Was Saved Successfuly`)
+                                this.fetchOrg()
+                            }
+                        }).catch(error => {
+                            console.log(error)
+                        })
+                    },//onSaveOrgDonor
+                    
+                    onDeleteOrg(index) {
+                        let onConfirm = confirm('Deleting Entry?\nPress confirm to proceed')
+                        if (onConfirm) {
+                            DataHandler.deleteDonor(this.orgs_list[index].id, true).then((data) => {
+                                console.log(data)
+                                if (data.error) {
+                                    alert(`Can't Delete Entry ${data.error}`)
+                                } else {
+                                    alert(`Entry Was Deleted Successfuly`)
+                                    this.fetchOrg()
+                                }
+                            })
                         }
+                    },//onDeleteOrg
+                    //----------INDEPENDENT-USER--------------!>
+                    
+                    
+                    //<!----------DEPENDENT-USER-----------------
+                        onAddNewIndv() {
+                            this.isEdit = false
+                            this.indv_input = (new DonorsIndividual()).toObject()
+                            this.indv_input.created_by = this.user.id
+                            $('#indvModal').modal()
+                        },//onAddNewIndv
+                        
+                        onEditIndv(index) {
+                            this.isEdit = true
+                            this.indv_input = this.indv_list[index].toObject()
+                            this.indv_input.date_updated = new Date()
+                            $('#indvModal').modal()
+                        },//onEditIndv
+                        
+                        onSaveIndvDonor() {                    
+                            const input = DonorsIndividual.parse(this.indv_input)
+                            
+                            DataHandler.addDonor(input, false).then((data) => {
+                                if (data.error) {
+                                    alert(`Can't Save Entry: ${data.error}`)
+                                } else {
+                                    alert(`Entry Was Saved Successfuly`)
+                                    this.fetchIndv()
+                                }
+                            }).catch(error => {
+                                console.log(error)
+                            })
+                        },//onSaveIndvDonor
+                        
+                        onDeleteIndv(index) {
+                            if (confirm('Deleting Entry?\nPress confirm to proceed')) {
+                                DataHandler.deleteDonor(this.indv_list[index].id, false).then((data) => {
+                                    console.log(data)
+                                    if (data.error) {
+                                        alert(`Can't Delete Entry ${data.error}`)
+                                    } else {
+                                        alert(`Entry Was Deleted Successfuly`)
+                                        this.fetchIndv()
+                                    }
+                                })
+                            }
+                        },//onDeleteIndv
+                        
+                        //----------DEPENDENT-USER-----------------!>
+                        
+                        onViewAllReports(){
+                            window.open(`donors_reports.html`,'_self')
+                        }
+                        
                     }
                 })
                 
-                Vue.component('donor-container', DonorComponent)
-                
-                app = new Vue({
-                    el: '#content',
-                    data: {
-                        user: new AdminUser(),
-                        
-                        //REFERENCES
-                        evac_list: [],
-                        evac_names: {},
-                        supply_types: {},
-                        
-                        //ENTRIES
-                        orgs_list: [],
-                        indv_list: [],
-                        donor_ref: {},
-                        donor_report_list: [],
-                        
-                        //MODEL INPUTS
-                        orgs_input: {},
-                        indv_input: {},
-                        
-                        //FORM MODELS
-                        org_headers: Object.keys(DonorsOrganization.headers),
-                        org_formmodel: DonorsOrganization.formModel,
-                        indv_headers: Object.keys(DonorsIndividual.headers),
-                        indv_formmodel: DonorsIndividual.formModel,
-                        
-                        isEdit: false,
-                        isLoading: {
-                            indv : false,
-                            org  : false,
-                            reports: false
-                        },
-                    },
-                    methods: {
-                        onStart() {
-                            this.user = header.user
-                            this.municipalities = municipalities
-                            
-                            this.fetchData()
-                        },//onStart
-                        
-                        fetchData(){
-                            this.fetchOrg()
-                            this.fetchIndv()
-                            this.fetchReports()
-                        },//fetchData
-                        
-                        fetchOrg() {
-                            this.isLoading.org = true
-                            DataHandler.getDonorOrganizations().then((message) => {
-                                this.orgs_list = message.data
-                                this.orgs_list.forEach((org) => {
-                                    this.donor_ref[org.id] = org
-                                })
-                            }).catch(err => {
-                                console.log(err)
-                            }).finally(() => {
-                                this.isLoading.org = false
-                            })
-                        },//fetchOrg
-                        
-                        fetchIndv(){
-                            this.isLoading.indv = true
-                            DataHandler.getDonorIndividual().then((message) => {
-                                this.indv_list = message.data
-                                this.indv_list.forEach((indv) => {
-                                    this.donor_ref[indv.id] = indv
-                                })
-                            }).catch(err => {
-                                console.log(err)
-                            }).finally(() => {
-                                this.isLoading.indv = false
-                            })
-                        },//fetchIndv
-                        
-                        fetchReports(){
-                            DataHandler.getSupplyTypes().then((message) => {
-                                this.supply_types_option = message.data.map((supply) => {
-                                    this.supply_types[supply.id] = supply
-                                    return {
-                                        title: supply.name,
-                                        value: supply.id
-                                    }
-                                })
-                                //this.donor_report_item_form.inventory_type.options = this.supply_types_option
-                                console.log("supply types %o", this.supply_types)
-                            }).catch(err => {
-                                console.log("err %o", err)
-                            })
-                            
-                            DataHandler.getEvacuationCenters().then((data) => {
-                                this.evac_list = data.data
-                                let evac_options = this.evac_list.map((evac) => {
-                                    this.evac_names[evac.id] = evac.name
-                                })
-                            }).catch(err => {
-                                console.log("err %o", err)
-                            })
-                            
-                            this.isLoading.reports = true
-                            DataHandler.getDonorReports(null, 10).then((message) => {
-                                this.donor_report_list = message.data
-                                console.log("reports %o", this.donor_report_list)
-                            }).catch(err => {
-                                console.log(err)
-                            }).finally(() => {
-                                this.isLoading.reports = false
-                            })
-                        },
-                        
-                        viewReports(id) {
-                            window.open(`donors_reports.html?id=${id}`,'_self')
-                        },
-                        
-                        //<!----------INDEPENDENT-USER--------------
-                            onAddNewOrg() {
-                                this.orgs_input = (new DonorsOrganization()).toObject()
-                                this.orgs_input.created_by = this.user.id
-                                this.isEdit = false
-                                $('#orgsModal').modal()
-                            },//onAddNewOrg
-                            
-                            onEditOrg(index) {
-                                const donor = this.orgs_list[index]
-                                this.isEdit = true
-                                this.orgs_input = donor.toObject()
-                                this.orgs_input.date_updated = new Date()
-                                $('#orgsModal').modal()
-                            },//onEditOrg
-                            
-                            onSaveOrgDonor() {
-                                const input = DonorsOrganization.parse(this.orgs_input)
-                                
-                                DataHandler.addDonor(input, true).then((data) => {
-                                    if (data.error) {
-                                        alert(`Can't Save Entry: ${data.error}`)
-                                    } else {
-                                        alert(`Entry Was Saved Successfuly`)
-                                        this.fetchOrg()
-                                    }
-                                }).catch(error => {
-                                    console.log(error)
-                                })
-                            },//onSaveOrgDonor
-                            
-                            onDeleteOrg(index) {
-                                let onConfirm = confirm('Deleting Entry?\nPress confirm to proceed')
-                                if (onConfirm) {
-                                    DataHandler.deleteDonor(this.orgs_list[index].id, true).then((data) => {
-                                        console.log(data)
-                                        if (data.error) {
-                                            alert(`Can't Delete Entry ${data.error}`)
-                                        } else {
-                                            alert(`Entry Was Deleted Successfuly`)
-                                            this.fetchOrg()
-                                        }
-                                    })
-                                }
-                            },//onDeleteOrg
-                            //----------INDEPENDENT-USER--------------!>
-                            
-                            
-                            //<!----------DEPENDENT-USER-----------------
-                                onAddNewIndv() {
-                                    this.isEdit = false
-                                    this.indv_input = (new DonorsIndividual()).toObject()
-                                    this.indv_input.created_by = this.user.id
-                                    $('#indvModal').modal()
-                                },//onAddNewIndv
-                                
-                                onEditIndv(index) {
-                                    this.isEdit = true
-                                    this.indv_input = this.indv_list[index].toObject()
-                                    this.indv_input.date_updated = new Date()
-                                    $('#indvModal').modal()
-                                },//onEditIndv
-                                
-                                onSaveIndvDonor() {                    
-                                    const input = DonorsIndividual.parse(this.indv_input)
-                                    
-                                    DataHandler.addDonor(input, false).then((data) => {
-                                        if (data.error) {
-                                            alert(`Can't Save Entry: ${data.error}`)
-                                        } else {
-                                            alert(`Entry Was Saved Successfuly`)
-                                            this.fetchIndv()
-                                        }
-                                    }).catch(error => {
-                                        console.log(error)
-                                    })
-                                },//onSaveIndvDonor
-                                
-                                onDeleteIndv(index) {
-                                    if (confirm('Deleting Entry?\nPress confirm to proceed')) {
-                                        DataHandler.deleteDonor(this.indv_list[index].id, false).then((data) => {
-                                            console.log(data)
-                                            if (data.error) {
-                                                alert(`Can't Delete Entry ${data.error}`)
-                                            } else {
-                                                alert(`Entry Was Deleted Successfuly`)
-                                                this.fetchIndv()
-                                            }
-                                        })
-                                    }
-                                },//onDeleteIndv
-                                
-                                //----------DEPENDENT-USER-----------------!>
-                                
-                                onViewAllReports(){
-                                    window.open(`donors_reports.html`,'_self')
-                                }
-
-                            }
-                        })
-                        
-                        /* $(document).ready(() => {
-                            header.onStart()
-                        }) */
-                    </script>
-                    
-                </body>
-                
-                </html>
+                /* $(document).ready(() => {
+                    header.onStart()
+                }) */
+            </script>
+            
+        </body>
+        
+        </html>

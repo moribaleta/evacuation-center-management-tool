@@ -94,7 +94,7 @@
         <div class="section">
             <!-- Individual -->
             <div class="well" v-if="indv != null">
-                <div class="row">
+                <!-- <div class="row">
                     <div class="col col-xs-4 item-info" v-for="key,index in indv_headers" v-if="key !='id'">
                         <p class="item-label">
                             {{key}}:
@@ -106,12 +106,14 @@
                             {{indv[key] == 0 ? 'Male' : 'Female'}}
                         </p>
                     </div>
-                </div>
+                </div> -->
+                <entry-component :entry="indv" :headers="indv_headers"></entry-component>
             </div>
             <!-- Individual -->
             <!-- Organization -->
             <div class="well" v-if="org != null">
-                <div class="row">
+                <entry-component :entry="org" :headers="org_headers"></entry-component>
+                <!-- <div class="row">
                     <div class="col col-xs-4 item-info" v-for="key,index in org_headers" v-if="key !='id'">
                         <p class="item-label">
                             {{key}}:
@@ -120,7 +122,7 @@
                             {{org[key] || '--'}}
                         </p>
                     </div>
-                </div>
+                </div> -->
             </div>
             <!-- Organization -->
         </div>

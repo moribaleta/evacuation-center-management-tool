@@ -819,16 +819,12 @@ class InventoryHandler extends MOABParamsHandler {
                     let data = doc.data()
                     let id = doc.id
                     
-                    let object = {
+                    var object = {
                         id,
                         ...data
                     }
-                    try {
-                        object.date_created = object.date_created.toDate()
-                        object.date_updated = object.date_updated.toDate()
-                    } catch (err) {
-                        console.log(err)
-                    }
+
+                    object = parseObject(object)
                     inventories.push(EvacuationInventory.parse(object))
                 });
                 var message = new Message()
@@ -880,16 +876,12 @@ class InventoryHandler extends MOABParamsHandler {
                     let data = doc.data()
                     let id = doc.id
                     
-                    let object = {
+                    var object = {
                         id,
                         ...data
                     }
-                    try {
-                        object.date_created = object.date_created.toDate()
-                        object.date_updated = object.date_updated.toDate()
-                    } catch (err) {
-                        //console.log(err)
-                    }
+
+                    object = parseObject(object)
                     supplies.push(EvacuationSupply.parse(object))
                 });
                 
@@ -977,16 +969,12 @@ class InventoryHandler extends MOABParamsHandler {
                     let data = doc.data()
                     let id = doc.id
                     
-                    let object = {
+                    var object = {
                         id,
                         ...data
                     }
-                    try {
-                        object.date_created = object.date_created.toDate()
-                        object.date_updated = object.date_updated.toDate()
-                    } catch (err) {
-                        //console.log(err)
-                    }
+
+                    object = parseObject(object)
                     supplytypes.push(EvacuationSupplyType.parse(object))
                 });
                 var message = new Message()
