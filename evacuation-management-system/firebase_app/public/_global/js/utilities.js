@@ -205,3 +205,73 @@ const FormGenerator = Vue.extend({
 })
 
 Vue.component('form-generator', FormGenerator)
+
+
+
+const EntryComponent = Vue.extend({
+    template: `
+<div class="row">
+    <div class="col col-md-4 item-info" v-for="key,index in headers" v-if="_filters.length <= 0 || _filters.includes(key)">
+        <p class="item-label">
+            {{key.replace(/_/g,' ').toUpperCase() +": "}}
+        </p>
+        <p class="item-value">
+            {{ getValue(key, entry[key]) || '--'}}
+        </p>
+    </div>
+</div>
+`,
+    props: {
+        entry: Object,
+        headers: Array,
+        filters: Array,
+        showCount: Boolean
+    },
+
+    data() {
+        return {
+            _filters : []
+        }
+    },
+
+    created: function () {
+        this._filters = this.filters || []
+        /* console.log("donor %o", this.donor)
+        if (this.donor.id.includes('org')) {
+            this.org = this.donor
+        } else {
+            this.indv = this.donor
+        } */
+    },
+
+    methods: {
+        formatDate(date) {
+            return app.formatDate(date)
+        },
+
+        getValue(key, value) {
+            if (key.includes('date')) {
+                return this.formatDate(value)
+            } else if (key.includes('sex')) {
+                return value == 0 ? 'Male' : 'Female'
+            }
+            return value
+        }
+    }
+})
+
+Vue.component('entry-component', EntryComponent)
+
+
+const parseObject = (object) => {
+    Object.keys(object).filter((key) => {
+        return key.includes('date')
+    }).forEach((key) => {
+        try {
+            object[key] = object[key].toDate()
+        } catch (err) {
+            console.log(err)
+        }
+    })
+    return object
+}

@@ -26,6 +26,7 @@
     <script src="js/vue.js"></script>
     <script src="../_global/js/objects.js"></script>
     <script src="../_global/js/utilities.js"></script>
+    <script src="../_global/js/datahandler.js"></script>
 
 </head>
 
@@ -191,18 +192,23 @@
                 <div class="table" id="tableData">
                     <div class="well" v-for="item,index in reports_view">
                         <div class="row">
-                            <div class="col col-md-3 item-info">
+                            <div class="col col-md-12 item-info">
                                 <p class="item-value">{{index + 1}}.</p>
                             </div>
-                            <div class="col col-md-3 item-info " v-for="info,index in Object.keys(item)">
-                                <div v-if="info == 'evac_id'">
+                            <div class="col col-md-12 item-info">    
+                                <p class="item-label">EVACUATION NAME</p>
+                                <p class="item-value">{{getEvacFromId(item.evac_id).name}}</p>
+                            </div>
+                            <div class="col col-md-12">
+                                <entry-component :entry="item" :headers="history_header"></entry-container>
+                                <!-- <div v-if="info == 'evac_id'">
                                     <p class="item-label">EVACUATION NAME</p>
                                     <p class="item-value">{{getEvacFromId(item.evac_id).name}}</p>
                                 </div>
                                 <div v-if="info != 'evac_id'">
                                     <p class="item-label">{{info.replace(/_/g,' ').toUpperCase() +": "}}</p>
-                                    <p class="item-value">{{item[info] ? item[info] : 'N/A'}}</p>
-                                </div>
+                                    <p class="item-value">{{item[info] ? item[info] : '--'}}</p>
+                                </div> -->
                             </div>
                             <div class="col col-md-12">
                                 <button class="btn btn-default btn-info" v-on:click="editItem(index)">edit</button>
@@ -216,7 +222,7 @@
         </div>
     </div>
 
-    <script src="js/app/datahandler.js"></script>
+    <!-- <script src="js/app/datahandler.js"></script> -->
     <script src="js/app/app.js"></script>
     <script src="js/app/constants.js"></script>
     <script src="../_global/js/moabc/utilities.js"></script>
@@ -233,6 +239,7 @@
                 evac_list: [],
                 reports: [],
                 reports_view: [],
+                history_header: ['created_by','date_created','date_updated','report_date','current_population'],
                 selections: {
                     years: ['all'],
                     months: [

@@ -206,7 +206,7 @@ var municipalities =
         {{muni_inv.municipality}}
         </p>
         <p class="item-value">
-        {{muni_inv.date_created}}
+        {{formatDate(muni_inv.date_created)}}
         </p>
         <p class="item-value">
         {{muni_inv.date_updated}}
@@ -316,6 +316,10 @@ var municipalities =
             tranferInventory(id) {
                 this.$emit('on-select-inventory',id)
             },
+            formatDate(date){
+                let _date = new Date(date)
+                return _date.toLocaleDateString()
+            }
         }
     })
     

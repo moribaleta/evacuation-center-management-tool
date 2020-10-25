@@ -204,7 +204,15 @@
                 </div>
                 
                 <div class="section" style="height: 80%;" v-if="evac_list.length > 0">
-                    
+                    <div class="section">
+                        <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="importEvac()">Import Evacuation Center
+                        </button>
+                        <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="onAddItem()">Add Evacuation Center
+                        </button>
+                        <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="download()">Download
+                            Evacuation Center
+                        </button>
+                    </div>
                     <div class="table-container" id="tableData">
                         <div class="well" v-for="item,index in evac_list">
                             <div class="row">
@@ -325,17 +333,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="section">
-                    <button type="button" id="add-report" class="btn btn-info button-view"
-                    v-on:click="importEvac()">Import Evacuation Center
-                </button>
-                <button type="button" id="add-report" class="btn btn-info button-view"
-                v-on:click="onAddItem()">Add Evacuation Center
-            </button>
-            <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="download()">Download
-                Evacuation Center
-            </button>
-        </div>
+                
     </div>
     
 </div>

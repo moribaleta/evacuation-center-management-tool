@@ -223,13 +223,16 @@
                 <div class="table-container" id="tableData">
                     <div class="well" v-for="item,item_index in param_list">
                         <div class="row">
-                            <div class="col col-md-3 item-info" v-for="key,index in headers" v-if="key !='id'">
+                            <!-- <div class="col col-md-3 item-info" v-for="key,index in headers" v-if="key !='id'">
                                 <p class="item-label">
                                     {{headers_title[key]}}:
                                 </p>
                                 <p class="item-value">
                                     {{item[key]}}
                                 </p>
+                            </div> -->
+                            <div class="col col-md-12">
+                                <entry-component :entry="item" :headers="headers"  ></entry-component>
                             </div>
                             
                             <div class="col col-md-12">

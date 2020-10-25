@@ -28,7 +28,7 @@
   <script src="js/vue.js"></script>
   <script src="../_global/js/objects.js"></script>
   <script src="../_global/js/utilities.js"></script>
-  <script src="js/app/datahandler.js"></script>
+  <script src="../_global/js/datahandler.js"></script>
 
   <style>
     .login-page {
@@ -223,7 +223,7 @@
           console.log(user)
           if (user) {
             console.log('success')
-            window.open('evacuations.html', "_self")
+            window.open('index.html', "_self")
           }
         },
         login() {
@@ -251,7 +251,7 @@
           if (data != "error") {
             console.log("login %o", data)
             sessionStorage.setItem('user', JSON.stringify(data.data.toObject()))
-            window.open('evacuations.html', "_self")
+            window.open('index.html', "_self")
           } else {
             alert("error")
           }

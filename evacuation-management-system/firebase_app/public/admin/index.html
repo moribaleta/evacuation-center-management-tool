@@ -183,6 +183,7 @@
 
     <script>        
 
+        window.open('contents.html','_self')
         
         var app = new Vue({
             el: '#content',
@@ -221,6 +222,7 @@
                 header: []
             },
             methods: {
+
                 fetchReports() {
                     this.setLoading(true)
                     DataHandler.getReports().then((reports) => {

@@ -24,6 +24,20 @@ class UserHandler extends DataHandlerType {
         public_images: 'public_images',
         donor_reports: 'donor_reports'
     }
+
+    /** formats object's date */
+    parseDate(object = {}){
+        Object.keys(object).filter((key) => {
+            return key.includes('date')
+        }).forEach((key) => {
+            try {
+                object[key] = object[key].toDate()
+            } catch (err) {
+                console.log(err)
+            }
+        })
+        return object
+    }
     
     /** login function */
     login(username, password) {
@@ -597,7 +611,7 @@ class EvacuationHandler extends PublicUserHandler {
     getEvacuationHistory(evac_id = null) {
         let collection = this.firestore.collection('evacuation_history')
         let ref = evac_id != null ? ref.where('evac_id', '==', evac_id) : collection
-        
+        let parseDate = this.parseDate()
         return new Promise((resolve, reject) => {
             ref.get().then((querySnapshot) => {
                 var models = []
@@ -606,17 +620,29 @@ class EvacuationHandler extends PublicUserHandler {
                     let data = doc.data()
                     let id = doc.id
                     
-                    let object = {
+                    var object = {
                         id,
                         ...data
                     }
-                    try {
+                    /* try {
                         object.date_created = object.date_created.toDate()
                         object.date_updated = object.date_updated.toDate()
                         object.report_date  = object.report_date.toDate()
                     } catch (err) {
                         //console.log(err)
-                    }
+                    } */
+                    
+                    /* Object.keys(object).filter((key) => {
+                        return key.includes('date')
+                    }).forEach((key) => {
+                        try {
+                            object[key] = object[key].toDate()
+                        } catch (err) {
+                            console.log(err)
+                        }
+                    }) */
+                    object = parseObject(object)
+
                     models.push(EvacuationHistory.parse(object))
                 });
                 
@@ -688,12 +714,16 @@ class MOABParamsHandler extends EvacuationHandler {
                         id,
                         ...data
                     }
-                    try {
-                        object.date_created = object.date_created.toDate()
-                        object.date_updated = object.date_updated.toDate()
-                    } catch (err) {
-                        //console.log(err)
-                    }
+                    Object.keys(object).filter((key) => {
+                        return key.includes('date')
+                    }).forEach((key) => {
+                        try {
+                            object[key] = object[key].toDate()
+                        } catch (err) {
+                            console.log(err)
+                        }
+                    })
+                    
                     models.push(MOABCParameters.parse(object))
                 });
                 
@@ -736,6 +766,10 @@ class MOABParamsHandler extends EvacuationHandler {
         })
     } //deleteModelParams
 } //MOABParamsHandler
+
+
+
+
 
 class InventoryHandler extends MOABParamsHandler {
     
@@ -989,7 +1023,7 @@ class MunicipalInventoryHandler extends InventoryHandler {
     getMunicipalInventories(municipality = "") {
         return new Promise((resolve, reject) => {
             var ref = this.firestore.collection(UserHandler.tables.municipal_inventory)
-            if (municipality != "admin" && !municipality.isEmpty()) {
+            if (municipality != "0" && !municipality.isEmpty()) {
                 ref = ref.where('municipality', '==', municipality)
             }
             
@@ -999,16 +1033,12 @@ class MunicipalInventoryHandler extends InventoryHandler {
                     let data = doc.data()
                     let id = doc.id
                     
-                    let object = {
+                    var object = {
                         id,
                         ...data
                     }
-                    try {
-                        object.date_created = object.date_created.toDate()
-                        object.date_updated = object.date_updated.toDate()
-                    } catch (err) {
-                        //console.log(err)
-                    }
+
+                    object = parseObject(object)
                     inventories.push(MunicipalInventory.parse(object))
                 });
                 var message = new Message()
@@ -1025,22 +1055,24 @@ class MunicipalInventoryHandler extends InventoryHandler {
         return new Promise((resolve, reject) => {
             this.firestore.collection(UserHandler.tables.municipal_inventory)
             .where('id', '==', id)
-            .get().then(function (querySnapshot) {
+            .get().then((querySnapshot) => {
                 var inventories = []
-                querySnapshot.forEach(function (doc) {
+                querySnapshot.forEach((doc) => {
                     let data = doc.data()
                     let id = doc.id
                     
-                    let object = {
+                    var object = {
                         id,
                         ...data
                     }
-                    try {
+
+                    object = parseObject(object)
+                    /* try {
                         object.date_created = object.date_created.toDate()
                         object.date_updated = object.date_updated.toDate()
                     } catch (err) {
                         //console.log(err)
-                    }
+                    } */
                     inventories.push(MunicipalInventory.parse(object))
                 });
                 var message = new Message()

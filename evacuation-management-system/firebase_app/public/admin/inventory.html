@@ -26,6 +26,7 @@
     <script src="js/vue.js"></script>
     <script src="../_global/js/objects.js"></script>
     <script src="../_global/js/utilities.js"></script>
+    <script src="../_global/js/datahandler.js"></script>
 </head>
 
 <body>
@@ -125,7 +126,7 @@
                                     </div>
                                 </div>
                                 <!-- Select Basic -->
-                                <div class="form-group" v-if="user.admin_type == 0 && user.municipality == 'admin'">
+                                <div class="form-group">
                                     <label class="col-md-4 control-label" for="municipality">Municipality</label>
                                     <div class="col-md-4">
                                         <select id="municipality" name="municipality" class="form-control"
@@ -154,6 +155,18 @@
                 <h1>Inventory</h1>
             </div>
 
+            <div class="section">
+                <button type="button" id="add-report" class="btn btn-success button-view"
+                    v-on:click="onNewMuniInventory()">
+                    Create Public Inventory
+                </button>
+                <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="viewSupplytypes()">
+                    View Supply Types
+                </button>
+                <button type="button" id="add-report" class="btn btn-info button-view"
+                    v-on:click="generateReport()">Generate Report
+                </button>
+            </div>
 
             <div class="section" v-if="muni_inv_list.length > 0">
                 <div class="section header">
@@ -171,10 +184,10 @@
                                         {{muni_inv.municipality}}
                                     </p>
                                     <p class="item-value">
-                                        {{muni_inv.date_created}}
+                                        {{formatDate(muni_inv.date_created)}}
                                     </p>
                                     <p class="item-value">
-                                        {{muni_inv.date_updated}}
+                                        {{formatDate(muni_inv.date_updated)}}
                                     </p>
                                     <p class="item-value">
                                         {{muni_inv.description}}
@@ -207,6 +220,7 @@
                 <div class="section header">
                     <h4>Evacuation Center Inventory</h4>
                 </div>
+                
                 <div class="table-container" id="tableData">
                     <div class="panel-group" v-for="evac,index in evac_list">
                         <div class="panel panel-default">
@@ -275,6 +289,10 @@
                         </div>
                         <div class="panel-footer">
                             <button type="button" id="add-report" class="btn btn-info button-view"
+                                data-toggle="collapse" :href="'#evac-'+index">
+                                View Inventory
+                            </button>
+                            <button type="button" id="add-report" class="btn btn-info button-view"
                                 v-on:click="addInventory(evac.id)">
                                 Add Inventory
                             </button>
@@ -283,24 +301,12 @@
 
                 </div>
             </div>
-            <div class="section">
-                <button type="button" id="add-report" class="btn btn-success button-view"
-                    v-on:click="onNewMuniInventory()">
-                    Create Public Inventory
-                </button>
-                <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="viewSupplytypes()">
-                    View Supply Types
-                </button>
-                <button type="button" id="add-report" class="btn btn-info button-view"
-                    v-on:click="generateReport()">Generate Report
-                </button>
-            </div>
+            
         </div>
 
     </div>
 
-    <script src="js/app/datahandler.js"></script>
-    <script src="js/app/constants.js"></script>
+    
     <script src="js/app/app.js"></script>
 
     <script>
@@ -325,7 +331,7 @@
 
                 onStart() {
                     this.user = header.user
-                    this.municipalities = municipalities
+                    this.municipalities = ['public'].concat(municipalities)
                     this.fetchData()
                 },
 
@@ -336,6 +342,7 @@
 
                 fetchMunicipalInv() {
                     this.isLoading.muni_inv = true
+                    console.log("municipality %o", this.user.municipality)
                     DataHandler.getMunicipalInventories(this.user.municipality).then((data) => {
                         this.muni_inv_list = data.data
                         console.log("muni list %o", this.muni_inv_list)
@@ -444,6 +451,8 @@
                 onNewMuniInventory() {
                     this.muni_inv_input = new MunicipalInventory()
                     this.muni_inv_input.created_by = this.user.id
+                    //v-if="user.admin_type == 0 && user.municipality == 'admin'"
+                    this.muni_inv_input.municipality = (this.user.admin_type == 0 && this.user.municipality == 'admin') ? 'public' : undefined
                     $('#muniModal').modal()
                 },
 

@@ -26,6 +26,7 @@
     <script src="js/vue.js"></script>
     <script src="../_global/js/objects.js"></script>
     <script src="../_global/js/utilities.js"></script>
+    <script src="../_global/js/datahandler.js"></script>
 </head>
 
 <body>
@@ -253,7 +254,7 @@
                                 description: {{inventory.description}}
                             </p>
                             <p class="item-value">
-                                date created: {{inventory.date_created}}
+                                date created: {{formatDate(inventory.date_created)}}
                             </p>
                             <p class="item-value">
                                 created by: {{inventory.created_by}}
@@ -290,64 +291,59 @@
                 <div class="table-container" id="tableData" v-if="supplies.length > 0">
                     <div class="well" v-for="item,index in supplies">
                         <div class="row">
-                            <div class="col col-md-1 item-info">
+                            <div class="col col-md-12 item-info">
                                 <p class="item-label">
                                     {{index + 1}}.
                                 </p>
                             </div>
-                            <div class="col col-md-10">
-                                <div class="row">
-                                    <div class="col col-md-4 item-info">
-                                        <p class="item-label">
-                                            Name:
-                                        </p>
-                                        <p class="item-value">
-                                            {{supply_types_ref[item.inventory_type].name}}
-                                        </p>
-                                    </div>
-                                    <div class="col col-md-2 item-info">
-                                        <p class="item-label">
-                                            Quantity:
-                                        </p>
-                                        <p class="item-value">
-                                            {{item.qty}}
-                                        </p>
-                                    </div>
-                                    
-                                    <div class="col col-md-6 item-info">
-                                        <p class="item-label">
-                                            Remarks:
-                                        </p>
-                                        <p class="item-value">
-                                            {{item.remarks}}
-                                        </p>
-                                    </div>
-                                    <div class="col col-md-4 item-info">
-                                        <p class="item-label">
-                                            Date Supplied:
-                                        </p>
-                                        <p class="item-value">
-                                            {{item.date_supplied}}
-                                        </p>
-                                    </div>
-                                    <div class="col col-md-4 item-info">
-                                        <p class="item-label">
-                                            Date Created:
-                                        </p>
-                                        <p class="item-value">
-                                            {{item.date_created}}
-                                        </p>
-                                    </div>
-                                    <div class="col col-md-4 item-info">
-                                        <p class="item-label">
-                                            Date Updated:
-                                        </p>
-                                        <p class="item-value">
-                                            {{item.date_updated}}
-                                        </p>
-                                    </div>
-                                </div>
-                               
+                            <div class="col col-md-12 item-info">
+                                <p class="item-label">
+                                    Name:
+                                </p>
+                                <p class="item-value">
+                                    {{supply_types_ref[item.inventory_type].name}}
+                                </p>
+                            </div>
+                            <div class="col col-md-2 item-info">
+                                <p class="item-label">
+                                    Quantity:
+                                </p>
+                                <p class="item-value">
+                                    {{item.qty}}
+                                </p>
+                            </div>
+                            
+                            <div class="col col-md-12 item-info">
+                                <p class="item-label">
+                                    Remarks:
+                                </p>
+                                <p class="item-value">
+                                    {{item.remarks}}
+                                </p>
+                            </div>
+                            <div class="col col-md-4 item-info">
+                                <p class="item-label">
+                                    Date Supplied:
+                                </p>
+                                <p class="item-value">
+                                    {{formatDate(item.date_supplied)}}
+                                </p>
+                            </div>
+                            <div class="col col-md-4 item-info">
+                                <p class="item-label">
+                                    Date Created:
+                                </p>
+                                <p class="item-value">
+                                    {{formatDate(item.date_created)}}
+                                </p>
+                            </div>
+                            <div class="col col-md-4 item-info">
+                                <p class="item-label">
+                                    Date Updated:
+                                </p>
+                                <p class="item-value">
+                                    {{formatDate(item.date_updated)}}
+                                </p>
                             </div>
                             
                             <div class="col col-md-12">
@@ -379,6 +375,13 @@
                 <div class="section header" v-if="supply_types.length > 0">
                     <h4>Supplies Types</h4>
                 </div>
+                <div class="section">
+                    <button type="button" id="add-report" class="btn btn-warning button-view"
+                        v-on:click="addSupplyType()">Add New
+                        Supply Type
+                    </button>
+                    <div>&nbsp;</div>
+                </div>
                 <div class="loader-container" v-if="loading.isSupplyType">
                     <div class="loader"></div>
                 </div>
@@ -392,12 +395,21 @@
                             </div>
                             <div class="col col-xs-9">
                                 <div class="row">
-                                    <div class="col col-md-2 item-info">
+                                    <div class="col col-md-12 item-info">
                                         <p class="item-label">
                                             Name:
                                         </p>
                                         <p class="item-value">
                                             {{item.name}}
+                                        </p>
+                                    </div>
+                                   
+                                    <div class="col col-md-12 item-info">
+                                        <p class="item-label">
+                                            Description:
+                                        </p>
+                                        <p class="item-value">
+                                            {{item.description}}
                                         </p>
                                     </div>
                                     <div class="col col-md-2 item-info">
@@ -408,14 +420,6 @@
                                             {{item.amount}}
                                         </p>
                                     </div>
-                                    <div class="col col-md-3 item-info">
-                                        <p class="item-label">
-                                            Description:
-                                        </p>
-                                        <p class="item-value">
-                                            {{item.description}}
-                                        </p>
-                                    </div>
                                 </div>
                                 <div class="row">
                                     <div class="col col-md-4 item-info">
@@ -423,7 +427,7 @@
                                             Date Created:
                                         </p>
                                         <p class="item-value">
-                                            {{item.date_created}}
+                                            {{formatDate(item.date_created)}}
                                         </p>
                                     </div>
         
@@ -432,7 +436,7 @@
                                             Date Updated:
                                         </p>
                                         <p class="item-value">
-                                            {{item.date_updated}}
+                                            {{formatDate(item.date_updated)}}
                                         </p>
                                     </div>
                                 </div>
@@ -446,19 +450,13 @@
                     </div>
                 </div>
             </div>
-            <div class="section">
-                <button type="button" id="add-report" class="btn btn-warning button-view"
-                    v-on:click="addSupplyType()">Add New
-                    Supply Type
-                </button>
-            </div>
+            
         </div>
     </div>
 
     </div>
 
-    <script src="js/app/datahandler.js"></script>
-    <script src="js/app/constants.js"></script>
+    
     <script src="js/app/app.js"></script>
 
     <script>
@@ -504,7 +502,7 @@
 
                     const isMuni = urlParams.get('isMuni')
                     console.log("is Municipality: " + isMuni)
-                    this.isMunicipality = isMuni || false
+                    this.isMunicipality = (isMuni == 'true');
 
                     this.fetchInventory(id)
                 },
@@ -513,16 +511,18 @@
                     this.loading.isInventory = true
                     this.loading.isSupply = true
 
-                    var promiseFetch = DataHandler.getInventory(id)
-
-                    if (this.isMunicipality == true) {
-                        console.log("is municipal?")
+                    //var promiseFetch = new Promise()//DataHandler.getInventory(id)
+                    console.log("get municipal", this.isMunicipality)
+                    if (this.isMunicipality) {
+                        console.log("get municipal", id)
                         promiseFetch = DataHandler.getMunicipalInventory(id)
+                    } else {
+                        promiseFetch = DataHandler.getInventory(id)
                     }
 
-                    promiseFetch.then((data) => {
-                        console.log("inventory %o", data.data)
-                        this.setInventory(data.data)
+                    promiseFetch.then((message) => {
+                        console.log("inventory %o", message.data)
+                        this.setInventory(message.data)
                     }).catch(err => {
                         console.log(err)
                     }).finally(() => {
@@ -534,17 +534,21 @@
 
                 setInventory(data) {
                     this.inventory = data
-                    this.fetchSupply()
+                    if(this.inventory) {
+                        this.fetchSupply()
+                    } else {
+                        this.loading.isSupply = false
+                    }
                 },
 
                 fetchSupply() {
                     this.loading.isSupply = false
                     DataHandler.getSupplies([this.inventory.id]).then((message) => {
                         this.supplies = message.data[0].supplies
-                        this.loading.isSupply = false
                     }).catch(err => {
-                        this.loading.isSupply = false
                         console.log(err)
+                    }).finally(() => {
+                        this.loading.isSupply = false
                     })
                 },
 

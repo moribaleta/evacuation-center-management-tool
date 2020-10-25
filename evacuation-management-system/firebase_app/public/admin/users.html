@@ -114,22 +114,7 @@
                     <option v-for="(item,index) in selections.months" :selected="index == filter.month ? true : false"> {{item}}</option>
                 </select>
             </div>
-            <!-- <div class="col col-md-4">
-                <p class="input-label">EVACUATION CENTER</p>
-                <select id="input-district" class="input input-select" v-model="filter.station">
-                    <option :selected="filter.station == 'all' ? true : false"> all</option>
-                    <option v-for="(item,index) in evac_list" :selected="index == filter.station ? true : false"> {{item.name}}</option>
-                </select>
-            </div>
-            <div class="col col-md-2">
-                <p class="input-label">MUNICIPAL</p>
-                <select id="input-district" class="input input-select" v-model="filter.municipal">
-                    <option :selected="filter.municipal == 'all' ? true : false">
-                        all</option>
-                    <option v-for="(item,index) in municipalities" :selected="index == filter.municipal ? true : false">
-                        {{item.toUpperCase()}}</option>
-                </select>
-            </div> -->
+            
             <div class="col col-md-3 button-filter-container">
                 <div>&nbsp;</div>
                 <button type="button" class="btn btn-warning button-view" v-on:click="filterList()">filter
@@ -150,6 +135,12 @@
                 </div>
             </div>
         </div>
+        <div class="section">
+            <div class="button-container">
+                <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="onAddNewUser()">Add
+                    New User</button>
+            </div>
+        </div>
         <div class="section" v-if="!isLoading">
             <div class="table-container" id="tableData">
                 <div class="well" v-for="item,index in view_user_list">
@@ -159,7 +150,7 @@
                                 {{index + 1}}.
                             </p>
                         </div>
-                        <div class="col col-md-4 item-info" v-for="key,index in headers" v-if="key !='id'">
+                        <!-- <div class="col col-md-4 item-info" v-for="key,index in headers" v-if="key !='id'">
                             <p class="item-label">
                                 {{key}}:
                             </p>
@@ -169,7 +160,11 @@
                             <p class="item-value" v-if="key == 'sex'">
                                 {{item[key] == 0 ? 'Male' : 'Female'}}
                             </p>
+                        </div> -->
+                        <div class="col col-md-12">
+                            <entry-component :entry="item" :headers="headers" :filters="headers" ></entry-component>
                         </div>
+                        
 
                         <div class="col col-md-12">
                             <button class="btn btn-default btn-info" :href="'#dependentrow'+index"
@@ -225,12 +220,7 @@
             </div>
         </div>
 
-        <div class="section">
-            <div class="button-container">
-                <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="onAddNewUser()">Add
-                    New User</button>
-            </div>
-        </div>
+        
     </div>
 
     <script src="js/app/datahandler.js"></script>
