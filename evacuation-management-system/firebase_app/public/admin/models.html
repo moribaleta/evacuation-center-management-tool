@@ -5,7 +5,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Models</title>
-    
+
     <!-- update the version number as needed -->
     <script defer src="/__/firebase/7.19.1/firebase-app.js"></script>
     <!-- include only the Firebase features as you need -->
@@ -17,7 +17,7 @@
     <script defer src="/__/firebase/7.19.1/firebase-functions.js"></script>
     <!-- initialize the SDK after all desired features are loaded -->
     <script defer src="/__/firebase/init.js"></script>
-    
+
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <script src="js/jquery-3.0.0.min.js"></script>
@@ -26,6 +26,7 @@
     <script src="js/vue.js"></script>
     <script src="../_global/js/objects.js"></script>
     <script src="../_global/js/utilities.js"></script>
+    <script src="../_global/js/datahandler.js"></script>
 </head>
 
 <body>
@@ -35,7 +36,7 @@
             <img class="nav-image" src="resources/images/logo.png" />
         </div>
 
-        <div  v-for="item in header_items" v-bind:class="'sidenav-item ' + (active == item.id ? 'active' : '') ">
+        <div v-for="item in header_items" v-bind:class="'sidenav-item ' + (active == item.id ? 'active' : '') ">
             <a v-bind:href="item.href">
                 <div class="icon-block">
                     <i class="material-icons">{{item.icon}}</i>
@@ -72,77 +73,84 @@
                                 <div class="form-group">
                                     <label class="col-md-4 control-label" for="max_epoch">Maximum Generation</label>
                                     <div class="col-md-4">
-                                        <input id="max_epoch" name="max_epoch" type="text"
-                                        placeholder="0" class="form-control input-md" v-model="data_input.max_epoch">
-                                        <span class="help-block">the maximum # of generation on generating solution</span>
-                                    </div>
-                                </div>
-                                
-                                <!-- Text input-->
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label" for="max_length">Maximum Number of Nectars per Food Source</label>
-                                    <div class="col-md-4">
-                                        <input id="max_length" name="max_length" type="text"
-                                        placeholder="0" class="form-control input-md" required="" v-model="data_input.max_length">
-                                        <span class="help-block">Number of values to be used for each food source</span>
-                                    </div>
-                                </div>
-                                
-                                <!-- Text input-->
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label" for="population_size">Maximum # of Population </label>
-                                    <div class="col-md-4">
-                                        <input id="population_size" name="population_size" type="text"
-                                        placeholder="0" class="form-control input-md"
-                                        required="" v-model="data_input.population_size">
-                                        <span class="help-block">The maximum # of evacuation centers to be used on the search this will be based on the distance</span>
-                                    </div>
-                                </div>
-                                
-                                <!-- Text input-->
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label" for="trial_limit">Trial Limit</label>
-                                    <div class="col-md-4">
-                                        <input id="trial_limit" name="trial_limit" type="text"
-                                        placeholder="0" class="form-control input-md" v-model="data_input.trial_limit">
-                                        <span class="help-block">the maximum # of trials before a food source is discarded and changed</span>
+                                        <input id="max_epoch" name="max_epoch" type="text" placeholder="0"
+                                            class="form-control input-md" v-model="data_input.max_epoch">
+                                        <span class="help-block">the maximum # of generation on generating
+                                            solution</span>
                                     </div>
                                 </div>
 
                                 <!-- Text input-->
                                 <div class="form-group">
-                                    <label class="col-md-4 control-label" for="min_shuffle">Minimum Shuffle Value</label>
+                                    <label class="col-md-4 control-label" for="max_length">Maximum Number of Nectars per
+                                        Food Source</label>
                                     <div class="col-md-4">
-                                        <input id="min_shuffle" name="min_shuffle" type="text"
-                                        placeholder="0" class="form-control input-md" v-model="data_input.min_shuffle">
+                                        <input id="max_length" name="max_length" type="text" placeholder="0"
+                                            class="form-control input-md" required="" v-model="data_input.max_length">
+                                        <span class="help-block">Number of values to be used for each food source</span>
+                                    </div>
+                                </div>
+
+                                <!-- Text input-->
+                                <div class="form-group">
+                                    <label class="col-md-4 control-label" for="population_size">Maximum # of Population
+                                    </label>
+                                    <div class="col-md-4">
+                                        <input id="population_size" name="population_size" type="text" placeholder="0"
+                                            class="form-control input-md" required=""
+                                            v-model="data_input.population_size">
+                                        <span class="help-block">The maximum # of evacuation centers to be used on the
+                                            search this will be based on the distance</span>
+                                    </div>
+                                </div>
+
+                                <!-- Text input-->
+                                <div class="form-group">
+                                    <label class="col-md-4 control-label" for="trial_limit">Trial Limit</label>
+                                    <div class="col-md-4">
+                                        <input id="trial_limit" name="trial_limit" type="text" placeholder="0"
+                                            class="form-control input-md" v-model="data_input.trial_limit">
+                                        <span class="help-block">the maximum # of trials before a food source is
+                                            discarded and changed</span>
+                                    </div>
+                                </div>
+
+                                <!-- Text input-->
+                                <div class="form-group">
+                                    <label class="col-md-4 control-label" for="min_shuffle">Minimum Shuffle
+                                        Value</label>
+                                    <div class="col-md-4">
+                                        <input id="min_shuffle" name="min_shuffle" type="text" placeholder="0"
+                                            class="form-control input-md" v-model="data_input.min_shuffle">
                                         <span class="help-block">the minimum value of the number of shuffles</span>
                                     </div>
                                 </div>
 
                                 <!-- Text input-->
                                 <div class="form-group">
-                                    <label class="col-md-4 control-label" for="max_shuffle">Maximum Shuffle Value</label>
+                                    <label class="col-md-4 control-label" for="max_shuffle">Maximum Shuffle
+                                        Value</label>
                                     <div class="col-md-4">
-                                        <input id="max_shuffle" name="max_shuffle" type="text"
-                                        placeholder="0" class="form-control input-md" v-model="data_input.max_shuffle">
+                                        <input id="max_shuffle" name="max_shuffle" type="text" placeholder="0"
+                                            class="form-control input-md" v-model="data_input.max_shuffle">
                                         <span class="help-block">the maximum value of the number of shuffles</span>
                                     </div>
                                 </div>
-                                
+
                             </fieldset>
                         </form>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal"
-                        v-on:click="addModelParams()">Save</button>
+                            v-on:click="addModelParams()">Save</button>
                         <button type="button" class="btn btn-default" data-dismiss="modal"
-                        v-on:click="close()">Close</button>
+                            v-on:click="close()">Close</button>
                     </div>
                 </div>
-                
+
             </div>
         </div>
-        
+
         <div id="resultModal" class="modal fade" role="dialog">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -150,50 +158,87 @@
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                         <h4 class="modal-title">Result Classifier Parameters</h4>
                     </div>
-                    
+
                     <div class="modal-body" v-if="isTesting">
-                        <div class="loader-container" >
+                        <div class="loader-container">
                             <div class="loader"></div>
-                        </div>  
+                        </div>
                     </div>
                     <div class="modal-body" v-if="test_result != null">
                         <div class="section">
                             <h3>Parameters</h3>
-                            <div class="col col-md-3 item-info" v-for="key,index in headers" v-if="key !='id'">
-                                <p class="item-label">
-                                    {{headers_title[key]}}:
-                                </p>
-                                <p class="item-value">
-                                    {{test_result.params[key]}}
-                                </p>
-                            </div>
+                            <entry-component :entry="test_result.models[0].params" :headers="headers"></entry-component>
                         </div>
                         <div class="section">
                             <h3>Results</h3>
-                            <ul>
-                                <li>
-                                    <p>Evacuation Center: {{test_result.output.best.evac.name}}</p>
-                                </li>
-                                <li>
-                                    <p>Conflicts: {{test_result.output.best.conflicts}}</p>
-                                </li>
-                                <li>
-                                    <p>Fitness: {{test_result.output.best.fitness}}</p>
-                                </li>
-                                <li>
-                                    <p>Trials: {{test_result.output.best.trials}}</p>
-                                </li>
-                                <li>
-                                    <ul>
-                                        <li v-for="item,index in test_result.output.best.nectar">
-                                            <p>{{index + 1}}</p>
-                                            <p>current_population : {{item.current_population}}</p>
-                                            <p>population_capacity: {{item.population_capacity}}</p>
-                                            <p>floor_space : {{item.floor_space}}</p>
+                            <ul class="list-group">
+                                <li class="list-group-item" v-for="models, index in test_result.models">
+                                    <p>{{index + 1}}</p>
+                                    <ul class="list-group">
+                                        <li class="list-group-item">
+                                            <p>Evacuation Center: {{models.output.best.evac.name}}</p>
                                         </li>
+                                        <li class="list-group-item">
+                                            <p>Conflicts: {{models.output.best.conflicts}}</p>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <p>Fitness: {{models.output.best.fitness}}</p>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <p>Trials: {{models.output.best.trials}}</p>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <p>population capacity: {{models.output.best.evac.population_capacity}}</p>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <p>floor space: {{models.output.best.evac.floor_space}}</p>
+                                        </li>
+        
+                                        <!-- <li class="list-group-item">
+                                            <ul class="list-group">
+                                                <li class="list-group-item"
+                                                    v-for="item,index in test_result.output.best.nectar">
+                                                    <p>{{index + 1}}</p>
+                                                    <p>current_population : {{item.current_population}}</p>
+                                                    <p></p>
+                                                </li>
+                                            </ul>
+                                        </li> -->
                                     </ul>
                                 </li>
                             </ul>
+                            <!-- <ul class="list-group">
+                                <li class="list-group-item">
+                                    <p>Evacuation Center: {{test_result.output.best.evac.name}}</p>
+                                </li>
+                                <li class="list-group-item">
+                                    <p>Conflicts: {{test_result.output.best.conflicts}}</p>
+                                </li>
+                                <li class="list-group-item">
+                                    <p>Fitness: {{test_result.output.best.fitness}}</p>
+                                </li>
+                                <li class="list-group-item">
+                                    <p>Trials: {{test_result.output.best.trials}}</p>
+                                </li>
+                                <li class="list-group-item">
+                                    <p>population capacity: {{test_result.output.best.evac.population_capacity}}</p>
+                                </li>
+                                <li class="list-group-item">
+                                    <p>floor space: {{test_result.output.best.evac.floor_space}}</p>
+                                </li>
+
+                                <li class="list-group-item">
+                                    <ul class="list-group">
+
+                                        <li class="list-group-item"
+                                            v-for="item,index in test_result.output.best.nectar">
+                                            <p>{{index + 1}}</p>
+                                            <p>current_population : {{item.current_population}}</p>
+                                            <p></p>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul> -->
                         </div>
                         <div class="section">
                             <p>Time elapsed: {{test_result.elapsed_time}}</p>
@@ -206,24 +251,29 @@
                         v-on:click="close()">Close</button>
                     </div> -->
                 </div>
-                
+
             </div>
         </div>
-        
+
         <div class="subcontent">
             <div class="section header">
                 <h1>Models</h1>
             </div>
-            <div class="loader-container" v-if="isLoading">
-                <div class="loader"></div>
-            </div>
 
-            <div class="section" style="height: 80%;" v-if="param_list.length > 0">
-                
-                <div class="table-container" id="tableData">
-                    <div class="well" v-for="item,item_index in param_list">
-                        <div class="row">
-                            <!-- <div class="col col-md-3 item-info" v-for="key,index in headers" v-if="key !='id'">
+            <div class="section">
+                <button type="button" id="add-report" class="btn btn-info button-view"
+                    v-on:click="openAddeditorModal(false)">Add New Model Parameters </button>
+
+                <div class="loader-container" v-if="isLoading">
+                    <div class="loader"></div>
+                </div>
+
+                <div class="section" style="height: 80%;" v-if="param_list.length > 0">
+
+                    <div class="table-container" id="tableData">
+                        <div class="well" v-for="item,item_index in param_list">
+                            <div class="row">
+                                <!-- <div class="col col-md-3 item-info" v-for="key,index in headers" v-if="key !='id'">
                                 <p class="item-label">
                                     {{headers_title[key]}}:
                                 </p>
@@ -231,194 +281,276 @@
                                     {{item[key]}}
                                 </p>
                             </div> -->
-                            <div class="col col-md-12">
-                                <entry-component :entry="item" :headers="headers"  ></entry-component>
-                            </div>
-                            
-                            <div class="col col-md-12">
-                                <button class="btn btn-default btn-info" v-on:click="testItem(item_index)">test</button>
-                                <button class="btn btn-default btn-info" v-on:click="editItem(item_index)">edit</button>
-                                <button class="btn btn-default btn-danger" v-on:click="deleteItem(item_index)">delete</button>
+                                <div class="col col-md-12">
+                                    <entry-component :entry="item" :headers="headers"></entry-component>
+                                </div>
+
+                                <div class="col col-md-12">
+                                    <button class="btn btn-default btn-info"
+                                        v-on:click="testItem(item_index)">test</button>
+                                    <button class="btn btn-default btn-info"
+                                        v-on:click="editItem(item_index)">edit</button>
+                                    <button class="btn btn-default btn-danger"
+                                        v-on:click="deleteItem(item_index)">delete</button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+
             </div>
-            <div class="section">
-                <button type="button" id="add-report" class="btn btn-info button-view"
-                v-on:click="openAddeditorModal(false)">Add New Model Parameters
-            </button>
+
         </div>
-        
     </div>
-</div>
 
-<script src="js/app/datahandler.js"></script>
-<script src="js/app/app.js"></script>
+    <!-- <script src="js/app/datahandler.js"></script> -->
+    <script src="js/app/app.js"></script>
 
-<script src="../_global/js/moabc/utilities.js"></script>
-<script src="../_global/js/moabc/objects.js"></script>
-<script src="../_global/js/moabc/evacuation.js"></script>
-<script src="../_global/js/moabc/honey.js"></script>
-<script src="../_global/js/moabc/moabc.js"></script>
-<script src="../_global/js/moabc/test.js"></script>
+    <script src="../_global/js/moabc/utilities.js"></script>
+    <script src="../_global/js/moabc/objects.js"></script>
+    <script src="../_global/js/moabc/evacuation.js"></script>
+    <script src="../_global/js/moabc/honey.js"></script>
+    <script src="../_global/js/moabc/moabc.js"></script>
+    <script src="../_global/js/moabc/test.js"></script>
 
-<script>
-    
-    const parameters_label =  MOABCParameters.parameters_shown
-    app = new Vue({
-        el: '#content',
-        data: {
-            report_list : [],
-            evac_list   : [],
-            param_list  : [],
-            headers: Object.keys(parameters_label),
-            headers_title: parameters_label,
-            data_input: null,//new MOABCParameters(),
-            isEdit: false,
-            conf_password: null,
-            isLoading: false,
-            test_result: null,
-            isTesting : false
-        },
-        methods: {
-            onStart(){
-                this.fetchModelParams()
+    <script>
+        const parameters_label = MOABCParameters.parameters_shown
+        app = new Vue({
+            el: '#content',
+            data: {
+                report_list: [],
+                evac_list: [],
+                param_list: [],
+                headers: Object.keys(parameters_label),
+                headers_title: parameters_label,
+                data_input: null, //new MOABCParameters(),
+                isEdit: false,
+                conf_password: null,
+                isLoading: false,
+                test_result: null,
+                isTesting: false
             },
-            fetchModelParams() {
-                this.isLoading = true
-                DataHandler.getModelParams().then((data) => {
-                    this.setModelParams(data.data)
-                    this.isLoading = false
-                }).catch(err => {
-                    console.log(err)
-                    this.isLoading = false
-                })
+            methods: {
+                onStart() {
+                    this.fetchModelParams()
+                },
 
-                DataHandler.getEvacuationCenters().then((data) => {
-                    this.evac_list = data.data
-                }).catch(err => {
-                    console.log("err %o", err)
-                })
+                fetchModelParams() {
+                    this.isLoading = true
+                    DataHandler.getModelParams().then((data) => {
+                        this.setModelParams(data.data)
+                    }).catch(err => {
+                        console.log(err)
+                    }).finally(() => {
+                        this.isLoading = false
+                    })
 
-                DataHandler.getEvacuationHistory().then((data) => {
-                    this.report_list = data.data
-                }).catch(err => {
-                    console.log("err %o", err)
-                })
-            },
-            setModelParams(data) {
-                this.param_list = data
-                console.log(this.param_list)
-            },
-            openAddeditorModal(isEdit) {
-                this.isEdit = isEdit
-                if (!this.isEdit) {
-                    this.data_input = new MOABCParameters()
-                    this.data_input.location = {lat: null, lng: null}
-                    console.log("data_input %o", this.data_input)
-                }
-                $('#editorModal').modal()
-            },
-            addModelParams() {
-                if (this.data_input.password == this.conf_password) {
-                    if (this.isEdit) {
-                        this.onSaveEdit()
-                    } else {
-                        this.onSaveNewModelParams()
-                    }
-                    this.close()
-                } else {
-                    alert("password doesn't match")
-                }
-            },
-            
-            onSaveEdit() {
-                console.log("data %o", this.data_input)
-                DataHandler.addModelParams(this.data_input).then((data) => {
-                    if (data.error) {
-                        alert(`Can't Edit User ${data.error}`)
-                    } else {
-                        alert(`User Have Been Edited Successfuly`)
+                    DataHandler.getEvacuationCenters().then((data) => {
+                        this.evac_list = data.data
+                    }).catch(err => {
+                        console.log("err %o", err)
+                    })
+
+                    DataHandler.getEvacuationHistory().then((data) => {
+                        this.report_list = data.data
+                    }).catch(err => {
+                        console.log("err %o", err)
+                    })
+
+                }, //fetchModelParams
+
+                setModelParams(data) {
+                    this.param_list = data
+                    console.log(this.param_list)
+                },
+                openAddeditorModal(isEdit) {
+                    this.isEdit = isEdit
+                    if (!this.isEdit) {
                         this.data_input = new MOABCParameters()
-                        this.fetchModelParams()
+                        this.data_input.location = {
+                            lat: null,
+                            lng: null
+                        }
+                        console.log("data_input %o", this.data_input)
                     }
-                })
-            },
-            
-            onSaveNewModelParams() {
-                console.log("data %o", this.data_input)
-                this.data_input.created_by = header.user.id
-                DataHandler.addModelParams(this.data_input).then((data) => {
-                    if (data.error) {
-                        console.log("params %o", data.params)
-                        alert(`Can't Save User ${data.error}`)
-                    } else {
-                        alert(`User Have Been Added Successfuly`)
-                        this.fetchModelParams()
-                    }
-                })
-            },
-            
-            testItem(index) {
-
-                $('#resultModal').modal()
-                this.test_result = null
-                this.isTesting = true
-                var model = this.param_list[index]
-                
-                console.log("models %o", this.param_list)
-                console.log("index %o", index)
-                console.log("model %o", model)
-                console.log("evac list %o", this.evac_list)
-                console.log("report list %o", this.report_list)
-                main.history        = this.report_list
-                main.evacuations    = this.evac_list
-                
-                let promise = new Promise(async (resolve, reject) => {
-                    let val = await main.generate(model)
-                    resolve(val)
-                });
-
-                promise.then((data) => {
-                    console.log(data)
-                    this.test_result = data
-                    this.isTesting = false
-                })
-            },
-
-            editItem(index) {
-                var model = this.param_list[index]
-                this.data_input = MOABCParameters.parse(model.toObject())
-                this.openAddeditorModal(true)
-            },
-            
-            deleteItem(index) {
-                let onConfirm = confirm('Deleting User\nPress confirm to proceed')
-                if (onConfirm) {
-                    DataHandler.deleteModelParams(this.param_list[index].id).then((data) => {
-                        console.log(data)
-                        if (data.error) {
-                            alert(`Can't Delete User ${data.error}`)
+                    $('#editorModal').modal()
+                },
+                addModelParams() {
+                    if (this.data_input.password == this.conf_password) {
+                        if (this.isEdit) {
+                            this.onSaveEdit()
                         } else {
-                            alert(`User Have Been Deleted Successfuly`)
+                            this.onSaveNewModelParams()
+                        }
+                        this.close()
+                    } else {
+                        alert("password doesn't match")
+                    }
+                },
+
+                onSaveEdit() {
+                    console.log("data %o", this.data_input)
+                    DataHandler.addModelParams(this.data_input).then((data) => {
+                        if (data.error) {
+                            alert(`Can't Edit User ${data.error}`)
+                        } else {
+                            alert(`User Have Been Edited Successfuly`)
+                            this.data_input = new MOABCParameters()
                             this.fetchModelParams()
                         }
                     })
-                }
-                
-            },
-            
-            close() {
-                this.data_input = new MOABCParameters()//newEvac()
-                this.conf_password = null
-                this.isEdit = false
-            }
-            
-        }
-    })
+                },
 
-</script>
+                onSaveNewModelParams() {
+                    console.log("data %o", this.data_input)
+                    this.data_input.created_by = header.user.id
+                    DataHandler.addModelParams(this.data_input).then((data) => {
+                        if (data.error) {
+                            console.log("params %o", data.params)
+                            alert(`Can't Save User ${data.error}`)
+                        } else {
+                            alert(`User Have Been Added Successfuly`)
+                            this.fetchModelParams()
+                        }
+                    })
+                },
+
+                /* testItem(index) {
+
+                    $('#resultModal').modal()
+                    this.test_result = null
+                    this.isTesting = true
+                    var model = this.param_list[index]
+                    
+                    console.log("models %o", this.param_list)
+                    console.log("index %o", index)
+                    console.log("model %o", model)
+                    console.log("evac list %o", this.evac_list)
+                    console.log("report list %o", this.report_list)
+                    main.history        = this.report_list
+                    main.evacuations    = this.evac_list
+                    
+                    let promise = new Promise((resolve, reject) => {
+                        setTimeout(() => {
+                            let val = main.generate(model)
+                            resolve(val)
+                        })
+                    });
+
+                    promise.then((data) => {
+                        console.log(data)
+                        this.test_result = data
+                        this.isTesting = false
+                    })
+
+                },//testItem */
+
+
+                testItem(index) {
+                    $('#resultModal').modal()
+
+                    this.test_result = null
+                    this.isTesting = true
+                    const model = this.param_list[index]
+
+                    let promise = new Promise((resolve, reject) => {
+                        setTimeout(() => {
+                            var models = []
+                            //var evacs  = []
+                            var best = {}
+                            var best_model = {}
+                            var crossover = 0
+
+                            while (crossover < 10) {
+                                let test = new TesterABC()
+                                /* test.evacuations = this.evac_list
+                                test.history_list = this.report_list */
+                                const test_output = test.initialize(model, this.evac_list, this.report_list)//.generate(model)
+                                const best_value = test_output.output.best
+
+                                /* if (!output[best_value.evac.id]) {
+                                    output[best_value.evac.id] = best_value
+                                    evacs.push(best_value.evac)
+                                } else {
+                                    const prev = output[best_value.evac.id]
+                                    const _new = best_value
+
+                                    if (prev.conflicts > _new.conflicts) {
+                                        output[best_value.evac.id] = _new
+                                    }
+                                } */
+                                if (best.conflicts > best_value.conflicts) {
+                                    best        = best_value
+                                    best_model  = test_output
+                                }
+
+                                models.push(test_output)
+
+                                crossover++
+                            }
+
+                            var winner = null
+
+                            /* const test_outputs = Object.keys(output).map((key) => {
+                                let _output = output[key]
+                                if (winner == null || winner.conflicts > _output
+                                    .conflicts) {
+                                    winner = _output
+                                }
+                                return _output
+                            }) */
+
+                            /* return {
+                                winner,
+                                evacs: test_outputs,
+                            } */
+                            resolve({best, best_model, models})
+                        },)
+                    })
+
+                    promise.then((result) =>{
+                        console.log(result)
+                        this.test_result = result
+                    }).catch((err) => {
+                        console.log(err)
+                    }).finally(() => {
+                        this.isTesting = false
+                    })
+
+                },
+
+
+                editItem(index) {
+                    var model = this.param_list[index]
+                    this.data_input = MOABCParameters.parse(model.toObject())
+                    this.openAddeditorModal(true)
+                },
+
+                deleteItem(index) {
+                    let onConfirm = confirm('Deleting User\nPress confirm to proceed')
+                    if (onConfirm) {
+                        DataHandler.deleteModelParams(this.param_list[index].id).then((data) => {
+                            console.log(data)
+                            if (data.error) {
+                                alert(`Can't Delete User ${data.error}`)
+                            } else {
+                                alert(`User Have Been Deleted Successfuly`)
+                                this.fetchModelParams()
+                            }
+                        })
+                    }
+
+                },
+
+                close() {
+                    this.data_input = new MOABCParameters() //newEvac()
+                    this.conf_password = null
+                    this.isEdit = false
+                }
+
+            }
+        })
+    </script>
 
 </body>
 

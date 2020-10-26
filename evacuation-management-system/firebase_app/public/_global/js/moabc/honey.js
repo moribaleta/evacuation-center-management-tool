@@ -28,6 +28,7 @@ var Honey = (function () {
     };
     Honey.prototype.initNectar = function () {
         var evac_sub_id = this.evac.id || Utilities.genID(5);
+        console.log("history is here %o %o", this.evac.id, this.history)
         for (var i = 0; i < this.MAX_LENGTH; i++) {
             if (i < this.history.length) {
                 var val = __assign({}, this.history[i]);

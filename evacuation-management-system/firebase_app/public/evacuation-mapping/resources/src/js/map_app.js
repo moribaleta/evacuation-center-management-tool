@@ -283,17 +283,7 @@ class MapApp {
         const emergency_node = MapRouter.getNearestNode(emergency_location)
 
         //FILTER LIST BASED ON ITS DISTANCE FROM THE ORIGIN
-        const _filter_evacs = this.evacuation_center_list.map((evac) => {
-            /* let emergency_elem = {
-                lat: this.emergency_marker.position.lat(),
-                lng: this.emergency_marker.position.lng()
-            } */
-            /* let evac_location = {
-                lat: evac.location.lat,
-                lng: evac.location.lng
-            } */
-            //let distance = DistanceCalculator.calculate(emergency_elem, evac_location, 'km')
-            //let distance = MapRouter.getPathDistance(emergency_elem, evac_location)
+        const _filter_evacs = this.evacuation_center_list.map((evac) => {            
             let distance = MapRouter.getPathOfTwoPoints(emergency_node, evac.node, emergency_location, evac.location)
             console.log("distance %o", distance)
             evac['distance'] = distance.distance

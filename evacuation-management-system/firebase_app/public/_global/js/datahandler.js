@@ -540,19 +540,10 @@ class EvacuationHandler extends PublicUserHandler {
                 var evacuations = []
                 querySnapshot.forEach(function (doc) {
                     //console.log(doc.id, " => ", doc.data());
-                    let data = doc.data()
-                    let id = doc.id
+                    const data = doc.data()
+                    const id = doc.id
+                    const object = parseObject({id,...data})
                     
-                    let object = {
-                        id,
-                        ...data
-                    }
-                    try {
-                        object.date_created = object.date_created.toDate()
-                        object.date_updated = object.date_updated.toDate()
-                    } catch (err) {
-                        //console.log(err)
-                    }
                     evacuations.push(EvacuationCenter.parse(object))
                 });
                 
@@ -611,37 +602,19 @@ class EvacuationHandler extends PublicUserHandler {
     getEvacuationHistory(evac_id = null) {
         let collection = this.firestore.collection('evacuation_history')
         let ref = evac_id != null ? ref.where('evac_id', '==', evac_id) : collection
-        let parseDate = this.parseDate()
+        
         return new Promise((resolve, reject) => {
             ref.get().then((querySnapshot) => {
                 var models = []
                 querySnapshot.forEach(function (doc) {
                     //console.log(doc.id, " => ", doc.data());
-                    let data = doc.data()
-                    let id = doc.id
+                    const data = doc.data()
+                    const id = doc.id
                     
-                    var object = {
+                    const object = parseObject({
                         id,
                         ...data
-                    }
-                    /* try {
-                        object.date_created = object.date_created.toDate()
-                        object.date_updated = object.date_updated.toDate()
-                        object.report_date  = object.report_date.toDate()
-                    } catch (err) {
-                        //console.log(err)
-                    } */
-                    
-                    /* Object.keys(object).filter((key) => {
-                        return key.includes('date')
-                    }).forEach((key) => {
-                        try {
-                            object[key] = object[key].toDate()
-                        } catch (err) {
-                            console.log(err)
-                        }
-                    }) */
-                    object = parseObject(object)
+                    })
 
                     models.push(EvacuationHistory.parse(object))
                 });
@@ -706,24 +679,9 @@ class MOABParamsHandler extends EvacuationHandler {
             .get().then(function (querySnapshot) {
                 var models = []
                 querySnapshot.forEach(function (doc) {
-                    //console.log(doc.id, " => ", doc.data());
-                    let data = doc.data()
-                    let id = doc.id
-                    
-                    let object = {
-                        id,
-                        ...data
-                    }
-                    Object.keys(object).filter((key) => {
-                        return key.includes('date')
-                    }).forEach((key) => {
-                        try {
-                            object[key] = object[key].toDate()
-                        } catch (err) {
-                            console.log(err)
-                        }
-                    })
-                    
+                    const data = doc.data()
+                    const id = doc.id
+                    const object = parseObject({id, ...data})
                     models.push(MOABCParameters.parse(object))
                 });
                 

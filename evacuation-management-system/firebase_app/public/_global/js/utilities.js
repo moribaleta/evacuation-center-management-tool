@@ -270,7 +270,7 @@ const parseObject = (object) => {
         try {
             object[key] = object[key].toDate()
         } catch (err) {
-            console.log(err)
+            //console.log(err)
         }
     })
     return object
