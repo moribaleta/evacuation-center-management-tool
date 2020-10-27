@@ -673,10 +673,13 @@ class EvacuationHandler extends PublicUserHandler {
 /** class functions handles moab parameters used */
 class MOABParamsHandler extends EvacuationHandler {
     
-    getModelParams() {
+    getModelParams(isActive = false) {
         return new Promise((resolve, reject) => {
-            this.firestore.collection('moabc')
-            .get().then(function (querySnapshot) {
+            let ref = this.firestore.collection('moabc')
+
+            let query = isActive ? ref.where('is_active','==','true') : ref
+
+            query.get().then(function (querySnapshot) {
                 var models = []
                 querySnapshot.forEach(function (doc) {
                     const data = doc.data()
@@ -699,7 +702,7 @@ class MOABParamsHandler extends EvacuationHandler {
     
     
     addModelParams(params = new MOABCParameters()) {
-        return new Promise((resolve, reject) => {
+        /* return new Promise((resolve, reject) => {
             this.firestore.collection('moabc')
             .doc(params.id)
             .set(params.toObject())
@@ -708,12 +711,14 @@ class MOABParamsHandler extends EvacuationHandler {
             }).catch(function (error) {
                 reject(error)
             });
-        })
+        }) */
+        return this.addEntry(params.id, params.toObject(), UserHandler.tables.moabc)
     } //addModelParams
     
     
     deleteModelParams(id) {
-        return new Promise((resolve, reject) => {
+        return this.deleteEntry(id, UserHandler.tables.moabc)
+        /* return new Promise((resolve, reject) => {
             this.firestore.collection('moabc')
             .doc(id).delete()
             .then(function () {
@@ -721,7 +726,7 @@ class MOABParamsHandler extends EvacuationHandler {
             }).catch(function (error) {
                 reject(error)
             });
-        })
+        }) */
     } //deleteModelParams
 } //MOABParamsHandler
 

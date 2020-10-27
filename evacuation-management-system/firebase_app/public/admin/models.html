@@ -166,11 +166,11 @@
                     </div>
                     <div class="modal-body" v-if="test_result != null">
                         <div class="section">
-                            <h3>Parameters</h3>
+                            <h5>Parameters</h5>
                             <entry-component :entry="test_result.models[0].params" :headers="headers"></entry-component>
                         </div>
                         <div class="section">
-                            <h3>Results</h3>
+                            <h5>Results</h5>
                             <ul class="list-group">
                                 <li class="list-group-item" v-for="models, index in test_result.models">
                                     <p>{{index + 1}}</p>
@@ -287,6 +287,8 @@
 
                                 <div class="col col-md-12">
                                     <button class="btn btn-default btn-info"
+                                        v-on:click="activateItem(item_index)" :disabled="item.is_active">activate</button>
+                                    <button class="btn btn-default btn-info"
                                         v-on:click="testItem(item_index)">test</button>
                                     <button class="btn btn-default btn-info"
                                         v-on:click="editItem(item_index)">edit</button>
@@ -328,7 +330,7 @@
                 conf_password: null,
                 isLoading: false,
                 test_result: null,
-                isTesting: false
+                isTesting: false,
             },
             methods: {
                 onStart() {
@@ -413,6 +415,37 @@
                             this.fetchModelParams()
                         }
                     })
+                },
+
+                activateItem(index){
+                    /* this.param_list.forEach((val, index) => {
+                        if (this.param_list[index].is_active) {
+                            prev = this.param_list[index].is_active = false
+                        }
+                    }) */
+                    var prev = this.param_list.filter((val, index) => {
+                        return val.is_active
+                    })[0]
+                    
+                    var model = this.param_list[index]
+                    model.is_active = true 
+                    
+                    if (prev)  {
+                        prev.is_active  = false
+                        DataHandler.addModelParams(prev).then((message) => {
+                            console.log("saved data")
+                        }).catch(err => {
+                            console.log(err)
+                        })
+                    } 
+
+                    DataHandler.addModelParams(model).then((message) => {
+                        this.fetchModelParams()
+                    }).catch((err) => {
+                        console.log(err)
+                        AlertMessages.error (err)
+                    })
+                    
                 },
 
                 /* testItem(index) {

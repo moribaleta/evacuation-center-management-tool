@@ -37,9 +37,11 @@ var ArtificialBeeColony = (function () {
         var done = false;
         var epoch = 0;
 
-        if (this.FOOD_NUMBER <= 1) {
+        if (this.FOOD_NUMBER <= 2) {
             throw "FOOD NUMBER IS EMPTY"
         }
+
+        console.log("food number %o", this.FOOD_NUMBER)
 
         this.initialize();
         this.memorizeBestFoodSource();
@@ -105,6 +107,7 @@ var ArtificialBeeColony = (function () {
         var neighborBeeIndex = 0;
         var currentBee;
         var neighborBee;
+        
         for (var i = 0; i < this.FOOD_NUMBER; i++) {
             console.log("food number %o", this.FOOD_NUMBER)
             neighborBeeIndex = this.getExclusiveRandomNumber(this.FOOD_NUMBER - 1, i);

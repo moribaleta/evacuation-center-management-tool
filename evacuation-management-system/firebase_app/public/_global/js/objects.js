@@ -311,6 +311,7 @@ class MOABCParameters extends Model {
     max_epoch
     min_shuffle
     max_shuffle
+    active
 
     static parameters_shown = {
         id: 'id',
@@ -323,9 +324,10 @@ class MOABCParameters extends Model {
         max_epoch: 'Maximum Generation',
         min_shuffle: 'Minimum Shuffle Value',
         max_shuffle: 'Maximum Shuffle Value',
+        is_active: 'Is Active'
     }
 
-    constructor(id, date_created, date_updated, created_by, max_length, max_val, population_size, trial_limit, max_epoch, min_shuffle, max_shuffle) {
+    constructor(id, date_created, date_updated, created_by, max_length, max_val, population_size, trial_limit, max_epoch, min_shuffle, max_shuffle, is_active) {
         super()
         this.id = id || "param-" + genID(5)
         this.date_created = date_created || new Date()
@@ -338,6 +340,7 @@ class MOABCParameters extends Model {
         this.max_epoch = max_epoch || 0
         this.min_shuffle = min_shuffle || 0
         this.max_shuffle = max_shuffle || 0
+        this.is_active  = is_active || false
     }
 
     static parse(objects = {}) {
@@ -352,7 +355,8 @@ class MOABCParameters extends Model {
             objects.trial_limit,
             objects.max_epoch,
             objects.min_shuffle,
-            objects.max_shuffle
+            objects.max_shuffle,
+            objects.is_active
         )
     }
 
@@ -368,7 +372,8 @@ class MOABCParameters extends Model {
             trial_limit: this.trial_limit,
             max_epoch: this.max_epoch,
             min_shuffle: this.min_shuffle,
-            max_shuffle: this.max_shuffle
+            max_shuffle: this.max_shuffle,
+            is_active: this.is_active
         }
     }
 

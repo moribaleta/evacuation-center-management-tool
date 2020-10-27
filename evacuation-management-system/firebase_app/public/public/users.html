@@ -160,6 +160,7 @@
                             <button class="btn btn-default btn-info" href="#dependentrow"
                             data-toggle="collapse">View Dependents</button>
                             <button class="btn btn-default btn-info" v-on:click="onEditItem()">edit</button>
+                            <button class="btn btn-default btn-info" v-on:click="onLogout()">logout</button>
                         </div>
                     </div>
                     
@@ -527,6 +528,15 @@
                             AlertMessages.error(err)
                         })
                     },
+
+                    onLogout(){
+                        localStorage.setItem('user',"{}")
+                        window.reload();
+                    },
+
+                    onEditItem(){
+                        
+                    }
                 }
             })
             
