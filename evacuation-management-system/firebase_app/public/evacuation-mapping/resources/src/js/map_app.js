@@ -244,16 +244,16 @@ class MapApp {
     setDestination() {
         $("#progressDirection").show();
 
-
         let showDetail = this.showDetail
 
         this.getNearestEvacuations()
             .pipe(
                 concatMap((evacs) => {return this.getAvailableEvacuation(evacs)})
             ).subscribe({
-                next(evacs) {
+                next(results) {
+                    console.log("test results %o", results)
                     $("#progressDirection").hide();
-                    showDetail(evacs);
+                    showDetail(results);
                     $("#button_modal").click();
                 },
                 error(err) {
@@ -304,8 +304,9 @@ class MapApp {
     getAvailableEvacuation(_evacs = []) {
         return new Observable((obs) => {
             setTimeout(() => {
-                var output = {}
-                var evacs = []
+                /* var output = {}
+                var evacs = [] */
+
                 const evacs_id = _evacs.map((evac) => {
                     return evac.id
                 })
@@ -313,17 +314,18 @@ class MapApp {
                     return evacs_id.includes(history.evac_id)
                 })
 
-                //GENERATE 5 distinct probably best evacs : OPTIONAL
+                /* //GENERATE 5 distinct probably best evacs : OPTIONAL
                 while (evacs.length < 5) {
-                    let test = new TesterABC()
-                    test.evacuations = _evacs
-                    test.history_list = history_list
-                    const test_output = test.generate(this.model_param)
-                    const best_value = test_output.output.best
+                    let test            = new TesterABC()
+                    test.evacuations    = _evacs
+                    test.history_list   = history_list
+                    const test_output   = test.generate(this.model_param)
+                    const best_value    = test_output.output.best
 
                     if (!output[best_value.evac.id]) {
                         output[best_value.evac.id] = best_value
                         evacs.push(best_value.evac)
+                        console.log("model pass %o", evacs.length)
                     } else {
                         const prev = output[best_value.evac.id]
                         const _new = best_value
@@ -332,31 +334,35 @@ class MapApp {
                             output[best_value.evac.id] = _new
                         }
                     }
-                }
+                } */
+                //let test            = new TesterABC()
+                let test            = new TesterABC()
+                test.evacuations    = _evacs
+                test.history_list   = history_list
+                const test_output   = test.generate(this.model_param)
+                //const best_value    = test_output.output.best   
 
-                var winner = null
+                obs.next(test_output)
+
+                /* var winner = null
 
                 const test_outputs = Object.keys(output).map((key) => {
-
                     let _output = output[key]
-
                     if (winner == null || winner.conflicts > _output.conflicts) {
                         winner = _output
                     }
-
                     return _output
                 })
 
-                obs.next({
+                const test_results = {
                     winner,
                     evacs: test_outputs,
-                })
+                }
 
-                obs.complete()
-                /* return {
-                    winner,
-                    evacs: test_outputs,
-                } */
+                console.log("im done %o")
+
+                obs.next(test_results)
+                obs.complete() */
             })
         })
     } //getAvailableEvacuation
@@ -411,15 +417,16 @@ var modal_vue = new Vue({
     data: {
         items: null,
         winner: null,
-        emergency: null
+        emergency: null,
+        elapsedtime: null
     },
     methods: {
         setList(test_results, emergency) {
-            console.log('winner: %o', test_results.winner);
-            console.log('items: %o', test_results);
+            console.log('items: %o',  test_results);
             console.log('emergency: %o', emergency);
-            this.items = test_results.evacs;
-            this.winner = test_results.winner;
+            this.items  = test_results.output.foodsources;
+            this.winner = test_results.output.best;
+            this.elapsedtime  = test_results.elapsed_time
             this.emergency = emergency;
         },
         proceed() {
@@ -443,8 +450,8 @@ var modal_vue = new Vue({
             }
 
             console.log("emergency location %o", emergency_elem)
-            window.open('route.html?' + JSON.stringify(evacuation_center) + "**" + JSON.stringify(emergency_elem), '_self');
-            //window.open(`route_2.html?evac=${JSON.stringify(evac_elem)}&emergency=${JSON.stringify(emergency_elem)}`, '_self')
+            //window.open('route.html?' + JSON.stringify(evacuation_center) + "**" + JSON.stringify(emergency_elem), '_self');
+            window.open(`route_2.html?evac=${JSON.stringify(evac_elem)}&origin=${JSON.stringify(emergency_elem)}`, '_self')
         },
     }
 }) //modal_vue
@@ -571,9 +578,7 @@ class MapRouterClass {
             }
             this.djikstra.addVertex(this.tree[i].node_id + "", vertex);
         }
-
         localStorage.setItem('djikstra', JSON.stringify(this.djikstra.vertices))
-
     } //initializeDjikstra
 
     /**returns the index of the nearest node based on the distance */

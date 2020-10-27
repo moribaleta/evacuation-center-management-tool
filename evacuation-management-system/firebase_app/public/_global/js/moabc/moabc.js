@@ -49,7 +49,7 @@ var ArtificialBeeColony = (function () {
             console.log("iteration current %o, max: %o", epoch, this.MAX_EPOCH);
             if (epoch < this.MAX_EPOCH) {
                 console.log("im the best %o", this.gBest);
-                if (this.gBest != null && this.gBest.getConflicts() < 0.3) {
+                if (this.gBest != null && this.gBest.getConflicts() < 0.05) {
                     done = true;
                 }
                 console.log("employed bees");
@@ -78,7 +78,7 @@ var ArtificialBeeColony = (function () {
         console.log("done.");
         console.log("Completed " + epoch + " epochs.");
         this.foodSources.forEach(function (h) {
-            if (h.getConflicts() < 0.5) {
+            if (h.getConflicts() < 0.05) {
                 console.log("SOLUTION");
                 _this.solutions.push(h);
                 _this.printSolution(h);
@@ -90,7 +90,7 @@ var ArtificialBeeColony = (function () {
     };
     ArtificialBeeColony.prototype.initialize = function () {
         var newFoodIndex = 0;
-        var shuffles = 0;
+        
         for (var i = 0; i < this.FOOD_NUMBER; i++) {
 
             let evacuation_history = this.evacuation_history.filter((history) => {
