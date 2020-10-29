@@ -150,19 +150,8 @@
                                 {{index + 1}}.
                             </p>
                         </div>
-                        <!-- <div class="col col-md-4 item-info" v-for="key,index in headers" v-if="key !='id'">
-                            <p class="item-label">
-                                {{key}}:
-                            </p>
-                            <p class="item-value" v-if="key != 'sex'">
-                                {{item[key] || '--'}}
-                            </p>
-                            <p class="item-value" v-if="key == 'sex'">
-                                {{item[key] == 0 ? 'Male' : 'Female'}}
-                            </p>
-                        </div> -->
                         <div class="col col-md-12">
-                            <entry-component :entry="item" :headers="headers" :filters="headers" ></entry-component>
+                            <entry-component :entry="item" :headers="headers" :labels="user_labels"></entry-component>
                         </div>
                         
 
@@ -256,7 +245,9 @@
                     dep_index: null
                 },
 
-                headers: Object.keys(PublicUser.headers),
+                headers: PublicUser.visiblekeys,
+                user_labels: PublicUser.headers,
+
                 formModelHeaders: Object.keys(PublicUser.formModel),
                 formModel: PublicUser.formModel,
 

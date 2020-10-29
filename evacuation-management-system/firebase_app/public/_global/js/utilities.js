@@ -213,7 +213,7 @@ const EntryComponent = Vue.extend({
 <div class="row">
     <div class="col col-md-4 item-info" v-for="key,index in headers" v-if="_filters.length <= 0 || _filters.includes(key)">
         <p class="item-label">
-            {{key.replace(/_/g,' ').toUpperCase() +": "}}
+            {{ getLabel(key)}}
         </p>
         <p class="item-value">
             {{ getValue(key, entry[key]) || '--'}}
@@ -225,28 +225,33 @@ const EntryComponent = Vue.extend({
         entry: Object,
         headers: Array,
         filters: Array,
+        labels: Object,
         showCount: Boolean
     },
 
     data() {
         return {
-            _filters : []
+            _filters : [],
+            _labels : []
         }
     },
 
     created: function () {
         this._filters = this.filters || []
-        /* console.log("donor %o", this.donor)
-        if (this.donor.id.includes('org')) {
-            this.org = this.donor
-        } else {
-            this.indv = this.donor
-        } */
+        this._labels = this.labels || {}
     },
 
     methods: {
         formatDate(date) {
-            return app.formatDate(date)
+            let _date = new Date(date)
+            return _date.toLocaleDateString()
+        },
+
+        getLabel(key) {
+            if (this._labels[key]) {
+                return this._labels[key]
+            } 
+            return key.replace(/_/g,' ').toUpperCase() +": "
         },
 
         getValue(key, value) {
@@ -262,6 +267,58 @@ const EntryComponent = Vue.extend({
 
 Vue.component('entry-component', EntryComponent)
 
+
+const EntrySingleComponent = Vue.extend({
+    template: `
+    <div>
+        <p class="item-label">
+            {{ _label }}
+        </p>
+        <p class="item-value">
+            {{ _value }}
+        </p>
+    </div>
+`,
+    props: {
+        value: String,
+        label: String,
+        showtime: Boolean
+    },
+
+    data() {
+        return {
+            _value : [],
+            _label : []
+        }
+    },
+
+    created: function () {
+        this._value = this.getValue(this.label, this.value)
+        this._label = this.getLabel(this.label)
+    },
+
+    methods: {
+        formatDate(date) {
+            let _date = new Date(date)
+            return this.showtime ? _date.toLocaleString() : _date.toLocaleDateString()
+        },
+
+        getLabel(key) {
+            return key.replace(/_/g,' ').toUpperCase() +": "
+        },
+
+        getValue(key, value) {
+            if (key.includes('date')) {
+                return this.formatDate(value)
+            } else if (key.includes('sex')) {
+                return value == 0 ? 'Male' : 'Female'
+            }
+            return value
+        }
+    }
+})
+
+Vue.component('entry-single-component', EntrySingleComponent)
 
 const parseObject = (object) => {
     Object.keys(object).filter((key) => {

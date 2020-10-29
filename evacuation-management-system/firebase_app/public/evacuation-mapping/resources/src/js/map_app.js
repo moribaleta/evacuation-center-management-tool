@@ -429,6 +429,7 @@ var modal_vue = new Vue({
             this.elapsedtime  = test_results.elapsed_time
             this.emergency = emergency;
         },
+
         proceed() {
             var evacuation_center = this.winner.evac;
             var emergency_elem;

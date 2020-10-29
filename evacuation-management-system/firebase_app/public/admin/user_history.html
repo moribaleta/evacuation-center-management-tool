@@ -5,7 +5,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>User</title>
-    
+
     <!-- update the version number as needed -->
     <script defer src="/__/firebase/7.19.1/firebase-app.js"></script>
     <!-- include only the Firebase features as you need -->
@@ -17,7 +17,7 @@
     <script defer src="/__/firebase/7.19.1/firebase-functions.js"></script>
     <!-- initialize the SDK after all desired features are loaded -->
     <script defer src="/__/firebase/init.js"></script>
-    
+
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <script src="js/jquery-3.0.0.min.js"></script>
@@ -26,16 +26,16 @@
     <script src="js/vue.js"></script>
     <script src="../_global/js/objects.js"></script>
     <script src="../_global/js/utilities.js"></script>
-    
+    <script src="../_global/js/datahandler.js"></script>
 </head>
 
 <body>
-    
+
     <div class="sidenav" id="header" attr="users">
         <div class="sidenav-item">
             <img class="nav-image" src="resources/images/logo.png" />
         </div>
-        
+
         <div v-for="item in header_items" v-bind:class="'sidenav-item ' + (active == item.id ? 'active' : '') ">
             <a v-bind:href="item.href">
                 <div class="icon-block">
@@ -44,7 +44,7 @@
                 </div>
             </a>
         </div>
-        
+
         <div class="sidenav-item">
             <a v-on:click="onLogout()">
                 <div class="icon-block">
@@ -68,25 +68,25 @@
                         <h4 class="modal-title">{{isEdit ? 'Edit ': 'Add '}} User History</h4>
                     </div>
                     <div class="modal-body">
-                        <form-generator :form="formModel" :input.sync="data_input" ></form-generator>
+                        <form-generator :form="formModel" :input.sync="data_input"></form-generator>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal"
-                        v-on:click="saveHistory()">Save</button>
+                            v-on:click="saveHistory()">Save</button>
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                     </div>
                 </div>
-                
+
             </div>
         </div>
         <!-- MODAL -->
-        
+
         <h1>Public User History</h1>
-        
+
         <div class="section">
             <div class="well">
                 <div class="row">
-                    <div class="col col-md-4 item-info" v-for="key,index in public_user_headers" v-if="key !='id'">
+                    <!-- <div class="col col-md-4 item-info" v-for="key,index in public_user_headers" v-if="key !='id'">
                         <p class="item-label">
                             {{public_user_formModel[key].title}}:
                         </p>
@@ -96,54 +96,44 @@
                         <p class="item-value" v-if="key == 'sex'">
                             {{public_user[key] == 0 ? 'Male' : 'Female'}}
                         </p>
-                    </div>
-                    
+                    </div> -->
                     <div class="col col-md-12">
-                        <button class="btn btn-default btn-info" href="#dependentrow"
-                        data-toggle="collapse">View Dependents</button>
+                        <entry-component :entry="public_user" :headers="public_user_headers"></entry-component>
+                    </div>
+
+                    <div class="col col-md-12">
+                        <button class="btn btn-default btn-info" href="#dependentrow" data-toggle="collapse">View
+                            Dependents</button>
                     </div>
                 </div>
-                
+
                 <div id="dependentrow" class="panel-collapse collapse">
                     <div class="panel-body">
                         <ul class="list-group">
-                            <li class="list-group-item" v-if="!public_user.dependents || public_user.dependents.length <= 0">
+                            <li class="list-group-item"
+                                v-if="!public_user.dependents || public_user.dependents.length <= 0">
                                 <p>No Dependents</p>
                             </li>
-                            
+
                             <li class="list-group-item" v-for="dependent,index in public_user.dependents">
-                                <!-- <img :src="cdn+image" class="img-thumbnail img-grid"/> -->
-                                <div class="row">
-                                    <div class="col col-md-4 item-info" v-for="key,index in dependentsHeaders"
-                                    v-if="key !='id'">
-                                    <p class="item-label">
-                                        {{public_user_formModel[key].title}}:
-                                    </p>
-                                    <p class="item-value" v-if="key != 'sex'">
-                                        {{dependent[key] || '--'}}
-                                    </p>
-                                    <p class="item-value" v-if="key == 'sex'">
-                                        {{dependent[key] == 0 ? 'Male' : 'Female'}}
-                                    </p>
-                                </div>
-                            </div>
-                        </li>
-                    </ul>
+                                <entry-component :entry="dependent" :headers="dependentsHeaders"></entry-component>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    
-    <!-- CONTENT -->
-    <div class="section">
-        <!-- HEADER FILTER -->
-        <div class="header-container">
-            <div class="well input-container" style="padding:10px; width: 100%; min-height: 70px">
-                <div class="col col-md-1">
-                    <p class="input-label">YEAR</p>
-                    <select id="input-type" class="input input-select" v-model="filter.year">
-                        <option v-for="(item,index) in selections.years"
-                        :selected="index == filter.year ? true : false">{{item
+
+        <!-- CONTENT -->
+        <div class="section">
+            <!-- HEADER FILTER -->
+            <div class="header-container">
+                <div class="well input-container" style="padding:10px; width: 100%; min-height: 70px">
+                    <div class="col col-md-1">
+                        <p class="input-label">YEAR</p>
+                        <select id="input-type" class="input input-select" v-model="filter.year">
+                            <option v-for="(item,index) in selections.years"
+                                :selected="index == filter.year ? true : false">{{item
                             ? item : "NOT AVAILABLE"}}</option>
                         </select>
                     </div>
@@ -151,8 +141,8 @@
                         <p class="input-label">MONTH</p>
                         <select id="input-type" class="input input-select" v-model="filter.month">
                             <option v-for="(item,index) in selections.months"
-                            :selected="index == filter.month ? true : false">
-                            {{item}}</option>
+                                :selected="index == filter.month ? true : false">
+                                {{item}}</option>
                         </select>
                     </div>
                     <div class="col col-md-4">
@@ -160,92 +150,118 @@
                         <select id="input-district" class="input input-select" v-model="filter.station">
                             <option :selected="filter.station == 'all' ? true : false">
                                 all</option>
-                                <option v-for="(item,index) in evac_list"
+                            <option v-for="(item,index) in evac_list"
                                 :selected="index == filter.station ? true : false">
                                 {{item.name}}</option>
-                            </select>
-                        </div>
-                        <div class="col col-md-3">
-                            <p class="input-label">MUNICIPAL</p>
-                            <select id="input-district" class="input input-select" v-model="filter.municipal">
-                                <option :selected="filter.municipal == 'all' ? true : false">
-                                    all</option>
-                                    <option v-for="(item,index) in municipalities"
-                                    :selected="index == filter.municipal ? true : false">
-                                    {{item.toUpperCase()}}</option>
-                                </select>
+                        </select>
+                    </div>
+                    <div class="col col-md-3">
+                        <p class="input-label">MUNICIPAL</p>
+                        <select id="input-district" class="input input-select" v-model="filter.municipal">
+                            <option :selected="filter.municipal == 'all' ? true : false">
+                                all</option>
+                            <option v-for="(item,index) in municipalities"
+                                :selected="index == filter.municipal ? true : false">
+                                {{item.toUpperCase()}}</option>
+                        </select>
+                    </div>
+                    <div class="col col-md-1 button-filter-container">
+                        <button type="button" class="btn btn-warning button-view button-filter"
+                            v-on:click="filterList()">filter
+                        </button>
+                    </div>
+
+                </div>
+                <div class="button-container">
+                    <button type="button" class="btn btn-info button-view" v-if="!public_user.is_active"
+                        v-on:click="admitHistory()">
+                        ADMIT USER
+                    </button>
+
+                    <button type="button" class="btn btn-info button-view" v-on:click="addPastHistory()">
+                        ADD
+                        PAST HISTORY
+                    </button>
+                    <button type="button" class="btn btn-info button-view" v-on:click="openGenerateReport()">
+                        GENERATE
+                        REPORT
+                    </button>
+                </div>
+            </div>
+
+            <!-- LOADER -->
+            <div class="loader_container" v-if="isDataLoading">
+                <div class="loader"></div>
+            </div>
+
+            <!-- TABLE VIEW -->
+            <div class="table-container" v-if="!isDataLoading">
+                <div class="table" id="tableData">
+                    <div class="well" v-if="active_history != null">
+                        <div class="row">
+                            <div class="col col-md-3 item-info">
+                                <p class="item-value">{{1}}.</p>
                             </div>
-                            <div class="col col-md-1 button-filter-container">
-                                <button type="button" class="btn btn-warning button-view button-filter"
-                                v-on:click="filterList()">filter
-                            </button>
+                            <div class="col col-md-3 item-info " v-for="info,index in header">
+                                <div v-if="info == 'evac_id'">
+                                    <p class="item-label">EVACUATION NAME</p>
+                                    <p class="item-value">{{getEvacFromId(active_history.evac_id).name}}</p>
+                                </div>
+                                <entry-single-component v-if="info != 'evac_id'" :label="info"
+                                    :value="active_history[info]">
+                                </entry-single-component>
+                            </div>
+                            <div class="col col-md-12">
+                                <button type="button" class="btn btn-default btn-warning" v-if="public_user.is_active"
+                                    v-on:click="clearAdmission()">Clear Admission</button>
+                                <button class="btn btn-default btn-danger"
+                                    v-on:click="deleteAdmission()">delete</button>
+                            </div>
                         </div>
-                        
                     </div>
-                    <div class="button-container">
-                        <button type="button" class="btn btn-info button-view" v-on:click="addHistory()">
-                            ADMIT USER
-                        </button>
-                        <button type="button" class="btn btn-info button-view" v-on:click="addPastHistory()">
-                            ADD
-                            PAST HISTORY
-                        </button>
-                        <button type="button" class="btn btn-info button-view" v-on:click="openGenerateReport()">
-                            GENERATE
-                            REPORT
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- LOADER -->
-                <div class="loader_container" v-if="isDataLoading">
-                    <div class="loader"></div>
-                </div>
-                
-                <!-- TABLE VIEW -->
-                <div class="table-container" v-if="!isDataLoading">
-                    <div class="table" id="tableData">
-                        <div class="well" v-for="item,index in reports_view">
-                            <div class="row">
-                                <div class="col col-md-3 item-info">
-                                    <p class="item-value">{{index + 1}}.</p>
+                    <div class="well" v-for="item,index in reports_view">
+                        <div class="row">
+                            <div class="col col-md-3 item-info">
+                                <p class="item-value">{{index + (!active_history ? 1 : 2) }}.</p>
+                            </div>
+                            <div class="col col-md-3 item-info " v-for="info,index in header">
+                                <div v-if="info == 'evac_id'">
+                                    <p class="item-label">EVACUATION NAME</p>
+                                    <p class="item-value">{{getEvacFromId(item.evac_id).name}}</p>
                                 </div>
-                                <div class="col col-md-3 item-info " v-for="info,index in header">
-                                    <div v-if="info == 'evac_id'">
-                                        <p class="item-label">EVACUATION NAME</p>
-                                        <p class="item-value">{{getEvacFromId(item.evac_id).name}}</p>
-                                    </div>
-                                    <div v-if="info != 'evac_id'">
-                                        <p class="item-label">{{info.replace(/_/g,' ').toUpperCase() +": "}}</p>
-                                        <p class="item-value">{{item[info] ? item[info] : 'N/A'}}</p>
-                                    </div>
-                                </div>
-                                <div class="col col-md-12">
-                                    <button class="btn btn-default btn-info" v-on:click="editItem(index)">edit</button>
-                                    <button class="btn btn-default btn-danger"
+                                <entry-single-component v-if="info != 'evac_id'" :label="info" :value="item[info]" :showtime="true">
+                                </entry-single-component>
+                            </div>
+                            <div class="col col-md-12">
+                                <button class="btn btn-default btn-info" v-on:click="editItem(index)">edit</button>
+                                <button class="btn btn-default btn-danger"
                                     v-on:click="deleteItem(index)">delete</button>
-                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        
-        <script src="js/app/datahandler.js"></script>
-        <script src="js/app/app.js"></script>
-        
-        <script>
-            app = new Vue({
-                el: '#content',
-                data: {
-                    user: null,
-                    evac_list: [],
-                    reports: [],
-                    reports_view: [],
-                    selections: {
-                        years: ['all'],
-                        months: [
+    </div>
+
+
+    <script src="js/app/app.js"></script>
+
+    <script>
+        app = new Vue({
+            el: '#content',
+            data: {
+                user: null,
+                evac_list: [],
+                evac_dict: {},
+
+                reports: [],
+                reports_view: [],
+                active_history: null,
+
+                selections: {
+                    years: ['all'],
+                    months: [
                         'all',
                         'JANUARY',
                         'FEBRUARY',
@@ -259,8 +275,8 @@
                         'OCTOBER',
                         'NOVEMBER',
                         'DECEMBER',
-                        ],
-                        months_only: [
+                    ],
+                    months_only: [
                         'JANUARY',
                         'FEBRUARY',
                         'MARCH',
@@ -273,231 +289,289 @@
                         'OCTOBER',
                         'NOVEMBER',
                         'DECEMBER',
-                        ],
-                        stations: ['']
-                    },
-                    filter: {
-                        year: 'all',
-                        month: 'all',
-                        station: 'all',
-                        municipal: 'all'
-                    },
-                    data_input: {},
-                    municipalities: [],
-                    isDataLoading: true,
-                    isEdit: false,
-                    header: PublicUserHistory.headers,
-                    formModel: PublicUserHistory.formModel,
-                    
-                    public_user_formModel: PublicUser.formModel,
-                    public_user_headers: PublicUserHistory.visiblekeys,
-                    dependentsHeaders: DependentUser.formDependent,
-                    public_user: new PublicUser(),
+                    ],
+                    stations: ['']
                 },
-                methods: {
-                    onStart() {
-                        this.user = header.user
-                        const queryString = window.location.search;
-                        const urlParams = new URLSearchParams(queryString);
-                        const id = urlParams.get('id') || null
-                        this.formModel = PublicUserHistory.formModel
-                        this.fetchHistory(id)
-                        this.municipalities = municipalities
-                        
-                    },
-                    
-                    fetchHistory(id, isAll) {
-                        this.setLoading(true)
-                        
-                        DataHandler.getPublicUserHistory(id).then((message) => {
-                            this.setData(message.data)
-                        }).catch(error => {
-                            console.log(error)
-                        }).finally(() => {
-                            this.setLoading(false)
+                filter: {
+                    year: 'all',
+                    month: 'all',
+                    station: 'all',
+                    municipal: 'all'
+                },
+                data_input: {},
+                municipalities: [],
+                isDataLoading: true,
+                isEdit: false,
+                isAdmit: false,
+
+
+                header: PublicUserHistory.headers,
+                formModel: PublicUserHistory.formModel,
+
+                public_user_formModel: PublicUser.formModel,
+                public_user_headers: PublicUserHistory.visiblekeys,
+                dependentsHeaders: DependentUser.formDependent,
+                public_user: new PublicUser(),
+            },
+            methods: {
+                onStart() {
+                    this.user = header.user
+                    const queryString = window.location.search;
+                    const urlParams = new URLSearchParams(queryString);
+                    const id = urlParams.get('id') || null
+                    this.formModel = PublicUserHistory.formModel
+                    this.fetchHistory(id)
+                    this.municipalities = municipalities
+
+                },
+
+                fetchHistory(id, isAll) {
+                    this.setLoading(true)
+
+                    DataHandler.getPublicUserHistory(id).then((message) => {
+                        let history = message.data.filter((history) => {
+                            if (!history.date_cleared) {
+                                this.active_history = history
+                                return false
+                            }
+                            return true
                         })
-                        
-                        if (id) {
-                            DataHandler.getPublicUsers(null, id).then((message) => {
-                                console.log("public user %o",message.data)
-                                this.public_user = message.data
-                                this.public_user_headers = PublicUser.visiblekeys
-                            }).catch(err => {
-                                console.log(err)
-                            })
-                        }
-                        
-                        DataHandler.getEvacuationCenters().then((data) => {
-                            this.evac_list = data.data
-                            
-                            this.formModel.evac_id.options = this.evac_list.map((evac) => {
-                                return  {
-                                    title: evac.name,
-                                    value: evac.id
-                                }
-                            })
+                        this.setData(history)
+                    }).catch(error => {
+                        console.log(error)
+                    }).finally(() => {
+                        this.setLoading(false)
+                    })
+
+                    if (id) {
+                        DataHandler.getPublicUsers(null, id).then((message) => {
+                            console.log("public user %o", message.data)
+                            this.public_user = message.data
+                            this.public_user_headers = PublicUser.visiblekeys
                         }).catch(err => {
-                            console.log("err %o", err)
+                            console.log(err)
                         })
-                        
-                    },
-                    
-                    getEvacFromId(id) {
-                        for (var i = 0; i < this.evac_list.length; i++) {
-                            if (this.evac_list[i].id == id) {
-                                return this.evac_list[i]
-                            }
-                        }
-                        return null
-                    },
-                    
-                    setData: function (data) {
-                        console.log("data %o", data)
-                        if (data.length > 0) {
-                            this.reports = data
-                            this.reports_view = this.reports
-                            this.getDistinctParams()
-                        }
-                    },
-                    
-                    getDistinctParams() {
-                        this.selections.years = ['all']
-                        this.selections.stations = ['all']
-                        
-                        this.reports.map((report = new PublicUserHistory()) => {
-                            let date = report.date_admitted
-                            var year = date.getFullYear()
-                            //var month = date.getMonth()
-                            
-                            if (!this.selections.years.includes(year)) {
-                                this.selections.years.push(year)
+                    }
+
+                    DataHandler.getEvacuationCenters().then((data) => {
+                        this.evac_list = data.data
+
+                        this.formModel.evac_id.options = this.evac_list.map((evac) => {
+                            this.evac_dict[evac.id] = evac
+                            return {
+                                title: evac.name,
+                                value: evac.id
                             }
                         })
-                    },
-                    
-                    setLoading(isLoading) {
-                        this.isDataLoading = isLoading
-                    },
-                    
-                    filterList() {
-                        //year
-                        this.reports_view = this.reports.filter((item = new PublicUserHistory()) => {
-                            let item_year = item.report_date.getFullYear()
-                            if (!this.filter.year || this.filter.year == 'all' || this.filter.year ==
+                    }).catch(err => {
+                        console.log("err %o", err)
+                    })
+
+                }, //fetchHistory
+
+                setData(data) {
+                    console.log("data %o", data)
+                    if (data.length > 0) {
+                        this.reports = data
+                        this.reports_view = this.reports
+                        this.getDistinctParams()
+                    }
+                }, //setData
+
+                getEvacFromId(id) {
+                    return this.evac_dict[id]
+                }, //getEvacFromId
+
+                getDistinctParams() {
+                    this.selections.years = ['all']
+                    this.selections.stations = ['all']
+
+                    this.reports.map((report = new PublicUserHistory()) => {
+                        let date = new Date()
+                        var year = date.getFullYear()
+                        //var month = date.getMonth()
+
+                        if (!this.selections.years.includes(year)) {
+                            this.selections.years.push(year)
+                        }
+                    })
+                },
+
+                setLoading(isLoading) {
+                    this.isDataLoading = isLoading
+                },
+
+                filterList() {
+                    //year
+                    this.reports_view = this.reports.filter((item = new PublicUserHistory()) => {
+                        let item_year = item.report_date.getFullYear()
+                        if (!this.filter.year || this.filter.year == 'all' || this.filter.year ==
                             item_year) {
-                                return true
-                            } else {
-                                return false
-                            }
-                        })
-                        
-                        
-                        //month
-                        
-                        let index_selection_month = this.selections.months.indexOf(this.filter.month)
-                        console.log("month index %o", index_selection_month)
-                        this.reports_view = this.reports_view.filter((item = new PublicUserHistory()) => {
-                            let item_month = item.report_date.getMonth()
-                            if (!this.filter.month || this.filter.month == 'all' || item_month ==
+                            return true
+                        } else {
+                            return false
+                        }
+                    })
+
+
+                    //month
+
+                    let index_selection_month = this.selections.months.indexOf(this.filter.month)
+                    console.log("month index %o", index_selection_month)
+                    this.reports_view = this.reports_view.filter((item = new PublicUserHistory()) => {
+                        let item_month = item.report_date.getMonth()
+                        if (!this.filter.month || this.filter.month == 'all' || item_month ==
                             index_selection_month) {
-                                return true
-                            } else {
-                                return false
-                            }
-                        })
-                        
-                        //evacuation center
-                        this.reports_view = this.reports_view.filter((item = new PublicUserHistory()) => {
-                            let evac = this.getEvacFromId(item.evac_id)
-                            if (!this.filter.station || this.filter.station == 'all' || this.filter
+                            return true
+                        } else {
+                            return false
+                        }
+                    })
+
+                    //evacuation center
+                    this.reports_view = this.reports_view.filter((item = new PublicUserHistory()) => {
+                        let evac = this.getEvacFromId(item.evac_id)
+                        if (!this.filter.station || this.filter.station == 'all' || this.filter
                             .station == evac.name) {
-                                return true
-                            } else {
-                                return false
-                            }
-                        })
-                        
-                        //municipalities
-                        this.reports_view = this.reports_view.filter((item = new PublicUserHistory()) => {
-                            let evac = this.getEvacFromId(item.evac_id)
-                            if (!this.filter.municipal || this.filter.municipal == 'all' || this.filter
+                            return true
+                        } else {
+                            return false
+                        }
+                    })
+
+                    //municipalities
+                    this.reports_view = this.reports_view.filter((item = new PublicUserHistory()) => {
+                        let evac = this.getEvacFromId(item.evac_id)
+                        if (!this.filter.municipal || this.filter.municipal == 'all' || this.filter
                             .municipal.toLowerCase() == evac.municipality.toLowerCase()) {
-                                return true
-                            } else {
-                                return false
-                            }
-                        })
-                        
-                        console.log("filtered %o", this.reports_view)
-                    },
-                    
-                    openGenerateReport() {
-                        let reports = JSON.stringify(this.reports)
-                        saveTextAsFile(reports)
-                    },
-                    
-                    editItem(index) {
-                        this.data_input = PublicUserHistory.parse(this.reports_view[index].toObject())
-                        this.data_input.date_updated = new Date()
-                        this.isEdit = true
-                        $('#editorModal').modal()
-                    },
-                    
-                    addHistory() {
+                            return true
+                        } else {
+                            return false
+                        }
+                    })
+
+                    console.log("filtered %o", this.reports_view)
+                },
+
+                openGenerateReport() {
+                    let reports = JSON.stringify(this.reports)
+                    saveTextAsFile(reports)
+                },
+
+                editItem(index) {
+                    this.data_input = PublicUserHistory.parse(this.reports_view[index].toObject())
+                    this.data_input.date_updated = new Date()
+                    this.isEdit = true
+                    $('#editorModal').modal()
+                }, //editItem
+
+                createHistory() {
+                    var input = new PublicUserHistory()
+                    input.user_id = this.public_user.id
+                    input.created_by = this.user.id
+                    this.isEdit = false
+                    return input
+                }, //addHistory
+
+                addPastHistory() {
+                    this.data_input = this.createHistory()
+                    this.formModel.date_cleared.isHidden = false
+                    this.data_input.date_admitted = new Date()
+                    this.isAdmit = false
+                    $('#editorModal').modal()
+                }, //addPastHistory
+
+                admitHistory() {
+                    this.data_input = this.createHistory()
+                    this.formModel.date_cleared.isHidden = true
+                    this.isAdmit = true
+                    $('#editorModal').modal()
+                },//admitHistory
+
+                clearAdmission() {
+                    this.data_input = PublicUserHistory.parse(this.active_history.toObject())
+                    this.data_input.date_cleared = new Date()
+                    this.saveHistory()
+                    this.updateUserActive(false)
+                },//clearAdmission
+
+                saveHistory() {
+                    DataHandler.addPublicUserHistory(this.data_input).then((data) => {
+                        console.log('response %o', data)
+                        if (data.error) {
+                            throw date.error
+                        } else {
+                            AlertMessages.success()
+                            location.reload()
+                        }
+                    }).catch(err => {
+                        AlertMessages.error(err)
+                    }).finally(() => {
                         this.data_input = new PublicUserHistory()
-                        this.data_input.user_id = this.public_user.id
-                        this.data_input.created_by = this.user.id
-                        this.isEdit = false
-                        this.formModel.date_cleared.isHidden = true
-                        $('#editorModal').modal()
-                    },
-                    
-                    addPastHistory() {
-                        this.addHistory()
-                        this.formModel.date_cleared.isHidden = false
-                        this.data_input.date_admitted = new Date()
-                    },
-                    
-                    saveHistory() {
-                        
-                        DataHandler.addPublicUserHistory(this.data_input).then((data) => {
+                    })
+
+                    if (this.isAdmit) {
+                        this.updateUserActive(true)
+                    }
+                }, //saveHistory
+
+                updateUserActive(isActive) {
+                    var public_user = PublicUser.parse(this.public_user.toObject())
+                    public_user.is_active = isActive
+                    DataHandler.addPublicUser(public_user).then((data) => {
+                        console.log('updated user %o', data)
+                        if (data.error) {
+                            throw date.error
+                        }
+                        this.public_user = public_user
+                    }).catch(err => {
+                        console.log("error %o", err)
+                    })
+                },//updateUserActive
+
+                deleteAdmission() {
+                    let id = this.active_history.id
+                    let onConfirm = confirm(`delete admission? id: ${id}`)
+                    if (onConfirm) {
+                        DataHandler.deletePublicUserHistory(id).then((data) => {
                             console.log('response %o', data)
                             if (data.error) {
-                                throw date.error
+                                throw data.error
                             } else {
-                                AlertMessages.success()
+                                AlertMessages.deleted()
                                 location.reload()
                             }
                         }).catch(err => {
                             AlertMessages.error(err)
-                        }).finally(() => {
-                            this.data_input = new PublicUserHistory()
                         })
-                    },
-                    
-                    deleteItem(index) {
-                        let id = this.reports_view[index].id
-                        let onConfirm = confirm(`delete item id: ${id}`)
-                        if (onConfirm) {
-                            DataHandler.deleteEvacuationHistory(id).then((data) => {
-                                console.log('response %o', data)
-                                if (data.error) {
-                                    throw data.error
-                                } else {
-                                    AlertMessages.deleted()
-                                    location.reload()
-                                }
-                            }).catch(err => {
-                                AlertMessages.error(err)
-                            })
-                        }
-                    },
-                    
-                    
-                }
-            })
-        </script>
-        
-    </body>
-    
-    </html>
+
+                        this.updateUserActive(false)
+                    }
+                },//deleteAdmission
+
+                deleteItem(index) {
+                    let id = this.reports_view[index].id
+                    let onConfirm = confirm(`delete item id: ${id}`)
+                    if (onConfirm) {
+                        DataHandler.deletePublicUserHistory(id).then((data) => {
+                            console.log('response %o', data)
+                            if (data.error) {
+                                throw data.error
+                            } else {
+                                AlertMessages.deleted()
+                                location.reload()
+                            }
+                        }).catch(err => {
+                            AlertMessages.error(err)
+                        })
+                    }
+                }, //deleteItem
+
+
+            }
+        })
+    </script>
+
+</body>
+
+</html>

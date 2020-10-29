@@ -648,6 +648,9 @@ class PublicUser extends Model {
     /** array contains dependents users */
     dependents = []
 
+    /** used to determine if the public user is admitted to an evacuation center : reflects user history */
+    is_active = false
+
     static headers = {
         id: 'ID',
         created_by: 'Issued By',
@@ -667,6 +670,7 @@ class PublicUser extends Model {
         disabilities: 'Disabilities',
         employment: 'Employment',
         medical_needs: 'Medical Needs',
+        is_active: 'Is Admitted'
     }
 
     static visiblekeys = [
@@ -683,6 +687,7 @@ class PublicUser extends Model {
         'disabilities',
         'employment',
         'medical_needs',
+        'is_active'
     ]
 
     /** defines the form of the model to be shown to create an entry */
@@ -763,7 +768,7 @@ class PublicUser extends Model {
 
     constructor(id, created_by, date_created, date_updated, firstname, lastname, middleinit,
         municipality, username, password, email, birthdate, phone_number, address, sex,
-        disabilities, employment, medical_needs, dependents) {
+        disabilities, employment, medical_needs, dependents, is_active) {
         super()
         this.id = id || keyGenID("publicuser", 5) //"publicuser-" + genID(5)
         this.created_by = created_by
@@ -784,6 +789,7 @@ class PublicUser extends Model {
         this.disabilities = disabilities || ""
         this.employment = employment || ""
         this.medical_needs = medical_needs || ""
+        this.is_active  = is_active  || false
 
         this.dependents = (dependents || []).map((dep) => {
             return DependentUser.parse(dep)
@@ -813,6 +819,7 @@ class PublicUser extends Model {
             dependents: (this.dependents || []).map((val) => {
                 return val.toObject()
             }),
+            is_active: this.is_active
         }
     }
 
@@ -841,6 +848,7 @@ class PublicUser extends Model {
             object.employment,
             object.medical_needs,
             object.dependents,
+            object.is_active
         )
     }
 } //PublicUser
