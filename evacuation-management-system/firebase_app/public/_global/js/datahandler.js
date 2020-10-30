@@ -403,21 +403,11 @@ class PublicUserHandler extends UserHandler {
                 .where("password", "==", password)
                 .get().then(function (querySnapshot) {
                     var users = []
-                    querySnapshot.forEach(function (doc) {
+                    querySnapshot.forEach((doc) => {
                         console.log(doc.id, " => ", doc.data());
                         let data = doc.data()
                         let id = doc.id
-                        let object = {
-                            id,
-                            ...data
-                        }
-                        try {
-                            object.date_created = object.date_created.toDate()
-                            object.date_updated = object.date_updated.toDate()
-                        } catch (err) {
-                            console.log(err)
-                        }
-
+                        let object = parseObject({id, ...data})
                         users.push(PublicUser.parse(object))
                     });
 
@@ -433,7 +423,7 @@ class PublicUserHandler extends UserHandler {
                     }
 
                 })
-                .catch(function (error) {
+                .catch((error) => {
                     console.log("Error getting documents: ", error);
                     reject(error)
                 });

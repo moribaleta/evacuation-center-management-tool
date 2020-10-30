@@ -777,7 +777,7 @@ class PublicUser extends Model {
 
         this.firstname = firstname
         this.lastname = lastname
-        this.middleinit = middleinit
+        this.middleinit = middleinit || ""
         this.municipality = municipality
         this.username = username
         this.password = password

@@ -268,6 +268,40 @@ const EntryComponent = Vue.extend({
 Vue.component('entry-component', EntryComponent)
 
 
+var municipalities = 
+[
+    'Alaminos',
+    'Bay',
+    'Biñan',
+    'Cabuyao',
+    'Calamba',
+    'Calauan',
+    'Cavinti',
+    'Famy',
+    'Kalayaan',
+    'Liliw',
+    'Los Baños',
+    'Luisiana',
+    'Lumban',
+    'Mabitac',
+    'Magdalena',
+    'Majayjay',
+    'Nagcarlan',
+    'Paete',
+    'Pagsanjan',
+    'Pakil',
+    'Pangil',
+    'Pila',
+    'Rizal',
+    'San Pablo',
+    'San Pedro',
+    'Santa Cruz',
+    'Santa Maria',
+    'Santa Rosa',
+    'Siniloan',
+    'Victoria']
+
+
 const EntrySingleComponent = Vue.extend({
     template: `
     <div>

@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>iEvacuate</title>
     <link rel="shortcut icon" href="resources/images/logo.png" />
-    
+
     <!-- update the version number as needed -->
     <script src="/__/firebase/7.24.0/firebase-app.js"></script>
     <!-- include only the Firebase features as you need -->
@@ -18,20 +18,20 @@
     <script src="/__/firebase/7.24.0/firebase-functions.js"></script>
     <!-- initialize the SDK after all desired features are loaded -->
     <script src="/__/firebase/init.js"></script>
-    
+
     <!-- CSS  -->
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <script src="js/jquery-3.0.0.min.js"></script>
     <script src="bootstrap/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.2.2/jquery.form.min.js"></script>
-    
+
     <link href="css/main-style.css" rel="stylesheet">
     <script src="js/vue.js"></script>
     <!-- <script src="js/materialize.js"></script> -->
     <script src="../_global/js/objects.js"></script>
     <script src="../_global/js/utilities.js"></script>
     <script src="../_global/js/datahandler.js"></script>
-    
+
 </head>
 
 <body>
@@ -48,17 +48,17 @@
                     <img class="img-small" src="resources/images/logo.png">
                 </a>
             </div>
-            
+
             <div class="collapse navbar-collapse" id="myNavbar">
                 <img class="img-small" src="resources/images/logo.png">
                 <ul class="nav navbar-nav">
-                    <li v-for="item in header_items"  :class="active == item.id ? 'active' : ''">
+                    <li v-for="item in header_items" :class="active == item.id ? 'active' : ''">
                         <a :href="item.href">{{item.title}}</a>
                     </li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                     <li v-for="item in right_header">
-                        <a :href="item.href" >
+                        <a :href="item.href">
                             <span :class="'glyphicon '+item.icon"></span>
                             {{item.title}}
                         </a>
@@ -67,9 +67,9 @@
             </div>
         </div>
     </nav>
-    
+
     <div id="post-container">
-        
+
         <!-- MODAL -->
         <div id="reportModal" class="modal fade" role="dialog">
             <div class="modal-dialog">
@@ -79,26 +79,29 @@
                         <h4 class="modal-title">{{isEdit ? 'Edit ': 'Add '}} User Request Report</h4>
                     </div>
                     <div class="modal-body">
-                        <form-generator :form="reportFormModel" :input.sync="report_data_input" ></form-generator>
+                        <form-generator :form="reportFormModel" :input.sync="report_data_input"></form-generator>
                         <div>&nbsp;</div>
                         <ol class="list-group">
                             <li class="list-group-item danger">
-                                <button type="button" class="btn btn-info" v-on:click="addInputInventory()">Add Item Request</button>
+                                <button type="button" class="btn btn-info" v-on:click="addInputInventory()">Add Item
+                                    Request</button>
                             </li>
-                            
+
                             <li class="list-group-item" v-for="report,index in report_data_input.reports">
-                                <form-generator :form="reportItemFormModel" :input.sync="report" ></form-generator>
+                                <form-generator :form="reportItemFormModel" :input.sync="report"></form-generator>
                                 <div>&nbsp;</div>
-                                <button type="button" class="btn btn-danger" v-on:click="removeInputInventory(index)">Remove</button>
+                                <button type="button" class="btn btn-danger"
+                                    v-on:click="removeInputInventory(index)">Remove</button>
                             </li>
                         </ol>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal" v-on:click="saveReport()">Save</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal"
+                            v-on:click="saveReport()">Save</button>
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                     </div>
                 </div>
-                
+
             </div>
         </div>
         <!-- MODAL -->
@@ -111,19 +114,62 @@
                         <h4 class="modal-title">Admit</h4>
                     </div>
                     <div class="modal-body">
-                        <form-generator :form="historyFormModel" :input.sync="history_data_input" ></form-generator>
+                        <form-generator :form="historyFormModel" :input.sync="history_data_input"></form-generator>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal"
-                                v-on:click="saveHistory()">Admit</button>
+                            v-on:click="saveHistory()">Admit</button>
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                     </div>
                 </div>
-                
+
             </div>
         </div>
-        
-        
+
+        <!-- INDEPENDENT MODAL -->
+        <div id="userModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">{{isEdit ? 'Edit ': 'Add '}} Account</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form-generator :form="formModel" :input.sync="user_input"></form-generator>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal"
+                            v-on:click="onSaveUser()">Save</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <!-- INDEPENDENT MODAL -->
+
+        <!-- DEPENDENT MODAL -->
+        <div id="dependentModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">{{isEdit ? 'Edit ': 'Add '}} Dependent Account</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form-generator :form="formDependent" :input.sync="dependent_input"></form-generator>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal"
+                            v-on:click="onSaveDependent()">Save</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <!-- DEPENDENT MODAL -->
+
         <div class="container">
             <div id="jumbotron" class="jumbotron">
                 <!-- <img class="foreground backgroundesources/images/logo1.png"> -->
@@ -131,11 +177,11 @@
                 <p class="time">Today: {{time}}</p>
             </div>
             <div>&nbsp;</div>
-            
+
             <div class="page-header">
                 <h1>Public User</h1>
             </div>
-            
+
             <div class="table-container" id="tableData">
                 <!-- PROFILE -->
                 <div class="page-subheader">
@@ -144,72 +190,57 @@
                 <div>&nbsp;</div>
                 <div class="well" v-if="user != null">
                     <div class="row">
-                        <div class="col col-md-6 item-info" v-for="key,index in headers" v-if="key !='id'">
-                            <p class="item-label">
-                                {{userFormModel[key].title}}:
-                            </p>
-                            <p class="item-value" v-if="key != 'sex'">
-                                {{user[key] || '--'}}
-                            </p>
-                            <p class="item-value" v-if="key == 'sex'">
-                                {{user[key] == 0 ? 'Male' : 'Female'}}
-                            </p>
+                        <div class="col col-md-12">
+                            <entry-component :entry="user" :headers="headers"></entry-component>
                         </div>
-                        
-                        <div class="col col-xs-12">
-                            <button class="btn btn-default btn-info" href="#dependentrow"
-                            data-toggle="collapse">View Dependents</button>
-                            <button class="btn btn-default btn-info" v-on:click="onEditItem()">edit</button>
-                            <button class="btn btn-default btn-info" v-on:click="onLogout()">logout</button>
+
+                        <div class="col col-md-12">
+                            <button class="btn btn-default btn-info" href="#dependentrow" data-toggle="collapse">View
+                                Dependents</button>
+                            <button class="btn btn-default btn-warning" v-on:click="onEditItem()">edit</button>
+                            <button class="btn btn-default btn-danger" v-on:click="onLogout()">logout</button>
                         </div>
                     </div>
-                    
+
                     <div id="dependentrow" class="panel-collapse collapse">
                         <div class="panel-body">
                             <ul class="list-group">
                                 <li class="list-group-item" v-if="!user.dependents || user.dependents.length <= 0">
                                     <p>No Dependents</p>
                                 </li>
-                                
+
                                 <li class="list-group-item" v-for="dependent,index in user.dependents">
-                                    <!-- <img :src="cdn+image" class="img-thumbnail img-grid"/> -->
                                     <div class="row">
-                                        <div class="col col-md-4 item-info" v-for="key,index in dependentsHeaders"
-                                        v-if="key !='id'">
-                                        <p class="item-label">
-                                            {{userFormModel[key].title}}:
-                                        </p>
-                                        <p class="item-value" v-if="key != 'sex'">
-                                            {{dependent[key] || '--'}}
-                                        </p>
-                                        <p class="item-value" v-if="key == 'sex'">
-                                            {{dependent[key] == 0 ? 'Male' : 'Female'}}
-                                        </p>
+                                        <div class="col col-md-12">
+                                            <entry-component :entry="dependent" :headers="dependentsHeaders">
+                                            </entry-component>
+                                        </div>
+                                        <div class="col col-xs-12">
+                                            <button class="btn btn-default btn-info"
+                                                v-on:click="onEditDependent(index)">edit</button>
+                                            <button class="btn btn-default btn-danger"
+                                                v-on:click="onDeleteDependent(index)">delete</button>
+                                        </div>
                                     </div>
-                                    <div class="col col-xs-12">
-                                        <button class="btn btn-default btn-info"
-                                        v-on:click="onEditDependent(user.id,index)">edit</button>
-                                        <button class="btn btn-default btn-danger"
-                                        v-on:click="onDeleteDependent(user.id, index)">delete</button>
-                                    </div>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="panel-footer">
-                        <div class="row">
-                            <button class="btn btn-default btn-info" v-on:click="onAddNewDependent(index)">Add New
-                                Dependent</button>
+                                </li>
+                            </ul>
+                        </div>
+                        <div>&nbsp;</div>
+                        <div class="panel-footer">
+                            <div class="row">
+                                <button class="btn btn-default btn-info" v-on:click="onAddNewDependent(index)">Add New
+                                    Dependent</button>
                             </div>
                         </div>
                     </div>
-                    
+
                 </div>
-                
+
                 <!-- HISTORY -->
                 <div class="page-subheader">
                     <h3>HISTORY</h3>
-                    <button class="btn btn-default btn-info" v-if="current_history == null" v-on:click="onAdmit()">Admit</button>
+                    <button class="btn btn-default btn-info" v-if="current_history == null"
+                        v-on:click="onAdmit()">Admit</button>
                 </div>
                 <div>&nbsp;</div>
                 <div class="well" v-if="current_history != null">
@@ -222,13 +253,14 @@
                                 <p class="item-label">EVACUATION NAME</p>
                                 <p class="item-value">{{evac_names[current_history.evac_id]}}</p>
                             </div>
-                            <div v-if="info != 'evac_id'">
-                                <p class="item-label">{{info.replace(/_/g,' ').toUpperCase() +": "}}</p>
-                                <p class="item-value">{{current_history[info] ? current_history[info] : 'N/A'}}</p>
-                            </div>
+                            <entry-single-component v-if="info != 'evac_id'" :value="current_history[info]"
+                                :label="info" :showtime="true"></entry-single-component>
                         </div>
                         <div class="col col-md-12">
-                            <button class="btn btn-default btn-warning" v-on:click="clearHistory()">Clear Admission</button>
+                            <button class="btn btn-default btn-warning" v-on:click="clearHistory()">Clear
+                                Admission</button>
+                            <button class="btn btn-default btn-danger" v-on:click="deleteAdmission()">Cancel
+                                Admission</button>
                         </div>
                     </div>
                 </div>
@@ -242,305 +274,474 @@
                                 <p class="item-label">EVACUATION NAME</p>
                                 <p class="item-value">{{evac_names[item.evac_id]}}</p>
                             </div>
-                            <div v-if="info != 'evac_id'">
-                                <p class="item-label">{{info.replace(/_/g,' ').toUpperCase() +": "}}</p>
-                                <p class="item-value">{{item[info] ? item[info] : 'N/A'}}</p>
-                            </div>
+                            <entry-single-component v-if="info != 'evac_id'" :value="item[info] ? item[info] : 'N/A'"
+                                :label="info" :showtime="true"></entry-single-component>
                         </div>
                     </div>
                 </div>
-                
-                
+
+
                 <!-- REQUEST REPORT-->
                 <div class="page-subheader">
                     <h3>REPORTS</h3>
-                    <button class="btn btn-default btn-info" v-on:click="addNewRequest()">Add New Request Report</button>
+                    <button class="btn btn-default btn-info" v-on:click="addNewRequest()">Add New Request
+                        Report</button>
                 </div>
                 <div>&nbsp;</div>
                 <div class="well" v-for="item,index in reports">
-                    <div class="row" >
+                    <div class="row">
                         <div class="col col-md-12 item-info">
                             <p class="item-value">{{index + 1}}.</p>
                         </div>
                         <div class="col col-md-3 item-info " v-for="key,index in report_headers">
                             <div v-if="key == 'evac_id'">
                                 <p class="item-label">EVACUATION NAME</p>
-                                <p class="item-value">{{item.evac_id.isEmpty() ? 'public' : evac_names[item.evac_id]}}</p>
+                                <p class="item-value">{{item.evac_id.isEmpty() ? 'public' : evac_names[item.evac_id]}}
+                                </p>
                             </div>
-                            <div v-if="key != 'evac_id'">
-                                <p class="item-label">{{key.replace(/_/g,' ').toUpperCase() +": "}}</p>
-                                <p class="item-value">{{item[key] ? item[key] : 'N/A'}}</p>
-                            </div>
+                            <entry-single-component v-if="key != 'evac_id'" :value="item[key] ? item[key] : 'N/A'"
+                                :label="key" :showtime="true"></entry-single-component>
                         </div>
                         <div class="col col-md-12">
-                            <button class="btn btn-default btn-info" :href="'#requestrow-'+index" data-toggle="collapse">View Request</button>
+                            <button class="btn btn-default btn-info" :href="'#requestrow-'+index"
+                                data-toggle="collapse">View Request</button>
                             <!-- <button class="btn btn-default btn-warning" v-on:click="editReport(index)">edit</button>
                                 <button class="btn btn-default btn-danger" v-on:click="deleteItem(index)">delete</button> -->
-                            </div>
                         </div>
-                        <div :id="'requestrow-'+index" class="panel-collapse collapse">
-                            <div class="panel-body">
-                                <ul class="list-group">
-                                    <li class="list-group-item" v-if="item.reports.isEmpty()">
-                                        <p>No Request</p>
-                                    </li>
-                                    
-                                    <li class="list-group-item" v-for="report,index in item.reports">
-                                        <div class="row">
-                                            <div class="col col-md-12 item-info">
-                                                <p class="item-label">
-                                                    {{ index + 1 }}. {{supply_types[report.inventory_type].name}}
-                                                </p>
-                                            </div>
-                                            <div class="col col-md-12 item-info">
-                                                <p class="item-label">
-                                                    QTY: 
-                                                </p>
-                                                <p class="item-value">
-                                                    {{report.qty}}
-                                                </p>
-                                            </div>
-                                            <div class="col col-md-12 item-info">
-                                                <p class="item-label">
-                                                    remarks: 
-                                                </p>
-                                                <p class="item-value">
-                                                    {{report.remarks}}
-                                                </p>
-                                            </div>
+                    </div>
+                    <div :id="'requestrow-'+index" class="panel-collapse collapse">
+                        <div class="panel-body">
+                            <ul class="list-group">
+                                <li class="list-group-item" v-if="item.reports.isEmpty()">
+                                    <p>No Request</p>
+                                </li>
+
+                                <li class="list-group-item" v-for="report,index in item.reports">
+                                    <div class="row">
+                                        <div class="col col-md-12 item-info">
+                                            <p class="item-label">
+                                                {{ index + 1 }}. {{supply_types[report.inventory_type].name}}
+                                            </p>
                                         </div>
-                                    </li>
-                                </ul>
-                            </div>
+                                        <div class="col col-md-12 item-info">
+                                            <p class="item-label">
+                                                QTY:
+                                            </p>
+                                            <p class="item-value">
+                                                {{report.qty}}
+                                            </p>
+                                        </div>
+                                        <div class="col col-md-12 item-info">
+                                            <p class="item-label">
+                                                remarks:
+                                            </p>
+                                            <p class="item-value">
+                                                {{report.remarks}}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
                         </div>
                     </div>
                 </div>
             </div>
-            
-            
-            <div class="footer">
-                <img class="footer-img" src="resources/images/govph-seal-mono-footer.jpg">
-                <div class="footer-item">
-                    <p class="footer-label">REPUBLIC OF THE PHILIPPINES</p>
-                    <p>All content is in the public domain unless otherwise stated.</p>
-                </div>
-            </div>
-            
         </div>
-        
-        
-        <!--  Scripts-->
-        <script src="js/app/app.js"></script>
-        
-        
-        <script>
-            
-            app = new Vue({
-                el: '#post-container',
-                data: {
-                    user: null,
-                    headers: PublicUser.visiblekeys,
-                    dependentsHeaders: DependentUser.formDependent,
-                    cdn: DataHandlerType.api_host,
-                    userFormModel: PublicUser.formModel,
-                    time: "",
-                    isEdit: false,
-                    
-                    
-                    //REPORTS
-                    reports             : [],
-                    report_data_input   : new PublicUserReport(),
-                    report_headers      : PublicUserReport.headers,
-                    reportFormModel     : PublicUserReport.formModel,
-                    reportItemFormModel : {},
-                    
-                    //HISTORY
-                    current_history     : null,
-                    history             : [],
-                    history_headers     : PublicUserHistory.headers,
-                    historyFormModel    : PublicUserHistory.formModel,
-                    history_data_input  : new PublicUserHistory(),
 
-                    //EVAC
-                    evac_list: [],
-                    evac_names: {},
-                    
-                    //SUPPLIES
-                    supply_types: {},
-                    supply_types_option: [],
-                    
+
+        <div class="footer">
+            <img class="footer-img" src="resources/images/govph-seal-mono-footer.jpg">
+            <div class="footer-item">
+                <p class="footer-label">REPUBLIC OF THE PHILIPPINES</p>
+                <p>All content is in the public domain unless otherwise stated.</p>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!--  Scripts-->
+    <script src="js/app/app.js"></script>
+
+
+    <script>
+        var formDependent = {}
+        DependentUser.formDependent.forEach((key) => {
+            formDependent[key] = PublicUser.formModel[key]
+        })
+
+        app = new Vue({
+            el: '#post-container',
+            data: {
+                //USERS ---------
+                user: null,
+
+                user_input: null,
+                dependent_input: null,
+
+                formModelHeaders: Object.keys(PublicUser.formModel),
+                formModel: PublicUser.formModel,
+
+                dependentsHeaders: DependentUser.formDependent,
+                formDependent: formDependent,
+
+                edit_dependent: {
+                    user_index: null,
+                    dep_index: null
                 },
-                methods: {
-                    onStart() {
-                        this.onStartTime()
-                        
-                        this.reportItemFormModel = {
-                            inventory_type: {
-                                title: 'Supply Type',
-                                type: FormModels.dropdown,
-                                options: [] 
-                            },
-                            qty: {
-                                title: 'QTY',
-                                type: FormModels.number
-                            },
-                            remarks: {
-                                title: 'Remarks',
-                                type: FormModels.textarea
-                            }
+
+                //USERS ---------
+
+                headers: PublicUser.visiblekeys,
+                cdn: DataHandlerType.api_host,
+                time: "",
+                isEdit: false,
+
+
+                //REPORTS
+                reports: [],
+                report_data_input: new PublicUserReport(),
+                report_headers: PublicUserReport.headers,
+                reportFormModel: PublicUserReport.formModel,
+                reportItemFormModel: {},
+
+                //HISTORY
+                current_history: null,
+                history: [],
+                history_headers: PublicUserHistory.headers,
+                historyFormModel: PublicUserHistory.formModel,
+                history_data_input: new PublicUserHistory(),
+
+                //EVAC
+                evac_list: [],
+                evac_dict: {},
+                evac_names: {},
+
+                //SUPPLIES
+                supply_types: {},
+                supply_types_option: [],
+                municipalities: municipalities
+
+            },
+            methods: {
+                onStart() {
+                    this.onStartTime()
+
+                    this.reportItemFormModel = {
+                        inventory_type: {
+                            title: 'Supply Type',
+                            type: FormModels.dropdown,
+                            options: []
+                        },
+                        qty: {
+                            title: 'QTY',
+                            type: FormModels.number
+                        },
+                        remarks: {
+                            title: 'Remarks',
+                            type: FormModels.textarea
                         }
-
-                        this.historyFormModel.date_cleared.isHidden = true
-                        
-                        this.fetchData()
-                    },
-                    
-                    fetchData() {
-                        const localuser = localStorage.getItem('user') || "{}"
-                        if (localuser != "{}") {
-                            this.user = PublicUser.parse(JSON.parse(localuser))
-                        } else {
-                            window.open('login_users.html','_self')
-                            return
-                        }
-                        
-                        this.fetchReports(this.user.id)
-                    },//fetchData
-                    
-                    fetchReports(id) {
-                        
-                        DataHandler.getEvacuationCenters().then((data) => {
-                            this.evac_list = data.data
-                            
-                            let evac_options = this.evac_list.map((evac) => {
-                                this.evac_names[evac.id] = evac.name
-                                return  {
-                                    title: evac.name,
-                                    value: evac.id
-                                }
-                            })
-
-                            this.reportFormModel.evac_id.options = evac_options
-                            this.historyFormModel.evac_id.options = evac_options
-
-                        }).catch(err => {
-                            console.log("err %o", err)
-                        })
-                        
-                        DataHandler.getSupplyTypes().then((data) => {
-                            this.reportItemFormModel.inventory_type.options = data.data.map((supply) => {
-                                this.supply_types[supply.id] = supply
-                                return {
-                                    title: supply.name,
-                                    value: supply.id
-                                }
-                            })
-                        }).catch(err => {
-                            console.log("err %o", err)
-                        })
-                        
-                        DataHandler.getPublicUserReports(id).then((message) => {
-                            this.reports = message.data
-                        }).catch(error => {
-                            console.log(error)
-                        })
-                        
-                        DataHandler.getPublicUserHistory(id).then((message) => {
-                            this.history = message.data.filter((history) => {
-                                if (!history.date_cleared) {
-                                    this.current_history = history
-                                    return false
-                                }
-                                return true
-                            })
-                        }).catch(error => {
-                            console.log(error)
-                        })
-                    },//fetchReports
-                    
-                    getEvacFromId(id) {
-                        for (var i = 0; i < this.evac_list.length; i++) {
-                            if (this.evac_list[i].id == id) {
-                                return this.evac_list[i]
-                            }
-                        }
-                        return null
-                    },
-                    
-                    viewItem(index) {
-                        window.open(`viewpost.html?id=${this.posts[index].id}`, '_self')
-                    },
-                    
-                    addNewRequest() {
-                        this.report_data_input = new PublicUserReport()
-                        this.report_data_input.user_id = this.user.id
-                        this.report_data_input.created_by = this.user.id
-                        this.isEdit = false
-                        $('#reportModal').modal()
-                    },//addReport
-                    
-                    saveReport() {
-                        DataHandler.addPublicUserReport(this.report_data_input).then((data) => {
-                            console.log('response %o', data)
-                            if (data.error) {
-                                throw date.error
-                            } else {
-                                AlertMessages.success()
-                                location.reload()
-                            }
-                        }).catch(err => {
-                            AlertMessages.error(err)
-                        })
-                    },//saveReport
-                    
-                    addInputInventory(){
-                        this.report_data_input.reports.push({inventory_type: '',qty: 0,remarks: ''})
-                    },
-                    
-                    removeInputInventory(index) {
-                        this.report_data_input.reports.splice(index, 1)
-                    },
-
-                    onAdmit() {
-                        this.history_data_input = new PublicUserHistory()
-                        this.history_data_input.user_id = this.user.id
-                        this.isEdit = false
-                        
-                        $('#historyModal').modal()
-                    },
-                    
-                    clearHistory(){
-                        this.history_data_input = PublicUserHistory.parse(this.current_history.toObject())
-                        this.history_data_input.date_cleared = new Date()
-                        this.saveHistory()
-                    },
-
-                    saveHistory() {
-                        DataHandler.addPublicUserHistory(this.history_data_input).then((data) => {
-                            console.log('response %o', data)
-                            if (data.error) {
-                                throw date.error
-                            } else {
-                                AlertMessages.success()
-                                location.reload()
-                            }
-                        }).catch(err => {
-                            AlertMessages.error(err)
-                        })
-                    },
-
-                    onLogout(){
-                        localStorage.setItem('user',"{}")
-                        window.reload();
-                    },
-
-                    onEditItem(){
-                        
                     }
-                }
-            })
-            
-        </script>
-    </body>
-    
-    </html>
+
+                    this.historyFormModel.date_cleared.isHidden = true
+                    this.formModel.municipality.options = municipalities.map((municipal) => {
+                        return {
+                            title: municipal,
+                            value: municipal
+                        }
+                    })
+                    this.fetchData()
+                },
+
+                fetchData() {
+                    const localuser = localStorage.getItem('user') || "{}"
+                    if (localuser != "{}") {
+                        this.user = PublicUser.parse(JSON.parse(localuser))
+                    } else {
+                        window.open('login_users.html', '_self')
+                        return
+                    }
+
+                    this.fetchReports(this.user.id)
+                }, //fetchData
+
+                fetchReports(id) {
+
+                    DataHandler.getEvacuationCenters().then((data) => {
+                        this.evac_list = data.data
+
+                        let evac_options = this.evac_list.map((evac) => {
+                            this.evac_dict[evac.id] = evac
+                            this.evac_names[evac.id] = evac.name
+                            return {
+                                title: evac.name,
+                                value: evac.id
+                            }
+                        })
+
+                        this.reportFormModel.evac_id.options = evac_options
+                        this.historyFormModel.evac_id.options = evac_options
+
+                    }).catch(err => {
+                        console.log("err %o", err)
+                    })
+
+                    DataHandler.getSupplyTypes().then((data) => {
+                        this.reportItemFormModel.inventory_type.options = data.data.map((supply) => {
+                            this.supply_types[supply.id] = supply
+                            return {
+                                title: supply.name,
+                                value: supply.id
+                            }
+                        })
+                    }).catch(err => {
+                        console.log("err %o", err)
+                    })
+
+                    DataHandler.getPublicUserReports(id).then((message) => {
+                        this.reports = message.data
+                    }).catch(error => {
+                        console.log(error)
+                    })
+
+                    DataHandler.getPublicUserHistory(id).then((message) => {
+                        this.history = message.data.filter((history) => {
+                            if (!history.date_cleared) {
+                                this.current_history = history
+                                return false
+                            }
+                            return true
+                        })
+                    }).catch(error => {
+                        console.log(error)
+                    })
+                }, //fetchReports
+
+                getEvacFromId(id) {
+                    return this.evac_dict[id]
+                    /* for (var i = 0; i < this.evac_list.length; i++) {
+                        if (this.evac_list[i].id == id) {
+                            return this.evac_list[i]
+                        }
+                    }
+                    return null */
+                },
+
+                viewItem(index) {
+                    window.open(`viewpost.html?id=${this.posts[index].id}`, '_self')
+                },
+
+                addNewRequest() {
+                    this.report_data_input = new PublicUserReport()
+                    this.report_data_input.user_id = this.user.id
+                    this.report_data_input.created_by = this.user.id
+                    this.isEdit = false
+                    $('#reportModal').modal()
+                }, //addReport
+
+                saveReport() {
+                    DataHandler.addPublicUserReport(this.report_data_input).then((data) => {
+                        console.log('response %o', data)
+                        if (data.error) {
+                            throw date.error
+                        } else {
+                            AlertMessages.success()
+                            location.reload()
+                        }
+                    }).catch(err => {
+                        AlertMessages.error(err)
+                    })
+                }, //saveReport
+
+                addInputInventory() {
+                    this.report_data_input.reports.push({
+                        inventory_type: '',
+                        qty: 0,
+                        remarks: ''
+                    })
+                },
+
+                removeInputInventory(index) {
+                    this.report_data_input.reports.splice(index, 1)
+                },
+
+                onAdmit() {
+                    this.history_data_input = new PublicUserHistory()
+                    this.history_data_input.user_id = this.user.id
+                    this.isEdit = false
+
+                    $('#historyModal').modal()
+                },
+
+                clearHistory() {
+                    this.history_data_input = PublicUserHistory.parse(this.current_history.toObject())
+                    this.history_data_input.date_cleared = new Date()
+                    this.saveHistory(false)
+                },
+
+                saveHistory(isActive = true) {
+                    DataHandler.addPublicUserHistory(this.history_data_input).then((data) => {
+                        console.log('response %o', data)
+                        if (data.error) {
+                            throw date.error
+                        } else {
+                            AlertMessages.success()
+                        }
+                        return this.updateUserActive(isActive)
+                    }).then((data) => {
+                        console.log('updated user %o', data)
+                        location.reload()
+                    }).catch(err => {
+                        AlertMessages.error(err)
+                    })
+
+                    //this.updateUserActive(isActive)
+                },
+
+                deleteAdmission() {
+                    let id = this.current_history.id
+                    let onConfirm = confirm(`delete admission? id: ${id}`)
+                    if (onConfirm) {
+                        DataHandler.deletePublicUserHistory(id).then((data) => {
+                            console.log('response %o', data)
+                            if (data.error) {
+                                throw data.error
+                            } else {
+                                AlertMessages.deleted()
+                            }
+                            return this.updateUserActive(false)
+                        }).then((data) => {
+                            location.reload()
+                        }).catch(err => {
+                            AlertMessages.error(err)
+                        })
+
+
+                    }
+                }, //deleteAdmission
+
+                updateUserActive(isActive) {
+                    var public_user = PublicUser.parse(this.user.toObject())
+                    public_user.is_active = isActive
+                    return DataHandler.addPublicUser(public_user).then((data) => {
+                        if (data.error) {
+                            throw date.error
+                        }
+                        this.user = public_user;
+                        localStorage.setItem('user', JSON.stringify(public_user.toObject()))
+                        return true;
+                    })
+                }, //updateUserActive
+
+                onLogout() {
+                    if (confirm('Logout?')) {
+                        localStorage.setItem('user', "{}")
+                        location.reload()
+                    }
+                },
+
+                //<!----------INDEPENDENT-USER---------------
+                onEditItem() {
+                    this.isEdit = true
+                    this.user_input = this.user.toObject()
+                    this.user_input.date_updated = new Date()
+                    $('#userModal').modal()
+                }, //onEditItem
+
+                onSaveUser() {
+                    const input = PublicUser.parse(this.user_input)
+
+                    DataHandler.addPublicUser(input).then((data) => {
+                        if (data.error) {
+                            alert(`Can't Save User: ${data.error}`)
+                        } else {
+                            alert(`User Have Been Saved Successfuly`)
+                            //this.fetchUser()
+                            this.user = input
+                            localStorage.setItem('user', this.user.toObject())
+                        }
+                    }).catch(error => {
+                        console.log(error)
+                    })
+                }, //onSaveUser
+                //------------INDEPENDENT-------------------!>
+
+                //<!----------DEPENDENT-USER-----------------
+                onAddNewDependent(index) {
+                    this.isEdit = false
+                    this.edit_dependent.user_index = 0
+                    this.dependent_input = (new DependentUser()).toObject()
+                    this.dependent_input.created_by = this.user.id
+                    $('#dependentModal').modal()
+                }, //onAddNewDependent
+
+                onEditDependent(dep_index) {
+                    this.isEdit = true
+                    this.edit_dependent.user_index = 0
+                    this.edit_dependent.dep_index = dep_index
+                    this.dependent_input = this.user.dependents[dep_index].toObject()
+                    this.dependent_input.date_updated = new Date()
+                    $('#dependentModal').modal()
+                }, //onEditDependent
+
+                onSaveDependent() {
+
+                    console.log("edit_dependent %o", this.edit_dependent)
+                    console.log("dependent %o", this.dependent_input)
+
+                    if (this.edit_dependent.user_index == undefined || this.edit_dependent.user_index == null) {
+                        return
+                    }
+
+                    const user_index = this.edit_dependent.user_index
+                    const dep_index = this.edit_dependent.dep_index
+
+                    let input = DependentUser.parse(this.dependent_input)
+
+                    if (dep_index) {
+                        this.user.dependents[dep_index] = input
+                    } else {
+                        this.user.dependents.push(input)
+                    }
+                    DataHandler.savePublicUser(this.user).then((message) => {
+                        if (message.error) {
+                            alert(`Issue Persisting Data: ${message.error}`)
+                        } else {
+                            alert("Successfuly Updated Entry")
+                        }
+                        this.edit_dependent.user_index = null
+                        this.edit_dependent.dep_index = null
+                        localStorage.setItem('user', this.user.toObject())
+                    }).catch(err => {
+                        console.log(err)
+                    })
+                }, //onSaveDependent
+
+                onDeleteDependent(index) {
+                    if (confirm("confirm delete entry?")) {
+                        let user = PublicUser.parse(this.user.toObject()) 
+                        user.dependents.splice(index, 1)
+                        DataHandler.savePublicUser(user).then((message) => {
+                            if (message.error) {
+                                alert(`Issue Persisting Data: ${message.error}`)
+                            } else {
+                                alert("Successfuly Updated Entry")
+                            }
+                            this.edit_dependent.user_index = null
+                            this.edit_dependent.dep_index = null
+                            this.user = user
+                            localStorage.setItem('user', this.user.toObject())
+                        }).catch(err => {
+                            console.log(err)
+                        })
+                    }
+                }, //onDeleteDependent
+
+                //----------DEPENDENT-USER-----------------!>
+
+            }
+        })
+    </script>
+</body>
+
+</html>
