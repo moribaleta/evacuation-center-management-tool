@@ -178,6 +178,41 @@ const FormGenerator = Vue.extend({
     <option v-for="option in form[key].options" :value="option.value">
     {{option.title}}</option>
     </select>
+
+    <!-- compound -->
+    <div v-if="form[key].type == 'compound'" class="row">
+        <div class="col col-md-12 input-container" v-for="subkey in Object.keys(form[key].compound)" v-if="!(form[key].compound[subkey].isHidden || false)">
+            <p>{{form[key].compound[subkey].title}}</p>
+            <input v-if="form[key].compound[subkey].type == 'text'" type="text" class="input input-item"
+            :id="'input_'+key" v-model="input[key][subkey]">
+            
+            <input v-if="form[key].compound[subkey].type == 'password'" type="password" class="input input-item"
+            :id="'input_'+key" v-model="input[key][subkey]">
+            
+            <input v-if="form[key].compound[subkey].type == 'email'" type="email" class="input input-item"
+            :id="'input_'+key" v-model="input[key][subkey]">
+            
+            <input v-if="form[key].compound[subkey].type == 'number'" type="number" class="input input-item"
+            :id="'input_'+key" v-model="input[key][subkey]">
+            
+            <input v-if="form[key].compound[subkey].type == 'date'" type="date" class="input input-item"
+            :id="'input_'+key" v-model="input[key][subkey]">
+            
+            <input v-if="form[key].compound[subkey].type == 'datetime'" type="datetime-local" class="input input-item"
+            :id="'input_'+key" v-model="input[key][subkey]">
+            
+            <textarea v-if="form[key].compound[subkey].type == 'textarea'" class="form-control"
+            :id="'input_'+key" name="exact_address" v-model="input[key][subkey]"></textarea>
+            
+            <select v-if="form[key].compound[subkey].type == 'dropdown'" class="input input-item input-select"
+            :id="'input_'+key" v-model="input[key][subkey]">
+            <option v-for="option in form[key].compound[subkey].options" :value="option.value">
+            {{option.title}}</option>
+            </select>
+        </div>
+    </div>
+    <!-- compound -->
+
     <div>&nbsp</div>
     </div>
     </div>

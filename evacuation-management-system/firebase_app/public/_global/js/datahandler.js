@@ -5,6 +5,7 @@ class UserHandler extends DataHandlerType {
     static tables = {
         admin_user: 'admin_user',
         evacuation_centers: 'evacuation_centers',
+        evacuation_center_type: 'evacuation_center_type',
         evacuation_history: 'evacuation_history',
         evacuation_inventory: 'evacuation_inventory',
         evacuation_supply: 'evacuation_supply',
@@ -565,30 +566,43 @@ class EvacuationHandler extends PublicUserHandler {
         } else {
             return this.addEntry(params.id, params.toObject(), UserHandler.tables.evacuation_centers)
         }
-        /* return new Promise((resolve, reject) => {
-            this.firestore.collection('evacuation_centers')
-            .doc(params.id)
-            .set(params.toObject())
-            .then(function () {
-                resolve("Document successfully written!")
-            }).catch(function (error) {
-                reject(error)
-            });
-        }) */
     } //addEvacationCenter
     
     
     deleteEvacationCenter(id) {
+        return this.deleteEntry(id, UserHandler.tables.evacuation_centers)
+    } //deleteEvacationCenter
+
+    /* !--------- EVACUATION CENTER TYPES -----------*/
+    getEvacuationCenterType(){
         return new Promise((resolve, reject) => {
-            this.firestore.collection('evacuation_centers')
-            .doc(id).delete()
-            .then(function () {
-                resolve("Document successfully deleted!");
+            this.firestore.collection(UserHandler.tables.evacuation_center_type)
+            .get().then(function (querySnapshot) {
+                var types = []
+                querySnapshot.forEach(function (doc) {
+                    //console.log(doc.id, " => ", doc.data());
+                    const data = doc.data()
+                    const id = doc.id
+                    const object = parseObject({id,...data})
+                    
+                    types.push(EvacuationCenterType.parse(object))
+                });
+                var message = new Message()
+                message.data = types
+                resolve(message)
             }).catch(function (error) {
                 reject(error)
             });
         })
-    } //deleteEvacationCenter
+    }
+
+    addEvacationCenterType(params = new EvacuationCenterType()){
+        return this.addEntry(params.id, params, UserHandler.tables.evacuation_center_type)
+    }
+
+    deleteEvacationCenterType(id) {
+        return this.deleteEntry(id, UserHandler.tables.evacuation_center_type)
+    }
     
     /*!--------- EVACUAITON HISTORY ---------------!*/
     
