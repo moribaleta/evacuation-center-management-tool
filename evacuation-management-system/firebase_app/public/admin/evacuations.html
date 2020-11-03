@@ -136,21 +136,19 @@
                 <h1>Evacuation Facilities</h1>
             </div>
 
+
+            <filter-component :filter_add="filter_add" v-on:filter="onFilter($event)" v-on:search="onSearch($event)"
+                v-on:cancel="onCancelSearch($event)" v-on:clear="onClearFilter()"></filter-component>
+
             <div class="loader-container" v-if="isLoading">
                 <div class="loader"></div>
             </div>
 
-            <filter-component :filter_add="filter_add" 
-                v-on:filter="onFilter($event)"
-                v-on:search="onSearch($event)" 
-                v-on:cancel="onCancelSearch($event)" 
-                v-on:clear="onClearFilter()"></filter-component>
-
             <div class="section" style="height: 80%;" v-if="evac_list.length > 0">
                 <div class="section">
-                    <button type="button" id="add-report" class="btn btn-info button-view"
+                    <!-- <button type="button" id="add-report" class="btn btn-info button-view"
                         v-on:click="onImportEvac()">Import Evacuation Center
-                    </button>
+                    </button> -->
                     <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="onAddItem()">Add
                         Evacuation Center
                     </button>
@@ -315,11 +313,12 @@
                 type_data_input: new EvacuationCenterType(),
                 evac_types_formModel: EvacuationCenterType.formModel,
 
+                filter_add: {},
+
                 isEdit: false,
                 municipalities: municipalities,
                 isLoading: false,
                 cdn: DataHandlerType.api_host,
-                filter_data: {}
             },
             methods: {
                 onStart() {
@@ -364,14 +363,20 @@
                 fetchEvacuationCenterTypes() {
                     DataHandler.getEvacuationCenterType().then((message) => {
                         this.evacuation_types = message.data
+
+                        var filter_evac_type = []
+
                         this.evacFormModel.category.options = this.evacuation_types.filter((val) => {
                             return val.is_active
                         }).map((type) => {
+                            filter_evac_type.push(type.name)
                             return {
                                 title: type.name,
                                 value: type.name
                             }
                         })
+
+                        this.filter_add['category'] = ['all'].concat(filter_evac_type)
                     }).catch(err => {
                         console.log(err)
                     })
@@ -401,6 +406,37 @@
                 setEvacationCenter(data) {
                     this.evac_list = data
                     this.view_list = data
+
+                    if (!this.evac_list.isEmpty()) {
+                        var params = {}
+                        let keys = EvacuationCenter.filter_keys.map((key) => {
+                            params[key] = ['all']
+                            return key
+                        });
+                        this.evac_list.forEach((evac) => {
+                            keys.forEach((key) => {
+                                if (key == 'facilities') {
+                                    (evac[key] || "").split(',').filter((value) => {
+                                        return !params[key].includes(value
+                                        .toLowerCase())
+                                    }).forEach((val) => {
+                                        params[key].push(val.toLowerCase())
+                                    });
+
+                                } else if (!params[key].includes(evac[key])) {
+                                    params[key].push(evac[key])
+                                }
+
+                            })
+                        })
+                        this.filter_add = params
+                        console.log("filters %o", this.filter_add)
+                        /* Object.keys(this.evac_list[0]).map((key) => {
+                            //params[key] = 
+                            this.evac_list[0]
+                        }) */
+                    }
+
                     console.log(this.evac_list)
                 }, //setEvacationCenter
 
@@ -504,7 +540,7 @@
                     }
                 },
 
-                onImportEvac() {
+                /* onImportEvac() {
                     let promises = evacs.map((evac) => {
                         return DataHandler.addEvacationCenter(EvacuationCenter.parse(evac))
                     })
@@ -514,11 +550,86 @@
                     }).catch(error => {
                         console.log(error)
                     })
-                },
+                }, */
 
                 onDownloadReport() {
-                    let text = JSON.stringify(this.evac_list)
-                    saveTextAsFile(text)
+                    /* let text = JSON.stringify(this.evac_list)
+                    saveTextAsFile(text) */
+                    /* if (this.view_list.isEmpty()) {
+                        alert("Empty Reports")
+                    } else {
+                        let params = Object.keys(this.view_list[0])
+                        var header = params.reduce((prev, curr) => {
+                            if (prev) {
+                                return prev + "," +curr
+                            } else {
+                                return curr
+                            }
+                        })
+                        let text = this.view_list.map((val) => {
+                            return params.reduce((prev, key) => {
+                                if (prev) {
+                                    return val[key]
+                                } else {
+                                    return prev + "," +val[key]
+                                }
+                            })
+                        }).reduce((prev, val) => {
+                            if (prev) {
+                                return header + "\n" +val
+                            } else {
+                                return prev + "\n" +val
+                            }
+                        })
+
+                    } */
+
+                    /* const replacer = (key, value) => value === null || value == undefined  ? '' :
+                        value // specify how you want to handle null values here
+
+                    const items = this.view_list.map((view) => {
+                        Object.keys(view).forEach((key) => {
+                            view[key] =  JSON.stringify(view[key], replacer).replace() //(view[key] + "").replace(',','-')
+                        })
+                        return view
+                    })
+                    
+                    const header = Object.keys(items[0])
+                    let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer))
+                        .join(','))
+                    csv.unshift(header.join(','))
+                    csv = csv.join('\r\n')
+
+                    console.log(csv) */
+
+                    const ConvertToCSV = (objArray) => {
+                    let rows = typeof objArray !== "object" ? JSON.parse(objArray) : objArray;
+                    let header = "";
+                    Object.keys(rows[0]).map(pr => (header += pr + ";"));
+
+                    let str = "";
+                    rows.forEach(row => {
+                    let line = "";
+                    let columns =
+                    typeof row !== "object" ? JSON.parse(row) : Object.values(row);
+                    columns.forEach(column => {
+                    if (line !== "") {
+                    line += ";";
+                    }
+                    if (typeof column === "object") {
+                    line += JSON.stringify(column);
+                    } else {
+                    line += column;
+                    }
+                    });
+                    str += line + "\r\n";
+                    });
+                    return header + "\r\n" + str;
+                    }
+
+                    let csv = ConvertToCSV(this.view_list)
+
+                    saveTextAsFile(csv)
                 },
 
 
@@ -572,27 +683,47 @@
 
                         return (
                             (filter.year == 'all' || filter.year == date.getFullYear()) &&
-                            (filter.month  == 'all' || filter.month == (months_array[date.getMonth()] || 0)) && 
-                            (filter.municipality == 'all' || filter.municipality == data.municipality)
+                            (filter.month == 'all' || filter.month == (months_array[date
+                                .getMonth()] || 0)) &&
+                            (filter.municipality == 'all' || filter.municipality == data
+                                .municipality)
                         )
                     });
+
+                    let keys = EvacuationCenter.filter_keys
+
+                    view_list = view_list.filter((data) => {
+                        let eval = keys.filter((key) => {
+                            if (key == 'facilities') {
+                                return (filter[key] == 'all' ||
+                                    (data[key] + "").toLowerCase().includes(filter[key]
+                                        .toLowerCase()))
+                            } else {
+                                return (filter[key] == 'all' ||
+                                    filter[key].toLowerCase() == (data[key] + "")
+                                    .toLowerCase())
+                            }
+                        })
+                        console.log(eval)
+                        return keys.length == eval.length
+                    })
 
                     this.view_list = view_list
                 },
 
                 onSearch(filter) {
                     this.onFilter(filter)
-                    
+
                     this.view_list = this.view_list.filter((data) => {
                         return SearchObject(data.toObject(), filter.searchTerm)
                     })
                 },
 
-                onCancelSearch(filter){
+                onCancelSearch(filter) {
                     this.onFilter(filter)
                 },
 
-                onClearFilter(){
+                onClearFilter() {
                     this.view_list = [...this.evac_list]
                 }
             }
@@ -604,7 +735,7 @@
             const textFileAsBlob = new Blob([textToWrite], {
                 type: 'text/plain'
             });
-            const fileNameToSaveAs = "coordinates.json" //document.getElementById("").value;
+            const fileNameToSaveAs = "reports.csv" //document.getElementById("").value;
             let downloadLink = document.createElement("a");
             downloadLink.download = fileNameToSaveAs;
             downloadLink.innerHTML = "Download File";

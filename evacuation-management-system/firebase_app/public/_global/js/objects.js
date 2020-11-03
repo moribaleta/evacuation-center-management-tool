@@ -161,14 +161,21 @@ class EvacuationCenter extends Model {
         facilities: 'Available Facilities',
     }
 
+    static filter_keys = [
+        'population_capacity',
+        'floor_space',
+        'category',
+        'facilities',
+    ]
+
     /** static enum contains type of categories used to define Evacuation Center */
-    static CategoryTypes = {
+    /* static CategoryTypes = {
         dedicated_evacuation_center: 'Dedicated Evacuation Center',
         barangay_hall: 'Barangay Hall',
         school: 'School',
         chapel: 'Chapel',
         others: 'Others'
-    }
+    } */
 
     static formModel = {
         name: {
@@ -654,7 +661,7 @@ class EvacuationSupply extends Model {
         this.qty = qty
         this.date_supplied = date_supplied
         this.remarks = remarks
-        this.status  = status || EvacuationSupply.SupplyStatus.pending
+        this.status  = status || SupplyStatus.pending
     }
 
     static parse(objects = {}) {

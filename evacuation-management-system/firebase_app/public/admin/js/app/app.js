@@ -162,30 +162,39 @@ const FilterComponent = Vue.extend({
                     <option v-for="(item,index) in selections.months" :selected="index == filter.month ? true : false"> {{item}}</option>
                 </select>
             </div>
-            <div class="col col-md-4">
+            <div class="col col-md-3">
                 <p class="input-label">MUNICIPALITY</p>
                 <select id="input-type" class="input input-select" v-model="filter.municipality">
                     <option v-for="(item,index) in selections.municipality" :selected="index == filter.municipality ? true : false"> {{item}}</option>
                 </select>
             </div>
-
-            <div class="col col-md-4" v-for="key, index in Object.keys(selections.filter_additional)">
-                <p class="input-label">{{key.toUpperCase()}}</p>
-                <select id="input-type" class="input input-select" v-model="filter[key]">
-                    <option v-for="(item,index) in selections.filter_additional[key]" :selected="index == filter[key] ? true : false"> {{item}}</option>
-                </select>
-            </div>
-            
+ 
             <div class="col col-md-3 button-filter-container">
                 <div>&nbsp;</div>
                 <button type="button" class="btn btn-warning button-view" v-on:click="$emit('filter', filter)">filter
                 </button>
                 <button type="button" class="btn btn-warning button-view" v-on:click="$emit('clear', 0); onClear()">clear
                 </button>
+                <button type="button" class="btn btn-warning button-view " href="#filteradd" data-toggle="collapse">Additional Filter
+                </button>
                 <button type="button" class="btn btn-danger button-view " href="#searchbox" data-toggle="collapse">Show Search
                 </button>
             </div>
 
+        </div>
+        <div id="filteradd" class="panel-collapse collapse">
+            <div class="panel-body well">
+                <div class="col col-md-12">
+                    <div class="row">
+                        <div class="col col-md-3" v-for="key, index in Object.keys(filter_add)">
+                            <p class="input-label">{{key.toUpperCase().replace('_'," ")}}</p>
+                            <select id="input-type" class="input input-select" v-model="filter[key]">
+                                <option v-for="(item,index) in filter_add[key]" :selected="index == filter[key] ? true : false"> {{item}}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <div id="searchbox" class="panel-collapse collapse">
             <div class="panel-body well">
@@ -200,6 +209,16 @@ const FilterComponent = Vue.extend({
     </div>`,
     props: {
         filter_add: {}
+    },
+    watch: {
+        filter_add(){
+            
+            Object.keys(this.filter_add).forEach((key) => {
+                //this.selections.filter_additional[key] = ['all'].concat(this.filter_add[key] || [])
+                this.filter[key] = 'all' 
+            })
+            console.log("hello %o", this.selections)
+        }
     },
     data() {
         return {
@@ -265,12 +284,16 @@ const FilterComponent = Vue.extend({
             this.filter.searchTerm = ""
         },
         onClear(){
-            this.filter = {
+            /* this.filter = {
                 year: 'all',
                 month: 'all',
                 municipality: 'all',                
                 searchTerm: ''
-            }
+            } */
+            Object.keys(this.filter).map((key) => {
+                this.filter[key] = 'all'
+            })
+            this.filter.searchTerm  = ''
         }
     }
 })
