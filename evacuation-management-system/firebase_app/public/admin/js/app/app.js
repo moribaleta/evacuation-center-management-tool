@@ -4,119 +4,118 @@ var header = new Vue({
         user: new AdminUser(),
         active: "",
         logo: "resources/images/logo.png",
-        header_items: [
-            {
+        header_items: [{
                 id: 'content',
                 href: 'contents.html',
                 icon: 'language',
                 title: 'Contents'
             },
             {
-            id: 'evacuations',
-            href: "evacuations.html",
-            icon: 'home_work',
-            title: 'Evacuations'
-        },
-        {
-            id: 'history',
-            href: "history.html",
-            icon: 'assessment',
-            title: 'History'
-        },
-        {
-            id: 'inventory',
-            href: 'inventory.html',
-            icon: 'storage',
-            title: 'Inventory'
-        },
-        {
-            id: 'models',
-            href: "models.html",
-            icon: 'assessment',
-            title: 'Models'
-        },
-        {
-            id: 'admin',
-            href: 'admin.html',
-            icon: 'group',
-            title: 'Admin'
-        },
-        {
-            id: 'map',
-            href: 'map.html',
-            icon: 'room',
-            title: 'Map'
-        },
-        {
-            id: 'donors',
-            href: 'donors.html',
-            icon: 'reduce_capacity',
-            title: 'Donors'
-        },
-        {
-            id: 'users',
-            href: 'users.html',
-            icon: 'account_circle',
-            title: 'Public'
-        },
-        
-    ]
-},
-methods: {
-    onStart() {
-        DataHandler.configure()
-        try {
-            let user = JSON.parse(sessionStorage.getItem('user'))
-            user = AdminUser.parse(user)
-            console.log("user %o", user)
-            if (user != undefined && user != null) {
-                console.log(user)
-                this.user = user
-                this.onConfigureApp()
-                app.onStart()
-            } else {
-                throw "login user"
-            }
-        } catch (error) {
-            console.error(error)
-            alert('login user account')
-            this.onLogout()
-        }
-        
-        this.active = $('#header').attr('attr')
-    },
-    
-    onSetUser(user) {
-        sessionStorage.setItem('user', JSON.stringify(user))
-        this.user = user
-    },
-    
-    onLogout() {
-        sessionStorage.clear()
-        window.open('login.html', '_self')
-    },
-    
-    onConfigureApp() {
-        app.formatDate = ((date) => {
-            let _date = new Date(date)
-            return _date.toLocaleDateString()
-        })
+                id: 'evacuations',
+                href: "evacuations.html",
+                icon: 'home_work',
+                title: 'Evacuations'
+            },
+            {
+                id: 'history',
+                href: "history.html",
+                icon: 'assessment',
+                title: 'History'
+            },
+            {
+                id: 'inventory',
+                href: 'inventory.html',
+                icon: 'storage',
+                title: 'Inventory'
+            },
+            {
+                id: 'models',
+                href: "models.html",
+                icon: 'assessment',
+                title: 'Models'
+            },
+            {
+                id: 'admin',
+                href: 'admin.html',
+                icon: 'group',
+                title: 'Admin'
+            },
+            {
+                id: 'map',
+                href: 'map.html',
+                icon: 'room',
+                title: 'Map'
+            },
+            {
+                id: 'donors',
+                href: 'donors.html',
+                icon: 'reduce_capacity',
+                title: 'Donors'
+            },
+            {
+                id: 'users',
+                href: 'users.html',
+                icon: 'account_circle',
+                title: 'Public'
+            },
 
-        app.formateDateRange = ((d1, d2) => {
-            var datestring = ""
-            if (d1 && d1.trim() != "") {
-                datestring += app.formatDate(d1)
-            }
-            if (d2 && d2.trim() != "") {
-                if (datestring != "") {
-                    datestring += " - "
+        ]
+    },
+    methods: {
+        onStart() {
+            DataHandler.configure()
+            try {
+                let user = JSON.parse(sessionStorage.getItem('user'))
+                user = AdminUser.parse(user)
+                console.log("user %o", user)
+                if (user != undefined && user != null) {
+                    console.log(user)
+                    this.user = user
+                    this.onConfigureApp()
+                    app.onStart()
+                } else {
+                    throw "login user"
                 }
-                datestring += app.formatDate(d2)
+            } catch (error) {
+                console.error(error)
+                alert('login user account')
+                this.onLogout()
             }
-            return datestring
-        })
+
+            this.active = $('#header').attr('attr')
+        },
+
+        onSetUser(user) {
+            sessionStorage.setItem('user', JSON.stringify(user))
+            this.user = user
+        },
+
+        onLogout() {
+            sessionStorage.clear()
+            window.open('login.html', '_self')
+        },
+
+        onConfigureApp() {
+            app.formatDate = ((date) => {
+                let _date = new Date(date)
+                return _date.toLocaleDateString()
+            })
+
+            app.formateDateRange = ((d1, d2) => {
+                var datestring = ""
+                if (d1 && d1.trim() != "") {
+                    datestring += app.formatDate(d1)
+                }
+                if (d2 && d2.trim() != "") {
+                    if (datestring != "") {
+                        datestring += " - "
+                    }
+                    datestring += app.formatDate(d2)
+                }
+                return datestring
+            })
+        }
     }
-}
 })
 
 var app = new Vue()
@@ -128,29 +127,160 @@ $(document).ready(() => {
 
 
 
-    class AlertMessages {
+class AlertMessages {
 
-        static success(message) {
-            alert(`Item Saved ${message || ""}`)
+    static success(message) {
+        alert(`Item Saved ${message || ""}`)
+    }
+
+    static deleted(message) {
+        alert(`Item Deleted ${message || ""}`)
+    }
+
+    static error(message) {
+        alert(`Failed to execute ${message || ""}`)
+    }
+
+    static confirmDelete(message) {
+        return confirm(`Confirm Delete Item? ${message || ""}`)
+    }
+}
+
+const FilterComponent = Vue.extend({
+    template: `
+    <div class="section">
+        <div class="well input-container" style="padding:10px; width: 100%; min-height: 70px">
+            <div class="col col-md-1">
+                <p class="input-label">YEAR</p>
+                <select id="input-type" class="input input-select" v-model="filter.year">
+                    <option v-for="(item,index) in selections.years" :selected="index == filter.year ? true : false">{{item ? item : "NOT AVAILABLE"}}</option>
+                </select>
+            </div>
+            <div class="col col-md-2">
+                <p class="input-label">MONTH</p>
+                <select id="input-type" class="input input-select" v-model="filter.month">
+                    <option v-for="(item,index) in selections.months" :selected="index == filter.month ? true : false"> {{item}}</option>
+                </select>
+            </div>
+            <div class="col col-md-4">
+                <p class="input-label">MUNICIPALITY</p>
+                <select id="input-type" class="input input-select" v-model="filter.municipality">
+                    <option v-for="(item,index) in selections.municipality" :selected="index == filter.municipality ? true : false"> {{item}}</option>
+                </select>
+            </div>
+
+            <div class="col col-md-4" v-for="key, index in Object.keys(selections.filter_additional)">
+                <p class="input-label">{{key.toUpperCase()}}</p>
+                <select id="input-type" class="input input-select" v-model="filter[key]">
+                    <option v-for="(item,index) in selections.filter_additional[key]" :selected="index == filter[key] ? true : false"> {{item}}</option>
+                </select>
+            </div>
+            
+            <div class="col col-md-3 button-filter-container">
+                <div>&nbsp;</div>
+                <button type="button" class="btn btn-warning button-view" v-on:click="$emit('filter', filter)">filter
+                </button>
+                <button type="button" class="btn btn-warning button-view" v-on:click="$emit('clear', 0); onClear()">clear
+                </button>
+                <button type="button" class="btn btn-danger button-view " href="#searchbox" data-toggle="collapse">Show Search
+                </button>
+            </div>
+
+        </div>
+        <div id="searchbox" class="panel-collapse collapse">
+            <div class="panel-body well">
+                <p class="input-label">Search</p>
+                <input id="input_searchTerm" class="input input-text" type="text" v-model="filter.searchTerm" >
+                <button type="button" class="btn btn-warning button-view" v-on:click="$emit('search', filter)">Search
+                </button>
+                <button type="button" class="btn btn-danger button-view" v-if="filter.searchTerm.length > 0" v-on:click="$emit('cancel', filter)">Cancel
+                </button>
+            </div>
+        </div>
+    </div>`,
+    props: {
+        filter_add: {}
+    },
+    data() {
+        return {
+            filter : {
+                year: 'all',
+                month: 'all',
+                municipality: 'all',                
+                searchTerm: ''
+            },
+            selections: {
+                years: ['all'],
+                months: [
+                    'all',
+                    'JANUARY',
+                    'FEBRUARY',
+                    'MARCH',
+                    'APRIL',
+                    'MAY',
+                    'JUNE',
+                    'JULY',
+                    'AUGUST',
+                    'SEPTEMBER',
+                    'OCTOBER',
+                    'NOVEMBER',
+                    'DECEMBER',
+                ],
+                months_only: [
+                    'JANUARY',
+                    'FEBRUARY',
+                    'MARCH',
+                    'APRIL',
+                    'MAY',
+                    'JUNE',
+                    'JULY',
+                    'AUGUST',
+                    'SEPTEMBER',
+                    'OCTOBER',
+                    'NOVEMBER',
+                    'DECEMBER',
+                ],
+                municipality: ['all'].concat(municipalities),
+
+                filter_additional: {}
+            },
         }
-
-        static deleted(message) {
-            alert(`Item Deleted ${message || ""}`)
-        }
-
-        static error(message){
-            alert(`Failed to execute ${message || ""}`)
-        }
-
-        static confirmDelete(message) {
-            return confirm(`Confirm Delete Item? ${message || ""}`)
+    },
+    created() {
+        console.log('user data from parent component:')
+        Object.keys(this.filter_add).forEach((key) => {
+            this.selections.filter_additional[key] = ['all'].concat(this.filter_add[key] || [])
+            this.filter[key] = 'all' 
+        })
+    },
+    methods: {
+        tranferInventory(id) {
+            this.$emit('on-select-inventory', id)
+        },
+        formatDate(date) {
+            let _date = new Date(date)
+            return _date.toLocaleDateString()
+        },
+        onCancelSearch(){
+            this.filter.searchTerm = ""
+        },
+        onClear(){
+            this.filter = {
+                year: 'all',
+                month: 'all',
+                municipality: 'all',                
+                searchTerm: ''
+            }
         }
     }
-    
-    
-    const InventorySelector = Vue.extend({
-        template: 
-        `<div id="inventorySelectionModal" class="modal fade" role="dialog">
+})
+
+Vue.component('filter-component', FilterComponent)
+
+
+
+const InventorySelector = Vue.extend({
+    template: `<div id="inventorySelectionModal" class="modal fade" role="dialog">
         <div class="modal-dialog">
         <div class="modal-content">
         <div class="modal-header">
@@ -270,119 +400,117 @@ $(document).ready(() => {
         
         </div>
         </div>`,
-        props : {
-            muni_inv_list: Array,
-            evac_list: Array,
-            inventory_list: Object,
-            isLoading: Object,
-            supply: Object
+    props: {
+        muni_inv_list: Array,
+        evac_list: Array,
+        inventory_list: Object,
+        isLoading: Object,
+        supply: Object
+    },
+    created: function () {
+        console.log('user data from parent component:')
+        console.log(this.evac_list) //prints out an empty string
+    },
+    methods: {
+        tranferInventory(id) {
+            this.$emit('on-select-inventory', id)
         },
-        created: function () {
-            console.log('user data from parent component:')
-            console.log(this.evac_list) //prints out an empty string
-        },
-        methods: {
-            tranferInventory(id) {
-                this.$emit('on-select-inventory',id)
-            },
-            formatDate(date){
-                let _date = new Date(date)
-                return _date.toLocaleDateString()
-            }
+        formatDate(date) {
+            let _date = new Date(date)
+            return _date.toLocaleDateString()
         }
-    })
-    
-    Vue.component('inventory-selector', InventorySelector)
-    
-    var inventory_selection = new Vue({
-        el: '#inventory-list-picker',
-        data: {
-            user: new AdminUser,
-            muni_inv_list: [],
-            evac_list: [],
-            inventory_list: {},
-            evac_inv_input: new EvacuationInventory(), //new EvacuationCenter(),
-            muni_inv_input: new MunicipalInventory(),
-            municipalities: [],
-            isEdit: false,
-            editEvacuationID: null,
-            isLoading: {
-                evac_inv: false,
-                muni_inv: false
-            },
-            supply: new EvacuationSupply(),
-            callable: (id) => {}
+    }
+})
+
+Vue.component('inventory-selector', InventorySelector)
+
+var inventory_selection = new Vue({
+    el: '#inventory-list-picker',
+    data: {
+        user: new AdminUser,
+        muni_inv_list: [],
+        evac_list: [],
+        inventory_list: {},
+        evac_inv_input: new EvacuationInventory(), //new EvacuationCenter(),
+        muni_inv_input: new MunicipalInventory(),
+        municipalities: [],
+        isEdit: false,
+        editEvacuationID: null,
+        isLoading: {
+            evac_inv: false,
+            muni_inv: false
         },
-        methods: {
-            onStart(supply, callable) {
-                this.user = header.user
-                this.municipalities = municipalities
-                this.callable = callable
-                this.supply = supply
-                this.fetchData()
-            },//onStart
-            
-            fetchData() {
-                this.fetchMunicipalInv()
-                this.fetchEvacationCenter()
-                $('#inventorySelectionModal').modal()
-            },//fetchData
-            
-            fetchMunicipalInv() {
-                this.isLoading.muni_inv = true
-                DataHandler.getMunicipalInventories(this.user.municipality).then((data) => {
-                    this.muni_inv_list = data.data
-                    console.log("muni list %o", this.muni_inv_list)
-                }).catch((err) => {
-                    console.log(err)
-                }).finally(() => {
-                    this.isLoading.muni_inv = false
+        supply: new EvacuationSupply(),
+        callable: (id) => {}
+    },
+    methods: {
+        onStart(supply, callable) {
+            this.user = header.user
+            this.municipalities = municipalities
+            this.callable = callable
+            this.supply = supply
+            this.fetchData()
+        }, //onStart
+
+        fetchData() {
+            this.fetchMunicipalInv()
+            this.fetchEvacationCenter()
+            $('#inventorySelectionModal').modal()
+        }, //fetchData
+
+        fetchMunicipalInv() {
+            this.isLoading.muni_inv = true
+            DataHandler.getMunicipalInventories(this.user.municipality).then((data) => {
+                this.muni_inv_list = data.data
+                console.log("muni list %o", this.muni_inv_list)
+            }).catch((err) => {
+                console.log(err)
+            }).finally(() => {
+                this.isLoading.muni_inv = false
+            })
+        }, //fetchMunicipalInv
+
+        fetchEvacationCenter() {
+            this.isLoading.evac_inv = true
+            DataHandler.getEvacuationCenters().then((data) => {
+                return this.setEvacationCenter(data.data)
+            }).then((data) => {
+                this.evac_list = data.evac_list
+                this.inventory_list = data.inventory_list
+            }).catch(err => {
+                console.log(err)
+            }).finally(() => {
+                this.isLoading.evac_inv = false
+            })
+        }, //fetchEvacationCenter
+
+        setEvacationCenter(evac_data) {
+            let promises = evac_data.map((evac) => {
+                return DataHandler.getInventories(evac.id)
+            })
+            return Promise.all(promises).then((data) => {
+                var inventory_list = {}
+                data.forEach((message) => {
+                    let data = message.data
+                    inventory_list[data.id] = data.inventories
                 })
-            },//fetchMunicipalInv
-            
-            fetchEvacationCenter() {
-                this.isLoading.evac_inv = true
-                DataHandler.getEvacuationCenters().then((data) => {
-                    return this.setEvacationCenter(data.data)
-                }).then((data) => {
-                    this.evac_list = data.evac_list
-                    this.inventory_list = data.inventory_list
-                }).catch(err => {
-                    console.log(err)
-                }).finally(() => {
-                    this.isLoading.evac_inv = false
-                })
-            },//fetchEvacationCenter
-            
-            setEvacationCenter(evac_data) {
-                let promises = evac_data.map((evac) => {
-                    return DataHandler.getInventories(evac.id)
-                })
-                return Promise.all(promises).then((data) => {
-                    var inventory_list = {}
-                    data.forEach((message) => {
-                        let data = message.data
-                        inventory_list[data.id] = data.inventories
-                    })
-                    return {
-                        evac_list: evac_data,
-                        inventory_list
-                    }
-                })
-            },//setEvacationCenter
-            
-            onSelectInventory(id) {
-                console.log("selected %o", id)
-                this.callable(id)
-            },
-            
-            onDismiss(){
-                $('#inventorySelectionModal').modal('hide')
-            }
+                return {
+                    evac_list: evac_data,
+                    inventory_list
+                }
+            })
+        }, //setEvacationCenter
+
+        onSelectInventory(id) {
+            console.log("selected %o", id)
+            this.callable(id)
+        },
+
+        onDismiss() {
+            $('#inventorySelectionModal').modal('hide')
         }
-    })
-    
-    
-    
-    
-    
+    }
+})
+
+
+

@@ -101,7 +101,7 @@ function SearchObject(object = {}, searchTerm = "") {
     let filter = Object.keys(object).filter((key) => {
         return (object[key] + "").toLowerCase().includes(searchTerm.toLowerCase())
     })
-    return filter.length > 0;
+    return !filter.isEmpty()
 }
 
 
@@ -336,6 +336,21 @@ var municipalities =
     'Siniloan',
     'Victoria']
 
+
+const months_array = [
+    'JANUARY',
+    'FEBRUARY',
+    'MARCH',
+    'APRIL',
+    'MAY',
+    'JUNE',
+    'JULY',
+    'AUGUST',
+    'SEPTEMBER',
+    'OCTOBER',
+    'NOVEMBER',
+    'DECEMBER',
+]
 
 const EntrySingleComponent = Vue.extend({
     template: `

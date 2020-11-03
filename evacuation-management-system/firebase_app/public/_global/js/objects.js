@@ -318,6 +318,21 @@ class EvacuationCenterType extends Model {
     ///used to determine if the type is available
     is_active
 
+    static formModel = {
+        name: {
+            title: "Title",
+            type: FormModels.text
+        },
+        is_active: {
+            title: "Is Active",
+            type: FormModels.dropdown,
+            options: [
+                {title: "true", value: true},
+                {title: "false", value: false},
+            ]
+        }
+    }
+
     constructor(id,
         date_created,
         date_updated,

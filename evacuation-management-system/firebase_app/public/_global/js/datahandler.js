@@ -597,7 +597,7 @@ class EvacuationHandler extends PublicUserHandler {
     }
 
     addEvacationCenterType(params = new EvacuationCenterType()){
-        return this.addEntry(params.id, params, UserHandler.tables.evacuation_center_type)
+        return this.addEntry(params.id, params.toObject(), UserHandler.tables.evacuation_center_type)
     }
 
     deleteEvacationCenterType(id) {
