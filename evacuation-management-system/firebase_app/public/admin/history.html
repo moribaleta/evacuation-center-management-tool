@@ -87,7 +87,8 @@
                                     <label class="col-md-4 control-label" for="name">Population</label>
                                     <div class="col-md-4">
                                         <input id="name" name="name" type="text" placeholder="0"
-                                            class="form-control input-md" required="" v-model="data_input.name">
+                                            class="form-control input-md" required=""
+                                            v-model="data_input.current_population">
                                         <span class="help-block">peek population size</span>
                                     </div>
                                 </div>
@@ -122,62 +123,17 @@
             <!-- HEADER FILTER -->
             <div class="header-container">
                 <h1>Reports</h1>
-                <div class="well input-container" style="padding:10px; width: 100%; min-height: 70px">
-                    <div class="col col-md-1">
-                        <p class="input-label">YEAR</p>
-                        <select id="input-type" class="input input-select" v-model="filter.year">
-                            <option v-for="(item,index) in selections.years"
-                                :selected="index == filter.year ? true : false">{{item
-                                                ? item : "NOT AVAILABLE"}}</option>
-                        </select>
-                    </div>
-                    <div class="col col-md-2">
-                        <p class="input-label">MONTH</p>
-                        <select id="input-type" class="input input-select" v-model="filter.month">
-                            <option v-for="(item,index) in selections.months"
-                                :selected="index == filter.month ? true : false">
-                                {{item}}</option>
-                        </select>
-                    </div>
-                    <div class="col col-md-4">
-                        <p class="input-label">EVACUATION CENTER</p>
-                        <select id="input-district" class="input input-select" v-model="filter.station">
-                            <option :selected="filter.station == 'all' ? true : false">
-                                all</option>
-                            <option v-for="(item,index) in evac_list"
-                                :selected="index == filter.station ? true : false">
-                                {{item.name}}</option>
-                        </select>
-                    </div>
-                    <div class="col col-md-3">
-                        <p class="input-label">MUNICIPAL</p>
-                        <select id="input-district" class="input input-select" v-model="filter.municipal">
-                            <option :selected="filter.municipal == 'all' ? true : false">
-                                all</option>
-                            <option v-for="(item,index) in municipalities"
-                                :selected="index == filter.municipal ? true : false">
-                                {{item.toUpperCase()}}</option>
-                        </select>
-                    </div>
-                    <div class="col col-md-1 button-filter-container">
-                        <button type="button" class="btn btn-warning button-view button-filter"
-                            v-on:click="filterList()">filter
-                        </button>
-                    </div>
+                <filter-component :filter_add="filter_add" v-on:filter="onFilter($event)" v-on:search="onSearch($event)"
+                    v-on:cancel="onCancelSearch($event)" v-on:clear="onClearFilter()"></filter-component>
 
-                </div>
                 <div class="button-container">
-                    <!-- <button type="button" class="btn btn-info button-view" v-on:click="createSampleReport()">
-                        create sample
-                        report
-                    </button> -->
                     <button type="button" class="btn btn-info button-view" v-on:click="addHistory()">
-                        add
-                        history
+                        Add
+                        History
                     </button>
                     <button type="button" class="btn btn-info button-view" v-on:click="openGenerateReport()">
-                        generate
-                        report
+                        Generate
+                        Report
                     </button>
                 </div>
             </div>
@@ -189,26 +145,22 @@
 
             <!-- TABLE VIEW -->
             <div class="table-container" v-if="!isDataLoading">
+                <ul class="pagination">
+                    <li v-for="offset,index in pages" :class="index==curr_offset_index ? 'active' : ''" ><a v-on:click="setPage(index)">{{index + 1}}</a></li>
+                </ul>
                 <div class="table" id="tableData">
                     <div class="well" v-for="item,index in reports_view">
                         <div class="row">
                             <div class="col col-md-12 item-info">
                                 <p class="item-value">{{index + 1}}.</p>
                             </div>
-                            <div class="col col-md-12 item-info">    
+                            <div class="col col-md-12 item-info">
                                 <p class="item-label">EVACUATION NAME</p>
                                 <p class="item-value">{{getEvacFromId(item.evac_id).name}}</p>
                             </div>
                             <div class="col col-md-12">
-                                <entry-component :entry="item" :headers="history_header"></entry-container>
-                                <!-- <div v-if="info == 'evac_id'">
-                                    <p class="item-label">EVACUATION NAME</p>
-                                    <p class="item-value">{{getEvacFromId(item.evac_id).name}}</p>
-                                </div>
-                                <div v-if="info != 'evac_id'">
-                                    <p class="item-label">{{info.replace(/_/g,' ').toUpperCase() +": "}}</p>
-                                    <p class="item-value">{{item[info] ? item[info] : '--'}}</p>
-                                </div> -->
+                                <entry-component :entry="item" :headers="history_header">
+                                    </entry-container>
                             </div>
                             <div class="col col-md-12">
                                 <button class="btn btn-default btn-info" v-on:click="editItem(index)">edit</button>
@@ -217,20 +169,14 @@
                             </div>
                         </div>
                     </div>
+                    
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- <script src="js/app/datahandler.js"></script> -->
     <script src="js/app/app.js"></script>
     <script src="js/app/constants.js"></script>
-    <script src="../_global/js/moabc/utilities.js"></script>
-    <script src="../_global/js/moabc/objects.js"></script>
-    <script src="../_global/js/moabc/evacuation.js"></script>
-    <script src="../_global/js/moabc/honey.js"></script>
-    <script src="../_global/js/moabc/moabc.js"></script>
-    <script src="../_global/js/moabc/test.js"></script>
 
     <script>
         app = new Vue({
@@ -239,46 +185,17 @@
                 evac_list: [],
                 reports: [],
                 reports_view: [],
-                history_header: ['created_by','date_created','date_updated','report_date','current_population'],
-                selections: {
-                    years: ['all'],
-                    months: [
-                        'all',
-                        'JANUARY',
-                        'FEBRUARY',
-                        'MARCH',
-                        'APRIL',
-                        'MAY',
-                        'JUNE',
-                        'JULY',
-                        'AUGUST',
-                        'SEPTEMBER',
-                        'OCTOBER',
-                        'NOVEMBER',
-                        'DECEMBER',
-                    ],
-                    months_only: [
-                        'JANUARY',
-                        'FEBRUARY',
-                        'MARCH',
-                        'APRIL',
-                        'MAY',
-                        'JUNE',
-                        'JULY',
-                        'AUGUST',
-                        'SEPTEMBER',
-                        'OCTOBER',
-                        'NOVEMBER',
-                        'DECEMBER',
-                    ],
-                    stations: ['']
-                },
-                filter: {
-                    year: 'all',
-                    month: 'all',
-                    station: 'all',
-                    municipal: 'all'
-                },
+                history_header: ['created_by', 'date_created', 'date_updated', 'report_date',
+                    'current_population'
+                ],
+
+                max_reports_count: 0,
+                curr_reports_count: 0,
+                curr_offset_index: 0,
+                pages: [],
+
+                filter_add: {},
+
                 data_input: new EvacuationHistory(),
                 municipalities: [],
                 isDataLoading: true,
@@ -293,10 +210,26 @@
                 fetchReports() {
                     this.setLoading(true)
 
+
+
                     DataHandler.getEvacuationCenters().then((data) => {
                         this.evac_list = data.data
                     }).catch(err => {
                         console.log("err %o", err)
+                    })
+
+                    DataHandler.getEvacuationHistoryMax().then((message) => {
+                        this.max_reports_count = message.data
+
+                        let pages = this.max_reports_count / 100
+
+                        for(var i = 0; i< pages; i++){
+                            this.pages.push(i * 101)
+                        }
+
+                        console.log("pages %o", this.pages)
+                    }).catch(error => {
+                        console.log(error)
                     })
 
                     DataHandler.getEvacuationHistory().then((message) => {
@@ -324,11 +257,10 @@
                         this.header = Object.keys(data[0])
                         this.reports = data
                         this.reports_view = this.reports
-                        this.getDistinctParams()
                     }
                 },
 
-                createSampleReport() {
+                /* createSampleReport() {
                     var reports = []
                     let year = [2018, 2019, 2020]
                     this.evac_list.forEach((evac = new EvacuationHistory()) => {
@@ -350,28 +282,7 @@
                     }).catch((err) => {
                         console.log("error")
                     })
-                },
-
-                getDistinctParams() {
-                    this.selections.years = ['all']
-                    this.selections.stations = ['all']
-
-                    this.reports.map((report = new EvacuationHistory()) => {
-                        let date = report.report_date
-                        var year = date.getFullYear()
-                        //var month = date.getMonth()
-
-                        if (!this.selections.years.includes(year)) {
-                            this.selections.years.push(year)
-                        }
-
-                        /* if (!this.selections.stations.includes(report.evac_id)) {
-                            this.selections.stations.push(report.evac_id)
-                        } */
-                    })
-
-
-                },
+                }, */
 
                 setLoading(isLoading) {
                     this.isDataLoading = isLoading

@@ -606,10 +606,13 @@ class EvacuationHandler extends PublicUserHandler {
     
     /*!--------- EVACUAITON HISTORY ---------------!*/
     
-    getEvacuationHistory(evac_id = null) {
+    /** returns history */
+    getEvacuationHistory(evac_id = null, offset = 0, limit = 100) {
         let collection = this.firestore.collection('evacuation_history')
-        let ref = evac_id != null ? ref.where('evac_id', '==', evac_id) : collection
+        var ref = evac_id != null ? ref.where('evac_id', '==', evac_id) : collection
         
+        ref = ref.orderBy("report_date").startAt(offset).limit(limit)
+
         return new Promise((resolve, reject) => {
             ref.get().then((querySnapshot) => {
                 var models = []
@@ -635,6 +638,20 @@ class EvacuationHandler extends PublicUserHandler {
             });
         })
     } //getEvacuationHistory
+
+    /** returns max count */
+    getEvacuationHistoryMax(){
+        return new Promise((resolve, reject) => {
+            this.firestore.collection('evacuation_history').get().then((querySnapshot) => {      
+                console.log(querySnapshot.size); 
+                var message = new Message()
+                message.data = querySnapshot.size
+                resolve(message)
+            }).catch((error)=> {
+                reject(error)
+            })
+        })
+    }//getEvacuationHistoryMax
     
     
     addEvacuationHistory(params = new EvacuationHistory()) {

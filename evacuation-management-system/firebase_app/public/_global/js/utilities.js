@@ -7,12 +7,12 @@ function genID(length) {
         result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
     const d = Date.parse(new Date());
-    return result +"-"+ d;
+    return result + "-" + d;
 } //genID
 
 /** generates an key for models */
 function keyGenID(prefix, length = 5) {
-    return prefix +"-"+ this.genID(length) +"-"+ Date.now()
+    return prefix + "-" + this.genID(length) + "-" + Date.now()
 }
 
 /**generates random value between min and max */
@@ -24,24 +24,24 @@ function getRandomValue(min, max) {
 class DataHandlerType {
     /** firebase functions */
     func
-    
+
     /** firebase firestore */
     firestore
     /** firebase storage */
     storage
-    
+
     /** firebase database*/
     database
-    
+
     /** app config */
     config
-    
+
     static cdn_host = 'https://ievacuate-laguna.000webhostapp.com/api/uploads/'
     static api_host = 'https://ievacuate-laguna.000webhostapp.com/api/'
-    
+
     /** configures firebase functionality */
     configure() {
-        
+
         if (firebase.apps.length > 0) {
             this.config = firebase.app()
         } else {
@@ -58,33 +58,32 @@ class DataHandlerType {
             // Initialize Firebase
             this.config = firebase.initializeApp(firebaseConfig);
         }
-        
-        this.storage    = this.config.storage()
-        this.database   = this.config.database()
-        this.firestore  = firebase.firestore(this.config)
-        
-        this.func   = firebase.functions()
+
+        this.storage = this.config.storage()
+        this.database = this.config.database()
+        this.firestore = firebase.firestore(this.config)
+
+        this.func = firebase.functions()
     } //configure
-    
+
 } //DataHandlerType
 
 
-///generates a file of json contains
+/* ///generates a file of json contains
 function saveTextAsFile(title, text) {
     const textToWrite = text
-    const textFileAsBlob = new Blob([textToWrite], {type:'text/plain'});
-    const fileNameToSaveAs = title//document.getElementById("").value;
+    const textFileAsBlob = new Blob([textToWrite], {
+        type: 'text/plain'
+    });
+    const fileNameToSaveAs = title //document.getElementById("").value;
     let downloadLink = document.createElement("a");
     downloadLink.download = fileNameToSaveAs;
     downloadLink.innerHTML = "Download File";
-    if (window.webkitURL != null)
-    {
+    if (window.webkitURL != null) {
         // Chrome allows the link to be clicked
         // without actually adding it to the DOM.
         downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
-    }
-    else
-    {
+    } else {
         // Firefox requires the link to be added to the DOM
         // before it can be clicked.
         downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
@@ -92,9 +91,9 @@ function saveTextAsFile(title, text) {
         downloadLink.style.display = "none";
         document.body.appendChild(downloadLink);
     }
-    
+
     downloadLink.click();
-}//saveTextAsFile
+} //saveTextAsFile */
 
 /** search an object from a given string */
 function SearchObject(object = {}, searchTerm = "") {
@@ -105,11 +104,11 @@ function SearchObject(object = {}, searchTerm = "") {
 }
 
 
-Array.prototype.isEmpty = function() {
+Array.prototype.isEmpty = function () {
     return this.length <= 0
 }
 
-Array.prototype.first = function() {
+Array.prototype.first = function () {
     return this[0]
 }
 
@@ -146,8 +145,7 @@ String.prototype.isEmpty = function () {
 
 
 const FormGenerator = Vue.extend({
-    template: 
-    `
+    template: `
     <div class="row">
     <div class="col col-md-12 input-container" v-for="key in headers" v-if="!(form[key].isHidden || false)">
     <p>{{form[key].title}}</p>
@@ -218,23 +216,23 @@ const FormGenerator = Vue.extend({
     </div>
     `,
     props: {
-        form    : Object,
-        input   : Object
-    }, 
+        form: Object,
+        input: Object
+    },
     data() {
         return {
-            headers : Object
+            headers: Object
         }
     },
-    
+
     created: function () {
         console.log('form generator')
-        
+
         console.log("formModel %o", this.form)
         console.log("input %o", this.input)
-        
+
         this.headers = Object.keys(this.form)
-        
+
         console.log("headers %o", this.headers)
     },
 })
@@ -266,8 +264,8 @@ const EntryComponent = Vue.extend({
 
     data() {
         return {
-            _filters : [],
-            _labels : []
+            _filters: [],
+            _labels: []
         }
     },
 
@@ -285,8 +283,8 @@ const EntryComponent = Vue.extend({
         getLabel(key) {
             if (this._labels[key]) {
                 return this._labels[key]
-            } 
-            return key.replace(/_/g,' ').toUpperCase() +": "
+            }
+            return key.replace(/_/g, ' ').toUpperCase() + ": "
         },
 
         getValue(key, value) {
@@ -303,8 +301,7 @@ const EntryComponent = Vue.extend({
 Vue.component('entry-component', EntryComponent)
 
 
-var municipalities = 
-[
+var municipalities = [
     'Alaminos',
     'Bay',
     'Biñan',
@@ -334,7 +331,8 @@ var municipalities =
     'Santa Maria',
     'Santa Rosa',
     'Siniloan',
-    'Victoria']
+    'Victoria'
+]
 
 
 const months_array = [
@@ -371,8 +369,8 @@ const EntrySingleComponent = Vue.extend({
 
     data() {
         return {
-            _value : [],
-            _label : []
+            _value: [],
+            _label: []
         }
     },
 
@@ -388,7 +386,7 @@ const EntrySingleComponent = Vue.extend({
         },
 
         getLabel(key) {
-            return key.replace(/_/g,' ').toUpperCase() +": "
+            return key.replace(/_/g, ' ').toUpperCase() + ": "
         },
 
         getValue(key, value) {
@@ -411,8 +409,70 @@ const parseObject = (object) => {
         try {
             object[key] = object[key].toDate()
         } catch (err) {
-            //console.log(err)
+            try {
+                let timestamp = new firebase.firestore.Timestamp(object[key].seconds, object[key].nanoseconds)
+                object[key] = timestamp.toDate()
+                //console.log("im here?")
+            } catch (err) {
+                /* console.log("not timestamp", key, object[key])
+                console.log(err) */
+            }
+            /* console.log("key %o, value %o", key, object[key])
+            console.log(err) */
         }
     })
     return object
+}
+
+
+const ConvertToCSV = (objArray) => {
+    let rows = typeof objArray !== "object" ? JSON.parse(objArray) : objArray;
+    let header = "";
+    Object.keys(rows[0]).map(pr => (header += pr + ";"));
+
+    let str = "";
+    rows.forEach(row => {
+        let line = "";
+        let columns =
+            typeof row !== "object" ? JSON.parse(row) : Object.values(row);
+        columns.forEach(column => {
+            if (line !== "") {
+                line += ";";
+            }
+            if (typeof column === "object") {
+                line += JSON.stringify(column);
+            } else {
+                line += column;
+            }
+        });
+        str += line + "\r\n";
+    });
+    return header + "\r\n" + str;
+}
+
+
+/** for saving any text as file */
+const saveTextAsFile = (title, data) => {
+    const textToWrite = data
+    const textFileAsBlob = new Blob([textToWrite], {
+        type: 'text/plain'
+    });
+    const fileNameToSaveAs = title //document.getElementById("").value;
+    let downloadLink = document.createElement("a");
+    downloadLink.download = fileNameToSaveAs;
+    downloadLink.innerHTML = "Download File";
+    if (window.webkitURL != null) {
+        // Chrome allows the link to be clicked
+        // without actually adding it to the DOM.
+        downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
+    } else {
+        // Firefox requires the link to be added to the DOM
+        // before it can be clicked.
+        downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
+        downloadLink.onclick = destroyClickedElement;
+        downloadLink.style.display = "none";
+        document.body.appendChild(downloadLink);
+    }
+
+    downloadLink.click();
 }

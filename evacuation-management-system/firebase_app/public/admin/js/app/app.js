@@ -212,9 +212,7 @@ const FilterComponent = Vue.extend({
     },
     watch: {
         filter_add(){
-            
             Object.keys(this.filter_add).forEach((key) => {
-                //this.selections.filter_additional[key] = ['all'].concat(this.filter_add[key] || [])
                 this.filter[key] = 'all' 
             })
             console.log("hello %o", this.selections)
@@ -271,6 +269,9 @@ const FilterComponent = Vue.extend({
             this.selections.filter_additional[key] = ['all'].concat(this.filter_add[key] || [])
             this.filter[key] = 'all' 
         })
+        for(var i = (new Date()).getFullYear(); i >= 2000 ; i--) {
+            this.selections.years.push(i)
+        }
     },
     methods: {
         tranferInventory(id) {

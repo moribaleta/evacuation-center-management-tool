@@ -153,8 +153,8 @@
                         Evacuation Center
                     </button>
                     <button type="button" id="add-report" class="btn btn-info button-view"
-                        v-on:click="onDownloadReport()">Download
-                        Evacuation Center
+                        v-on:click="onDownloadReport()">Generate
+                        Report
                     </button>
                     <button type="button" id="add-report" class="btn btn-info button-view"
                         v-on:click="onViewCategories()">View
@@ -246,6 +246,17 @@
                                 </p>
                                 <p class="item-value">
                                     lng: {{item.location.lng}}
+                                </p>
+                            </div>
+                            <div class="col col-md-12 item-info">
+                                <p class="item-label">
+                                    Date:
+                                </p>
+                                <p class="item-value" style="margin-right: 10px;">
+                                    Created: {{ formatDate(item.date_created)}}
+                                </p>
+                                <p class="item-value">
+                                    Updated: {{ formatDate(item.date_updated)}}
                                 </p>
                             </div>
                             <div class="col col-md-12">
@@ -414,11 +425,12 @@
                             return key
                         });
                         this.evac_list.forEach((evac) => {
+                            
                             keys.forEach((key) => {
                                 if (key == 'facilities') {
                                     (evac[key] || "").split(',').filter((value) => {
                                         return !params[key].includes(value
-                                        .toLowerCase())
+                                            .toLowerCase())
                                     }).forEach((val) => {
                                         params[key].push(val.toLowerCase())
                                     });
@@ -431,10 +443,6 @@
                         })
                         this.filter_add = params
                         console.log("filters %o", this.filter_add)
-                        /* Object.keys(this.evac_list[0]).map((key) => {
-                            //params[key] = 
-                            this.evac_list[0]
-                        }) */
                     }
 
                     console.log(this.evac_list)
@@ -485,11 +493,7 @@
                         })
                     }
                 }, //deleteItem
-
-                onSelectAdmin() {
-
-                }, //onSelectAdmin
-
+                
                 onAddImages(index) {
                     const files = document.getElementById('input_images' + index).files;
                     var uploads = []
@@ -518,7 +522,7 @@
                             console.log(error)
                         })
                     }
-                },
+                },//onAddImages
 
                 onDeleteImage(evac_id, image_index) {
                     let first = this.evac_list.filter((value) => {
@@ -538,99 +542,7 @@
                             console.log(err)
                         })
                     }
-                },
-
-                /* onImportEvac() {
-                    let promises = evacs.map((evac) => {
-                        return DataHandler.addEvacationCenter(EvacuationCenter.parse(evac))
-                    })
-
-                    Promise.all(promises).then(() => {
-                        this.fetchEvacationCenter()
-                    }).catch(error => {
-                        console.log(error)
-                    })
-                }, */
-
-                onDownloadReport() {
-                    /* let text = JSON.stringify(this.evac_list)
-                    saveTextAsFile(text) */
-                    /* if (this.view_list.isEmpty()) {
-                        alert("Empty Reports")
-                    } else {
-                        let params = Object.keys(this.view_list[0])
-                        var header = params.reduce((prev, curr) => {
-                            if (prev) {
-                                return prev + "," +curr
-                            } else {
-                                return curr
-                            }
-                        })
-                        let text = this.view_list.map((val) => {
-                            return params.reduce((prev, key) => {
-                                if (prev) {
-                                    return val[key]
-                                } else {
-                                    return prev + "," +val[key]
-                                }
-                            })
-                        }).reduce((prev, val) => {
-                            if (prev) {
-                                return header + "\n" +val
-                            } else {
-                                return prev + "\n" +val
-                            }
-                        })
-
-                    } */
-
-                    /* const replacer = (key, value) => value === null || value == undefined  ? '' :
-                        value // specify how you want to handle null values here
-
-                    const items = this.view_list.map((view) => {
-                        Object.keys(view).forEach((key) => {
-                            view[key] =  JSON.stringify(view[key], replacer).replace() //(view[key] + "").replace(',','-')
-                        })
-                        return view
-                    })
-                    
-                    const header = Object.keys(items[0])
-                    let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer))
-                        .join(','))
-                    csv.unshift(header.join(','))
-                    csv = csv.join('\r\n')
-
-                    console.log(csv) */
-
-                    const ConvertToCSV = (objArray) => {
-                    let rows = typeof objArray !== "object" ? JSON.parse(objArray) : objArray;
-                    let header = "";
-                    Object.keys(rows[0]).map(pr => (header += pr + ";"));
-
-                    let str = "";
-                    rows.forEach(row => {
-                    let line = "";
-                    let columns =
-                    typeof row !== "object" ? JSON.parse(row) : Object.values(row);
-                    columns.forEach(column => {
-                    if (line !== "") {
-                    line += ";";
-                    }
-                    if (typeof column === "object") {
-                    line += JSON.stringify(column);
-                    } else {
-                    line += column;
-                    }
-                    });
-                    str += line + "\r\n";
-                    });
-                    return header + "\r\n" + str;
-                    }
-
-                    let csv = ConvertToCSV(this.view_list)
-
-                    saveTextAsFile(csv)
-                },
+                },//onDeleteImage
 
 
                 /*Categories*/
@@ -679,10 +591,11 @@
                 onFilter(filter) {
                     console.log("filter %o", filter)
                     var view_list = this.evac_list.filter((data) => {
-                        let date = new Date(data.date_created)
+                        let date_created = new Date(data.date_created)
+                        let date_updated = new Date(date.date_updated)
 
                         return (
-                            (filter.year == 'all' || filter.year == date.getFullYear()) &&
+                            (filter.year == 'all' || filter.year == date_created.getFullYear() || filter.year == date_updated.getFullYear()) &&
                             (filter.month == 'all' || filter.month == (months_array[date
                                 .getMonth()] || 0)) &&
                             (filter.municipality == 'all' || filter.municipality == data
@@ -725,35 +638,14 @@
 
                 onClearFilter() {
                     this.view_list = [...this.evac_list]
-                }
+                },
+
+                onDownloadReport() {
+                    let csv = ConvertToCSV(this.view_list)
+                    saveTextAsFile('evacuations.csv', csv)
+                },
             }
         })
-
-        ///generates a file of json contains
-        function saveTextAsFile(text) {
-            const textToWrite = text
-            const textFileAsBlob = new Blob([textToWrite], {
-                type: 'text/plain'
-            });
-            const fileNameToSaveAs = "reports.csv" //document.getElementById("").value;
-            let downloadLink = document.createElement("a");
-            downloadLink.download = fileNameToSaveAs;
-            downloadLink.innerHTML = "Download File";
-            if (window.webkitURL != null) {
-                // Chrome allows the link to be clicked
-                // without actually adding it to the DOM.
-                downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
-            } else {
-                // Firefox requires the link to be added to the DOM
-                // before it can be clicked.
-                downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
-                downloadLink.onclick = destroyClickedElement;
-                downloadLink.style.display = "none";
-                document.body.appendChild(downloadLink);
-            }
-
-            downloadLink.click();
-        } //saveTextAsFile
     </script>
 
 </body>
