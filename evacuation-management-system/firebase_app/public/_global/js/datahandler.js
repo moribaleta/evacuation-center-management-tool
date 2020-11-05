@@ -607,11 +607,11 @@ class EvacuationHandler extends PublicUserHandler {
     /*!--------- EVACUAITON HISTORY ---------------!*/
     
     /** returns history */
-    getEvacuationHistory(evac_id = null, offset = 0, limit = 100) {
+    getEvacuationHistory(evac_id = null) {
         let collection = this.firestore.collection('evacuation_history')
         var ref = evac_id != null ? ref.where('evac_id', '==', evac_id) : collection
         
-        ref = ref.orderBy("report_date").startAt(offset).limit(limit)
+        ref = ref.orderBy("report_date","desc")//.limit(limit)
 
         return new Promise((resolve, reject) => {
             ref.get().then((querySnapshot) => {

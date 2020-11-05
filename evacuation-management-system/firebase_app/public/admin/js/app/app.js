@@ -169,7 +169,7 @@ const FilterComponent = Vue.extend({
                 </select>
             </div>
  
-            <div class="col col-md-3 button-filter-container">
+            <div class="col button-filter-container">
                 <div>&nbsp;</div>
                 <button type="button" class="btn btn-warning button-view" v-on:click="$emit('filter', filter)">filter
                 </button>
@@ -215,7 +215,7 @@ const FilterComponent = Vue.extend({
             Object.keys(this.filter_add).forEach((key) => {
                 this.filter[key] = 'all' 
             })
-            console.log("hello %o", this.selections)
+            console.log("filter %o", this.filter_add)
         }
     },
     data() {
@@ -265,18 +265,23 @@ const FilterComponent = Vue.extend({
     },
     created() {
         console.log('user data from parent component:')
-        Object.keys(this.filter_add).forEach((key) => {
-            this.selections.filter_additional[key] = ['all'].concat(this.filter_add[key] || [])
-            this.filter[key] = 'all' 
-        })
+
         for(var i = (new Date()).getFullYear(); i >= 2000 ; i--) {
             this.selections.years.push(i)
         }
+
+        try{
+            Object.keys(this.filter_add).forEach((key) => {
+                this.selections.filter_additional[key] = ['all'].concat(this.filter_add[key] || [])
+                this.filter[key] = 'all' 
+            })
+        }catch(err) {
+            console.log(err)
+        }
+        
+        
     },
     methods: {
-        tranferInventory(id) {
-            this.$emit('on-select-inventory', id)
-        },
         formatDate(date) {
             let _date = new Date(date)
             return _date.toLocaleDateString()

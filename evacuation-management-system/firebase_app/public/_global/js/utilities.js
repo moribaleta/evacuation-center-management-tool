@@ -69,31 +69,6 @@ class DataHandlerType {
 } //DataHandlerType
 
 
-/* ///generates a file of json contains
-function saveTextAsFile(title, text) {
-    const textToWrite = text
-    const textFileAsBlob = new Blob([textToWrite], {
-        type: 'text/plain'
-    });
-    const fileNameToSaveAs = title //document.getElementById("").value;
-    let downloadLink = document.createElement("a");
-    downloadLink.download = fileNameToSaveAs;
-    downloadLink.innerHTML = "Download File";
-    if (window.webkitURL != null) {
-        // Chrome allows the link to be clicked
-        // without actually adding it to the DOM.
-        downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
-    } else {
-        // Firefox requires the link to be added to the DOM
-        // before it can be clicked.
-        downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
-        downloadLink.onclick = destroyClickedElement;
-        downloadLink.style.display = "none";
-        document.body.appendChild(downloadLink);
-    }
-
-    downloadLink.click();
-} //saveTextAsFile */
 
 /** search an object from a given string */
 function SearchObject(object = {}, searchTerm = "") {
@@ -163,10 +138,10 @@ const FormGenerator = Vue.extend({
     :id="'input_'+key" v-model="input[key]">
     
     <input v-if="form[key].type == 'date'" type="date" class="input input-item"
-    :id="'input_'+key" v-model="input[key]">
+    :id="'input_'+key"  :value="formatDate(input[key], false)" v-on:change="dateChange">
     
     <input v-if="form[key].type == 'datetime'" type="datetime-local" class="input input-item"
-    :id="'input_'+key" v-model="input[key]">
+    :id="'input_'+key"  :value="formatDate(input[key], true)" v-on:change="dateChange"">
     
     <textarea v-if="form[key].type == 'textarea'" class="form-control"
     :id="'input_'+key" name="exact_address" v-model="input[key]"></textarea>
@@ -182,28 +157,28 @@ const FormGenerator = Vue.extend({
         <div class="col col-md-12 input-container" v-for="subkey in Object.keys(form[key].compound)" v-if="!(form[key].compound[subkey].isHidden || false)">
             <p>{{form[key].compound[subkey].title}}</p>
             <input v-if="form[key].compound[subkey].type == 'text'" type="text" class="input input-item"
-            :id="'input_'+key" v-model="input[key][subkey]">
+            :id="'input_'+key+'_'+subkey" v-model="input[key][subkey]">
             
             <input v-if="form[key].compound[subkey].type == 'password'" type="password" class="input input-item"
-            :id="'input_'+key" v-model="input[key][subkey]">
+            :id="'input_'+key+'_'+subkey" v-model="input[key][subkey]">
             
             <input v-if="form[key].compound[subkey].type == 'email'" type="email" class="input input-item"
-            :id="'input_'+key" v-model="input[key][subkey]">
+            :id="'input_'+key+'_'+subkey" v-model="input[key][subkey]">
             
             <input v-if="form[key].compound[subkey].type == 'number'" type="number" class="input input-item"
-            :id="'input_'+key" v-model="input[key][subkey]">
+            :id="'input_'+key+'_'+subkey" v-model="input[key][subkey]">
             
             <input v-if="form[key].compound[subkey].type == 'date'" type="date" class="input input-item"
-            :id="'input_'+key" v-model="input[key][subkey]">
+            :id="'input_'+key+'_'+subkey" v-model="input[key][subkey]">
             
             <input v-if="form[key].compound[subkey].type == 'datetime'" type="datetime-local" class="input input-item"
-            :id="'input_'+key" v-model="input[key][subkey]">
+            :id="'input_'+key+'_'+subkey" v-model="input[key][subkey]">
             
             <textarea v-if="form[key].compound[subkey].type == 'textarea'" class="form-control"
-            :id="'input_'+key" name="exact_address" v-model="input[key][subkey]"></textarea>
+            :id="'input_'+key+'_'+subkey" name="exact_address" v-model="input[key][subkey]"></textarea>
             
             <select v-if="form[key].compound[subkey].type == 'dropdown'" class="input input-item input-select"
-            :id="'input_'+key" v-model="input[key][subkey]">
+            :id="'input_'+key+'_'+subkey" v-model="input[key][subkey]">
             <option v-for="option in form[key].compound[subkey].options" :value="option.value">
             {{option.title}}</option>
             </select>
@@ -225,7 +200,7 @@ const FormGenerator = Vue.extend({
         }
     },
 
-    created: function () {
+    created() {
         console.log('form generator')
 
         console.log("formModel %o", this.form)
@@ -235,6 +210,30 @@ const FormGenerator = Vue.extend({
 
         console.log("headers %o", this.headers)
     },
+
+    methods: {
+        dateChange(event){
+            console.log("event %o", event)
+
+            let id = event.srcElement.id
+            let date = $('#'+id).val()
+            //this.input[id.substr(('input_').length)] = new Date(date)
+            let ids = id.split('_')
+            if (ids > 1) {
+                this.input[ids[1]][ids[2]] = new Date(date)
+            } else {
+                this.input[ids[1]] = new Date(date)
+            }
+        },
+
+        formatDate(date, isTime) {
+            return isTime ? moment(date).format('YYYY-MM-DD HH:MM') : moment(date).format('YYYY-MM-DD')
+            /* let _date = new Date(date)
+            let format = isTime ? _date.toLocaleString() : _date.toLocaleDateString()
+            console.log("formatted input date %o", format )
+            return format */
+        },
+    }
 })
 
 Vue.component('form-generator', FormGenerator)
@@ -289,7 +288,7 @@ const EntryComponent = Vue.extend({
 
         getValue(key, value) {
             if (key.includes('date')) {
-                return this.formatDate(value)
+                return value ? this.formatDate(value) : "--"
             } else if (key.includes('sex')) {
                 return value == 0 ? 'Male' : 'Female'
             }
@@ -407,11 +406,13 @@ const parseObject = (object) => {
         return key.includes('date')
     }).forEach((key) => {
         try {
-            object[key] = object[key].toDate()
+            //object[key] = object[key].toDate()
+            let date = new Date(object[key].toDate())
+            object[key] = date
         } catch (err) {
             try {
                 let timestamp = new firebase.firestore.Timestamp(object[key].seconds, object[key].nanoseconds)
-                object[key] = timestamp.toDate()
+                object[key] = new Date(timestamp.toDate())
                 //console.log("im here?")
             } catch (err) {
                 /* console.log("not timestamp", key, object[key])

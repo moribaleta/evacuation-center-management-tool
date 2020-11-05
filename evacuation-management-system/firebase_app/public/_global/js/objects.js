@@ -399,15 +399,33 @@ class EvacuationHistory extends Model {
     current_population = 0
     report_date = new Date()
 
-    constructor(id = null, evac_id = null, current_population = 0, created_by = 0, report_date = new Date, date_created = new Date(), date_updated = new Date()) {
+
+    static formModel = {
+        evac_id: {
+            title: "Evacuation Center",
+            type: FormModels.dropdown,
+            options: [],
+        },
+        current_population: {
+            title: "Population",
+            type: FormModels.number,
+        },
+        report_date: {
+            title: "Report Date",
+            type: FormModels.date
+        }
+    }
+
+
+    constructor(id = null, evac_id = null, current_population = 0, created_by = 0, report_date, date_created, date_updated) {
         super()
         this.id = id || keyGenID('history',5)//"history-" + genID(5)
         this.evac_id = evac_id
         this.current_population = current_population
         this.created_by = created_by
-        this.report_date = report_date
-        this.date_created = date_created
-        this.date_updated = date_updated
+        this.report_date = report_date || new Date()
+        this.date_created = date_created || new Date()
+        this.date_updated = date_updated || new Date()
     }
 
     /**returns instance to json object */
