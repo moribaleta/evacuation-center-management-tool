@@ -110,76 +110,9 @@
         </div>
     </div>
     <div class="container" id="content">
-
-
-        <div class="loader_container" v-if="isDataLoading">
+        <!-- <div class="loader_container" v-if="isDataLoading">
             <div class="loader"></div>
-        </div>
-
-        <div class="section" v-if="!isDataLoading">
-            <div class="header-container">
-                <h1>Reports</h1>
-                <div class="well input-container" style="padding:10px; width: 100%; min-height: 70px">
-                    <div class="col col-md-2">
-                        <p class="input-label">year</p>
-                        <select id="input-type" class="input input-select" v-model="filter.year">
-                            <option v-for="(item,index) in selections.years"
-                                :selected="index == filter.year ? true : false">{{item
-                                                ? item : "NOT AVAILABLE"}}</option>
-                        </select>
-                    </div>
-                    <div class="col col-md-2">
-                        <p class="input-label">month</p>
-                        <select id="input-type" class="input input-select" v-model="filter.month">
-                            <option v-for="(item,index) in selections.months"
-                                :selected="index == filter.month ? true : false">
-                                {{item}}</option>
-                        </select>
-                    </div>
-                    <div class="col col-md-2">
-                        <p class="input-label">stations</p>
-                        <select id="input-district" class="input input-select" v-model="filter.station">
-                            <option v-for="(item,index) in selections.stations"
-                                :selected="index == filter.station ? true : false">
-                                {{item}}</option>
-                        </select>
-                    </div>
-                    <div class="col col-md-3 button-filter-container">
-                        <button type="button" class="btn btn-warning button-view button-filter"
-                            v-on:click="filterList()">filter
-                        </button>
-                    </div>
-
-                </div>
-                <div class="button-container">
-                    <button type="button" class="btn btn-info button-view" v-on:click="openAddReport()">add
-                        report
-                    </button>
-                    <button type="button" class="btn btn-info button-view" v-on:click="openGenerateReport()">
-                        generate
-                        report
-                    </button>
-                </div>
-            </div>
-
-            <div class="table-container">
-                <div class="table" id="tableData">
-                    <div class="well" v-for="item,index in reports_view">
-                        <div class="row">
-                            <div class="col col-md-3 item-info " v-for="info,index in Object.keys(item)">
-                                <p class="item-label">{{info.replace(/_/g,' ') +": "}}</p>
-                                <p class="item-value">{{item[info] ? item[info] : 'N/A'}}</p>
-                            </div>
-                            <div class="col col-md-12">
-                                <button class="btn btn-default btn-info" v-on:click="editItem(index)">edit</button>
-                                <button class="btn btn-default btn-danger"
-                                    v-on:click="deleteItem(index)">delete</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        </div> -->
     </div>
 
     <script>
