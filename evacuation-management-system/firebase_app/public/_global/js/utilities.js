@@ -7,12 +7,12 @@ function genID(length) {
         result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
     const d = Date.parse(new Date());
-    return result +"-"+ d;
+    return result + "-" + d;
 } //genID
 
 /** generates an key for models */
 function keyGenID(prefix, length = 5) {
-    return prefix +"-"+ this.genID(length) +"-"+ Date.now()
+    return prefix + "-" + this.genID(length) + "-" + Date.now()
 }
 
 /**generates random value between min and max */
@@ -24,24 +24,24 @@ function getRandomValue(min, max) {
 class DataHandlerType {
     /** firebase functions */
     func
-    
+
     /** firebase firestore */
     firestore
     /** firebase storage */
     storage
-    
+
     /** firebase database*/
     database
-    
+
     /** app config */
     config
-    
+
     static cdn_host = 'https://ievacuate-laguna.000webhostapp.com/api/uploads/'
     static api_host = 'https://ievacuate-laguna.000webhostapp.com/api/'
-    
+
     /** configures firebase functionality */
     configure() {
-        
+
         if (firebase.apps.length > 0) {
             this.config = firebase.app()
         } else {
@@ -58,58 +58,32 @@ class DataHandlerType {
             // Initialize Firebase
             this.config = firebase.initializeApp(firebaseConfig);
         }
-        
-        this.storage    = this.config.storage()
-        this.database   = this.config.database()
-        this.firestore  = firebase.firestore(this.config)
-        
-        this.func   = firebase.functions()
+
+        this.storage = this.config.storage()
+        this.database = this.config.database()
+        this.firestore = firebase.firestore(this.config)
+
+        this.func = firebase.functions()
     } //configure
-    
+
 } //DataHandlerType
 
 
-///generates a file of json contains
-function saveTextAsFile(title, text) {
-    const textToWrite = text
-    const textFileAsBlob = new Blob([textToWrite], {type:'text/plain'});
-    const fileNameToSaveAs = title//document.getElementById("").value;
-    let downloadLink = document.createElement("a");
-    downloadLink.download = fileNameToSaveAs;
-    downloadLink.innerHTML = "Download File";
-    if (window.webkitURL != null)
-    {
-        // Chrome allows the link to be clicked
-        // without actually adding it to the DOM.
-        downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
-    }
-    else
-    {
-        // Firefox requires the link to be added to the DOM
-        // before it can be clicked.
-        downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
-        downloadLink.onclick = destroyClickedElement;
-        downloadLink.style.display = "none";
-        document.body.appendChild(downloadLink);
-    }
-    
-    downloadLink.click();
-}//saveTextAsFile
 
 /** search an object from a given string */
 function SearchObject(object = {}, searchTerm = "") {
     let filter = Object.keys(object).filter((key) => {
         return (object[key] + "").toLowerCase().includes(searchTerm.toLowerCase())
     })
-    return filter.length > 0;
+    return !filter.isEmpty()
 }
 
 
-Array.prototype.isEmpty = function() {
+Array.prototype.isEmpty = function () {
     return this.length <= 0
 }
 
-Array.prototype.first = function() {
+Array.prototype.first = function () {
     return this[0]
 }
 
@@ -146,8 +120,7 @@ String.prototype.isEmpty = function () {
 
 
 const FormGenerator = Vue.extend({
-    template: 
-    `
+    template: `
     <div class="row">
     <div class="col col-md-12 input-container" v-for="key in headers" v-if="!(form[key].isHidden || false)">
     <p>{{form[key].title}}</p>
@@ -165,10 +138,10 @@ const FormGenerator = Vue.extend({
     :id="'input_'+key" v-model="input[key]">
     
     <input v-if="form[key].type == 'date'" type="date" class="input input-item"
-    :id="'input_'+key" v-model="input[key]">
+    :id="'input_'+key"  :value="formatDate(input[key], false)" v-on:change="dateChange">
     
     <input v-if="form[key].type == 'datetime'" type="datetime-local" class="input input-item"
-    :id="'input_'+key" v-model="input[key]">
+    :id="'input_'+key"  :value="formatDate(input[key], true)" v-on:change="dateChange"">
     
     <textarea v-if="form[key].type == 'textarea'" class="form-control"
     :id="'input_'+key" name="exact_address" v-model="input[key]"></textarea>
@@ -178,30 +151,89 @@ const FormGenerator = Vue.extend({
     <option v-for="option in form[key].options" :value="option.value">
     {{option.title}}</option>
     </select>
+
+    <!-- compound -->
+    <div v-if="form[key].type == 'compound'" class="row">
+        <div class="col col-md-12 input-container" v-for="subkey in Object.keys(form[key].compound)" v-if="!(form[key].compound[subkey].isHidden || false)">
+            <p>{{form[key].compound[subkey].title}}</p>
+            <input v-if="form[key].compound[subkey].type == 'text'" type="text" class="input input-item"
+            :id="'input_'+key+'_'+subkey" v-model="input[key][subkey]">
+            
+            <input v-if="form[key].compound[subkey].type == 'password'" type="password" class="input input-item"
+            :id="'input_'+key+'_'+subkey" v-model="input[key][subkey]">
+            
+            <input v-if="form[key].compound[subkey].type == 'email'" type="email" class="input input-item"
+            :id="'input_'+key+'_'+subkey" v-model="input[key][subkey]">
+            
+            <input v-if="form[key].compound[subkey].type == 'number'" type="number" class="input input-item"
+            :id="'input_'+key+'_'+subkey" v-model="input[key][subkey]">
+            
+            <input v-if="form[key].compound[subkey].type == 'date'" type="date" class="input input-item"
+            :id="'input_'+key+'_'+subkey" v-model="input[key][subkey]">
+            
+            <input v-if="form[key].compound[subkey].type == 'datetime'" type="datetime-local" class="input input-item"
+            :id="'input_'+key+'_'+subkey" v-model="input[key][subkey]">
+            
+            <textarea v-if="form[key].compound[subkey].type == 'textarea'" class="form-control"
+            :id="'input_'+key+'_'+subkey" name="exact_address" v-model="input[key][subkey]"></textarea>
+            
+            <select v-if="form[key].compound[subkey].type == 'dropdown'" class="input input-item input-select"
+            :id="'input_'+key+'_'+subkey" v-model="input[key][subkey]">
+            <option v-for="option in form[key].compound[subkey].options" :value="option.value">
+            {{option.title}}</option>
+            </select>
+        </div>
+    </div>
+    <!-- compound -->
+
     <div>&nbsp</div>
     </div>
     </div>
     `,
     props: {
-        form    : Object,
-        input   : Object
-    }, 
+        form: Object,
+        input: Object
+    },
     data() {
         return {
-            headers : Object
+            headers: Object
         }
     },
-    
-    created: function () {
+
+    created() {
         console.log('form generator')
-        
+
         console.log("formModel %o", this.form)
         console.log("input %o", this.input)
-        
+
         this.headers = Object.keys(this.form)
-        
+
         console.log("headers %o", this.headers)
     },
+
+    methods: {
+        dateChange(event){
+            console.log("event %o", event)
+
+            let id = event.srcElement.id
+            let date = $('#'+id).val()
+            //this.input[id.substr(('input_').length)] = new Date(date)
+            let ids = id.split('_')
+            if (ids > 1) {
+                this.input[ids[1]][ids[2]] = new Date(date)
+            } else {
+                this.input[ids[1]] = new Date(date)
+            }
+        },
+
+        formatDate(date, isTime) {
+            return isTime ? moment(date).format('YYYY-MM-DD HH:MM') : moment(date).format('YYYY-MM-DD')
+            /* let _date = new Date(date)
+            let format = isTime ? _date.toLocaleString() : _date.toLocaleDateString()
+            console.log("formatted input date %o", format )
+            return format */
+        },
+    }
 })
 
 Vue.component('form-generator', FormGenerator)
@@ -213,7 +245,7 @@ const EntryComponent = Vue.extend({
 <div class="row">
     <div class="col col-md-4 item-info" v-for="key,index in headers" v-if="_filters.length <= 0 || _filters.includes(key)">
         <p class="item-label">
-            {{key.replace(/_/g,' ').toUpperCase() +": "}}
+            {{ getLabel(key)}}
         </p>
         <p class="item-value">
             {{ getValue(key, entry[key]) || '--'}}
@@ -225,28 +257,135 @@ const EntryComponent = Vue.extend({
         entry: Object,
         headers: Array,
         filters: Array,
+        labels: Object,
         showCount: Boolean
     },
 
     data() {
         return {
-            _filters : []
+            _filters: [],
+            _labels: []
         }
     },
 
     created: function () {
         this._filters = this.filters || []
-        /* console.log("donor %o", this.donor)
-        if (this.donor.id.includes('org')) {
-            this.org = this.donor
-        } else {
-            this.indv = this.donor
-        } */
+        this._labels = this.labels || {}
     },
 
     methods: {
         formatDate(date) {
-            return app.formatDate(date)
+            let _date = new Date(date)
+            return _date.toLocaleDateString()
+        },
+
+        getLabel(key) {
+            if (this._labels[key]) {
+                return this._labels[key]
+            }
+            return key.replace(/_/g, ' ').toUpperCase() + ": "
+        },
+
+        getValue(key, value) {
+            if (key.includes('date')) {
+                return value ? this.formatDate(value) : "--"
+            } else if (key.includes('sex')) {
+                return value == 0 ? 'Male' : 'Female'
+            }
+            return value
+        }
+    }
+})
+
+Vue.component('entry-component', EntryComponent)
+
+
+var municipalities = [
+    'Alaminos',
+    'Bay',
+    'Biñan',
+    'Cabuyao',
+    'Calamba',
+    'Calauan',
+    'Cavinti',
+    'Famy',
+    'Kalayaan',
+    'Liliw',
+    'Los Baños',
+    'Luisiana',
+    'Lumban',
+    'Mabitac',
+    'Magdalena',
+    'Majayjay',
+    'Nagcarlan',
+    'Paete',
+    'Pagsanjan',
+    'Pakil',
+    'Pangil',
+    'Pila',
+    'Rizal',
+    'San Pablo',
+    'San Pedro',
+    'Santa Cruz',
+    'Santa Maria',
+    'Santa Rosa',
+    'Siniloan',
+    'Victoria'
+]
+
+
+const months_array = [
+    'JANUARY',
+    'FEBRUARY',
+    'MARCH',
+    'APRIL',
+    'MAY',
+    'JUNE',
+    'JULY',
+    'AUGUST',
+    'SEPTEMBER',
+    'OCTOBER',
+    'NOVEMBER',
+    'DECEMBER',
+]
+
+const EntrySingleComponent = Vue.extend({
+    template: `
+    <div>
+        <p class="item-label">
+            {{ _label }}
+        </p>
+        <p class="item-value">
+            {{ _value }}
+        </p>
+    </div>
+`,
+    props: {
+        value: String,
+        label: String,
+        showtime: Boolean
+    },
+
+    data() {
+        return {
+            _value: [],
+            _label: []
+        }
+    },
+
+    created: function () {
+        this._value = this.getValue(this.label, this.value)
+        this._label = this.getLabel(this.label)
+    },
+
+    methods: {
+        formatDate(date) {
+            let _date = new Date(date)
+            return this.showtime ? _date.toLocaleString() : _date.toLocaleDateString()
+        },
+
+        getLabel(key) {
+            return key.replace(/_/g, ' ').toUpperCase() + ": "
         },
 
         getValue(key, value) {
@@ -260,18 +399,81 @@ const EntryComponent = Vue.extend({
     }
 })
 
-Vue.component('entry-component', EntryComponent)
-
+Vue.component('entry-single-component', EntrySingleComponent)
 
 const parseObject = (object) => {
     Object.keys(object).filter((key) => {
         return key.includes('date')
     }).forEach((key) => {
         try {
-            object[key] = object[key].toDate()
+            //object[key] = object[key].toDate()
+            let date = new Date(object[key].toDate())
+            object[key] = date
         } catch (err) {
-            //console.log(err)
+            try {
+                let timestamp = new firebase.firestore.Timestamp(object[key].seconds, object[key].nanoseconds)
+                object[key] = new Date(timestamp.toDate())
+                //console.log("im here?")
+            } catch (err) {
+                /* console.log("not timestamp", key, object[key])
+                console.log(err) */
+            }
+            /* console.log("key %o, value %o", key, object[key])
+            console.log(err) */
         }
     })
     return object
+}
+
+
+const ConvertToCSV = (objArray) => {
+    let rows = typeof objArray !== "object" ? JSON.parse(objArray) : objArray;
+    let header = "";
+    Object.keys(rows[0]).map(pr => (header += pr + ";"));
+
+    let str = "";
+    rows.forEach(row => {
+        let line = "";
+        let columns =
+            typeof row !== "object" ? JSON.parse(row) : Object.values(row);
+        columns.forEach(column => {
+            if (line !== "") {
+                line += ";";
+            }
+            if (typeof column === "object") {
+                line += JSON.stringify(column);
+            } else {
+                line += column;
+            }
+        });
+        str += line + "\r\n";
+    });
+    return header + "\r\n" + str;
+}
+
+
+/** for saving any text as file */
+const saveTextAsFile = (title, data) => {
+    const textToWrite = data
+    const textFileAsBlob = new Blob([textToWrite], {
+        type: 'text/plain'
+    });
+    const fileNameToSaveAs = title //document.getElementById("").value;
+    let downloadLink = document.createElement("a");
+    downloadLink.download = fileNameToSaveAs;
+    downloadLink.innerHTML = "Download File";
+    if (window.webkitURL != null) {
+        // Chrome allows the link to be clicked
+        // without actually adding it to the DOM.
+        downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
+    } else {
+        // Firefox requires the link to be added to the DOM
+        // before it can be clicked.
+        downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
+        downloadLink.onclick = destroyClickedElement;
+        downloadLink.style.display = "none";
+        document.body.appendChild(downloadLink);
+    }
+
+    downloadLink.click();
 }

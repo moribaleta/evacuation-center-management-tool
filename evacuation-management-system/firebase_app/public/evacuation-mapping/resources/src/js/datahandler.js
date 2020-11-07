@@ -101,7 +101,7 @@ class DataHandlerClass extends DataHandlerType {
 
     getModelParams() {
         return new Promise((resolve, reject) => {
-            this.firestore.collection('moabc')
+            this.firestore.collection('moabc').where('is_active','==',true)
                 .get().then(function (querySnapshot) {
                     var models = []
                     querySnapshot.forEach(function (doc) {

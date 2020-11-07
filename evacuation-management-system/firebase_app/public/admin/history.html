@@ -27,6 +27,7 @@
     <script src="../_global/js/objects.js"></script>
     <script src="../_global/js/utilities.js"></script>
     <script src="../_global/js/datahandler.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
 
 </head>
 
@@ -66,44 +67,7 @@
                         <h4 class="modal-title">{{isEdit ? 'Edit ': 'Add '}} Evacuation History</h4>
                     </div>
                     <div class="modal-body">
-                        <form class="form-horizontal" v-if="data_input != null">
-                            <fieldset>
-
-                                <!-- Select Basic -->
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label" for="evacuation_center">Evacuation
-                                        Center</label>
-                                    <div class="col-md-4">
-                                        <select id="evacuation_center" name="evacuation_center" class="form-control"
-                                            v-model="data_input.evac_id">
-                                            <option v-for="evac in evac_list" v-bind:value="evac.id">
-                                                {{evac.name}}</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <!-- Text input-->
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label" for="name">Population</label>
-                                    <div class="col-md-4">
-                                        <input id="name" name="name" type="text" placeholder="0"
-                                            class="form-control input-md" required="" v-model="data_input.name">
-                                        <span class="help-block">peek population size</span>
-                                    </div>
-                                </div>
-
-                                <!-- Text input-->
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label" for="report_date">Report Date</label>
-                                    <div class="col-md-4">
-                                        <input id="report_date" name="report_date" type="datetime-local"
-                                            class="form-control input-md" v-model="data_input.report_date">
-                                        <span class="help-block">date of entry recorded</span>
-                                    </div>
-                                </div>
-
-                            </fieldset>
-                        </form>
+                        <form-generator :form="formModel" :input.sync="data_input" ></form-generator>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal"
@@ -122,62 +86,17 @@
             <!-- HEADER FILTER -->
             <div class="header-container">
                 <h1>Reports</h1>
-                <div class="well input-container" style="padding:10px; width: 100%; min-height: 70px">
-                    <div class="col col-md-1">
-                        <p class="input-label">YEAR</p>
-                        <select id="input-type" class="input input-select" v-model="filter.year">
-                            <option v-for="(item,index) in selections.years"
-                                :selected="index == filter.year ? true : false">{{item
-                                                ? item : "NOT AVAILABLE"}}</option>
-                        </select>
-                    </div>
-                    <div class="col col-md-2">
-                        <p class="input-label">MONTH</p>
-                        <select id="input-type" class="input input-select" v-model="filter.month">
-                            <option v-for="(item,index) in selections.months"
-                                :selected="index == filter.month ? true : false">
-                                {{item}}</option>
-                        </select>
-                    </div>
-                    <div class="col col-md-4">
-                        <p class="input-label">EVACUATION CENTER</p>
-                        <select id="input-district" class="input input-select" v-model="filter.station">
-                            <option :selected="filter.station == 'all' ? true : false">
-                                all</option>
-                            <option v-for="(item,index) in evac_list"
-                                :selected="index == filter.station ? true : false">
-                                {{item.name}}</option>
-                        </select>
-                    </div>
-                    <div class="col col-md-3">
-                        <p class="input-label">MUNICIPAL</p>
-                        <select id="input-district" class="input input-select" v-model="filter.municipal">
-                            <option :selected="filter.municipal == 'all' ? true : false">
-                                all</option>
-                            <option v-for="(item,index) in municipalities"
-                                :selected="index == filter.municipal ? true : false">
-                                {{item.toUpperCase()}}</option>
-                        </select>
-                    </div>
-                    <div class="col col-md-1 button-filter-container">
-                        <button type="button" class="btn btn-warning button-view button-filter"
-                            v-on:click="filterList()">filter
-                        </button>
-                    </div>
+                <filter-component :filter_add="filter_add" v-on:filter="onFilter($event)" v-on:search="onSearch($event)"
+                    v-on:cancel="onCancelSearch($event)" v-on:clear="onClearFilter()"></filter-component>
 
-                </div>
                 <div class="button-container">
-                    <!-- <button type="button" class="btn btn-info button-view" v-on:click="createSampleReport()">
-                        create sample
-                        report
-                    </button> -->
                     <button type="button" class="btn btn-info button-view" v-on:click="addHistory()">
-                        add
-                        history
+                        Add
+                        History
                     </button>
-                    <button type="button" class="btn btn-info button-view" v-on:click="openGenerateReport()">
-                        generate
-                        report
+                    <button type="button" class="btn btn-info button-view" v-on:click="onDownloadReport()">
+                        Generate
+                        Report
                     </button>
                 </div>
             </div>
@@ -189,26 +108,22 @@
 
             <!-- TABLE VIEW -->
             <div class="table-container" v-if="!isDataLoading">
+                <!-- <ul class="pagination">
+                    <li v-for="offset,index in pages" :class="index==curr_offset_index ? 'active' : ''" ><a v-on:click="setPage(index)">{{index + 1}}</a></li>
+                </ul> -->
                 <div class="table" id="tableData">
-                    <div class="well" v-for="item,index in reports_view">
+                    <div class="well" v-for="item,index in view_list">
                         <div class="row">
                             <div class="col col-md-12 item-info">
                                 <p class="item-value">{{index + 1}}.</p>
                             </div>
-                            <div class="col col-md-12 item-info">    
+                            <div class="col col-md-12 item-info">
                                 <p class="item-label">EVACUATION NAME</p>
                                 <p class="item-value">{{getEvacFromId(item.evac_id).name}}</p>
                             </div>
                             <div class="col col-md-12">
-                                <entry-component :entry="item" :headers="history_header"></entry-container>
-                                <!-- <div v-if="info == 'evac_id'">
-                                    <p class="item-label">EVACUATION NAME</p>
-                                    <p class="item-value">{{getEvacFromId(item.evac_id).name}}</p>
-                                </div>
-                                <div v-if="info != 'evac_id'">
-                                    <p class="item-label">{{info.replace(/_/g,' ').toUpperCase() +": "}}</p>
-                                    <p class="item-value">{{item[info] ? item[info] : '--'}}</p>
-                                </div> -->
+                                <entry-component :entry="item" :headers="history_header">
+                                    </entry-container>
                             </div>
                             <div class="col col-md-12">
                                 <button class="btn btn-default btn-info" v-on:click="editItem(index)">edit</button>
@@ -217,225 +132,87 @@
                             </div>
                         </div>
                     </div>
+                    
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- <script src="js/app/datahandler.js"></script> -->
     <script src="js/app/app.js"></script>
     <script src="js/app/constants.js"></script>
-    <script src="../_global/js/moabc/utilities.js"></script>
-    <script src="../_global/js/moabc/objects.js"></script>
-    <script src="../_global/js/moabc/evacuation.js"></script>
-    <script src="../_global/js/moabc/honey.js"></script>
-    <script src="../_global/js/moabc/moabc.js"></script>
-    <script src="../_global/js/moabc/test.js"></script>
 
     <script>
         app = new Vue({
             el: '#content',
             data: {
                 evac_list: [],
+                evac_dict: {},
+                evac_names: {},
+
                 reports: [],
-                reports_view: [],
-                history_header: ['created_by','date_created','date_updated','report_date','current_population'],
-                selections: {
-                    years: ['all'],
-                    months: [
-                        'all',
-                        'JANUARY',
-                        'FEBRUARY',
-                        'MARCH',
-                        'APRIL',
-                        'MAY',
-                        'JUNE',
-                        'JULY',
-                        'AUGUST',
-                        'SEPTEMBER',
-                        'OCTOBER',
-                        'NOVEMBER',
-                        'DECEMBER',
-                    ],
-                    months_only: [
-                        'JANUARY',
-                        'FEBRUARY',
-                        'MARCH',
-                        'APRIL',
-                        'MAY',
-                        'JUNE',
-                        'JULY',
-                        'AUGUST',
-                        'SEPTEMBER',
-                        'OCTOBER',
-                        'NOVEMBER',
-                        'DECEMBER',
-                    ],
-                    stations: ['']
-                },
-                filter: {
-                    year: 'all',
-                    month: 'all',
-                    station: 'all',
-                    municipal: 'all'
-                },
+                view_list: [],
+                history_header: ['created_by', 'date_created', 'date_updated', 'report_date',
+                    'current_population'
+                ],
+
+                formModel: EvacuationHistory.formModel,
+
+                filter_add: null,
+
                 data_input: new EvacuationHistory(),
                 municipalities: [],
                 isDataLoading: true,
                 isEdit: false,
-                header: []
             },
             methods: {
                 onStart() {
                     this.fetchReports()
                     this.municipalities = municipalities
                 },
+
                 fetchReports() {
-                    this.setLoading(true)
 
                     DataHandler.getEvacuationCenters().then((data) => {
                         this.evac_list = data.data
+                        //this.filter_add['evacuation'] = ['all']
+                        var evac_options = []
+                        var evac_filter = ['all']
+                        this.evac_list.forEach((entry)=>{
+                            this.evac_dict[entry.id] = entry
+                            this.evac_names[entry.name] = entry.id
+                            evac_filter.push(entry.name);
+                            evac_options.push({
+                                title: entry.name,
+                                value: entry.id
+                            })
+                        })
+                        this.filter_add = {
+                            populations: ['all','0-100','101-500','501-1000','1001+'],
+                            evacuations: evac_filter
+                        }
+                        this.formModel.evac_id.options = evac_options
                     }).catch(err => {
                         console.log("err %o", err)
                     })
 
+                    this.isDataLoading = true
                     DataHandler.getEvacuationHistory().then((message) => {
-                        this.setData(message.data)
+                        this.reports    = message.data
+                        this.view_list  = message.data
                     }).catch(error => {
                         console.log(error)
                     }).finally(() => {
-                        this.setLoading(false)
+                        this.isDataLoading = false
                     })
 
                 },
 
                 getEvacFromId(id) {
-                    for (var i = 0; i < this.evac_list.length; i++) {
-                        if (this.evac_list[i].id == id) {
-                            return this.evac_list[i]
-                        }
-                    }
-                    return null
-                },
-
-                setData: function (data) {
-                    console.log("data %o", data)
-                    if (data.length > 0) {
-                        this.header = Object.keys(data[0])
-                        this.reports = data
-                        this.reports_view = this.reports
-                        this.getDistinctParams()
-                    }
-                },
-
-                createSampleReport() {
-                    var reports = []
-                    let year = [2018, 2019, 2020]
-                    this.evac_list.forEach((evac = new EvacuationHistory()) => {
-                        year.forEach((year) => {
-                            this.selections.months_only.forEach((month, index) => {
-                                let samplePop = getRandomValue(evac
-                                    .population_capacity / 2, evac
-                                    .population_capacity)
-                                let date = new Date(year, (index + 1), 1);
-                                let history = new EvacuationHistory(null, evac.id,
-                                    samplePop, 0, date, null)
-                                reports.push(history)
-                            })
-                        })
-                    });
-                    DataHandler.setDataEvacuationHistory(reports).then((data) => {
-                        alert("added reports")
-                        this.fetchReports()
-                    }).catch((err) => {
-                        console.log("error")
-                    })
-                },
-
-                getDistinctParams() {
-                    this.selections.years = ['all']
-                    this.selections.stations = ['all']
-
-                    this.reports.map((report = new EvacuationHistory()) => {
-                        let date = report.report_date
-                        var year = date.getFullYear()
-                        //var month = date.getMonth()
-
-                        if (!this.selections.years.includes(year)) {
-                            this.selections.years.push(year)
-                        }
-
-                        /* if (!this.selections.stations.includes(report.evac_id)) {
-                            this.selections.stations.push(report.evac_id)
-                        } */
-                    })
-
-
-                },
-
-                setLoading(isLoading) {
-                    this.isDataLoading = isLoading
-                },
-
-                filterList() {
-                    //year
-                    this.reports_view = this.reports.filter((item = new EvacuationHistory()) => {
-                        let item_year = item.report_date.getFullYear()
-                        if (!this.filter.year || this.filter.year == 'all' || this.filter.year ==
-                            item_year) {
-                            return true
-                        } else {
-                            return false
-                        }
-                    })
-
-
-                    //month
-
-                    let index_selection_month = this.selections.months.indexOf(this.filter.month)
-                    console.log("month index %o", index_selection_month)
-                    this.reports_view = this.reports_view.filter((item = new EvacuationHistory()) => {
-                        let item_month = item.report_date.getMonth()
-                        if (!this.filter.month || this.filter.month == 'all' || item_month ==
-                            index_selection_month) {
-                            return true
-                        } else {
-                            return false
-                        }
-                    })
-
-                    //evacuation center
-                    this.reports_view = this.reports_view.filter((item = new EvacuationHistory()) => {
-                        let evac = this.getEvacFromId(item.evac_id)
-                        if (!this.filter.station || this.filter.station == 'all' || this.filter
-                            .station == evac.name) {
-                            return true
-                        } else {
-                            return false
-                        }
-                    })
-
-                    //municipalities
-                    this.reports_view = this.reports_view.filter((item = new EvacuationHistory()) => {
-                        let evac = this.getEvacFromId(item.evac_id)
-                        if (!this.filter.municipal || this.filter.municipal == 'all' || this.filter
-                            .municipal.toLowerCase() == evac.municipality.toLowerCase()) {
-                            return true
-                        } else {
-                            return false
-                        }
-                    })
-
-                    console.log("filtered %o", this.reports_view)
-                },
-
-                openGenerateReport() {
-                    let reports = JSON.stringify(this.reports)
-                    saveTextAsFile(reports)
+                    return this.evac_dict[id]
                 },
 
                 editItem(index) {
-                    this.data_input = EvacuationHistory.parse(this.reports_view[index].toObject())
+                    this.data_input = EvacuationHistory.parse(this.view_list[index].toObject())
                     this.isEdit = true
                     $('#editorModal').modal()
                 },
@@ -451,6 +228,8 @@
                     if (!this.isEdit) {
                         this.data_input.created_by = header.user.id
                     }
+
+                    console.log("saving %o",this.data_input)
 
                     DataHandler.addEvacuationHistory(this.data_input).then((data) => {
                         console.log('response %o', data)
@@ -468,7 +247,7 @@
                 },
 
                 deleteItem(index) {
-                    let id = this.reports_view[index].id
+                    let id = this.view_list[index].id
                     let onConfirm = confirm(`delete item id: ${id}`)
                     if (onConfirm) {
                         DataHandler.deleteEvacuationHistory(id).then((data) => {
@@ -483,6 +262,89 @@
                     }
                 },
 
+
+                /*FILTER /SEARCH/ DOWNLOAD*/
+
+                /* FILTER / SEARCH */
+                onFilter(filter) {
+                    console.log("filter %o", filter)
+
+                    var view_list = this.reports.filter((data) => {
+                        let date_created = new Date(data.date_created)
+                        let date_updated = new Date(data.date_updated)
+                        let date_report  = new Date(data.report_date)
+                        let evac = this.evac_dict[data.evac_id]
+
+                        return (
+                            (filter.year == 'all' || 
+                                filter.year == date_report.getFullYear()  ) &&
+                            (filter.month == 'all' || 
+                                filter.month == (months_array[date_report.getMonth()] || 0)) &&
+                            (filter.municipality == 'all' || 
+                            filter.municipality == evac.municipality)
+                        )
+                    });
+                    
+                    view_list = view_list.filter((data) => {
+                        let population_range = filter.populations
+                        if (population_range == 'all') {
+                            return true
+                        } else if (!population_range.split('-').isEmpty()) {
+                            let range = population_range.split('-')
+                            console.log("let range %o", range)
+                            return (data.current_population >= Number(range[0]) && data.current_population <= Number(range[1]))
+                        } else {
+                            let max_range = population_range.split('+')[0]
+                            console.log("let max_range %o", max_range)
+                            return (data.current_population >= Number(max_range))
+                        }
+                    })
+
+                    view_list = view_list.filter((data) => {
+                        let evac = filter.evacuations
+                        if (evac == 'all') {
+                            return true
+                        } else {
+                            let evac_id = this.evac_names[evac]
+                            return data.evac_id === evac_id
+                        }
+                    })
+
+
+                    this.view_list = view_list
+                },
+
+                onSearch(filter) {
+                    this.onFilter(filter)
+
+                    this.view_list = this.view_list.filter((data) => {
+                        var object = {...data.toObject()}
+                        let evac = this.evac_dict[data.evac_id]
+                        object['evac_name'] = evac.name 
+                        object['municipal'] = evac.municipal
+                        return SearchObject(object, filter.searchTerm)
+                    })
+                },
+
+                onCancelSearch(filter) {
+                    this.onFilter(filter)
+                },
+
+                onClearFilter() {
+                    this.view_list = [...this.reports]
+                },
+
+                onDownloadReport() {
+                    let view_list = this.view_list.map((data) => {
+                        var object = {...data.toObject()}
+                        let evac = this.evac_dict[data.evac_id]
+                        object['evac_name'] = evac.name 
+                        object['municipal'] = evac.municipality
+                        return object
+                    })
+                    let csv = ConvertToCSV(view_list)
+                    saveTextAsFile('history.csv', csv)
+                },
 
             }
         })

@@ -5,6 +5,7 @@ class UserHandler extends DataHandlerType {
     static tables = {
         admin_user: 'admin_user',
         evacuation_centers: 'evacuation_centers',
+        evacuation_center_type: 'evacuation_center_type',
         evacuation_history: 'evacuation_history',
         evacuation_inventory: 'evacuation_inventory',
         evacuation_supply: 'evacuation_supply',
@@ -53,16 +54,11 @@ class UserHandler extends DataHandlerType {
                     console.log(doc.id, " => ", doc.data());
                     let data = doc.data()
                     let id = doc.id
-                    let object = {
+                    
+                    const object = parseObject({
                         id,
                         ...data
-                    }
-                    try {
-                        object.date_created = object.date_created.toDate()
-                        object.date_updated = object.date_updated.toDate()
-                    } catch (err) {
-                        console.log(err)
-                    }
+                    })
                     
                     users.push(AdminUser.parse(object))
                 });
@@ -99,21 +95,13 @@ class UserHandler extends DataHandlerType {
                     console.log(doc.id, " => ", doc.data());
                     let data = doc.data()
                     let id = doc.id
-                    var object = {
-                        id,
-                        ...data
-                    }
-                    try {
-                        object.date_created = object.date_created.toDate()
-                        object.date_updated = object.date_updated.toDate()
-                    } catch (err) {
-                        console.log(err)
-                    }
+                    const object = parseObject({
+                        id,...data
+                    })
                     users.push(AdminUser.parse(object))
                 });
                 
                 var message = new Message()
-                
                 message.data = users
                 resolve(message)
             })
@@ -157,10 +145,10 @@ class UserHandler extends DataHandlerType {
         return new Promise((resolve, reject) => {
             this.firestore.collection(table)
             .doc(id).delete()
-            .then(function () {
+            .then(() => {
                 message.data = "success delete"
                 resolve(message);
-            }).catch(function (error) {
+            }).catch((error) => {
                 message.error = error
                 reject(message)
             });
@@ -286,25 +274,13 @@ class PublicUserHandler extends UserHandler {
                 query = ref.where('id', '==', id)
             }
         
-            query.get().then(function (querySnapshot) {
+            query.get().then((querySnapshot) => {
                 var users = []
                 querySnapshot.forEach(function (doc) {
                     console.log(doc.id, " => ", doc.data());
                     let data = doc.data()
                     let id = doc.id
-                    var object = {
-                        id,
-                        ...data
-                    }
-                    Object.keys(object).filter((key) => {
-                        return key.includes('date')
-                    }).forEach((key) => {
-                        try {
-                            object[key] = object[key].toDate()
-                        } catch (err) {
-                            console.log(err)
-                        }
-                    })
+                    const object = parseObject({id, ...data})
                     users.push(PublicUser.parse(object))
                 });
                 
@@ -317,13 +293,54 @@ class PublicUserHandler extends UserHandler {
                 }
                 
                 resolve(message)
-            }).catch(function (error) {
+            }).catch((error) => {
                 console.log("Error getting documents: ", error);
                 reject(error)
             });
         })
     } //getUsers
     
+    /** gets active public users by municipality and evacuations */
+    getPublicActiveUsers(municipality, evacs = []){
+        return new Promise((resolve, reject) => {
+            const ref = this.firestore.collection(UserHandler.tables.public_user)
+            var query = ref.where('is_active','==',true)
+            
+            if (municipality && !municipality.trim().isEmpty() && municipality != 0) {
+                query = ref.where('municipality', '==', municipality)
+            }
+
+            if (!evacs.isEmpty()) {
+                query  = ref.where('evac_id','in',evacs)
+            }
+        
+            query.get().then((querySnapshot) => {
+                var users = []
+
+                querySnapshot.forEach(function (doc) {
+                    console.log(doc.id, " => ", doc.data());
+                    let data = doc.data()
+                    let id = doc.id
+                    const object = parseObject({id, ...data})
+                    users.push(PublicUser.parse(object))
+                });
+                
+                var message = new Message()
+                
+                if (!id.isEmpty()) {
+                    message.data = users[0]
+                } else {
+                    message.data = users
+                }
+                
+                resolve(message)
+            }).catch((error) => {
+                console.log("Error getting documents: ", error);
+                reject(error)
+            });
+        })
+    }//getPublicActiveUsers
+
     addPublicUser(params = new PublicUser()) {
         return new Promise((resolve, reject) => {
             var ref = this.firestore.collection(UserHandler.tables.public_user)
@@ -387,21 +404,11 @@ class PublicUserHandler extends UserHandler {
                 .where("password", "==", password)
                 .get().then(function (querySnapshot) {
                     var users = []
-                    querySnapshot.forEach(function (doc) {
+                    querySnapshot.forEach((doc) => {
                         console.log(doc.id, " => ", doc.data());
                         let data = doc.data()
                         let id = doc.id
-                        let object = {
-                            id,
-                            ...data
-                        }
-                        try {
-                            object.date_created = object.date_created.toDate()
-                            object.date_updated = object.date_updated.toDate()
-                        } catch (err) {
-                            console.log(err)
-                        }
-
+                        let object = parseObject({id, ...data})
                         users.push(PublicUser.parse(object))
                     });
 
@@ -417,7 +424,7 @@ class PublicUserHandler extends UserHandler {
                     }
 
                 })
-                .catch(function (error) {
+                .catch((error) => {
                     console.log("Error getting documents: ", error);
                     reject(error)
                 });
@@ -436,25 +443,12 @@ class PublicUserHandler extends UserHandler {
             query.get().then(function (querySnapshot) {
                 var history = []
                 querySnapshot.forEach(function (doc) {
-                    console.log(doc.id, " => ", doc.data());
                     let data = doc.data()
-                    let id = doc.id
-                    var object = {
+                    let id  = doc.id
+                    const object = parseObject({
                         id,
                         ...data
-                    }
-
-                
-                    
-                    Object.keys(object).filter((key) => {
-                        return key.includes('date')
-                    }).forEach((key) => {
-                        try {
-                            object[key] = object[key].toDate()
-                        } catch (err) {
-                            console.log(err)
-                        }
-                    })
+                    }) 
                     history.push(PublicUserHistory.parse(object))
                 });
                 var message = new Message()
@@ -572,37 +566,53 @@ class EvacuationHandler extends PublicUserHandler {
         } else {
             return this.addEntry(params.id, params.toObject(), UserHandler.tables.evacuation_centers)
         }
-        /* return new Promise((resolve, reject) => {
-            this.firestore.collection('evacuation_centers')
-            .doc(params.id)
-            .set(params.toObject())
-            .then(function () {
-                resolve("Document successfully written!")
-            }).catch(function (error) {
-                reject(error)
-            });
-        }) */
     } //addEvacationCenter
     
     
     deleteEvacationCenter(id) {
+        return this.deleteEntry(id, UserHandler.tables.evacuation_centers)
+    } //deleteEvacationCenter
+
+    /* !--------- EVACUATION CENTER TYPES -----------*/
+    getEvacuationCenterType(){
         return new Promise((resolve, reject) => {
-            this.firestore.collection('evacuation_centers')
-            .doc(id).delete()
-            .then(function () {
-                resolve("Document successfully deleted!");
+            this.firestore.collection(UserHandler.tables.evacuation_center_type)
+            .get().then(function (querySnapshot) {
+                var types = []
+                querySnapshot.forEach(function (doc) {
+                    //console.log(doc.id, " => ", doc.data());
+                    const data = doc.data()
+                    const id = doc.id
+                    const object = parseObject({id,...data})
+                    
+                    types.push(EvacuationCenterType.parse(object))
+                });
+                var message = new Message()
+                message.data = types
+                resolve(message)
             }).catch(function (error) {
                 reject(error)
             });
         })
-    } //deleteEvacationCenter
+    }
+
+    addEvacationCenterType(params = new EvacuationCenterType()){
+        return this.addEntry(params.id, params.toObject(), UserHandler.tables.evacuation_center_type)
+    }
+
+    deleteEvacationCenterType(id) {
+        return this.deleteEntry(id, UserHandler.tables.evacuation_center_type)
+    }
     
     /*!--------- EVACUAITON HISTORY ---------------!*/
     
+    /** returns history */
     getEvacuationHistory(evac_id = null) {
         let collection = this.firestore.collection('evacuation_history')
-        let ref = evac_id != null ? ref.where('evac_id', '==', evac_id) : collection
+        var ref = evac_id != null ? ref.where('evac_id', '==', evac_id) : collection
         
+        ref = ref.orderBy("report_date","desc")//.limit(limit)
+
         return new Promise((resolve, reject) => {
             ref.get().then((querySnapshot) => {
                 var models = []
@@ -628,6 +638,20 @@ class EvacuationHandler extends PublicUserHandler {
             });
         })
     } //getEvacuationHistory
+
+    /** returns max count */
+    getEvacuationHistoryMax(){
+        return new Promise((resolve, reject) => {
+            this.firestore.collection('evacuation_history').get().then((querySnapshot) => {      
+                console.log(querySnapshot.size); 
+                var message = new Message()
+                message.data = querySnapshot.size
+                resolve(message)
+            }).catch((error)=> {
+                reject(error)
+            })
+        })
+    }//getEvacuationHistoryMax
     
     
     addEvacuationHistory(params = new EvacuationHistory()) {
@@ -673,10 +697,13 @@ class EvacuationHandler extends PublicUserHandler {
 /** class functions handles moab parameters used */
 class MOABParamsHandler extends EvacuationHandler {
     
-    getModelParams() {
+    getModelParams(isActive = false) {
         return new Promise((resolve, reject) => {
-            this.firestore.collection('moabc')
-            .get().then(function (querySnapshot) {
+            let ref = this.firestore.collection('moabc')
+
+            let query = isActive ? ref.where('is_active','==','true') : ref
+
+            query.get().then(function (querySnapshot) {
                 var models = []
                 querySnapshot.forEach(function (doc) {
                     const data = doc.data()
@@ -697,38 +724,17 @@ class MOABParamsHandler extends EvacuationHandler {
         })
     } //getModelParams
     
-    
     addModelParams(params = new MOABCParameters()) {
-        return new Promise((resolve, reject) => {
-            this.firestore.collection('moabc')
-            .doc(params.id)
-            .set(params.toObject())
-            .then(function () {
-                resolve("Document successfully written!")
-            }).catch(function (error) {
-                reject(error)
-            });
-        })
+        return this.addEntry(params.id, params.toObject(), UserHandler.tables.moabc)
     } //addModelParams
     
-    
     deleteModelParams(id) {
-        return new Promise((resolve, reject) => {
-            this.firestore.collection('moabc')
-            .doc(id).delete()
-            .then(function () {
-                resolve("Document successfully deleted!");
-            }).catch(function (error) {
-                reject(error)
-            });
-        })
+        return this.deleteEntry(id, UserHandler.tables.moabc)
     } //deleteModelParams
+
 } //MOABParamsHandler
 
-
-
-
-
+/** class functions handles inventory */
 class InventoryHandler extends MOABParamsHandler {
     
     /** returns the inventories of the evacuation centers */
@@ -915,24 +921,22 @@ class InventoryHandler extends MOABParamsHandler {
                 resolve(message)
             });
         })
-    }
+    }//deleteSuppliesOfInventory
     
-    
+    /** returns the list of supplies dictated by the admin */
     getSupplyTypes() {
         return new Promise((resolve, reject) => {
-            this.firestore.collection(UserHandler.tables.supply_types)
+            this.firestore.collection(UserHandler.tables.supply_types).orderBy('date_updated', 'desc')
             .get().then(function (querySnapshot) {
                 var supplytypes = []
                 querySnapshot.forEach(function (doc) {
                     let data = doc.data()
                     let id = doc.id
-                    
-                    var object = {
+
+                    const object = parseObject({
                         id,
                         ...data
-                    }
-
-                    object = parseObject(object)
+                    })
                     supplytypes.push(EvacuationSupplyType.parse(object))
                 });
                 var message = new Message()
@@ -942,7 +946,7 @@ class InventoryHandler extends MOABParamsHandler {
                 reject(error)
             });
         })
-    }
+    }//getSupplyTypes
     
     /** adds `SUPPLY TYPE`
     * @param inventory - inventory to be updated to the database

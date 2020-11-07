@@ -24,9 +24,16 @@ const FormModels = {
     number: 'number',
     dropdown: 'dropdown',
     password: 'password',
-    email: 'email'
+    email: 'email',
+    compound: 'compound'
 }
 
+const SupplyStatus = {
+    pending:    'pending',
+    stored:     'stored',
+    addressed:  'addressed',
+    cancelled:  'cancelled'
+}
 
 /**
  * User object structure
@@ -51,7 +58,7 @@ class AdminUser extends Model {
     constructor(id, admin_type, created_by, date_created, date_updated, firstname,
         lastname, municipality, username, email, password, images) {
         super()
-        this.id = id || "admin-" + genID(5)
+        this.id = id || keyGenID("admin")//"admin-" + genID(5)
         this.admin_type = admin_type
         this.created_by = created_by
         this.date_created = date_created || new Date()
@@ -154,13 +161,82 @@ class EvacuationCenter extends Model {
         facilities: 'Available Facilities',
     }
 
+    static filter_keys = [
+        'population_capacity',
+        'floor_space',
+        'category',
+        'facilities',
+    ]
+
     /** static enum contains type of categories used to define Evacuation Center */
-    static CategoryTypes = {
+    /* static CategoryTypes = {
         dedicated_evacuation_center: 'Dedicated Evacuation Center',
         barangay_hall: 'Barangay Hall',
         school: 'School',
         chapel: 'Chapel',
         others: 'Others'
+    } */
+
+    static formModel = {
+        name: {
+            title: "Name",
+            type: FormModels.text
+        },
+        population_capacity: {
+            title: "Population Capacity",
+            type: FormModels.number
+        },
+        floor_space: {
+            title: 'Area (sq)',
+            type: FormModels.number
+        },
+        contact_numbers: {
+            title: 'Contact Number',
+            type: FormModels.number
+        },
+
+        admin_id: {
+            title: 'Evacuation Center In-charge',
+            type: FormModels.dropdown,
+            options: []
+        },
+
+        municipality: {
+            title: 'Municipality',
+            type: FormModels.dropdown,
+            options: []
+        },
+
+        location: {
+            title: 'Location',
+            type: FormModels.compound,
+            compound: {
+                lat: {
+                    title: 'Latitude',
+                    type: FormModels.number,
+                },
+                lng: {
+                    title: 'Longitude',
+                    type: FormModels.number
+                }
+            }
+        },
+
+        exact_address: {
+            title: 'Exact Address',
+            type: FormModels.textarea
+        },
+        
+        category: {
+            title: 'Category',
+            type: FormModels.dropdown,
+            options: []
+        },
+        facilities: {
+            title: 'Exact Address',
+            type: FormModels.textarea
+        },
+
     }
 
     constructor(id, name, location, population_capacity,
@@ -169,7 +245,7 @@ class EvacuationCenter extends Model {
         exact_address, municipality, contact_numbers,
         admin_id, category, facilities, images = []) {
         super()
-        this.id = id || "evac-" + genID(5)
+        this.id = id || keyGenID('evac',5)
         this.name = name
         this.location = (location != null && location != undefined) ? location : {
             lat: null,
@@ -240,6 +316,70 @@ class EvacuationCenter extends Model {
 } //EvacuationCenter
 
 
+/** class for determining the type of evacuation center */
+class EvacuationCenterType extends Model {
+    
+    //name of the type
+    name
+
+    ///used to determine if the type is available
+    is_active
+
+    static formModel = {
+        name: {
+            title: "Title",
+            type: FormModels.text
+        },
+        is_active: {
+            title: "Is Active",
+            type: FormModels.dropdown,
+            options: [
+                {title: "true", value: true},
+                {title: "false", value: false},
+            ]
+        }
+    }
+
+    constructor(id,
+        date_created,
+        date_updated,
+        created_by, name, is_active) {
+        super()
+        this.id = id || keyGenID('evactype',5)
+        this.date_created = date_created || new Date()
+        this.date_updated = date_updated || new Date()
+        this.created_by   = created_by
+
+        this.name = name
+        this.is_active = is_active || true
+    }
+
+    /**returns instance to json object */
+    toObject() {
+        return {
+            id: this.id,
+            date_created: this.date_created,
+            date_updated: this.date_updated,
+            created_by: this.created_by,
+            name: this.name,
+            is_active: this.is_active,
+        }
+    }
+
+    /** converts object to EvacuationCenter instance */
+    static parse(object = {}) {
+        return new EvacuationCenterType(
+            object.id,
+            object.date_created,
+            object.date_updated,
+            object.created_by,
+            object.name,
+            object.is_active,
+        )
+    }
+}//EvacuationCenterType
+
+
 /**
  * object structure of Message response from Datahandler
  */
@@ -259,15 +399,33 @@ class EvacuationHistory extends Model {
     current_population = 0
     report_date = new Date()
 
-    constructor(id = null, evac_id = null, current_population = 0, created_by = 0, report_date = new Date, date_created = new Date(), date_updated = new Date()) {
+
+    static formModel = {
+        evac_id: {
+            title: "Evacuation Center",
+            type: FormModels.dropdown,
+            options: [],
+        },
+        current_population: {
+            title: "Population",
+            type: FormModels.number,
+        },
+        report_date: {
+            title: "Report Date",
+            type: FormModels.date
+        }
+    }
+
+
+    constructor(id = null, evac_id = null, current_population = 0, created_by = 0, report_date, date_created, date_updated) {
         super()
-        this.id = id || "history-" + genID(5)
+        this.id = id || keyGenID('history',5)//"history-" + genID(5)
         this.evac_id = evac_id
         this.current_population = current_population
         this.created_by = created_by
-        this.report_date = report_date
-        this.date_created = date_created
-        this.date_updated = date_updated
+        this.report_date = report_date || new Date()
+        this.date_created = date_created || new Date()
+        this.date_updated = date_updated || new Date()
     }
 
     /**returns instance to json object */
@@ -311,6 +469,7 @@ class MOABCParameters extends Model {
     max_epoch
     min_shuffle
     max_shuffle
+    active
 
     static parameters_shown = {
         id: 'id',
@@ -323,11 +482,12 @@ class MOABCParameters extends Model {
         max_epoch: 'Maximum Generation',
         min_shuffle: 'Minimum Shuffle Value',
         max_shuffle: 'Maximum Shuffle Value',
+        is_active: 'Is Active'
     }
 
-    constructor(id, date_created, date_updated, created_by, max_length, max_val, population_size, trial_limit, max_epoch, min_shuffle, max_shuffle) {
+    constructor(id, date_created, date_updated, created_by, max_length, max_val, population_size, trial_limit, max_epoch, min_shuffle, max_shuffle, is_active) {
         super()
-        this.id = id || "param-" + genID(5)
+        this.id = id || keygenID("param", 5)//"param-" + genID(5)
         this.date_created = date_created || new Date()
         this.date_updated = date_updated || new Date()
         this.created_by = created_by || '0'
@@ -338,6 +498,7 @@ class MOABCParameters extends Model {
         this.max_epoch = max_epoch || 0
         this.min_shuffle = min_shuffle || 0
         this.max_shuffle = max_shuffle || 0
+        this.is_active  = is_active || false
     }
 
     static parse(objects = {}) {
@@ -352,7 +513,8 @@ class MOABCParameters extends Model {
             objects.trial_limit,
             objects.max_epoch,
             objects.min_shuffle,
-            objects.max_shuffle
+            objects.max_shuffle,
+            objects.is_active
         )
     }
 
@@ -368,7 +530,8 @@ class MOABCParameters extends Model {
             trial_limit: this.trial_limit,
             max_epoch: this.max_epoch,
             min_shuffle: this.min_shuffle,
-            max_shuffle: this.max_shuffle
+            max_shuffle: this.max_shuffle,
+            is_active: this.is_active
         }
     }
 
@@ -397,7 +560,7 @@ class EvacuationInventory extends InventoryType {
 
     constructor(id, date_created, date_updated, created_by, evac_id, name, description) {
         super()
-        this.id = id || "evacinv-" + genID(5)
+        this.id = id || keyGenID("evacinv") //"evacinv-" + genID(5)
         this.date_created = date_created || new Date()
         this.date_updated = date_updated || new Date()
         this.created_by = created_by || '0'
@@ -445,7 +608,7 @@ class MunicipalInventory extends InventoryType {
 
     constructor(id, date_created, date_updated, created_by, municipality, name, description) {
         super()
-        this.id = id || "muninv-" + genID(5)
+        this.id = id || keyGenID("muninv")//"muninv-" + genID(5)
         this.date_created = date_created || new Date()
         this.date_updated = date_updated || new Date()
         this.created_by = created_by || '0'
@@ -498,11 +661,14 @@ class EvacuationSupply extends Model {
     /** date of the item supplied */
     date_supplied = new Date()
 
+    /** status of the supply given */
+    status = SupplyStatus.pending
+
     /** any remarks or descriptions */
     remarks = ""
 
 
-    constructor(id, date_created, date_updated, created_by, inventory_id, inventory_type, qty, date_supplied, remarks) {
+    constructor(id, date_created, date_updated, created_by, inventory_id, inventory_type, qty, date_supplied, remarks, status) {
         super()
         this.id = id || "evacsupply-" + genID(5)
         this.date_created = date_created || new Date()
@@ -513,6 +679,7 @@ class EvacuationSupply extends Model {
         this.qty = qty
         this.date_supplied = date_supplied
         this.remarks = remarks
+        this.status  = status || SupplyStatus.pending
     }
 
     static parse(objects = {}) {
@@ -525,7 +692,8 @@ class EvacuationSupply extends Model {
             objects.inventory_type,
             objects.qty,
             objects.date_supplied,
-            objects.remarks
+            objects.remarks,
+            objects.status
         )
     }
 
@@ -539,7 +707,8 @@ class EvacuationSupply extends Model {
             inventory_type: this.inventory_type,
             qty: this.qty,
             date_supplied: this.date_supplied,
-            remarks: this.remarks
+            remarks: this.remarks,
+            status: this.status
         }
     }
 } //EvacuationSupply
@@ -558,7 +727,7 @@ class EvacuationSupplyType extends Model {
 
     constructor(id, date_created, date_updated, created_by, name, description, amount) {
         super()
-        this.id = id || "evacsupplytype-" + genID(5)
+        this.id = id || keyGenID("evacsupplytype")//"evacsupplytype-" + genID(5)
         this.date_created = date_created || new Date()
         this.date_updated = date_updated || new Date()
         this.created_by = created_by || '0'
@@ -591,6 +760,7 @@ class EvacuationSupplyType extends Model {
         }
     }
 } //EvacuationSupplyType
+
 
 /** defines the object of Public User */
 class PublicUser extends Model {
@@ -643,6 +813,9 @@ class PublicUser extends Model {
     /** array contains dependents users */
     dependents = []
 
+    /** used to determine if the public user is admitted to an evacuation center : reflects user history */
+    is_active = false
+
     static headers = {
         id: 'ID',
         created_by: 'Issued By',
@@ -662,6 +835,7 @@ class PublicUser extends Model {
         disabilities: 'Disabilities',
         employment: 'Employment',
         medical_needs: 'Medical Needs',
+        is_active: 'Is Admitted'
     }
 
     static visiblekeys = [
@@ -678,6 +852,7 @@ class PublicUser extends Model {
         'disabilities',
         'employment',
         'medical_needs',
+        'is_active'
     ]
 
     /** defines the form of the model to be shown to create an entry */
@@ -758,7 +933,7 @@ class PublicUser extends Model {
 
     constructor(id, created_by, date_created, date_updated, firstname, lastname, middleinit,
         municipality, username, password, email, birthdate, phone_number, address, sex,
-        disabilities, employment, medical_needs, dependents) {
+        disabilities, employment, medical_needs, dependents, is_active) {
         super()
         this.id = id || keyGenID("publicuser", 5) //"publicuser-" + genID(5)
         this.created_by = created_by
@@ -767,7 +942,7 @@ class PublicUser extends Model {
 
         this.firstname = firstname
         this.lastname = lastname
-        this.middleinit = middleinit
+        this.middleinit = middleinit || ""
         this.municipality = municipality
         this.username = username
         this.password = password
@@ -779,6 +954,7 @@ class PublicUser extends Model {
         this.disabilities = disabilities || ""
         this.employment = employment || ""
         this.medical_needs = medical_needs || ""
+        this.is_active  = is_active  || false
 
         this.dependents = (dependents || []).map((dep) => {
             return DependentUser.parse(dep)
@@ -808,6 +984,7 @@ class PublicUser extends Model {
             dependents: (this.dependents || []).map((val) => {
                 return val.toObject()
             }),
+            is_active: this.is_active
         }
     }
 
@@ -836,6 +1013,7 @@ class PublicUser extends Model {
             object.employment,
             object.medical_needs,
             object.dependents,
+            object.is_active
         )
     }
 } //PublicUser
@@ -991,69 +1169,6 @@ class PublicUserHistory extends Model {
 
 } //PublicUserHistory
 
-/** defines the model of the report to be requested by the public user */
-class PublicUserReport extends Model {
-    
-    /** public user */
-    user_id
-
-    /** evacuation center */
-    evac_id
-
-    /** items to be report to ask for evacuation supplies */
-    reports = []
-
-    static formModel = {
-        evac_id: {
-            title: 'Evacuation Center', 
-            type: FormModels.dropdown,
-            options: []
-        },
-    }
-
-    static headers = [
-        'user_id',
-        'evac_id',
-        'date_created',
-        'date_updated'
-    ]
-
-    constructor(id, date_created, date_updated, created_by, user_id, evac_id, reports) {
-        super()
-        this.id = id || keyGenID("publicuserreport") //"publicuserhistory-" + genID(5)
-        this.date_created = date_created    || new Date()
-        this.date_updated = date_updated    || new Date()
-        this.created_by = created_by        || '0'
-        this.user_id    = user_id
-        this.evac_id    = evac_id
-        this.reports    = reports || []
-    }
-
-    toObject() {
-        return {
-            id: this.id,
-            date_created: this.date_created,
-            date_updated: this.date_updated,
-            created_by: this.created_by,
-            user_id: this.user_id,
-            evac_id: this.evac_id,
-            reports: this.reports
-        }
-    }
-
-    static parse(object = {}) {
-        return new PublicUserReport(
-            object.id,
-            object.date_created,
-            object.date_updated,
-            object.created_by,
-            object.user_id,
-            object.evac_id,
-            object.reports
-        )
-    }
-
-}//PublicUserReport
 
 /** defines the object of an organization donor */
 class DonorsOrganization extends Model {
@@ -1359,17 +1474,25 @@ class DonorsIndividual extends Model {
     }
 } //DonorsIndividual
 
-/** defines the model of a donor to send donations */
-class DonorsReport extends Model {
 
-    /** donor id */
+/* !=========== PUBLIC REPORTS =============*/
+class ReportType extends Model  {
+     
+    /** public user */
     user_id
 
     /** evac id appointing to can be empty */
     evac_id = ""
 
-    /** donations to give */
+    /** items to be report to ask for evacuation supplies 
+     * @model ReportItemType
+    */
     reports = []
+
+    /** used to determine the status of the request
+     * @model SupplyStatus | string
+     */
+    status = ""
 
     static formModel = {
         evac_id: {
@@ -1385,6 +1508,37 @@ class DonorsReport extends Model {
         'date_created',
         'date_updated'
     ]
+
+    toObject() {
+        return {
+            id: this.id,
+            date_created: this.date_created,
+            date_updated: this.date_updated,
+            created_by: this.created_by,
+            user_id: this.user_id,
+            evac_id: this.evac_id,
+            reports: this.reports
+        }
+    }
+
+}//ReportType
+
+/** individual items to be given/requested on the reporttype */
+class ReportItemType {
+
+    ///id type of inventory
+    inventory_type
+
+    ///qty
+    qty
+
+    ///remarks
+    remarks
+
+    /** used to create a custom item 
+     * @model EvacuationSupplyType
+    */
+    custom = {}
 
     static reportItemFormModel = {
         inventory_type: {
@@ -1402,7 +1556,42 @@ class DonorsReport extends Model {
         }
     }
 
-    constructor(id, date_created, date_updated, created_by, user_id,  evac_id, reports) {
+}//ReportItemType
+
+/** defines the model of the report to be requested by the public user */
+class PublicUserReport extends ReportType {
+    
+    constructor(id, date_created, date_updated, created_by, user_id, evac_id, reports, status) {
+        super()
+        this.id = id || keyGenID("publicuserreport") //"publicuserhistory-" + genID(5)
+        this.date_created = date_created    || new Date()
+        this.date_updated = date_updated    || new Date()
+        this.created_by = created_by        || '0'
+        this.user_id    = user_id
+        this.evac_id    = evac_id
+        this.reports    = reports || []
+        this.status     = status || ""
+    }
+
+    static parse(object = {}) {
+        return new PublicUserReport(
+            object.id,
+            object.date_created,
+            object.date_updated,
+            object.created_by,
+            object.user_id,
+            object.evac_id,
+            object.reports,
+            object.status
+        )
+    }
+
+}//PublicUserReport
+
+/** defines the model of a donor to send donations */
+class DonorsReport extends ReportType {
+
+    constructor(id, date_created, date_updated, created_by, user_id,  evac_id, reports, status) {
         super()
         this.id = id || keyGenID("donorreport") //"publicuserhistory-" + genID(5)
         this.date_created = date_created    || new Date()
@@ -1411,18 +1600,7 @@ class DonorsReport extends Model {
         this.user_id    = user_id
         this.evac_id    = evac_id || ""
         this.reports    = reports || []
-    }
-
-    toObject() {
-        return {
-            id: this.id,
-            date_created: this.date_created,
-            date_updated: this.date_updated,
-            created_by: this.created_by,
-            user_id: this.user_id,
-            evac_id: this.evac_id,
-            reports: this.reports
-        }
+        this.status     = status || ""
     }
 
     static parse(object = {}) {
@@ -1433,11 +1611,13 @@ class DonorsReport extends Model {
             object.created_by,
             object.user_id,
             object.evac_id,
-            object.reports
+            object.reports,
+            object.status
         )
     }
 
-}
+}//DonorsReport
+/* =========== PUBLIC REPORTS =============! */
 
 /** defines the model of the content to be shown on the public */
 class PublicContent extends Model {

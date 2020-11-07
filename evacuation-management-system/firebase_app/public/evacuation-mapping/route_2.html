@@ -18,234 +18,113 @@
             z-index: 0;
         }
     </style>
-    <!--<script type="text/javascript" src="resources/json/coordinates.json"></script>
-        <script type="text/javascript" src="resources/json/hospitals.json"></script>
-        <script src="resources/json/road_coordinates3.json"></script>-->
-    <link rel="shortcut icon" href="resources/images/favicon.ico" type="image/x-icon">
-    <!-- update the version number as needed -->
-    <script src="/__/firebase/7.24.0/firebase-app.js"></script>
-    <!-- include only the Firebase features as you need -->
-    <script src="/__/firebase/7.24.0/firebase-auth.js"></script>
-    <script src="/__/firebase/7.24.0/firebase-database.js"></script>
-    <script src="/__/firebase/7.24.0/firebase-messaging.js"></script>
-    <script src="/__/firebase/7.24.0/firebase-storage.js"></script>
-    <script src="/__/firebase/7.24.0/firebase-firestore.js"></script>
-    <script src="/__/firebase/7.24.0/firebase-functions.js"></script>
-    <!-- initialize the SDK after all desired features are loaded -->
-    <script src="/__/firebase/init.js"></script>
-    <script src="resources/json/boundaries.js"></script>
 
+    <script type="text/javascript" src="resources/json/coordinates.js"></script>
+    <script type="text/javascript" src="resources/json/hospitals.js"></script>
+    <script src="resources/json/road_coordinates.js"></script>
     <script src="resources/js/jquery-3.0.0.min.js"></script>
-    <script src="resources/js/vue.js"></script>
     <script src="resources/bootstrap/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="resources/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="resources/css/main.css">
+    <script src="resources/js/dijkstra.js"></script>
+    <script src="resources/js/jquery-3.0.0.min.js"></script>
+    <script src="resources/js/xmlparser.js"></script>
     <link rel="shortcut icon" href="resources/images/favicon.ico" type="image/x-icon">
-
+    <script src="resources/src/js/utilities.js"></script>
 </head>
 
 <body>
 
-    <!--  <nav class="navbar navbar-inverse" id="navbar">
-            <div class="container-fluid">
-                <div class="navbar-header">
-                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span> 
-                    </button>
-                    <a class="navbar-brand" href="#">iAmbulansiya</a>
-                </div>
-                <div class="collapse navbar-collapse" id="myNavbar">
-                    <ul class="nav navbar-nav">
-                        <li class="active"><a href="map.html">Home</a></li>
-                        <li><a href="hospital.html">Hospital</a></li>
-                        <li><a href="history.html">History</a></li>
-                        <li><a href="abouts.html">About</a></li>
-                    </ul>
-                    <ul class="nav navbar-nav navbar-right">
-                        <div id="warnings-panel"></div>
-                    </ul>
-                </div>                
-            </div>
-        </nav>-->
-
-
-
-
     <div id="map"></div>
-    <script src="../_global/js/utilities.js"></script>
-    <script src="../_global/js/objects.js"></script>
-    <script src="resources/src/js/datahandler.js"></script>
-    <script src="resources/src/js/utilities.js"></script>
-    <script src="resources/js/dijkstra.js"></script>
-    <script src="resources/json/coordinates.js"></script>
 
 
     <script>
-        var tree = []
-        var tree_dict = {}
-        var djikstra = []
-        var path_data = []
+        console.log("roads %o", localStorage.getItem('roads'))
+
+        var road_coord = JSON.parse(localStorage.getItem("roads")) || [];
+        var path_data;
+        var start_location;
+        var finish_location;
+        var tree;
+
 
         function initRoute() {
-            DataHandler.configure()
 
-            return getRoadTreeStructure().then((message) => {
-                tree = message.data
-                console.log(tree)
-                tree.forEach((node) => {
-                    tree_dict[node.node_id] = node
-                })
-                return initDjikstra(tree)
-            }).then((data) => {
-                djikstra = data
-                return initPathRoute(djikstra, tree)
-            }).then((data) => {
-                path_data = data
-                return path_data
-            })
-        } //initRoute
+            console.log("roads_coord %o", road_coord)
 
-        /** generates the path from the two points using the djikstra */
-        function initPathRoute(djikstra = new Graph(), tree) {
-            return new Promise((resolve, reject) => {
-                const queryString = window.location.search;
-                const urlParams = new URLSearchParams(queryString);
-                const evac = JSON.parse(urlParams.get('evac'))
-                const emergency = JSON.parse(urlParams.get('emergency'))
+            tree = JSON.parse(localStorage.getItem('roadTree')).data
+            var tree_dict = {}
 
-                console.log("evac %o", evac)
-
-                const evac_loc = getNearest(evac, tree);
-                const emergency_loc = getNearest(emergency, tree);
-
-                console.log(tree)
-                console.log("evac loc %o -- em loc %o", evac_loc, emergency_loc)
-
-                const start = tree[emergency_loc].node_id;
-                const finish = tree[evac_loc].node_id;
-
-                var path = djikstra.shortestPath(start + '', finish + '').concat([start + ''])
-                console.log("path %o", path)
-                var path_data = [];
-
-                for (var i = 0; i < path.length; i++) {
-                    let node = tree_dict[Number.parseInt(path[i])]
-                    if (node) {
-                        path_data.push(node)
-                    }
+            //dijkstra
+            var g = new Graph();
+            for (var i = 0; i < tree.length; i++) {
+                var vertex = {};
+                tree_dict[tree[i].node_id] = tree[i]
+                for (var j = 0; j < tree[i].vertex.length; j++) {
+                    vertex["" + tree[i].vertex[j].node] = tree[i].vertex[j].distance;
                 }
+                g.addVertex(tree[i].node_id + "", vertex);
+            }
 
-                var path_distance = 0;
-                for (var i = 0; i < path_data.length - 1; i++) {
-                    path_distance += Number.parseFloat(getdistance(
-                        path_data[i].coordinates.lat, path_data[i + 1].coordinates.lat,
-                        path_data[i].coordinates.lng, path_data[i + 1].coordinates.lng
-                    ));
-                    console.log(path_distance);
+            /* var url_data = window.location.href.split('route.html?').pop();
+            url_data = url_data.split("%20").join('');
+            url_data = url_data.split("%22").join('"'); */
+
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+
+            var evac = urlParams.get('evac');
+            var origin = urlParams.get('origin');
+
+
+            console.log("evac: " + evac);
+            console.log("origin: " + origin);
+
+            evac = JSON.parse(evac);
+            origin = JSON.parse(origin);
+
+            start_location = evac;
+            finish_location = origin;
+
+            const evac_loc = getNearest(evac, tree);
+            const origin_loc = getNearest(origin, tree);
+
+            console.log("nearest evac: %o", tree[evac_loc]);
+            console.log("nearest origin: %o", tree[origin_loc]);
+
+            const start = tree[evac_loc].node_id;
+            const finish = tree[origin_loc].node_id;
+
+            var path = g.shortestPath(start + '', finish + '').concat([start + '']).reverse();
+            //console.log("path %o",path);
+            path_data = [];
+
+            for (var i = 0; i < path.length; i++) {
+                let node = tree_dict[Number.parseInt(path[i])]
+                if (node) {
+                    path_data.push(node)
                 }
-                console.log("total distance: " + path_distance);
-
-                resolve({
-                    path_data,
-                    start_location: emergency,
-                    finish_location: evac
-                })
-            })
-        }
-
-        function initTree() {
-            return new Promise((resolve, reject) => {
-                setTimeout(() => {
-                    var road_coord = JSON.parse(localStorage.getItem("roads")) || [];
-
-                    var tree = []
-                    var node_id = 0;
-                    for (var i = 0; i < road_coord.length; i++) {
-
-                        for (var j = 0; j < road_coord[i].coordinates.length; j++) {
-                            var vertex = [];
-                            if (j < road_coord[i].coordinates.length - 1) {
-                                var distance = getdistance(
-                                    road_coord[i].coordinates[j].lat, road_coord[i].coordinates[j +
-                                        1].lat,
-                                    road_coord[i].coordinates[j].lng, road_coord[i].coordinates[j +
-                                        1].lng,
-                                );
-                                vertex.push({
-                                    node: node_id + 1,
-                                    distance: distance
-                                });
-                            }
-                            if (j > 0) {
-                                var distance = getdistance(
-                                    road_coord[i].coordinates[j].lat, road_coord[i].coordinates[j - 1].lat,
-                                    road_coord[i].coordinates[j].lng, road_coord[i].coordinates[j - 1].lng,
-                                );
-                                vertex.push({
-                                    node: tree[tree.length - 1].node_id,
-                                    distance: distance
-                                });
-                            }
-                            var node = {
-                                node_id: node_id,
-                                name: road_coord[i].name,
-                                coordinates: road_coord[i].coordinates[j],
-                                vertex: vertex
-                            }
-                            tree.push(node);
-                            node_id++;
-                        }
-                    }
-                    //console.log("road structure %o",tree);
-
-
-                    var tree_temp = tree;
-                    var added = [];
-                    for (var i = 0; i < tree.length; i++) {
-                        for (var j = 0; j < tree_temp.length; j++) {
-                            if (i != j) {
-                                if ((tree[i].coordinates.lat == tree_temp[j].coordinates.lat &&
-                                        tree[i].coordinates.lng == tree_temp[j].coordinates.lng)) {
-                                    console.log("match: " + i + " vs " + j + " distance: " + distance);
-                                    if (!added.includes(j)) {
-                                        for (var k = 0; k < tree_temp[j].vertex.length; k++) {
-                                            if (!tree[i].vertex.includes(tree_temp[j].vertex[k])) {
-                                                tree[i].vertex.push(tree_temp[j].vertex[k]);
-                                            }
-                                        }
-                                        added.push(j);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    resolve(tree)
-                })
-
-            })
+            }
 
         }
 
-        /** initializes djikstra from localstorage or reinitialize it from tree structure*/
-        function initDjikstra(tree = []) {
-            return new Promise((resolve, reject) => {
-                var g = new Graph();
-                for (var i = 0; i < tree.length; i++) {
-                    var vertex = {};
-                    for (var j = 0; j < tree[i].vertex.length; j++) {
-                        vertex["" + tree[i].vertex[j].node] = tree[i].vertex[j].distance;
-                    }
-                    g.addVertex(tree[i].node_id + "", vertex);
-                }
-                resolve(g)
-            })
-        } //initDjikstra
+        /* function getNearest(unit,tree){
+            var min = Infinity;
+            var winner = null;
+            for(var i = 0; i<tree.length; i++){
+                var distance = getdistance(unit.lat,tree[i].coordinates.lat,unit.lng,tree[i].coordinates.lng);
+                if(distance<min){
+                    winner = i;
+                    min = distance;
 
-        /** search for the nearest node of the road */
-        function getNearest(location, tree) {
-            var min = 100;
+                }
+            }
+            return winner;
+        } */
+
+        /**returns the index of the nearest node based on the distance */
+        function getNearest(location) {
+            var min = Infinity;
             var winner = null;
             //split the search in two parts to decrease runtime
             for (var i = 0, j = tree.length - 1; i < tree.length / 2; i++, j--) {
@@ -277,14 +156,23 @@
 
             return winner;
         } //getNearest
+
+        initRoute();
     </script>
+
+
+
 
     <script>
         var map;
-        var emergency_marker = [];
 
-        /** initializes google map and initializes the route */
+        var infowindow;
+        var directionsService;
+        var emergency_marker = [];
+        var hostpital_list = hospital_data;
+
         function initMap() {
+
             map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 15,
                 disableDefaultUI: true,
@@ -312,31 +200,42 @@
                 }]
             });
 
-
-            initRoute().then((data) => {
-                drawPath(data)
-            }).catch(err => {
-                console.log(err)
-            })
-        } //initMap
-
-        /** draws the path of two points on the map */
-        function drawPath(data = {}) {
-
-            const path_data = data.path_data
-            const start_location = data.start_location
-            const finish_location = data.finish_location
-
-            console.log("path_data %o, start_location %o finish_locaiton %o", path_data, start_location,
-                finish_location)
+            /*var trafficLayer = new google.maps.TrafficLayer();
+            trafficLayer.setMap(map);*/
 
             var bounds = new google.maps.LatLngBounds();
+
+
+
+
+
+            var infoWindow = new google.maps.InfoWindow(),
+                marker, i;
+
+            /*for( i = 0; i < tree.length; i++ ) {
+                var position = new google.maps.LatLng( tree[i].coordinates.lat,tree[i].coordinates.lng);
+                bounds.extend(position);
+                marker = new google.maps.Marker({
+                    position: position,
+                    map: map,
+                    title: tree[i].node_id+". "+tree[i].name+" position " + tree[i].coordinates.lat +" , "+tree[i].coordinates.lng,
+                    icon: 'resources/images/border-dot-point-25.png'
+                });
+                map.fitBounds(bounds);
+            }*/
+
 
             var path_line_coordinates = []
             for (i = 0; i < path_data.length; i++) {
                 var position = new google.maps.LatLng(path_data[i].coordinates.lat, path_data[i].coordinates.lng);
                 path_line_coordinates.push(position)
                 bounds.extend(position);
+                /* marker = new google.maps.Marker({
+                    position: position,
+                    map: map,
+                    title: (i+1)+". "+" node_id: "+path_data[i].node_id+" "+path_data[i].name+" position " + path_data[i].coordinates.lat +" , "+path_data[i].coordinates.lng,
+                    icon: 'resources/images/ambulance_24.png'
+                }); */
                 map.fitBounds(bounds);
             }
 
@@ -345,8 +244,8 @@
             marker = new google.maps.Marker({
                 position: start_position,
                 map: map,
-                title: "hospital",
-                icon: 'resources/images/emergency_32.png'
+                title: "Evacuation",
+                icon: 'resources/images/evac_32.png'
             });
             map.fitBounds(bounds);
 
@@ -355,8 +254,8 @@
             marker = new google.maps.Marker({
                 position: end_position,
                 map: map,
-                title: "emergency!!",
-                icon: 'resources/images/evac_32.png'
+                title: "User Location",
+                icon: 'resources/images/emergency_32.png'
             });
             map.fitBounds(bounds);
 
@@ -384,6 +283,13 @@
                 map: map
             });
 
+            /* var path_line_coordinates = [];
+            path_line_coordinates.push(start_location);
+            for(var i = 0; i<path_data.length; i++){
+                path_line_coordinates.push(path_data[i].coordinates);
+            }                                
+            path_line_coordinates.push(finish_location); */
+
             var lineSymbol = {
                 path: 'M 0,-1 0,1',
                 strokeOpacity: 1,
@@ -397,6 +303,9 @@
                 strokeWeight: 2,
                 map: map
             });
+
+
+            //marikinaBorder.setMap(map);
         }
     </script>
     <script
