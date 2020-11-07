@@ -148,7 +148,9 @@
 
             </div>
         </div>
+        
 
+        <inventory-supplytype-editor :user="user" v-ref:supply_type_component></inventory-supplytype-editor>
 
         <div class="subcontent">
             <div class="section header">
@@ -160,7 +162,8 @@
                     v-on:click="onNewMuniInventory()">
                     Create Public Inventory
                 </button>
-                <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="viewSupplytypes()">
+                <button type="button" id="add-report" class="btn btn-info button-view" data-toggle="modal"
+                    data-target="#supplyTypesModal">
                     View Supply Types
                 </button>
                 <button type="button" id="add-report" class="btn btn-info button-view"
@@ -220,7 +223,7 @@
                 <div class="section header">
                     <h4>Evacuation Center Inventory</h4>
                 </div>
-                
+
                 <div class="table-container" id="tableData">
                     <div class="panel-group" v-for="evac,index in evac_list">
                         <div class="panel panel-default">
@@ -251,23 +254,22 @@
                                     <ul class="list-group" v-for="inventory,index in inventory_list[evac.id]">
                                         <div class="list-group-item">
                                             <div class="row">
-                                                <div class="col-xs-12">
-                                                    <p class="item-value">{{index+1}}. {{inventory.name}}</p>
+                                                <div class="col-md-12">
+                                                    <p class="item-label">{{index+1}}. {{inventory.name}}</p>
                                                 </div>
-                                                <div class="col-xs-5">
+                                                <div class="col-md-5">
                                                     <p class="item-value">{{inventory.description}}</p>
                                                 </div>
-                                                <div class="col-xs-3">
-                                                    <p class="item-value">date created: {{formatDate(inventory.date_created)}}</p>
+                                                <div class="col-md-3">
+                                                    <p class="item-value">date created:
+                                                        {{formatDate(inventory.date_created)}}</p>
                                                 </div>
-                                                <div class="col-xs-3">
+                                                <div class="col-md-3">
                                                     <p class="item-value">
                                                         date updated: {{formatDate(inventory.date_updated)}}
                                                     </p>
                                                 </div>
-                                                
                                             </div>
-
                                         </div>
                                         <div class="list-group-item">
                                             <button type="button" id="add-report" class="btn btn-success button-view"
@@ -301,12 +303,12 @@
 
                 </div>
             </div>
-            
+
         </div>
 
     </div>
 
-    
+
     <script src="js/app/app.js"></script>
 
     <script>
@@ -322,6 +324,13 @@
                 municipalities: [],
                 isEdit: false,
                 editEvacuationID: null,
+
+                supply_type_component: {},
+
+
+                supply_types: [],
+                //supply_type_input: new EvacuationSupplyType(),
+
                 isLoading: {
                     evac_inv: false,
                     muni_inv: false
@@ -332,12 +341,22 @@
                 onStart() {
                     this.user = header.user
                     this.municipalities = ['public'].concat(municipalities)
-                    this.fetchData()
+                    try {
+                        this.fetchData()
+                    }catch(err) {
+                        console.log(err)
+                    }
                 },
 
                 fetchData() {
                     this.fetchMunicipalInv()
                     this.fetchEvacationCenter()
+                    
+                    //this.$refs.supply_type_component.fetchSupplyType()
+                    //this.$children[0].fetchSupplyType()
+                    this.$children[0].fetchSupplyType()
+                    
+                    //this.fetchSupplyType()
                 },
 
                 fetchMunicipalInv() {
@@ -361,8 +380,17 @@
                         console.log(err)
                     }).finally(() => {
                         this.isLoading.evac_inv = false
-                    })
+                    })  
                 },
+
+                /* fetchSupplyType(){
+                    DataHandler.getSupplyTypes().then((data) => {
+                        this.supply_types = data.data || []
+                        console.log("supply types %o", this.supply_types)
+                    }).catch(err => {
+                        console.log(err)
+                    })
+                }, */
 
                 setEvacationCenter(evac_data) {
                     this.evac_list = evac_data
@@ -452,7 +480,8 @@
                     this.muni_inv_input = new MunicipalInventory()
                     this.muni_inv_input.created_by = this.user.id
                     //v-if="user.admin_type == 0 && user.municipality == 'admin'"
-                    this.muni_inv_input.municipality = (this.user.admin_type == 0 && this.user.municipality == 'admin') ? 'public' : undefined
+                    this.muni_inv_input.municipality = (this.user.admin_type == 0 && this.user.municipality ==
+                        'admin') ? 'public' : undefined
                     $('#muniModal').modal()
                 },
 
@@ -472,7 +501,7 @@
                             alert(`Can't Edit Item ${data.error}`)
                         } else {
                             alert(`Item Have Been Saved Successfuly`)
-                            this.fetchMunicipalInv()
+                            this.fetchEvacationCenter()
                         }
                     }).catch(err => {
                         console.log(err)
@@ -492,7 +521,7 @@
                                 alert(`Item Have Been Deleted Successfuly`)
                                 this.fetchMunicipalInv()
                             }
-                        }).catch((err) =>{
+                        }).catch((err) => {
                             console.log(err)
                         })
                     }
@@ -507,9 +536,52 @@
                     saveTextAsFile(text)
                 },
 
-                viewSupplytypes() {
-
+                /*!!=============== SUPPLY-TYPE ===============!!!*/
+                /* addSupplyType() {
+                    this.supply_type_input = new EvacuationSupplyType()
+                    this.supply_type_input.inventory_id = this.inventory.id
+                    this.supply_type_input.created_by = this.user.id
+                    this.isEdit = false
+                    $('#supplyTypeEditor').modal()
                 },
+
+                editSupplyType(index) {
+                    let supply = this.supply_types[index]
+                    this.supply_type_input = EvacuationSupplyType.parse(supply.toObject())
+                    $('#supplyTypeEditor').modal()
+                },
+
+                onSaveSupplyType() {
+                    console.log("data %o", this.supply_type_input)
+
+                    this.supply_type_input.date_updated = new Date()
+
+                    DataHandler.addSupplyType(this.supply_type_input).then((data) => {
+                        if (data.error) {
+                            alert(`Can't Persist Item ${data.error}`)
+                        } else {
+                            alert(`Item Have Been Persisted Successfuly`)
+                            this.supply_type_input = new EvacuationSupplyType()
+                            this.fetchSupplyType()
+                        }
+                    })
+                },
+
+                onDeleteSupplyType(id) {
+                    let onConfirm = confirm('Deleting Item\nPress confirm to proceed')
+                    if (onConfirm) {
+                        DataHandler.deleteSupplyType(id).then((data) => {
+                            console.log(data)
+                            if (data.error) {
+                                alert(`Can't Delete Item ${data.error}`)
+                            } else {
+                                alert(`Item Have Been Deleted Successfuly`)
+                                this.fetchSupplyType()
+                            }
+                        })
+                    }
+                }, */
+                /*!!=============== SUPPLY-TYPE ===============!!!*/
 
                 generateReport() {
 
@@ -517,32 +589,6 @@
 
             }
         })
-
-        ///generates a file of json contains
-        function saveTextAsFile(text) {
-            const textToWrite = text
-            const textFileAsBlob = new Blob([textToWrite], {
-                type: 'text/plain'
-            });
-            const fileNameToSaveAs = "inventory.json" //document.getElementById("").value;
-            let downloadLink = document.createElement("a");
-            downloadLink.download = fileNameToSaveAs;
-            downloadLink.innerHTML = "Download File";
-            if (window.webkitURL != null) {
-                // Chrome allows the link to be clicked
-                // without actually adding it to the DOM.
-                downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
-            } else {
-                // Firefox requires the link to be added to the DOM
-                // before it can be clicked.
-                downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
-                downloadLink.onclick = destroyClickedElement;
-                downloadLink.style.display = "none";
-                document.body.appendChild(downloadLink);
-            }
-
-            downloadLink.click();
-        } //saveTextAsFile
     </script>
 
 </body>

@@ -211,19 +211,19 @@ const FilterComponent = Vue.extend({
         filter_add: {}
     },
     watch: {
-        filter_add(){
+        filter_add() {
             Object.keys(this.filter_add).forEach((key) => {
-                this.filter[key] = 'all' 
+                this.filter[key] = 'all'
             })
             console.log("filter %o", this.filter_add)
         }
     },
     data() {
         return {
-            filter : {
+            filter: {
                 year: 'all',
                 month: 'all',
-                municipality: 'all',                
+                municipality: 'all',
                 searchTerm: ''
             },
             selections: {
@@ -266,30 +266,30 @@ const FilterComponent = Vue.extend({
     created() {
         console.log('user data from parent component:')
 
-        for(var i = (new Date()).getFullYear(); i >= 2000 ; i--) {
+        for (var i = (new Date()).getFullYear(); i >= 2000; i--) {
             this.selections.years.push(i)
         }
 
-        try{
+        try {
             Object.keys(this.filter_add).forEach((key) => {
                 this.selections.filter_additional[key] = ['all'].concat(this.filter_add[key] || [])
-                this.filter[key] = 'all' 
+                this.filter[key] = 'all'
             })
-        }catch(err) {
+        } catch (err) {
             console.log(err)
         }
-        
-        
+
+
     },
     methods: {
         formatDate(date) {
             let _date = new Date(date)
             return _date.toLocaleDateString()
         },
-        onCancelSearch(){
+        onCancelSearch() {
             this.filter.searchTerm = ""
         },
-        onClear(){
+        onClear() {
             /* this.filter = {
                 year: 'all',
                 month: 'all',
@@ -299,13 +299,201 @@ const FilterComponent = Vue.extend({
             Object.keys(this.filter).map((key) => {
                 this.filter[key] = 'all'
             })
-            this.filter.searchTerm  = ''
+            this.filter.searchTerm = ''
         }
     }
 })
 
 Vue.component('filter-component', FilterComponent)
 
+const InventorySupplyTypeEditor = Vue.extend({
+    template: `
+    <div>
+    <div id="supplyTypesModal" class="modal fade " role="dialog">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Inventory Supply Types</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="table-container table-responsive" id="tableData" v-if="supply_types.length > 0">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Name</th>
+                                        <th>Description</th>
+                                        <th>Amount</th>
+                                        <th>Date Created</th>
+                                        <th>Date Updated</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="item, index in supply_types">
+                                        <td>{{index+1}}</td>
+                                        <td>{{item.name}}</td>
+                                        <td>{{item.description}}</td>
+                                        <td>{{item.amount}}</td>
+                                        <td>{{formatDate(item.date_created)}}</td>
+                                        <td>{{formatDate(item.date_updated)}}</td>
+                                        <td>
+                                            <button class="btn btn-info"
+                                                v-on:click="editSupplyType(index)">edit</button>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-danger"
+                                                v-on:click="onDeleteSupplyType(index)">delete</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="add-report" class="btn btn-warning button-view"
+                            v-on:click="addSupplyType()">Add New Type
+                        </button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <div id="supplyTypeEditor" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Supply Types</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" v-if="supply_type_input != null">
+                    <fieldset>
+                        <div class="form-group">
+                            <label class="col-md-4 control-label" for="name">Name</label>
+                            <div class="col-md-4">
+                                <input id="name" name="name" type="text" placeholder="Name"
+                                    class="form-control input-md" required="" v-model="supply_type_input.name">
+                                <span class="help-block">Enter Name</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-4 control-label" for="qty">Unit Count</label>
+                            <div class="col-md-4">
+                                <input id="name" name="qty" type="number" placeholder="Unit Count"
+                                    class="form-control input-md" required=""
+                                    v-model="supply_type_input.amount">
+                                <span class="help-block"># of items per pack</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-4 control-label" for="description">Description</label>
+                            <div class="col-md-4">
+                                <textarea id="description" name="description" type="text"
+                                    placeholder="Description .... " class="form-control input-md" required=""
+                                    v-model="supply_type_input.description"></textarea>
+                                <span class="help-block">Enter Description</span>
+                            </div>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal"
+                    v-on:click="onSaveSupplyType()">Save</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+</div>`,
+    props: {
+        user: AdminUser,
+        //supply_types: Array,
+        //supply_type_input: Object,
+    },
+    watch: {
+        user(){
+            console.log("user updated %o", this.user)
+            if (this.user) {
+                console.log("user updated %o", this.user)
+                this.fetchSupplyType()
+            }
+        }
+    },
+    data() {
+        return {
+            supply_type_input: {},
+            supply_types: []
+        }
+    },
+    created() {
+        //this.fetchSupplyType()
+    },
+    methods: {
+        fetchSupplyType(){
+            DataHandler.getSupplyTypes().then((data) => {
+                this.supply_types = data.data || []
+                console.log("supply types %o", this.supply_types)
+                this.$emit('onchange',this.supply_types)
+            }).catch(err => {
+                console.log(err)
+            })
+        },
+
+        formatDate(date) {
+            let _date = new Date(date)
+            return _date.toLocaleDateString()
+        },
+
+        addSupplyType() {
+            this.supply_type_input = new EvacuationSupplyType()
+            this.supply_type_input.created_by = this.user.id
+            this.isEdit = false
+            $('#supplyTypeEditor').modal()
+        },
+
+        editSupplyType(index) {
+            let supply = this.supply_types[index]
+            this.supply_type_input = EvacuationSupplyType.parse(supply.toObject())
+            $('#supplyTypeEditor').modal()
+        },
+
+        onSaveSupplyType() {
+            console.log("data %o", this.supply_type_input)
+
+            this.supply_type_input.date_updated = new Date()
+
+            DataHandler.addSupplyType(this.supply_type_input).then((data) => {
+                if (data.error) {
+                    alert(`Can't Persist Item ${data.error}`)
+                } else {
+                    alert(`Item Have Been Persisted Successfuly`)
+                    this.supply_type_input = new EvacuationSupplyType()
+                    this.fetchSupplyType()
+                }
+            })
+        },
+
+        onDeleteSupplyType(id) {
+            let onConfirm = confirm('Deleting Item\nPress confirm to proceed')
+            if (onConfirm) {
+                DataHandler.deleteSupplyType(id).then((data) => {
+                    console.log(data)
+                    if (data.error) {
+                        alert(`Can't Delete Item ${data.error}`)
+                    } else {
+                        alert(`Item Have Been Deleted Successfuly`)
+                        this.fetchSupplyType()
+                    }
+                })
+            }
+        },
+    }
+})
+
+Vue.component('inventory-supplytype-editor', InventorySupplyTypeEditor)
 
 
 const InventorySelector = Vue.extend({
@@ -540,6 +728,3 @@ var inventory_selection = new Vue({
         }
     }
 })
-
-
-

@@ -68,39 +68,6 @@
                     </div>
                     <div class="modal-body">
                         <form-generator :form="formModel" :input.sync="data_input" ></form-generator>
-                        <!-- <form class="form-horizontal" v-if="data_input != null">
-                            <fieldset>
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label" for="evacuation_center">Evacuation
-                                        Center</label>
-                                    <div class="col-md-4">
-                                        <select id="evacuation_center" name="evacuation_center" class="form-control"
-                                            v-model="data_input.evac_id">
-                                            <option v-for="evac in evac_list" v-bind:value="evac.id">
-                                                {{evac.name}}</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label" for="name">Population</label>
-                                    <div class="col-md-4">
-                                        <input id="name" name="name" type="text" placeholder="0"
-                                            class="form-control input-md" required=""
-                                            v-model="data_input.current_population">
-                                        <span class="help-block">peek population size</span>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label" for="report_date">Report Date</label>
-                                    <div class="col-md-4">
-                                        <input id="report_date" name="report_date" type="datetime-local"
-                                            class="form-control input-md" v-model="data_input.report_date">
-                                        <span class="help-block">date of entry recorded</span>
-                                    </div>
-                                </div>
-
-                            </fieldset>
-                        </form> -->
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal"
@@ -188,10 +155,6 @@
                     'current_population'
                 ],
 
-                /* max_reports_count: 0,
-                curr_reports_count: 0,
-                curr_offset_index: 0,
-                pages: [], */
                 formModel: EvacuationHistory.formModel,
 
                 filter_add: null,
@@ -232,20 +195,6 @@
                         console.log("err %o", err)
                     })
 
-                    /* DataHandler.getEvacuationHistoryMax().then((message) => {
-                        this.max_reports_count = message.data
-
-                        let pages = this.max_reports_count / 100
-
-                        for(var i = 0; i< pages; i++){
-                            this.pages.push(i * 101)
-                        }
-
-                        console.log("pages %o", this.pages)
-                    }).catch(error => {
-                        console.log(error)
-                    }) */
-
                     this.isDataLoading = true
                     DataHandler.getEvacuationHistory().then((message) => {
                         this.reports    = message.data
@@ -258,89 +207,9 @@
 
                 },
 
-
                 getEvacFromId(id) {
                     return this.evac_dict[id]
                 },
-
-                /* createSampleReport() {
-                    var reports = []
-                    let year = [2018, 2019, 2020]
-                    this.evac_list.forEach((evac = new EvacuationHistory()) => {
-                        year.forEach((year) => {
-                            this.selections.months_only.forEach((month, index) => {
-                                let samplePop = getRandomValue(evac
-                                    .population_capacity / 2, evac
-                                    .population_capacity)
-                                let date = new Date(year, (index + 1), 1);
-                                let history = new EvacuationHistory(null, evac.id,
-                                    samplePop, 0, date, null)
-                                reports.push(history)
-                            })
-                        })
-                    });
-                    DataHandler.setDataEvacuationHistory(reports).then((data) => {
-                        alert("added reports")
-                        this.fetchReports()
-                    }).catch((err) => {
-                        console.log("error")
-                    })
-                }, */
-
-                
-
-                /* filterList() {
-                    //year
-                    this.view_list = this.reports.filter((item = new EvacuationHistory()) => {
-                        let item_year = item.report_date.getFullYear()
-                        if (!this.filter.year || this.filter.year == 'all' || this.filter.year ==
-                            item_year) {
-                            return true
-                        } else {
-                            return false
-                        }
-                    })
-
-
-                    //month
-
-                    let index_selection_month = this.selections.months.indexOf(this.filter.month)
-                    console.log("month index %o", index_selection_month)
-                    this.view_list = this.view_list.filter((item = new EvacuationHistory()) => {
-                        let item_month = item.report_date.getMonth()
-                        if (!this.filter.month || this.filter.month == 'all' || item_month ==
-                            index_selection_month) {
-                            return true
-                        } else {
-                            return false
-                        }
-                    })
-
-                    //evacuation center
-                    this.view_list = this.view_list.filter((item = new EvacuationHistory()) => {
-                        let evac = this.getEvacFromId(item.evac_id)
-                        if (!this.filter.station || this.filter.station == 'all' || this.filter
-                            .station == evac.name) {
-                            return true
-                        } else {
-                            return false
-                        }
-                    })
-
-                    //municipalities
-                    this.view_list = this.view_list.filter((item = new EvacuationHistory()) => {
-                        let evac = this.getEvacFromId(item.evac_id)
-                        if (!this.filter.municipal || this.filter.municipal == 'all' || this.filter
-                            .municipal.toLowerCase() == evac.municipality.toLowerCase()) {
-                            return true
-                        } else {
-                            return false
-                        }
-                    })
-
-                    console.log("filtered %o", this.view_list)
-                }, */
-
 
                 editItem(index) {
                     this.data_input = EvacuationHistory.parse(this.view_list[index].toObject())
@@ -408,35 +277,13 @@
 
                         return (
                             (filter.year == 'all' || 
-                                /* filter.year == date_created.getFullYear() || 
-                                filter.year == date_updated.getFullYear() || */
                                 filter.year == date_report.getFullYear()  ) &&
                             (filter.month == 'all' || 
-                                /* filter.month == (months_array[date_created.getMonth()] || 0) ||
-                                filter.month == (months_array[date_updated.getMonth()] || 0) || */
                                 filter.month == (months_array[date_report.getMonth()] || 0)) &&
                             (filter.municipality == 'all' || 
                             filter.municipality == evac.municipality)
                         )
                     });
-
-                    /* let keys = EvacuationCenter.filter_keys
-
-                    view_list = view_list.filter((data) => {
-                        let eval = keys.filter((key) => {
-                            if (key == 'facilities') {
-                                return (filter[key] == 'all' ||
-                                    (data[key] + "").toLowerCase().includes(filter[key]
-                                        .toLowerCase()))
-                            } else {
-                                return (filter[key] == 'all' ||
-                                    filter[key].toLowerCase() == (data[key] + "")
-                                    .toLowerCase())
-                            }
-                        })
-                        console.log(eval)
-                        return keys.length == eval.length
-                    }) */
                     
                     view_list = view_list.filter((data) => {
                         let population_range = filter.populations
@@ -484,12 +331,10 @@
                 },
 
                 onClearFilter() {
-                    //this.view_list = [...this.evac_list]
                     this.view_list = [...this.reports]
                 },
 
                 onDownloadReport() {
-
                     let view_list = this.view_list.map((data) => {
                         var object = {...data.toObject()}
                         let evac = this.evac_dict[data.evac_id]

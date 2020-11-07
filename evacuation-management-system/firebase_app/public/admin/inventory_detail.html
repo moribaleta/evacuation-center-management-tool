@@ -76,7 +76,7 @@
                         <h4 class="modal-title">Inventory Supply</h4>
                     </div>
                     <div class="modal-body">
-                        <form class="form-horizontal" v-if="supply_input != null">
+                        <form class="form-horizontal" >
                             <fieldset>
                                 <div class="form-group">
                                     <label class="col-md-4 control-label" for="inventory_type">Supply Type</label>
@@ -99,7 +99,7 @@
                                 <div class="form-group">
                                     <label class="col-md-4 control-label" for="report_date">Date Supplied</label>
                                     <div class="col-md-4">
-                                        <input id="report_date" name="report_date" type="datetime-local"
+                                        <input id="report_date" name="report_date" type="date"
                                             class="form-control input-md" v-model="supply_input.date_supplied">
                                         <span class="help-block">date supplied</span>
                                     </div>
@@ -228,6 +228,7 @@
             </div>
         </div>
 
+        <inventory-supplytype-editor :user="user" ref:supply_type_component></inventory-supplytype-editor>
 
         <div class="subcontent">
             <div class="section header">
@@ -269,6 +270,21 @@
                 </div>
             </div>
 
+            <div class="section">
+                <button type="button" id="add-report" class="btn btn-info button-view"
+                data-toggle="modal"
+                data-target="#supplyTypesModal">View Supply Types
+                </button>
+                <button type="button" id="add-report" class="btn btn-info button-view"
+                    v-on:click="addSupplyItem()">Add
+                    New
+                    Supply
+                </button>
+                <button type="button" id="add-report" class="btn btn-success button-view"
+                    v-on:click="generateReport()">
+                    Generate Report
+                </button>
+            </div>
 
             <div class="section">
                 <div class="section header">
@@ -301,7 +317,7 @@
                                     Name:
                                 </p>
                                 <p class="item-value">
-                                    {{supply_types_ref[item.inventory_type].name}}
+                                    {{getSupplyType(item.inventory_type)}}
                                 </p>
                             </div>
                             <div class="col col-md-2 item-info">
@@ -357,21 +373,11 @@
                         </div>
                     </div>
                 </div>
-                <div class="section">
-                    <button type="button" id="add-report" class="btn btn-info button-view"
-                        v-on:click="addSupplyItem()">Add
-                        New
-                        Supply
-                    </button>
-                    <button type="button" id="add-report" class="btn btn-success button-view"
-                        v-on:click="generateReport()">
-                        Generate Report
-                    </button>
-                </div>
+                
             </div>
 
 
-            <div class="section">
+           <!--  <div class="section">
                 <div class="section header" v-if="supply_types.length > 0">
                     <h4>Supplies Types</h4>
                 </div>
@@ -449,9 +455,10 @@
                         
                     </div>
                 </div>
-            </div>
+            </div> -->
             
         </div>
+        <div>&nbsp;</div>
     </div>
 
     </div>
@@ -469,8 +476,8 @@
                 supply_types: [],
                 supply_types_ref: {},
                 inventory_input: null,
-                supply_input: null,
-                supply_type_input: null,
+                supply_input: {},
+                supply_type_input: {},
                 isedit: false,
                 municipalities: [],
                 /* isloadinginventory: false,
@@ -484,6 +491,7 @@
                 supply_header: [],
                 supply_type_header: [],
                 isMunicipality: false,
+                supply_type_component:null,
                 transfer_supply: new EvacuationSupply()
             },
             methods: {
@@ -505,11 +513,19 @@
                     this.isMunicipality = (isMuni == 'true');
 
                     this.fetchInventory(id)
+
+                    try{
+                        console.log(this.$children)
+                    }catch(err) {
+                        console.log(err)
+                    }
                 },
 
                 fetchInventory(id) {
                     this.loading.isInventory = true
                     this.loading.isSupply = true
+
+                    //this.fetchSupplyType()
 
                     //var promiseFetch = new Promise()//DataHandler.getInventory(id)
                     console.log("get municipal", this.isMunicipality)
@@ -529,13 +545,27 @@
                         this.loading.isInventory = false
                     })
 
-                    this.fetchSupplyType()
+                    
                 },
 
                 setInventory(data) {
                     this.inventory = data
                     if(this.inventory) {
-                        this.fetchSupply()
+                        //this.fetchSupply()
+
+                        Promise.all([this.fetchSupplyTypePromise(), this.fetchSupplyPromise(this.inventory.id)]).then((data) => {
+                            
+                            this.supply_types = data[0].supply_types
+                            this.supply_types_ref = data[0].supply_types_ref
+                            this.supplies = data[1]
+                            console.log("supplies types %o", data[0])
+                            console.log("supplies %o", this.supplies)
+                            this.loading.isSupply = false
+                        }).catch((err) => {
+                            console.log(err)
+                            this.loading.isSupply = false
+                        })
+
                     } else {
                         this.loading.isSupply = false
                     }
@@ -543,6 +573,7 @@
 
                 fetchSupply() {
                     this.loading.isSupply = false
+                    
                     DataHandler.getSupplies([this.inventory.id]).then((message) => {
                         this.supplies = message.data[0].supplies
                     }).catch(err => {
@@ -552,6 +583,45 @@
                     })
                 },
 
+                getSupplyType(id) {
+                    console.log(id)
+                    console.log(this.supply_types_ref)
+                    let type =  this.supply_types_ref[id]
+                    
+                    
+                    return type ? type.name : id
+                },
+
+                fetchSupplyPromise(id) {
+                    return DataHandler.getSupplies([id]).then((message) => {
+                        console.log("supply %o", message)
+                        return message.data[0].supplies
+                    })
+                },
+
+
+                fetchSupplyTypePromise() {
+                    return DataHandler.getSupplyTypes().then((data) => {
+                        /* this.supply_types = data.data || []
+                        this.loading.isSupplyType = false
+                        console.log("supply types %o", this.supply_types)
+
+                        this.supply_types.forEach(type => {
+                            this.supply_types_ref[type.id] = type
+                        });
+                        return true */
+                        
+                        let supply_types  = data.data || [] 
+                        var supply_types_ref = {}
+                        supply_types.forEach(type => {
+                            supply_types_ref[type.id] = type
+                        });
+                        console.log("fetch %o", {supply_types, supply_types_ref})
+                        return {supply_types, supply_types_ref}
+                    })
+                },
+
+                
                 fetchSupplyType() {
                     this.loading.isSupplyType = true
                     DataHandler.getSupplyTypes().then((data) => {
@@ -657,7 +727,9 @@
                     })
                 },
 
-                onDeleteSupplyItem(id) {
+                onDeleteSupplyItem(index) {
+                    console.log("id %o", index)
+                    let id = this.supplies[index].id
                     let onConfirm = confirm('Deleting Item\nPress confirm to proceed')
                     if (onConfirm) {
                         DataHandler.deleteSupply(id).then((data) => {
@@ -755,7 +827,7 @@
             }
         })
 
-
+/* 
         ///generates a file of json contains
         function saveTextAsFile(text) {
             const textToWrite = text
@@ -780,7 +852,7 @@
             }
 
             downloadLink.click();
-        } //saveTextAsFile
+        } //saveTextAsFile */
         
 
     
