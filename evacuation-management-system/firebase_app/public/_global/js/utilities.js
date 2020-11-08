@@ -126,28 +126,28 @@ const FormGenerator = Vue.extend({
     <p>{{form[key].title}}</p>
     
     <input v-if="form[key].type == 'text'" type="text" class="input input-item"
-    :id="'input_'+key" v-model="input[key]">
+    :id="'inputINP'+key" v-model="input[key]">
     
     <input v-if="form[key].type == 'password'" type="password" class="input input-item"
-    :id="'input_'+key" v-model="input[key]">
+    :id="'inputINP'+key" v-model="input[key]">
     
     <input v-if="form[key].type == 'email'" type="email" class="input input-item"
-    :id="'input_'+key" v-model="input[key]">
+    :id="'inputINP'+key" v-model="input[key]">
     
     <input v-if="form[key].type == 'number'" type="number" class="input input-item"
-    :id="'input_'+key" v-model="input[key]">
+    :id="'inputINP'+key" v-model="input[key]">
     
     <input v-if="form[key].type == 'date'" type="date" class="input input-item"
-    :id="'input_'+key"  :value="formatDate(input[key], false)" v-on:change="dateChange">
+    :id="'inputINP'+key"  :value="formatDate(input[key], false)" v-on:change="dateChange">
     
     <input v-if="form[key].type == 'datetime'" type="datetime-local" class="input input-item"
-    :id="'input_'+key"  :value="formatDate(input[key], true)" v-on:change="dateChange"">
+    :id="'inputINP'+key"  :value="formatDate(input[key], true)" v-on:change="dateChange"">
     
     <textarea v-if="form[key].type == 'textarea'" class="form-control"
-    :id="'input_'+key" name="exact_address" v-model="input[key]"></textarea>
+    :id="'inputINP'+key" name="exact_address" v-model="input[key]"></textarea>
     
     <select v-if="form[key].type == 'dropdown'" class="input input-item input-select"
-    :id="'input_'+key" v-model="input[key]">
+    :id="'inputINP'+key" v-model="input[key]">
     <option v-for="option in form[key].options" :value="option.value">
     {{option.title}}</option>
     </select>
@@ -157,28 +157,28 @@ const FormGenerator = Vue.extend({
         <div class="col col-md-12 input-container" v-for="subkey in Object.keys(form[key].compound)" v-if="!(form[key].compound[subkey].isHidden || false)">
             <p>{{form[key].compound[subkey].title}}</p>
             <input v-if="form[key].compound[subkey].type == 'text'" type="text" class="input input-item"
-            :id="'input_'+key+'_'+subkey" v-model="input[key][subkey]">
+            :id="'inputINP'+key+'INP'+subkey" v-model="input[key][subkey]">
             
             <input v-if="form[key].compound[subkey].type == 'password'" type="password" class="input input-item"
-            :id="'input_'+key+'_'+subkey" v-model="input[key][subkey]">
+            :id="'inputINP'+key+'INP'+subkey" v-model="input[key][subkey]">
             
             <input v-if="form[key].compound[subkey].type == 'email'" type="email" class="input input-item"
-            :id="'input_'+key+'_'+subkey" v-model="input[key][subkey]">
+            :id="'inputINP'+key+'INP'+subkey" v-model="input[key][subkey]">
             
             <input v-if="form[key].compound[subkey].type == 'number'" type="number" class="input input-item"
-            :id="'input_'+key+'_'+subkey" v-model="input[key][subkey]">
+            :id="'inputINP'+key+'INP'+subkey" v-model="input[key][subkey]">
             
             <input v-if="form[key].compound[subkey].type == 'date'" type="date" class="input input-item"
-            :id="'input_'+key+'_'+subkey" v-model="input[key][subkey]">
+            :id="'inputINP'+key+'INP'+subkey" v-model="input[key][subkey]">
             
             <input v-if="form[key].compound[subkey].type == 'datetime'" type="datetime-local" class="input input-item"
-            :id="'input_'+key+'_'+subkey" v-model="input[key][subkey]">
+            :id="'inputINP'+key+'INP'+subkey" v-model="input[key][subkey]">
             
             <textarea v-if="form[key].compound[subkey].type == 'textarea'" class="form-control"
-            :id="'input_'+key+'_'+subkey" name="exact_address" v-model="input[key][subkey]"></textarea>
+            :id="'inputINP'+key+'INP'+subkey" name="exact_address" v-model="input[key][subkey]"></textarea>
             
             <select v-if="form[key].compound[subkey].type == 'dropdown'" class="input input-item input-select"
-            :id="'input_'+key+'_'+subkey" v-model="input[key][subkey]">
+            :id="'inputINP'+key+'INP'+subkey" v-model="input[key][subkey]">
             <option v-for="option in form[key].compound[subkey].options" :value="option.value">
             {{option.title}}</option>
             </select>
@@ -218,12 +218,16 @@ const FormGenerator = Vue.extend({
             let id = event.srcElement.id
             let date = $('#'+id).val()
             //this.input[id.substr(('input_').length)] = new Date(date)
-            let ids = id.split('_')
+            let ids = id.split('INP')
+            let _date = new Date(date)
             if (ids > 1) {
-                this.input[ids[1]][ids[2]] = new Date(date)
+                this.input[ids[1]][ids[2]] = _date
+                console.log("compound")
             } else {
-                this.input[ids[1]] = new Date(date)
+                this.input[ids[1]] = _date
             }
+            console.log("ids %o", ids)
+            console.log(this.input)
         },
 
         formatDate(date, isTime) {
@@ -360,11 +364,11 @@ const EntrySingleComponent = Vue.extend({
         </p>
     </div>
 `,
-    props: {
-        value: String,
-        label: String,
-        showtime: Boolean
-    },
+    props: [
+        'value',
+        'label',
+        'showtime'
+    ],
 
     data() {
         return {
@@ -411,12 +415,19 @@ const parseObject = (object) => {
             object[key] = date
         } catch (err) {
             try {
-                let timestamp = new firebase.firestore.Timestamp(object[key].seconds, object[key].nanoseconds)
-                object[key] = new Date(timestamp.toDate())
+                console.log(err) 
+                if (object[key].seconds &&
+                    object[key].nanoseconds) {
+                        let timestamp = new firebase.firestore.Timestamp(object[key].seconds,
+                            object[key].nanoseconds)
+                       object[key] = new Date(timestamp.toDate())
+                } else {
+                    object[key] = new Date(object[key])
+                }
+                
                 //console.log("im here?")
             } catch (err) {
-                /* console.log("not timestamp", key, object[key])
-                console.log(err) */
+                console.log(err) 
             }
             /* console.log("key %o, value %o", key, object[key])
             console.log(err) */

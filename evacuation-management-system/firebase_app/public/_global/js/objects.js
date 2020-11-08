@@ -29,10 +29,10 @@ const FormModels = {
 }
 
 const SupplyStatus = {
-    pending:    'pending',
-    stored:     'stored',
-    addressed:  'addressed',
-    cancelled:  'cancelled'
+    pending:        'pending',
+    stored:         'stored',
+    addressed:      'addressed',
+    cancelled:      'cancelled',
 }
 
 /**
@@ -667,8 +667,45 @@ class EvacuationSupply extends Model {
     /** any remarks or descriptions */
     remarks = ""
 
+    /** log data of the supply */
+    logs = ""
 
-    constructor(id, date_created, date_updated, created_by, inventory_id, inventory_type, qty, date_supplied, remarks, status) {
+    static formModel = {
+        inventory_type : {
+            type: FormModels.dropdown,
+            title: 'Supply Type',
+            options: []
+        },
+
+        qty: {
+            type: FormModels.number,
+            title: '# of Quantity',
+        },
+
+        date_supplied: {
+            type: FormModels.date,
+            title: 'Date Supplied',
+        },
+
+        status: {
+            type: FormModels.dropdown,
+            title: 'Supply Status',
+            options: Object.keys(SupplyStatus).map((key) => {
+                return {
+                    title: key,
+                    value: key
+                }
+            })
+        },
+
+        remarks: {
+            type: FormModels.textarea,
+            title: 'Remarks'
+        }
+    }
+
+
+    constructor(id, date_created, date_updated, created_by, inventory_id, inventory_type, qty, date_supplied, remarks, status, logs) {
         super()
         this.id = id || "evacsupply-" + genID(5)
         this.date_created = date_created || new Date()
@@ -680,6 +717,7 @@ class EvacuationSupply extends Model {
         this.date_supplied = date_supplied
         this.remarks = remarks
         this.status  = status || SupplyStatus.pending
+        this.logs = logs || "Created Entry"
     }
 
     static parse(objects = {}) {
@@ -693,7 +731,8 @@ class EvacuationSupply extends Model {
             objects.qty,
             objects.date_supplied,
             objects.remarks,
-            objects.status
+            objects.status,
+            objects.logs || ""
         )
     }
 
@@ -708,7 +747,8 @@ class EvacuationSupply extends Model {
             qty: this.qty,
             date_supplied: this.date_supplied,
             remarks: this.remarks,
-            status: this.status
+            status: this.status,
+            logs: this.logs
         }
     }
 } //EvacuationSupply

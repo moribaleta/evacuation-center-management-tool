@@ -5,7 +5,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Inventory Detail</title>
-
+    
     <!-- update the version number as needed -->
     <script defer src="/__/firebase/7.19.1/firebase-app.js"></script>
     <!-- include only the Firebase features as you need -->
@@ -17,8 +17,9 @@
     <script defer src="/__/firebase/7.19.1/firebase-functions.js"></script>
     <!-- initialize the SDK after all desired features are loaded -->
     <script defer src="/__/firebase/init.js"></script>
-
+    
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <script src="js/jquery-3.0.0.min.js"></script>
     <script src="bootstrap/js/bootstrap.min.js"></script>
@@ -27,6 +28,7 @@
     <script src="../_global/js/objects.js"></script>
     <script src="../_global/js/utilities.js"></script>
     <script src="../_global/js/datahandler.js"></script>
+    
 </head>
 
 <body>
@@ -34,7 +36,7 @@
         <div class="sidenav-item">
             <img class="nav-image" :src="logo" />
         </div>
-
+        
         <div v-for="item in header_items" v-bind:class="'sidenav-item ' + (active == item.id ? 'active' : '') ">
             <a v-bind:href="item.href">
                 <div class="icon-block">
@@ -43,7 +45,7 @@
                 </div>
             </a>
         </div>
-
+        
         <div class="sidenav-item">
             <a v-on:click="onLogout()">
                 <div class="icon-block">
@@ -53,15 +55,15 @@
             </a>
         </div>
     </div>
-
+    
     <div id="inventory-list-picker">
         <inventory-selector 
-            :muni_inv_list="muni_inv_list" 
-            :evac_list="evac_list" 
-            :inventory_list="inventory_list" 
-            :is-loading="isLoading"
-            :supply="supply"
-            v-on:on-select-inventory="id => {onSelectInventory(id)}"
+        :muni_inv_list="muni_inv_list" 
+        :evac_list="evac_list" 
+        :inventory_list="inventory_list" 
+        :is-loading="isLoading"
+        :supply="supply"
+        v-on:on-select-inventory="id => {onSelectInventory(id)}"
         ></inventory-selector>
     </div>
     <!-- <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#editorModal">Open Modal</button> -->
@@ -76,57 +78,18 @@
                         <h4 class="modal-title">Inventory Supply</h4>
                     </div>
                     <div class="modal-body">
-                        <form class="form-horizontal" >
-                            <fieldset>
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label" for="inventory_type">Supply Type</label>
-                                    <div class="col-md-4">
-                                        <select id="inventory_type" name="inventory_type" class="form-control"
-                                            v-model="supply_input.inventory_type">
-                                            <option v-for="type in supply_types" v-bind:value="type.id">
-                                                {{type.name}}</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label" for="qty">Qty</label>
-                                    <div class="col-md-4">
-                                        <input id="name" name="qty" type="number" placeholder="Quantity"
-                                            class="form-control input-md" required="" v-model="supply_input.qty">
-                                        <span class="help-block">Enter Quantity Stored</span>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label" for="report_date">Date Supplied</label>
-                                    <div class="col-md-4">
-                                        <input id="report_date" name="report_date" type="date"
-                                            class="form-control input-md" v-model="supply_input.date_supplied">
-                                        <span class="help-block">date supplied</span>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label" for="name">Remarks</label>
-                                    <div class="col-md-4">
-                                        <textarea id="name" name="name" type="text" placeholder="Remarks/Notes .... "
-                                            class="form-control input-md" required=""
-                                            v-model="supply_input.remarks"></textarea>
-                                        <span class="help-block">Enter Any Remarks</span>
-                                    </div>
-                                </div>
-
-                            </fieldset>
-                        </form>
+                        <form-generator :form="supply_form" :input.sync="supply_input"></form-generator>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal"
-                            v-on:click="onSaveSupplyItem()">Save</button>
+                        v-on:click="onSaveSupplyItem()">Save</button>
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                     </div>
                 </div>
-
+                
             </div>
         </div>
-
+        
         <!-- Inventory Modal -->
         <div id="inventoryModal" class="modal fade" role="dialog">
             <div class="modal-dialog">
@@ -142,7 +105,7 @@
                                     <label class="col-md-4 control-label" for="name">Name</label>
                                     <div class="col-md-4">
                                         <input id="name" name="name" type="text" placeholder="Name"
-                                            class="form-control input-md" required="" v-model="inventory_input.name">
+                                        class="form-control input-md" required="" v-model="inventory_input.name">
                                         <span class="help-block">Enter Name</span>
                                     </div>
                                 </div>
@@ -150,713 +113,652 @@
                                     <label class="col-md-4 control-label" for="description">Description</label>
                                     <div class="col-md-4">
                                         <textarea id="description" name="description" type="text"
-                                            placeholder="Description .... " class="form-control input-md" required=""
-                                            v-model="inventory_input.description"></textarea>
+                                        placeholder="Description .... " class="form-control input-md" required=""
+                                        v-model="inventory_input.description"></textarea>
                                         <span class="help-block">Enter Description</span>
                                     </div>
                                 </div>
                                 <!-- Select Basic -->
                                 <div class="form-group"
-                                    v-if="user.admin_type == 0 && user.municipality == 'admin' && inventory_input.id.includes('muninv')">
-                                    <label class="col-md-4 control-label" for="municipality">Municipality</label>
-                                    <div class="col-md-4">
-                                        <select id="municipality" name="municipality" class="form-control"
-                                            v-model="inventory_input.municipality">
-                                            <option v-for="municipal in municipalities" v-bind:value="municipal">
-                                                {{municipal}}</option>
-                                        </select>
-                                    </div>
+                                v-if="user.admin_type == 0 && user.municipality == 'admin' && inventory_input.id.includes('muninv')">
+                                <label class="col-md-4 control-label" for="municipality">Municipality</label>
+                                <div class="col-md-4">
+                                    <select id="municipality" name="municipality" class="form-control"
+                                    v-model="inventory_input.municipality">
+                                    <option v-for="municipal in municipalities" v-bind:value="municipal">
+                                        {{municipal}}</option>
+                                    </select>
                                 </div>
-                            </fieldset>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal"
-                            v-on:click="onSaveInventory()">Save</button>
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    </div>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal"
+                    v-on:click="onSaveInventory()">Save</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
-
-        <!-- Supply Type -->
-        <div id="typeModal" class="modal fade" role="dialog">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">Supply Types</h4>
-                    </div>
-                    <div class="modal-body">
-                        <form class="form-horizontal" v-if="supply_type_input != null">
-                            <fieldset>
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label" for="name">Name</label>
-                                    <div class="col-md-4">
-                                        <input id="name" name="name" type="text" placeholder="Name"
-                                            class="form-control input-md" required="" v-model="supply_type_input.name">
-                                        <span class="help-block">Enter Name</span>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label" for="qty">Unit Count</label>
-                                    <div class="col-md-4">
-                                        <input id="name" name="qty" type="number" placeholder="Unit Count"
-                                            class="form-control input-md" required=""
-                                            v-model="supply_type_input.amount">
-                                        <span class="help-block"># of items per pack</span>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label" for="description">Description</label>
-                                    <div class="col-md-4">
-                                        <textarea id="description" name="description" type="text"
-                                            placeholder="Description .... " class="form-control input-md" required=""
-                                            v-model="supply_type_input.description"></textarea>
-                                        <span class="help-block">Enter Description</span>
-                                    </div>
-                                </div>
-                            </fieldset>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal"
-                            v-on:click="onSaveSupplyType()">Save</button>
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    </div>
-                </div>
-            </div>
+    </div>
+    
+    <inventory-supplytype-editor :user="user" :load="supply_types" v-on:onchange="onSuppyTypeDidChange"></inventory-supplytype-editor>
+    
+    
+    <div class="subcontent">
+        <div class="section header">
+            <h1>Inventory Details</h1>
         </div>
-
-        <inventory-supplytype-editor :user="user" ref:supply_type_component></inventory-supplytype-editor>
-
-        <div class="subcontent">
-            <div class="section header">
-                <h1>Inventory Details</h1>
-            </div>
-
-            <div class="section">
-                <div class="well">
-                    <div class="section header">
-                        <h4>Inventory</h4>
-                    </div>
-
-                    <div class="loader" v-if="loading.isInventory"></div>
-
-                    <div class="row" v-if="!loading.isInventory">
-                        <div class="col col-md-12">
-                            <p class="item-value">
-                                name: {{inventory.name}}
-                            </p>
-                            <p class="item-value" v-if="inventory.id.includes('muninv')">
-                                municipality: {{inventory.municipality}}
-                            </p>
-                            <p class="item-value">
-                                description: {{inventory.description}}
-                            </p>
-                            <p class="item-value">
-                                date created: {{formatDate(inventory.date_created)}}
-                            </p>
-                            <p class="item-value">
-                                created by: {{inventory.created_by}}
-                            </p>
-                        </div>
-
-                        <div class="col col-md-12">
-                            <button class="btn btn-default btn-info" v-on:click="editInventory()">edit</button>
-                            <button class="btn btn-default btn-danger" v-on:click="onDeleteInventory()">delete</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="section">
-                <button type="button" id="add-report" class="btn btn-info button-view"
-                data-toggle="modal"
-                data-target="#supplyTypesModal">View Supply Types
-                </button>
-                <button type="button" id="add-report" class="btn btn-info button-view"
-                    v-on:click="addSupplyItem()">Add
-                    New
-                    Supply
-                </button>
-                <button type="button" id="add-report" class="btn btn-success button-view"
-                    v-on:click="generateReport()">
-                    Generate Report
-                </button>
-            </div>
-
-            <div class="section">
+        
+        <div class="section">
+            <div class="well">
                 <div class="section header">
-                    <h4>Supplies</h4>
-                </div>
-                <div class="loader-container" v-if="loading.isSupply">
-                    <div class="loader"></div>
-                </div>
-                <div class="table-container" id="tableData" v-if="supplies.length == 0 && !loading.isSupply">
-                    <div class="well">
-                        <div class="row">
-                            <div class="col col-md-12 item-info">
-                                <p class="item-value">
-                                    no supplies stored
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="table-container" id="tableData" v-if="supplies.length > 0">
-                    <div class="well" v-for="item,index in supplies">
-                        <div class="row">
-                            <div class="col col-md-12 item-info">
-                                <p class="item-label">
-                                    {{index + 1}}.
-                                </p>
-                            </div>
-                            <div class="col col-md-12 item-info">
-                                <p class="item-label">
-                                    Name:
-                                </p>
-                                <p class="item-value">
-                                    {{getSupplyType(item.inventory_type)}}
-                                </p>
-                            </div>
-                            <div class="col col-md-2 item-info">
-                                <p class="item-label">
-                                    Quantity:
-                                </p>
-                                <p class="item-value">
-                                    {{item.qty}}
-                                </p>
-                            </div>
-                            
-                            <div class="col col-md-12 item-info">
-                                <p class="item-label">
-                                    Remarks:
-                                </p>
-                                <p class="item-value">
-                                    {{item.remarks}}
-                                </p>
-                            </div>
-                            <div class="col col-md-4 item-info">
-                                <p class="item-label">
-                                    Date Supplied:
-                                </p>
-                                <p class="item-value">
-                                    {{formatDate(item.date_supplied)}}
-                                </p>
-                            </div>
-                            <div class="col col-md-4 item-info">
-                                <p class="item-label">
-                                    Date Created:
-                                </p>
-                                <p class="item-value">
-                                    {{formatDate(item.date_created)}}
-                                </p>
-                            </div>
-                            <div class="col col-md-4 item-info">
-                                <p class="item-label">
-                                    Date Updated:
-                                </p>
-                                <p class="item-value">
-                                    {{formatDate(item.date_updated)}}
-                                </p>
-                            </div>
-                            
-                            <div class="col col-md-12">
-                                <button class="btn btn-default btn-info"
-                                    v-on:click="onTransferSupply(index)">transfer</button>
-                                <button class="btn btn-default btn-info"
-                                    v-on:click="editSupplyItem(index)">edit</button>
-                                <button class="btn btn-default btn-danger"
-                                    v-on:click="onDeleteSupplyItem(index)">delete</button>
-                            </div>
-                        </div>
-                    </div>
+                    <h4>Inventory</h4>
                 </div>
                 
+                <div class="loader" v-if="loading.isInventory"></div>
+                
+                <div class="row" v-if="!loading.isInventory">
+                    <div class="col col-md-12">
+                        <p class="item-value">
+                            name: {{inventory.name}}
+                        </p>
+                        <p class="item-value" v-if="inventory.id.includes('muninv')">
+                            municipality: {{inventory.municipality}}
+                        </p>
+                        <p class="item-value">
+                            description: {{inventory.description}}
+                        </p>
+                        <p class="item-value">
+                            date created: {{formatDate(inventory.date_created)}}
+                        </p>
+                        <p class="item-value">
+                            created by: {{inventory.created_by}}
+                        </p>
+                    </div>
+                    
+                    <div class="col col-md-12">
+                        <button class="btn btn-default btn-info" v-on:click="editInventory()">edit</button>
+                        <button class="btn btn-default btn-danger" v-on:click="onDeleteInventory()">delete</button>
+                    </div>
+                </div>
             </div>
-
-
-           <!--  <div class="section">
-                <div class="section header" v-if="supply_types.length > 0">
-                    <h4>Supplies Types</h4>
-                </div>
-                <div class="section">
-                    <button type="button" id="add-report" class="btn btn-warning button-view"
-                        v-on:click="addSupplyType()">Add New
-                        Supply Type
-                    </button>
-                    <div>&nbsp;</div>
-                </div>
-                <div class="loader-container" v-if="loading.isSupplyType">
-                    <div class="loader"></div>
-                </div>
-                <div class="table-container" id="tableData" v-if="supply_types.length > 0">
-                    <div class="well" v-for="item,index in supply_types">
-                        <div class="row">
-                            <div class="col col-xs-1">
-                                <p class="item-label">
-                                    {{index + 1}}.
-                                </p>
-                            </div>
-                            <div class="col col-xs-9">
-                                <div class="row">
-                                    <div class="col col-md-12 item-info">
-                                        <p class="item-label">
-                                            Name:
-                                        </p>
-                                        <p class="item-value">
-                                            {{item.name}}
-                                        </p>
-                                    </div>
-                                   
-                                    <div class="col col-md-12 item-info">
-                                        <p class="item-label">
-                                            Description:
-                                        </p>
-                                        <p class="item-value">
-                                            {{item.description}}
-                                        </p>
-                                    </div>
-                                    <div class="col col-md-2 item-info">
-                                        <p class="item-label">
-                                            Amount:
-                                        </p>
-                                        <p class="item-value">
-                                            {{item.amount}}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col col-md-4 item-info">
-                                        <p class="item-label">
-                                            Date Created:
-                                        </p>
-                                        <p class="item-value">
-                                            {{formatDate(item.date_created)}}
-                                        </p>
-                                    </div>
+        </div>
         
-                                    <div class="col col-md-4 item-info" v-if="item.date_updated != item.date_created">
-                                        <p class="item-label">
-                                            Date Updated:
-                                        </p>
-                                        <p class="item-value">
-                                            {{formatDate(item.date_updated)}}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col col-md-2">
-                                <button class="btn btn-default btn-info" v-on:click="editSupplyType(index)">edit</button>
-                                <button class="btn btn-default btn-danger" v-on:click="onDeleteSupplyType(index)">delete</button>        
-                            </div>
-                        </div>
-                        
+        <div class="section">
+            <button type="button" id="add-report" class="btn btn-info button-view"
+            data-toggle="modal"
+            data-target="#supplyTypesModal">View Supply Types
+        </button>
+        <button type="button" id="add-report" class="btn btn-info button-view"
+        v-on:click="addSupplyItem()">Add
+        New
+        Supply
+    </button>
+    <button type="button" id="add-report" class="btn btn-success button-view"
+    v-on:click="onDownloadReport()">
+    Generate Report
+</button>
+</div>
+
+<div class="section">
+    
+    <div class="loader-container" v-if="loading.isSupply">
+        <div class="loader"></div>
+    </div>
+    <div class="table-container" id="tableData" v-if="supplies.length == 0 && !loading.isSupply">
+        <div class="well">
+            <div class="row">
+                <div class="col col-md-12 item-info">
+                    <p class="item-value">
+                        no supplies stored
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <h3>Supplies</h3>
+    
+    <filter-component :filter_add="filter_add" :disable_municipal="true"  v-on:filter="onFilter($event)" v-on:search="onSearch($event)"
+    v-on:cancel="onCancelSearch($event)" v-on:clear="onClearFilter()"></filter-component>
+    
+    <div class="table-container" id="tableData" v-if="view_list.length > 0">
+        <div class="well" v-for="item,index in view_list">
+            <div class="row">
+                <div class="col col-md-12 item-info">
+                    <p class="item-label">
+                        {{index + 1}}.
+                    </p>
+                </div>
+                <div class="col col-md-12 item-info">
+                    <p class="item-label">
+                        Name:
+                    </p>
+                    <p class="item-value">
+                        {{getSupplyType(item.inventory_type)}}
+                    </p>
+                </div>
+                <div class="col col-md-2 item-info">
+                    <p class="item-label">
+                        Quantity:
+                    </p>
+                    <p class="item-value">
+                        {{item.qty}}
+                    </p>
+                </div>
+                
+                <div class="col col-md-12 item-info">
+                    <p class="item-label">
+                        Remarks:
+                    </p>
+                    <p class="item-value">
+                        {{item.remarks}}
+                    </p>
+                </div>
+                
+                <div class="col col-md-4 item-info">
+                    <p class="item-label">
+                        Status:
+                    </p>
+                    <p class="item-value">
+                        {{item.status}}
+                    </p>
+                </div>
+                
+                
+                <div class="col col-md-4 item-info">
+                    <p class="item-label">
+                        Date Supplied:
+                    </p>
+                    <p class="item-value">
+                        {{formatDate(item.date_supplied)}}
+                    </p>
+                </div>
+                <div class="col col-md-4 item-info">
+                    <p class="item-label">
+                        Date Created:
+                    </p>
+                    <p class="item-value">
+                        {{formatDate(item.date_created)}}
+                    </p>
+                </div>
+                <div class="col col-md-4 item-info">
+                    <p class="item-label">
+                        Date Updated:
+                    </p>
+                    <p class="item-value">
+                        {{formatDate(item.date_updated)}}
+                    </p>
+                </div>
+                
+                <div class="col col-md-12">
+                    <button class="btn btn-default btn-info"
+                    :href="'#panellogs'+index" data-toggle="collapse">Show Logs</button>
+                    <button class="btn btn-default btn-info"
+                    v-on:click="onTransferSupply(index)">Transfer Item</button>
+                    <button class="btn btn-default btn-info"
+                    v-on:click="editSupplyItem(index)">Edit</button>
+                    <button class="btn btn-default btn-danger"
+                    v-on:click="onDeleteSupplyItem(index)">Delete</button>
+                </div>
+            </div>
+            <div>&nbsp;</div>
+            <div :id="'panellogs'+index" class="collapse">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <p class="item-label">Logs</p>
+                        <p class="item-value">{{item.logs}}</p>
                     </div>
                 </div>
-            </div> -->
-            
+            </div>
         </div>
-        <div>&nbsp;</div>
     </div>
+</div> 
+</div>
+<div>&nbsp;</div>
+</div>
 
-    </div>
+</div>
 
-    
-    <script src="js/app/app.js"></script>
 
-    <script>
-        app = new Vue({
-            el: '#content',
-            data: {
-                user: new AdminUser(),
-                inventory: new InventoryType(),
-                supplies: [],
-                supply_types: [],
-                supply_types_ref: {},
-                inventory_input: null,
-                supply_input: {},
-                supply_type_input: {},
-                isedit: false,
-                municipalities: [],
-                /* isloadinginventory: false,
-                loading.isSupply : false, */
-                loading: {
-                    isInventory: false,
-                    isSupply: false,
-                    isSupplyType: false
-                },
+<script src="js/app/app.js"></script>
 
-                supply_header: [],
-                supply_type_header: [],
-                isMunicipality: false,
-                supply_type_component:null,
-                transfer_supply: new EvacuationSupply()
+<script>
+    app = new Vue({
+        el: '#content',
+        data: {
+            user: new AdminUser(),
+            inventory: new InventoryType(),
+            supplies: [],
+            view_list: [],
+            
+            supply_types: [],
+            supply_types_option: [],
+            supply_types_ref: {},
+            
+            inventory_input: {},
+            supply_input: {},
+            
+            isedit: false,
+            municipalities: [],
+            /* isloadinginventory: false,
+            loading.isSupply : false, */
+            loading: {
+                isInventory: false,
+                isSupply: false,
+                isSupplyType: false
             },
-            methods: {
-
-                onStart() {
-                    this.municipalities = municipalities
-                    this.user = header.user
-
-                    const queryString = window.location.search;
-                    console.log(queryString);
-
-                    const urlParams = new URLSearchParams(queryString);
-
-                    const id = urlParams.get('inventory_id')
-                    console.log("inventory id: " + id);
-
-                    const isMuni = urlParams.get('isMuni')
-                    console.log("is Municipality: " + isMuni)
-                    this.isMunicipality = (isMuni == 'true');
-
-                    this.fetchInventory(id)
-
-                    try{
-                        console.log(this.$children)
-                    }catch(err) {
-                        console.log(err)
-                    }
-                },
-
-                fetchInventory(id) {
-                    this.loading.isInventory = true
-                    this.loading.isSupply = true
-
-                    //this.fetchSupplyType()
-
-                    //var promiseFetch = new Promise()//DataHandler.getInventory(id)
-                    console.log("get municipal", this.isMunicipality)
-                    if (this.isMunicipality) {
-                        console.log("get municipal", id)
-                        promiseFetch = DataHandler.getMunicipalInventory(id)
-                    } else {
-                        promiseFetch = DataHandler.getInventory(id)
-                    }
-
-                    promiseFetch.then((message) => {
-                        console.log("inventory %o", message.data)
-                        this.setInventory(message.data)
-                    }).catch(err => {
-                        console.log(err)
-                    }).finally(() => {
-                        this.loading.isInventory = false
-                    })
-
-                    
-                },
-
-                setInventory(data) {
-                    this.inventory = data
-                    if(this.inventory) {
-                        //this.fetchSupply()
-
-                        Promise.all([this.fetchSupplyTypePromise(), this.fetchSupplyPromise(this.inventory.id)]).then((data) => {
-                            
-                            this.supply_types = data[0].supply_types
-                            this.supply_types_ref = data[0].supply_types_ref
-                            this.supplies = data[1]
-                            console.log("supplies types %o", data[0])
-                            console.log("supplies %o", this.supplies)
-                            this.loading.isSupply = false
-                        }).catch((err) => {
-                            console.log(err)
-                            this.loading.isSupply = false
-                        })
-
-                    } else {
-                        this.loading.isSupply = false
-                    }
-                },
-
-                fetchSupply() {
-                    this.loading.isSupply = false
-                    
-                    DataHandler.getSupplies([this.inventory.id]).then((message) => {
-                        this.supplies = message.data[0].supplies
-                    }).catch(err => {
-                        console.log(err)
-                    }).finally(() => {
-                        this.loading.isSupply = false
-                    })
-                },
-
-                getSupplyType(id) {
-                    console.log(id)
-                    console.log(this.supply_types_ref)
-                    let type =  this.supply_types_ref[id]
-                    
-                    
-                    return type ? type.name : id
-                },
-
-                fetchSupplyPromise(id) {
-                    return DataHandler.getSupplies([id]).then((message) => {
-                        console.log("supply %o", message)
-                        return message.data[0].supplies
-                    })
-                },
-
-
-                fetchSupplyTypePromise() {
-                    return DataHandler.getSupplyTypes().then((data) => {
-                        /* this.supply_types = data.data || []
-                        this.loading.isSupplyType = false
-                        console.log("supply types %o", this.supply_types)
-
-                        this.supply_types.forEach(type => {
-                            this.supply_types_ref[type.id] = type
-                        });
-                        return true */
-                        
-                        let supply_types  = data.data || [] 
-                        var supply_types_ref = {}
-                        supply_types.forEach(type => {
-                            supply_types_ref[type.id] = type
-                        });
-                        console.log("fetch %o", {supply_types, supply_types_ref})
-                        return {supply_types, supply_types_ref}
-                    })
-                },
-
+            
+            
+            
+            supply_form: EvacuationSupply.formModel,
+            
+            supply_header: [],
+            supply_type_header: [],
+            isMunicipality: false,
+            supply_type_component:null,
+            transfer_supply: new EvacuationSupply(),
+            
+            filter_add: {}
+        },
+        methods: {
+            
+            onStart() {
+                this.municipalities = municipalities
+                this.user = header.user
                 
-                fetchSupplyType() {
-                    this.loading.isSupplyType = true
-                    DataHandler.getSupplyTypes().then((data) => {
-                        this.supply_types = data.data || []
-                        this.loading.isSupplyType = false
-                        console.log("supply types %o", this.supply_types)
-
-                        this.supply_types.forEach(type => {
-                            this.supply_types_ref[type.id] = type
-                        });
-
+                const queryString = window.location.search;
+                console.log(queryString);
+                
+                const urlParams = new URLSearchParams(queryString);
+                
+                const id = urlParams.get('inventory_id')
+                console.log("inventory id: " + id);
+                
+                const isMuni = urlParams.get('isMuni')
+                console.log("is Municipality: " + isMuni)
+                this.isMunicipality = (isMuni == 'true');
+                
+                this.filter_add = {
+                    status : ['all'].concat(Object.keys(SupplyStatus)), 
+                    qty: ['all','0-100','101-500','501-1000','1001+']
+                }
+                
+                
+                try{
+                    console.log("%o children",this.$refs)
+                    this.fetchInventory(id)
+                }catch(err) {
+                    console.log(err)
+                }
+            },
+            
+            fetchInventory(id) {
+                this.loading.isInventory = true
+                this.loading.isSupply = true
+                
+                console.log("get municipal", this.isMunicipality)
+                if (this.isMunicipality) {
+                    console.log("get municipal", id)
+                    promiseFetch = DataHandler.getMunicipalInventory(id)
+                } else {
+                    promiseFetch = DataHandler.getInventory(id)
+                }
+                
+                promiseFetch.then((message) => {
+                    console.log("inventory %o", message.data)
+                    this.setInventory(message.data)
+                }).catch(err => {
+                    console.log(err)
+                }).finally(() => {
+                    this.loading.isInventory = false
+                })
+                
+            },
+            
+            setInventory(data) {
+                this.inventory = data
+                if(this.inventory) {
+                    this.getSupplyDetails(data.id)
+                } else {
+                    this.loading.isSupply = false
+                }
+            },//setInventory
+            
+            getSupplyDetails(id) {
+                Promise.all([this.fetchSupplyTypePromise(), this.fetchSupplyPromise(this.inventory.id)]).then((data) => {
+                    this.supply_types = data[0].supply_types
+                    this.supply_types_ref = data[0].supply_types_ref
+                    this.supply_type_options = data[0].supply_type_options
+                    this.supplies = data[1]
+                    this.view_list = [...this.supplies]
+                    this.filter_add = { ...this.filter_add, types: ['all'].concat(data[0].supply_types.map((sup)=>{return sup.name}))} 
+                    
+                    this.supply_form.inventory_type.options = this.supply_type_options
+                    this.loading.isSupply = false
+                }).catch((err) => {
+                    console.log(err)
+                    this.loading.isSupply = false
+                })
+            },
+            
+            getSupplyType(id) {
+                console.log(id)
+                console.log(this.supply_types_ref)
+                let type =  this.supply_types_ref[id]
+                
+                return type ? type.name : id
+            },//getSupplyType
+            
+            fetchSupplyPromise(id) {
+                return DataHandler.getSupplies([id]).then((message) => {
+                    console.log("supply %o", message)
+                    return message.data[0].supplies
+                })
+            },//fetchSupplyPromise
+            
+            fetchSupplyTypePromise() {
+                return DataHandler.getSupplyTypes().then((data) => {
+                    let supply_types  = data.data || [] 
+                    var supply_types_ref = {}
+                    let supply_type_options = supply_types.map(type => {
+                        supply_types_ref[type.id] = type
+                        return {
+                            title: type.name,
+                            value: type.id
+                        }
+                    });
+                    console.log("fetch %o", {supply_types, supply_types_ref})
+                    return {supply_types, supply_types_ref, supply_type_options}
+                })
+            },//fetchSupplyTypePromises
+            
+            
+            
+            
+            /*!!=============== INVENTORY ===============!!!*/
+            editInventory() {
+                if (this.isMunicipality) {
+                    this.inventory_input = MunicipalInventory.parse(this.inventory.toObject())
+                } else {
+                    this.inventory_input = EvacuationInventory.parse(this.inventory.toObject())
+                }
+                
+                $('#inventoryModal').modal()
+            },
+            
+            onSaveInventory() {
+                console.log("data %o", this.inventory_input)
+                
+                this.inventory_input.date_updated = new Date()
+                
+                var promise = DataHandler.addInventory(this.inventory_input)
+                if (this.isMunicipality) {
+                    promise = DataHandler.addMunicipalInventory(this.inventory_input)
+                }
+                
+                promise.then((data) => {
+                    if (data.error) {
+                        alert(`Can't Persist Item ${data.error}`)
+                    } else {
+                        alert(`Item Have Been Persisted Successfuly`)
+                        let id = this.inventory_input.id
+                        this.inventory_input = (this.isMunicipality) ? new MunicipalInventory() :
+                        new EvacuationInventory()
+                        this.fetchInventory(id)
+                    }
+                }).catch((err) => {
+                    console.log(err)
+                })
+            },
+            
+            onDeleteInventory() {
+                const id = this.inventory.id
+                let onConfirm = confirm('Deleting Item\nPress confirm to proceed')
+                
+                if (onConfirm) {
+                    var promise = DataHandler.deleteInventory(id)
+                    if (this.isMunicipality) {
+                        promise = DataHandler.deleteMunicipalInventory(id)
+                    }
+                    promise.then((data) => {
+                        console.log(data)
+                        if (data.error) {
+                            alert(`Can't Delete Item ${data.error}`)
+                        } else {
+                            alert(`Item Have Been Deleted Successfuly`)
+                            window.open(`inventory.html`)
+                        }
+                    })
+                }
+            },
+            /*!!=============== INVENTORY ===============!!!*/
+            
+            /*!!=============== SUPPLY ===============!!!*/
+            addSupplyItem() {
+                this.supply_input = new EvacuationSupply()
+                this.supply_input.inventory_id = this.inventory.id
+                this.supply_input.created_by = this.user.id
+                this.isEdit = false
+                $('#supplyModal').modal()
+            },
+            
+            editSupplyItem(index) {
+                let supply = this.supplies[index]
+                this.supply_input = EvacuationSupply.parse(supply.toObject())
+                $('#supplyModal').modal()
+            },
+            
+            onSaveSupplyItem() {
+                
+                this.supply_input.date_updated = new Date()
+                this.supply_input.date_supplied = new Date(this.supply_input.date_supplied)
+                
+                console.log("data %o", this.supply_input)
+                
+                DataHandler.addSupply(this.supply_input).then((data) => {
+                    if (data.error) {
+                        alert(`Can't Persist Item ${data.error}`)
+                    } else {
+                        alert(`Item Have Been Persisted Successfuly`)
+                        this.supply_input = new EvacuationSupply()
+                        //this.fetchSupply()
+                        this.getSupplyDetails(this.inventory.id)
+                    }
+                })
+            },
+            
+            onDeleteSupplyItem(index) {
+                console.log("id %o", index)
+                let id = this.supplies[index].id
+                let onConfirm = confirm('Deleting Item\nPress confirm to proceed')
+                if (onConfirm) {
+                    DataHandler.deleteSupply(id).then((data) => {
+                        console.log(data)
+                        if (data.error) {
+                            alert(`Can't Delete Item ${data.error}`)
+                        } else {
+                            alert(`Item Have Been Deleted Successfuly`)
+                            this.getSupplyDetails(this.inventory.id)
+                        }
+                    })
+                }
+            },
+            
+            onTransferSupply(index) {
+                let supply = this.supplies[index]
+                this.transfer_supply = EvacuationSupply.parse(supply.toObject())
+                inventory_selection.onStart(supply, this.onSelectedInventory)
+                //$('#inventorySelectionModal').modal()
+            },
+            
+            onSelectedInventory(id) {
+                if (confirm("transfer inventory here?")) {
+                    this.transfer_supply.inventory_id = id
+                    this.transfer_supply.date_updated = new Date()
+                    this.transfer_supply.status = SupplyStatus.pending
+                    this.transfer_supply.logs = this.transfer_supply.logs + "\n" + "Transferred from: "+ this.inventory.name +" by: " + this.user.id
+                    
+                    inventory_selection.onDismiss()
+                    DataHandler.addSupply(this.transfer_supply).then((data) => {
+                        if (data.error) {
+                            alert(`Can't Persist Item ${data.error}`)
+                        } else {
+                            alert(`Item Have Been Persisted Successfuly`)
+                            this.transfer_supply = new EvacuationSupply()
+                            this.getSupplyDetails(this.inventory.id)
+                        }
                     }).catch(err => {
                         console.log(err)
-                        this.loading.isSupplyType = false
                     })
-                },
-
-                /*!!=============== INVENTORY ===============!!!*/
-                editInventory() {
-                    if (this.isMunicipality) {
-                        this.inventory_input = MunicipalInventory.parse(this.inventory.toObject())
-                    } else {
-                        this.inventory_input = EvacuationInventory.parse(this.inventory.toObject())
-                    }
-
-                    $('#inventoryModal').modal()
-                },
-
-                onSaveInventory() {
-                    console.log("data %o", this.inventory_input)
-
-                    this.inventory_input.date_updated = new Date()
-
-                    var promise = DataHandler.addInventory(this.inventory_input)
-                    if (this.isMunicipality) {
-                        promise = DataHandler.addMunicipalInventory(this.inventory_input)
-                    }
-
-                    promise.then((data) => {
-                        if (data.error) {
-                            alert(`Can't Persist Item ${data.error}`)
-                        } else {
-                            alert(`Item Have Been Persisted Successfuly`)
-                            let id = this.inventory_input.id
-                            this.inventory_input = (this.isMunicipality) ? new MunicipalInventory() :
-                                new EvacuationInventory()
-                            this.fetchInventory(id)
-                        }
-                    }).catch((err) => {
-                        console.log(err)
-                    })
-                },
-
-                onDeleteInventory() {
-                    const id = this.inventory.id
-                    let onConfirm = confirm('Deleting Item\nPress confirm to proceed')
-
-                    if (onConfirm) {
-                        var promise = DataHandler.deleteInventory(id)
-                        if (this.isMunicipality) {
-                            promise = DataHandler.deleteMunicipalInventory(id)
-                        }
-                        promise.then((data) => {
-                            console.log(data)
-                            if (data.error) {
-                                alert(`Can't Delete Item ${data.error}`)
-                            } else {
-                                alert(`Item Have Been Deleted Successfuly`)
-                                window.open(`inventory.html`)
-                            }
-                        })
-                    }
-                },
-                /*!!=============== INVENTORY ===============!!!*/
-
-                /*!!=============== SUPPLY ===============!!!*/
-                addSupplyItem() {
-                    this.supply_input = new EvacuationSupply()
-                    this.supply_input.inventory_id = this.inventory.id
-                    this.supply_input.created_by = this.user.id
-                    this.isEdit = false
-                    $('#supplyModal').modal()
-                },
-
-                editSupplyItem(index) {
-                    let supply = this.supplies[index]
-                    this.supply_input = EvacuationSupply.parse(supply.toObject())
-                    $('#supplyModal').modal()
-                },
-
-                onSaveSupplyItem() {
-                    console.log("data %o", this.supply_input)
-                    this.supply_input.date_updated = new Date()
-
-                    DataHandler.addSupply(this.supply_input).then((data) => {
-                        if (data.error) {
-                            alert(`Can't Persist Item ${data.error}`)
-                        } else {
-                            alert(`Item Have Been Persisted Successfuly`)
-                            this.supply_input = new EvacuationSupply()
-                            this.fetchSupply()
-                        }
-                    })
-                },
-
-                onDeleteSupplyItem(index) {
-                    console.log("id %o", index)
-                    let id = this.supplies[index].id
-                    let onConfirm = confirm('Deleting Item\nPress confirm to proceed')
-                    if (onConfirm) {
-                        DataHandler.deleteSupply(id).then((data) => {
-                            console.log(data)
-                            if (data.error) {
-                                alert(`Can't Delete Item ${data.error}`)
-                            } else {
-                                alert(`Item Have Been Deleted Successfuly`)
-                                this.fetchSupply()
-                            }
-                        })
-                    }
-                },
-
-                onTransferSupply(index) {
-                    let supply = this.supplies[index]
-                    this.transfer_supply = EvacuationSupply.parse(supply.toObject())
-                    inventory_selection.onStart(supply, this.onSelectedInventory)
-                    //$('#inventorySelectionModal').modal()
-                },
-
-                onSelectedInventory(id) {
-                    if (confirm("transfer inventory here?")) {
-                        this.transfer_supply.inventory_id = id
-                        this.transfer_supply.date_updated = new Date()
-                        inventory_selection.onDismiss()
-                        DataHandler.addSupply(this.transfer_supply).then((data) => {
-                            if (data.error) {
-                                alert(`Can't Persist Item ${data.error}`)
-                            } else {
-                                alert(`Item Have Been Persisted Successfuly`)
-                                this.transfer_supply = new EvacuationSupply()
-                                this.fetchSupply()
-                            }
-                        }).catch(err => {
-                            console.log(err)
-                        })
-                    }
-                },
-
-                /*!!=============== SUPPLY ===============!!!*/
-
-                /*!!=============== SUPPLY-TYPE ===============!!!*/
-                addSupplyType() {
-                    this.supply_type_input = new EvacuationSupplyType()
-                    this.supply_type_input.inventory_id = this.inventory.id
-                    this.supply_type_input.created_by = this.user.id
-                    this.isEdit = false
-                    $('#typeModal').modal()
-                },
-
-                editSupplyType(index) {
-                    let supply = this.supply_types[index]
-                    this.supply_type_input = EvacuationSupplyType.parse(supply.toObject())
-                    $('#typeModal').modal()
-                },
-
-                onSaveSupplyType() {
-                    console.log("data %o", this.supply_type_input)
-
-                    this.supply_type_input.date_updated = new Date()
-
-                    DataHandler.addSupplyType(this.supply_type_input).then((data) => {
-                        if (data.error) {
-                            alert(`Can't Persist Item ${data.error}`)
-                        } else {
-                            alert(`Item Have Been Persisted Successfuly`)
-                            this.supply_type_input = new EvacuationSupplyType()
-                            this.fetchSupplyType()
-                        }
-                    })
-                },
-
-                onDeleteSupplyType(id) {
-                    let onConfirm = confirm('Deleting Item\nPress confirm to proceed')
-                    if (onConfirm) {
-                        DataHandler.deleteSupplyType(id).then((data) => {
-                            console.log(data)
-                            if (data.error) {
-                                alert(`Can't Delete Item ${data.error}`)
-                            } else {
-                                alert(`Item Have Been Deleted Successfuly`)
-                                this.fetchSupplyType()
-                            }
-                        })
-                    }
-                },
-                /*!!=============== SUPPLY-TYPE ===============!!!*/
-
-                generateReport() {
-                    let text = JSON.stringify(this.evac_list)
-                    saveTextAsFile(text)
                 }
+            },
+            
+            /*!!=============== SUPPLY ===============!!!*/
+            
+            onSuppyTypeDidChange(supply_types){
+                this.supply_types = supply_types
+                this.supply_types_ref = {}
+                this.supply_type_options = supply_types.map(type => {
+                    this.supply_types_ref[type.id] = type
+                    return {
+                        title: type.name,
+                        value: type.id
+                    }
+                });
+                this.filter_add['types'] = ['all'].concat(this.supply_types.map((sup)=>{return sup.name}))
+                this.supply_form.inventory_type.options = this.supply_type_options
+            },
+            
+            /*FILTER /SEARCH/ DOWNLOAD*/
+            
+            /* FILTER / SEARCH */
+            onFilter(filter) {
+                console.log("filter %o", filter)
+                
+                var view_list = this.supplies.filter((data) => {
+                    let date_created = new Date(data.date_created)
+                    let date_updated = new Date(data.date_updated)
+                    let date_report  = new Date(data.date_supplied)
+                    //let evac = this.evac_dict[data.evac_id]
+                    
+                    return (
+                    (filter.year == 'all' || 
+                    filter.year == date_report.getFullYear()  ) &&
+                    (filter.month == 'all' || 
+                    filter.month == (months_array[date_report.getMonth()] || 0)) 
+                    /* &&
+                    (filter.municipality == 'all' || 
+                    filter.municipality == evac.municipality) */
+                    )
+                });
+                
+                view_list = view_list.filter((data) => {
+                    let qty_range = filter.qty
+                    if (qty_range == 'all') {
+                        return true
+                    } else if (!qty_range.split('-').isEmpty()) {
+                        let range = qty_range.split('-')
+                        console.log("let range %o", range)
+                        return (data.qty >= Number(range[0]) && data.qty <= Number(range[1]))
+                    } else {
+                        let max_range = qty_range.split('+')[0]
+                        console.log("let max_range %o", max_range)
+                        return (data.qty >= Number(max_range))
+                    }
+                })
+                
+                view_list = view_list.filter((data) => {
+                    let status = filter.status
+                    if (status == 'all') {
+                        return true
+                    } else {
+                        //let evac_id = this.evac_names[evac]
+                        return data.status === status
+                    }
+                })
+                
+                view_list = view_list.filter((data) => {
+                    let type = filter.types
+                    if (type == 'all') {
+                        return true
+                    } else {
+                        let name = this.getSupplyType(data.inventory_type)
+                        return name == type
+                    }
+                })
+                
+                this.view_list = view_list
+            },
+            
+            onSearch(filter) {
+                this.onFilter(filter)
+                
+                this.view_list = this.view_list.filter((data) => {
+                    var object = {...data.toObject()}
+                    //let evac = this.evac_dict[data.evac_id]
+                    let ref = this.getSupplyType(data.inventory_type)//.supply_types_ref[data.inventory_type]
+                    object['type'] = ref
+                    //object['municipal'] = evac.municipal
+                    return SearchObject(object, filter.searchTerm)
+                })
+            },
+            
+            onCancelSearch(filter) {
+                this.onFilter(filter)
+            },
+            
+            onClearFilter() {
+                this.view_list = [...this.supplies]
+            },
+            
+            onDownloadReport() {
+                let view_list = this.view_list.map((data) => {
+                    var object = {...data.toObject()}
+                    //let evac = this.evac_dict[data.evac_id]
+                    let ref = this.getSupplyType(data.inventory_type)//.supply_types_ref[data.inventory_type]
+                    object['type'] = ref
 
-            }
-        })
-
-/* 
-        ///generates a file of json contains
-        function saveTextAsFile(text) {
-            const textToWrite = text
-            const textFileAsBlob = new Blob([textToWrite], {
-                type: 'text/plain'
-            });
-            const fileNameToSaveAs = "coordinates.json" //document.getElementById("").value;
-            let downloadLink = document.createElement("a");
-            downloadLink.download = fileNameToSaveAs;
-            downloadLink.innerHTML = "Download File";
-            if (window.webkitURL != null) {
-                // Chrome allows the link to be clicked
-                // without actually adding it to the DOM.
-                downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
-            } else {
-                // Firefox requires the link to be added to the DOM
-                // before it can be clicked.
-                downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
-                downloadLink.onclick = destroyClickedElement;
-                downloadLink.style.display = "none";
-                document.body.appendChild(downloadLink);
-            }
-
-            downloadLink.click();
-        } //saveTextAsFile */
-        
-
+                    return object
+                })
+                let csv = ConvertToCSV(view_list)
+                saveTextAsFile(`inventory_detail_${this.inventory.name}.csv`, csv)
+            },
+            
+        }
+    })
     
-    </script>
+    /* 
+    ///generates a file of json contains
+    function saveTextAsFile(text) {
+        const textToWrite = text
+        const textFileAsBlob = new Blob([textToWrite], {
+            type: 'text/plain'
+        });
+        const fileNameToSaveAs = "coordinates.json" //document.getElementById("").value;
+        let downloadLink = document.createElement("a");
+        downloadLink.download = fileNameToSaveAs;
+        downloadLink.innerHTML = "Download File";
+        if (window.webkitURL != null) {
+            // Chrome allows the link to be clicked
+            // without actually adding it to the DOM.
+            downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
+        } else {
+            // Firefox requires the link to be added to the DOM
+            // before it can be clicked.
+            downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
+            downloadLink.onclick = destroyClickedElement;
+            downloadLink.style.display = "none";
+            document.body.appendChild(downloadLink);
+        }
+        
+        downloadLink.click();
+    } //saveTextAsFile */
+    
+    
+    
+</script>
 
 </body>
 

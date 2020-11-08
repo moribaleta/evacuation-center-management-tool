@@ -162,7 +162,7 @@ const FilterComponent = Vue.extend({
                     <option v-for="(item,index) in selections.months" :selected="index == filter.month ? true : false"> {{item}}</option>
                 </select>
             </div>
-            <div class="col col-md-3">
+            <div class="col col-md-3" v-if="!disable_municipal">
                 <p class="input-label">MUNICIPALITY</p>
                 <select id="input-type" class="input input-select" v-model="filter.municipality">
                     <option v-for="(item,index) in selections.municipality" :selected="index == filter.municipality ? true : false"> {{item}}</option>
@@ -208,7 +208,8 @@ const FilterComponent = Vue.extend({
         </div>
     </div>`,
     props: {
-        filter_add: {}
+        filter_add: {},
+        disable_municipal: Boolean
     },
     watch: {
         filter_add() {
@@ -278,7 +279,6 @@ const FilterComponent = Vue.extend({
         } catch (err) {
             console.log(err)
         }
-
 
     },
     methods: {
@@ -410,6 +410,7 @@ const InventorySupplyTypeEditor = Vue.extend({
 </div>`,
     props: {
         user: AdminUser,
+        load: Array,
         //supply_types: Array,
         //supply_type_input: Object,
     },
@@ -419,6 +420,12 @@ const InventorySupplyTypeEditor = Vue.extend({
             if (this.user) {
                 console.log("user updated %o", this.user)
                 this.fetchSupplyType()
+            }
+        },
+
+        load(){
+            if (this.supply_types.isEmpty()) {
+                this.supply_types = this.load
             }
         }
     },
