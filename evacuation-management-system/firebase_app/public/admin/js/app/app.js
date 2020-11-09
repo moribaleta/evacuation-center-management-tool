@@ -532,7 +532,7 @@ const InventorySelector = Vue.extend({
         {{formatDate(muni_inv.date_created)}}
         </p>
         <p class="item-value">
-        {{muni_inv.date_updated}}
+        {{formatDate(muni_inv.date_updated)}}
         </p>
         <p class="item-value">
         {{muni_inv.description}}
@@ -590,11 +590,11 @@ const InventorySelector = Vue.extend({
         </div>
         <div class="col-xs-3">
         <p class="item-value">date created:
-        {{inventory.date_created}}</p>
+        {{formatDate(inventory.date_created)}}</p>
         </div>
         <div class="col-xs-3">
         <p class="item-value">
-        date updated: {{inventory.date_updated}}
+        date updated: {{formatDate(inventory.date_updated)}}
         </p>
         </div>
         

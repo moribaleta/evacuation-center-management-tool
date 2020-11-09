@@ -54,6 +54,11 @@
             </a>
         </div>
     </div>
+    <div id="inventory-list-picker">
+        <inventory-selector :muni_inv_list="muni_inv_list" :evac_list="evac_list" :inventory_list="inventory_list"
+            :is-loading="isLoading" :supply="supply" v-on:on-select-inventory="id => {onSelectInventory(id)}">
+        </inventory-selector>
+    </div>
     <!-- <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#evacModal">Open Modal</button> -->
     <div class="container" id="content">
         <!-- editor modal -->
@@ -149,9 +154,29 @@
 
             </div>
         </div>
+        <!-- Supply modal -->
+        <div id="supplyModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Inventory Supply</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form-generator :form="supply_form" :input.sync="supply_input"></form-generator>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal"
+                            v-on:click="onSaveSupplyItem()">Save</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
 
 
-        <inventory-supplytype-editor :user="user" v-ref:supply_type_component></inventory-supplytype-editor>
+        <inventory-supplytype-editor :user="user" v-on:change="onSuppyTypeDidChange"></inventory-supplytype-editor>
 
         <div class="subcontent">
             <div class="section header">
@@ -170,6 +195,112 @@
                 <button type="button" id="add-report" class="btn btn-info button-view"
                     v-on:click="generateReport()">Generate Report
                 </button>
+            </div>
+
+            <div class="section">
+                <div class="section header">
+                    <h4>Latest Pending Supplies</h4>
+
+                    <div class="table-container" id="tableData" v-if="pending_supplies.length > 0">
+                        <div class="well" v-for="item,index in pending_supplies">
+                            <div class="row">
+                                <div class="col col-md-12 item-info">
+                                    <p class="item-label">
+                                        {{index + 1}}.
+                                    </p>
+                                </div>
+                                <div class="col col-md-12 item-info">
+                                    <p class="item-label">
+                                        Name:
+                                    </p>
+                                    <p class="item-value">
+                                        {{getSupplyType(item.inventory_type)}}
+                                    </p>
+                                </div>
+                                <div class="col col-md-12 item-info">
+                                    <p class="item-label">
+                                        Inventory:
+                                    </p>
+                                    <p class="item-value">
+                                        {{getInventoryById(item.inventory_id).name}}
+                                    </p>
+                                </div>
+                                <div class="col col-md-2 item-info">
+                                    <p class="item-label">
+                                        Quantity:
+                                    </p>
+                                    <p class="item-value">
+                                        {{item.qty}}
+                                    </p>
+                                </div>
+
+                                <div class="col col-md-12 item-info">
+                                    <p class="item-label">
+                                        Remarks:
+                                    </p>
+                                    <p class="item-value">
+                                        {{item.remarks}}
+                                    </p>
+                                </div>
+
+                                <div class="col col-md-4 item-info">
+                                    <p class="item-label">
+                                        Status:
+                                    </p>
+                                    <p class="item-value">
+                                        {{item.status}}
+                                    </p>
+                                </div>
+
+
+                                <div class="col col-md-4 item-info">
+                                    <p class="item-label">
+                                        Date Supplied:
+                                    </p>
+                                    <p class="item-value">
+                                        {{formatDate(item.date_supplied)}}
+                                    </p>
+                                </div>
+                                <div class="col col-md-4 item-info">
+                                    <p class="item-label">
+                                        Date Created:
+                                    </p>
+                                    <p class="item-value">
+                                        {{formatDate(item.date_created)}}
+                                    </p>
+                                </div>
+                                <div class="col col-md-4 item-info">
+                                    <p class="item-label">
+                                        Date Updated:
+                                    </p>
+                                    <p class="item-value">
+                                        {{formatDate(item.date_updated)}}
+                                    </p>
+                                </div>
+
+                                <div class="col col-md-12">
+                                    <button class="btn btn-default btn-info" :href="'#panellogs'+index"
+                                        data-toggle="collapse">Show Logs</button>
+                                    <button class="btn btn-default btn-info"
+                                        v-on:click="onTransferSupply(index)">Transfer Item</button>
+                                    <button class="btn btn-default btn-info"
+                                        v-on:click="editSupplyItem(index)">Edit</button>
+                                    <button class="btn btn-default btn-danger"
+                                        v-on:click="onDeleteSupplyItem(index)">Delete</button>
+                                </div>
+                            </div>
+                            <div>&nbsp;</div>
+                            <div :id="'panellogs'+index" class="collapse">
+                                <div class="panel panel-default">
+                                    <div class="panel-body">
+                                        <p class="item-label">Logs</p>
+                                        <p class="item-value">{{item.logs}}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="section" v-if="muni_inv_list.length > 0">
@@ -287,7 +418,8 @@
                                             </tr>
                                         </tbody>
                                     </table>
-                                    <ul class="list-group hidden-md hidden-lg" v-for="inventory,index in inventory_list[evac.id]">
+                                    <ul class="list-group hidden-md hidden-lg"
+                                        v-for="inventory,index in inventory_list[evac.id]">
                                         <div class="list-group-item">
                                             <div class="row">
                                                 <div class="col-md-12">
@@ -361,10 +493,18 @@
                 isEdit: false,
                 editEvacuationID: null,
 
+                inventory_dict: {},
+
                 supply_type_component: {},
 
+                pending_supplies: [],
 
+                supply_types_ref: {},
                 supply_types: [],
+                supply_types_option: [],
+                supply_input: {},
+                transfer_supply: {},
+                supply_form: EvacuationSupply.formModel,
                 //supply_type_input: new EvacuationSupplyType(),
 
                 isLoading: {
@@ -385,17 +525,43 @@
                 },
 
                 fetchData() {
-                    this.fetchMunicipalInv()
-                    this.fetchEvacationCenter()
+                    /* this.fetchMunicipalInv()
+                    this.fetchEvacationCenter() */
 
                     //this.$refs.supply_type_component.fetchSupplyType()
                     //this.$children[0].fetchSupplyType()
-                    this.$children[0].fetchSupplyType()
 
+                    this.fetchAll()
+                    this.$children[0].fetchSupplyType()
                     //this.fetchSupplyType()
                 },
 
-                fetchMunicipalInv() {
+                fetchAll() {
+                    Promise.all([this.promiseMunicipalInv(), this.promiseEvacCenter()]).then((data) => {
+                        this.muni_inv_list = data[0]
+                        let evac_list = data[1]
+                        console.log(this.muni_inv_list)
+                        let ids = this.muni_inv_list.map((muni) => {
+                            return muni.id
+                        })
+                        console.log(this.muni_inv_list)
+                        this.setEvacationCenter(evac_list, this.muni_inv_list)
+                    })
+                },
+
+                promiseMunicipalInv() {
+                    return DataHandler.getMunicipalInventories(this.user.municipality).then((data) => {
+                        return data.data
+                    })
+                },
+
+                promiseEvacCenter() {
+                    return DataHandler.getEvacuationCenters(this.user.municipality).then((data) => {
+                        return data.data
+                    })
+                },
+
+                /* fetchMunicipalInv() {
                     this.isLoading.muni_inv = true
                     console.log("municipality %o", this.user.municipality)
                     DataHandler.getMunicipalInventories(this.user.municipality).then((data) => {
@@ -409,46 +575,114 @@
                 },
 
                 fetchEvacationCenter() {
-                    this.isLoading.evac_inv = true
-                    DataHandler.getEvacuationCenters().then((data) => {
+                    DataHandler.getEvacuationCenters(this.user.municipality).then((data) => {
                         this.setEvacationCenter(data.data)
-                    }).catch(err => {
-                        console.log(err)
-                    }).finally(() => {
-                        this.isLoading.evac_inv = false
-                    })
-                },
-
-                /* fetchSupplyType(){
-                    DataHandler.getSupplyTypes().then((data) => {
-                        this.supply_types = data.data || []
-                        console.log("supply types %o", this.supply_types)
                     }).catch(err => {
                         console.log(err)
                     })
                 }, */
 
-                setEvacationCenter(evac_data) {
+                getSupplyType(id) {
+                    console.log(id)
+                    console.log(this.supply_types_ref)
+                    let type = this.supply_types_ref[id]
+
+                    return type ? type.name : id
+                }, //getSupplyType
+
+                getInventoryById(id) {
+                    return this.inventory_dict[id]
+                },
+
+                setEvacationCenter(evac_data, muni_inv = []) {
                     this.evac_list = evac_data
 
                     let promises = evac_data.map((evac) => {
                         return DataHandler.getInventories(evac.id)
                     })
 
+                    var inv_ids = muni_inv
+
+                    muni_inv.forEach((inv) => {
+                        this.inventory_dict[inv.id] = inv
+                    })
+
                     Promise.all(promises).then((data) => {
                         console.log("data_list %o", data)
                         this.evac_list = []
+
                         data.forEach((message) => {
                             let data = message.data
                             this.inventory_list[data.id] = data.inventories
+                            inv_ids = inv_ids.concat(data.inventories)
+
+                            data.inventories.forEach((inv) => {
+                                this.inventory_dict[inv.id] = inv
+                            })
                         })
+
                         console.log("inventory %o", this.inventory_list)
                         this.evac_list = evac_data
 
+                        this.fetchPendingSupplies(inv_ids.map((data) => {
+                            return data.id
+                        }))
                     }).catch((err) => {
                         console.log(err)
                     })
                 },
+
+                fetchPendingSupplies(ids) {
+                    this.fetchSupplyTypePromise().then((data) => {
+                            this.supply_types = data.supply_types
+                            this.supply_types_ref = data.supply_types_ref
+                            this.supply_type_options = data.supply_type_options
+                            this.supply_form.inventory_type.options = this.supply_type_options
+                            return true
+                        }).then((val) => {
+                            DataHandler.getPendingSupplies(ids, 10).then((message) => {
+                                console.log("getPending Supplies %o", message)
+                                //var supplies = []
+                                let value = message.data.reduce((prev, curr) => {
+                                    prev = prev || []
+                                    return prev.concat(curr)
+                                }).map((data) => {
+                                    return data.supplies
+                                }).reduce((prev, curr) => {
+                                    prev = prev || []
+                                    return prev.concat(curr)
+                                })
+                                console.log("pending supplies %o", value)
+                                this.pending_supplies = value
+                            })
+                        })
+                        .catch((err) => {
+                            console.log(err)
+                        })
+                },
+
+                fetchSupplyTypePromise() {
+                    return DataHandler.getSupplyTypes().then((data) => {
+                        let supply_types = data.data || []
+                        var supply_types_ref = {}
+                        let supply_type_options = supply_types.map(type => {
+                            supply_types_ref[type.id] = type
+                            return {
+                                title: type.name,
+                                value: type.id
+                            }
+                        });
+                        console.log("fetch %o", {
+                            supply_types,
+                            supply_types_ref
+                        })
+                        return {
+                            supply_types,
+                            supply_types_ref,
+                            supply_type_options
+                        }
+                    })
+                }, //fetchSupplyTypePromises
 
                 getInventory(evac_id) {
                     console.log("evac_id %o", evac_id)
@@ -482,7 +716,7 @@
                             alert(`Can't Edit Item ${data.error}`)
                         } else {
                             alert(`Item Have Been Saved Successfuly`)
-                            this.fetchEvacationCenter()
+                            this.fetchAll()
                         }
                     }).catch(err => {
                         console.log(err)
@@ -502,7 +736,7 @@
                                 alert(`Can't Delete Item ${data.error}`)
                             } else {
                                 alert(`Item Have Been Deleted Successfuly`)
-                                this.fetchEvacationCenter()
+                                this.fetchAll()
                             }
                         })
                     }
@@ -537,7 +771,7 @@
                             alert(`Can't Edit Item ${data.error}`)
                         } else {
                             alert(`Item Have Been Saved Successfuly`)
-                            this.fetchEvacationCenter()
+                            this.fetchAll()
                         }
                     }).catch(err => {
                         console.log(err)
@@ -555,7 +789,7 @@
                                 alert(`Can't Delete Item ${data.error}`)
                             } else {
                                 alert(`Item Have Been Deleted Successfuly`)
-                                this.fetchMunicipalInv()
+                                this.fetchAll()
                             }
                         }).catch((err) => {
                             console.log(err)
@@ -572,55 +806,119 @@
                     saveTextAsFile(text)
                 },
 
-                /*!!=============== SUPPLY-TYPE ===============!!!*/
-                /* addSupplyType() {
-                    this.supply_type_input = new EvacuationSupplyType()
-                    this.supply_type_input.inventory_id = this.inventory.id
-                    this.supply_type_input.created_by = this.user.id
-                    this.isEdit = false
-                    $('#supplyTypeEditor').modal()
+                onSuppyTypeDidChange(supply_types) {
+                    console.log("did change supply type %o", supply_types)
+                    this.supply_types = supply_types
+                    this.supply_types_ref = {}
+                    supply_types.map(type => {
+                        this.supply_types_ref[type.id] = type
+                        return {
+                            title: type.name,
+                            value: type.id
+                        }
+                    });
                 },
 
-                editSupplyType(index) {
-                    let supply = this.supply_types[index]
-                    this.supply_type_input = EvacuationSupplyType.parse(supply.toObject())
-                    $('#supplyTypeEditor').modal()
+                /*!!=============== PENDING-SUPPLY-TYPE ===============!!!*/
+                editSupplyItem(index) {
+                    let supply = this.pending_supplies[index]
+                    this.supply_input = EvacuationSupply.parse(supply.toObject())
+                    $('#supplyModal').modal()
                 },
 
-                onSaveSupplyType() {
-                    console.log("data %o", this.supply_type_input)
+                onSaveSupplyItem() {
 
-                    this.supply_type_input.date_updated = new Date()
+                    this.supply_input.date_updated = new Date()
+                    this.supply_input.date_supplied = new Date(this.supply_input.date_supplied)
 
-                    DataHandler.addSupplyType(this.supply_type_input).then((data) => {
+                    console.log("data %o", this.supply_input)
+
+                    DataHandler.addSupply(this.supply_input).then((data) => {
                         if (data.error) {
                             alert(`Can't Persist Item ${data.error}`)
                         } else {
                             alert(`Item Have Been Persisted Successfuly`)
-                            this.supply_type_input = new EvacuationSupplyType()
-                            this.fetchSupplyType()
+                            this.supply_input = new EvacuationSupply()
+                            //this.fetchSupply()
+                            this.getSupplyDetails(this.inventory.id)
                         }
                     })
                 },
 
-                onDeleteSupplyType(id) {
+                onDeleteSupplyItem(index) {
+                    console.log("id %o", index)
+                    let id = this.supplies[index].id
                     let onConfirm = confirm('Deleting Item\nPress confirm to proceed')
                     if (onConfirm) {
-                        DataHandler.deleteSupplyType(id).then((data) => {
+                        DataHandler.deleteSupply(id).then((data) => {
                             console.log(data)
                             if (data.error) {
                                 alert(`Can't Delete Item ${data.error}`)
                             } else {
                                 alert(`Item Have Been Deleted Successfuly`)
-                                this.fetchSupplyType()
+                                this.getSupplyDetails(this.inventory.id)
                             }
                         })
                     }
-                }, */
-                /*!!=============== SUPPLY-TYPE ===============!!!*/
+                },
+
+                onTransferSupply(index) {
+                    let supply = this.pending_supplies[index]
+                    this.transfer_supply = EvacuationSupply.parse(supply.toObject())
+                    inventory_selection.onStart(supply, this.onSelectedInventory)
+                    //$('#inventorySelectionModal').modal()
+                },
+
+                onSelectedInventory(id) {
+                    if (confirm("transfer inventory here?")) {
+                        let prevInv = this.getInventoryById(this.transfer_supply.inventory_id)
+                        this.transfer_supply.inventory_id = id
+                        this.transfer_supply.date_updated = new Date()
+                        this.transfer_supply.status = SupplyStatus.pending
+                        this.transfer_supply.logs = this.transfer_supply.logs + "\n" + "Transferred from: " +
+                            prevInv.name + " by: " + this.user.id
+
+                        inventory_selection.onDismiss()
+                        DataHandler.addSupply(this.transfer_supply).then((data) => {
+                            if (data.error) {
+                                alert(`Can't Persist Item ${data.error}`)
+                            } else {
+                                alert(`Item Have Been Persisted Successfuly`)
+                                this.transfer_supply = new EvacuationSupply()
+                                //this.getSupplyDetails(this.inventory.id)
+                            }
+                        }).catch(err => {
+                            console.log(err)
+                        })
+                    }
+                },
+                /*!!=============== PENDING-SUPPLY-TYPE ===============!!!*/
 
                 generateReport() {
+                    let view_list = this.pending_supplies.map((data) => {
+                        var object = {
+                            ...data.toObject()
+                        }
+                        //let evac = this.evac_dict[data.evac_id]
+                        let ref = this.getSupplyType(data.inventory_type) //.supply_types_ref[data.inventory_type]
+                        object['type'] = ref
+                        let inventory = this.getInventoryById(data.inventory_id)
+                        object['inventory'] = inventory
 
+                        return object
+                    })
+                    let csv = ConvertToCSV(view_list)
+                    saveTextAsFile(`latest_inventory_pending_supply_${this.user.municipality}.csv`, csv)
+
+                    /* let public_list = this.muni_inv_list 
+                    let munic_csv = ConvertToCSV(public_list)
+                    saveTextAsFile(`latest_public_inventory_${this.user.municipality}.csv`, csv) */
+
+                    let inv_list = Object.keys(this.inventory_dict).map((key) => {
+                        return this.inventory_dict[key]
+                    })
+                    let munic_csv = ConvertToCSV(inv_list)
+                    saveTextAsFile(`latest_inventory_${this.user.municipality}.csv`, munic_csv)
                 }
 
             }
