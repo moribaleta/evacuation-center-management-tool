@@ -149,7 +149,7 @@
 
             </div>
         </div>
-        
+
 
         <inventory-supplytype-editor :user="user" v-ref:supply_type_component></inventory-supplytype-editor>
 
@@ -252,7 +252,42 @@
                                             <p class="item-value">No Inventory</p>
                                         </div>
                                     </ul>
-                                    <ul class="list-group" v-for="inventory,index in inventory_list[evac.id]">
+                                    <table class="table hidden-sm hidden-xs">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Description</th>
+                                                <th>Date Created</th>
+                                                <th>Date Updated</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-for="inventory,index in inventory_list[evac.id]">
+                                                <td>{{index+1}}. {{inventory.name }}</td>
+                                                <td>{{inventory.description}}</td>
+                                                <td>{{formatDate(inventory.date_created)}}</td>
+                                                <td>{{formatDate(inventory.date_updated)}}</td>
+                                                <td>
+                                                    <button type="button" id="add-report"
+                                                        class="btn btn-success button-view"
+                                                        v-on:click="viewInventory(inventory.id)">
+                                                        View Inventory
+                                                    </button>
+                                                    <button type="button" id="add-report"
+                                                        class="btn btn-warning button-view"
+                                                        v-on:click="editInventory(evac.id,index)">
+                                                        Edit Inventory
+                                                    </button>
+                                                    <button type="button" id="add-report"
+                                                        class="btn btn-danger button-view "
+                                                        v-on:click="deleteInventory(inventory.id)">
+                                                        Delete Inventory
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <ul class="list-group hidden-md hidden-lg" v-for="inventory,index in inventory_list[evac.id]">
                                         <div class="list-group-item">
                                             <div class="row">
                                                 <div class="col-md-12">
@@ -344,7 +379,7 @@
                     this.municipalities = ['public'].concat(municipalities)
                     try {
                         this.fetchData()
-                    }catch(err) {
+                    } catch (err) {
                         console.log(err)
                     }
                 },
@@ -352,11 +387,11 @@
                 fetchData() {
                     this.fetchMunicipalInv()
                     this.fetchEvacationCenter()
-                    
+
                     //this.$refs.supply_type_component.fetchSupplyType()
                     //this.$children[0].fetchSupplyType()
                     this.$children[0].fetchSupplyType()
-                    
+
                     //this.fetchSupplyType()
                 },
 
@@ -381,7 +416,7 @@
                         console.log(err)
                     }).finally(() => {
                         this.isLoading.evac_inv = false
-                    })  
+                    })
                 },
 
                 /* fetchSupplyType(){
