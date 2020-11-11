@@ -5,7 +5,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Donors</title>
-    
+
     <!-- update the version number as needed -->
     <script defer src="/__/firebase/7.19.1/firebase-app.js"></script>
     <!-- include only the Firebase features as you need -->
@@ -17,7 +17,7 @@
     <script defer src="/__/firebase/7.19.1/firebase-functions.js"></script>
     <!-- initialize the SDK after all desired features are loaded -->
     <script defer src="/__/firebase/init.js"></script>
-    
+
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -28,7 +28,7 @@
     <script src="../_global/js/objects.js"></script>
     <script src="../_global/js/utilities.js"></script>
     <script src="../_global/js/datahandler.js"></script>
-    
+
 </head>
 
 <body>
@@ -36,7 +36,7 @@
         <div class="sidenav-item">
             <img class="nav-image" :src="logo" />
         </div>
-        
+
         <div v-for="item in header_items" v-bind:class="'sidenav-item ' + (active == item.id ? 'active' : '') ">
             <a v-bind:href="item.href">
                 <div class="icon-block">
@@ -45,7 +45,7 @@
                 </div>
             </a>
         </div>
-        
+
         <div class="sidenav-item">
             <a v-on:click="onLogout()">
                 <div class="icon-block">
@@ -68,14 +68,14 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal"
-                        v-on:click="onSaveOrgDonor()">Save</button>
+                            v-on:click="onSaveOrgDonor()">Save</button>
                         <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                     </div>
                 </div>
-                
+
             </div>
         </div>
-        
+
         <div id="indvModal" class="modal fade" role="dialog">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -84,28 +84,33 @@
                         <h4 class="modal-title">{{isEdit ? 'Edit ': 'Add '}} Donor</h4>
                     </div>
                     <div class="modal-body">
-                        <form-generator :form="indv_formmodel"  :input.sync="indv_input"></form-generator>
+                        <form-generator :form="indv_formmodel" :input.sync="indv_input"></form-generator>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal"
-                        v-on:click="onSaveIndvDonor()">Save</button>
+                            v-on:click="onSaveIndvDonor()">Save</button>
                         <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                     </div>
                 </div>
-                
+
             </div>
         </div>
-        
+
         <h1>Donors</h1>
-        
+
         <!-- LATEST REPORTS -->
         <div class="section">
             <h3>Latest Reports</h3>
+
+            <filter-component :filter_add="filter_add.reports" v-on:filter="onFilterReport($event)"
+                v-on:search="onSearchReport($event)" v-on:cancel="onCancelSearchReport($event)" v-on:clear="onClearFilterReport()">
+            </filter-component>
             <div class="loader-container" v-if="isLoading.reports">
                 <div class="loader"></div>
             </div>
-            <div class="table-container" id="tableData"  v-if="!isLoading.reports">
-                <div class="well" v-for="item,index in donor_report_list">
+
+            <div class="table-container" id="tableData" v-if="!isLoading.reports">
+                <div class="well" v-for="item,index in donor_report_view_list">
                     <div class="row">
                         <div class="col col-md-12 item-info">
                             <p class="item-value">{{index + 1}}.</p>
@@ -114,24 +119,17 @@
                             <donor-container :donor="donor_ref[item.user_id]"></donor-container>
                         </div>
                         <div class="col col-md-4 item-info " v-for="info,index in donor_report_headers"
-                        v-if="info != 'user_id'">
-                        <div v-if="info == 'evac_id'">
-                            <p class="item-label">EVACUATION NAME</p>
-                            <p class="item-value">
-                                {{item.evac_id.isEmpty() ? 'public' : evac_names[item.evac_id]}}</p>
-                            </div>
-                            <div v-if="info != 'evac_id' && !info.includes('date')">
+                            v-if="info != 'user_id'">
+                            <entry-single-component v-if="info=='evac_id'" :label="'EVACUATION NAME'" :value="item.evac_id.isEmpty() ? 'public' : evac_names[item.evac_id]" ></entry-single-component>
+                            <!-- <div v-if="info != 'evac_id' && !info.includes('date')">
                                 <p class="item-label">{{info.replace(/_/g,' ').toUpperCase() +": "}}</p>
                                 <p class="item-value">{{item[info] ? item[info] : 'N/A'}}</p>
-                            </div>
-                            <div v-if="info.includes('date')">
-                                <p class="item-label">{{info.replace(/_/g,' ').toUpperCase() +": "}}</p>
-                                <p class="item-value">{{item[info] ? formatDate(item[info]): 'N/A'}}</p>
-                            </div>
+                            </div> -->
+                            <entry-single-component v-if="info != 'evac_id'" :label="info" :value="item[info]"></entry-single-component>
                         </div>
                         <div class="col col-md-12">
                             <button class="btn btn-default btn-info" :href="'#requestrow-'+index"
-                            data-toggle="collapse">View Request</button>
+                                data-toggle="collapse">View Request</button>
                         </div>
                     </div>
                     <div :id="'requestrow-'+index" class="panel-collapse collapse">
@@ -140,7 +138,7 @@
                                 <li class="list-group-item" v-if="item.reports.isEmpty()">
                                     <p>No Request</p>
                                 </li>
-                                
+
                                 <li class="list-group-item" v-for="report,index in item.reports">
                                     <div class="row">
                                         <div class="col col-md-12 item-info">
@@ -166,28 +164,31 @@
             </div>
             <div>&nbsp;</div>
             <div class="button-container">
-                <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="onViewAllReports()">View All Reports</button>
+                <button type="button" id="add-report" class="btn btn-info button-view"
+                    v-on:click="onViewAllReports()">View All Reports</button>
             </div>
         </div>
-        
+
         <h3>Donors Users</h3>
         <div class="section">
             <div class="button-container">
-                <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="onAddNewOrg()">Add New Organization</button>
-                <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="onAddNewIndv()">Add New Individual</button>
+                <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="onAddNewOrg()">Add
+                    New Organization</button>
+                <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="onAddNewIndv()">Add
+                    New Individual</button>
             </div>
             <div>&nbsp;</div>
         </div>
-        
+
         <!--------- ORGANIZATION ------------->
         <div class="section">
             <h4>Organization</h4>
-            
+
             <div class="loader-container" v-if="isLoading.org">
                 <div class="loader"></div>
             </div>
-            
-            <div class="table-container" id="tableData"  v-if="!isLoading.org">
+
+            <div class="table-container" id="tableData" v-if="!isLoading.org">
                 <div class="well" v-for="item,index in orgs_list">
                     <div class="row">
                         <div class="col col-xs-12 item-info">
@@ -203,9 +204,10 @@
                                 {{item[key] || '--'}}
                             </p>
                         </div>
-                        
+
                         <div class="col col-xs-12">
-                            <button class="btn btn-default btn-info"   v-on:click="viewReports(item.id)">View Reports</button>
+                            <button class="btn btn-default btn-info" v-on:click="viewReports(item.id)">View
+                                Reports</button>
                             <button class="btn btn-default btn-info" v-on:click="onEditOrg(index)">edit</button>
                             <button class="btn btn-default btn-danger" v-on:click="onDeleteOrg(index)">delete</button>
                         </div>
@@ -214,16 +216,16 @@
             </div>
         </div>
         <!--------- ORGANIZATION ------------->
-        
+
         <!--------- INDIVIDUAL --------------->
         <div class="section">
-            
+
             <h4>Individual</h4>
-            
+
             <div class="loader-container" v-if="isLoading.indv">
                 <div class="loader"></div>
             </div>
-            
+
             <div class="table-container" id="tableData" v-if="!isLoading.indv">
                 <div class="well" v-for="item,index in indv_list">
                     <div class="row">
@@ -243,10 +245,11 @@
                                 {{item[key] == 0 ? 'Male' : 'Female'}}
                             </p>
                         </div>
-                        
+
                         <div class="col col-xs-12">
-                            <button class="btn btn-default btn-info"   v-on:click="viewReports(item.id)">View Reports</button>
-                            <button class="btn btn-default btn-info"   v-on:click="onEditIndv(index)">edit</button>
+                            <button class="btn btn-default btn-info" v-on:click="viewReports(item.id)">View
+                                Reports</button>
+                            <button class="btn btn-default btn-info" v-on:click="onEditIndv(index)">edit</button>
                             <button class="btn btn-default btn-danger" v-on:click="onDeleteIndv(index)">delete</button>
                         </div>
                     </div>
@@ -254,25 +257,24 @@
             </div>
         </div>
         <!--------- INDIVIDUAL --------------->
-        
-        
+
+
     </div>
-    
-    
+
+
     <script src="js/app/app.js"></script>
     <script>
-        
         const filterheaders = [
-        'date_created',
-        'date_updated',
-        'firstname',
-        'lastname',
-        'middleinit',
-        'email',
-        'birthdate',
-        'phone_number',
-        'address',
-        'sex',
+            'date_created',
+            'date_updated',
+            'firstname',
+            'lastname',
+            'middleinit',
+            'email',
+            'birthdate',
+            'phone_number',
+            'address',
+            'sex',
         ]
         const DonorComponent = Vue.extend({
             template: `
@@ -302,16 +304,20 @@
             props: {
                 donor: Object,
             },
-            
+
             data() {
                 return {
                     org: null,
                     indv: null,
-                    org_headers: Object.keys(DonorsOrganization.headers).filter((val)=>{return filterheaders.includes(val)}),
-                    indv_headers: Object.keys(DonorsIndividual.headers).filter((val)=>{return filterheaders.includes(val)}),
+                    org_headers: Object.keys(DonorsOrganization.headers).filter((val) => {
+                        return filterheaders.includes(val)
+                    }),
+                    indv_headers: Object.keys(DonorsIndividual.headers).filter((val) => {
+                        return filterheaders.includes(val)
+                    }),
                 }
             },
-            
+
             created: function () {
                 console.log("donor %o", this.donor)
                 if (this.donor.id.includes('org')) {
@@ -320,12 +326,12 @@
                     this.indv = this.donor
                 }
             },
-            
+
             methods: {
                 formatDate(date) {
                     return app.formatDate(date)
                 },
-                
+
                 getValue(key, value) {
                     if (key.includes('date')) {
                         return this.formatDate(value)
@@ -336,56 +342,69 @@
                 }
             }
         })
-        
+
         Vue.component('donor-container', DonorComponent)
-        
+
         app = new Vue({
             el: '#content',
             data: {
                 user: new AdminUser(),
-                
+
                 //REFERENCES
                 evac_list: [],
+                evac_dict: {},
                 evac_names: {},
                 supply_types: {},
-                
+
                 //ENTRIES
                 orgs_list: [],
                 indv_list: [],
                 donor_ref: {},
-                donor_report_list: [],
                 
+                //REPORTS
+                donor_report_view_list: [],
+                donor_report_list: [],
+                donor_report_headers: DonorsReport.headers,
+
                 //MODEL INPUTS
                 orgs_input: {},
                 indv_input: {},
-                
+
                 //FORM MODELS
                 org_headers: Object.keys(DonorsOrganization.headers),
                 org_formmodel: DonorsOrganization.formModel,
                 indv_headers: Object.keys(DonorsIndividual.headers),
                 indv_formmodel: DonorsIndividual.formModel,
-                
+
                 isEdit: false,
                 isLoading: {
-                    indv : false,
-                    org  : false,
+                    indv: false,
+                    org: false,
                     reports: false
                 },
+
+                filter_add: {
+                    reports: {
+                        status:  ['all'].concat(Object.keys(SupplyStatus)),
+                        evacuation: [],
+                        item_type:  []
+                    },
+                    donors: {}
+                }
             },
             methods: {
                 onStart() {
                     this.user = header.user
                     this.municipalities = municipalities
-                    
                     this.fetchData()
-                },//onStart
-                
-                fetchData(){
+                }, //onStart
+
+                fetchData() {
                     this.fetchOrg()
                     this.fetchIndv()
                     this.fetchReports()
-                },//fetchData
-                
+                }, //fetchData
+
                 fetchOrg() {
                     this.isLoading.org = true
                     DataHandler.getDonorOrganizations().then((message) => {
@@ -398,9 +417,9 @@
                     }).finally(() => {
                         this.isLoading.org = false
                     })
-                },//fetchOrg
-                
-                fetchIndv(){
+                }, //fetchOrg
+
+                fetchIndv() {
                     this.isLoading.indv = true
                     DataHandler.getDonorIndividual().then((message) => {
                         this.indv_list = message.data
@@ -412,9 +431,9 @@
                     }).finally(() => {
                         this.isLoading.indv = false
                     })
-                },//fetchIndv
-                
-                fetchReports(){
+                }, //fetchIndv
+
+                fetchReports() {
                     DataHandler.getSupplyTypes().then((message) => {
                         this.supply_types_option = message.data.map((supply) => {
                             this.supply_types[supply.id] = supply
@@ -423,142 +442,237 @@
                                 value: supply.id
                             }
                         })
+                        this.filter_add.reports.item_type = ['all'].concat(this.supply_types_option.map((data) => {
+                            return data.title;
+                        }))
                         //this.donor_report_item_form.inventory_type.options = this.supply_types_option
                         console.log("supply types %o", this.supply_types)
                     }).catch(err => {
                         console.log("err %o", err)
                     })
-                    
+
                     DataHandler.getEvacuationCenters().then((data) => {
                         this.evac_list = data.data
+                        this.filter_add.reports.evacuation = []
+                        var evacuation_names = []
                         let evac_options = this.evac_list.map((evac) => {
                             this.evac_names[evac.id] = evac.name
+                            evacuation_names.push(evac.name)
+                            this.evac_dict[evac.id] = evac
                         })
+                        this.filter_add.reports.evacuation = ['all','public'].concat(evacuation_names)
+                        
                     }).catch(err => {
                         console.log("err %o", err)
                     })
-                    
+
                     this.isLoading.reports = true
                     DataHandler.getDonorReports(null, 10).then((message) => {
                         this.donor_report_list = message.data
+                        this.donor_report_view_list = this.donor_report_list
                         console.log("reports %o", this.donor_report_list)
                     }).catch(err => {
                         console.log(err)
                     }).finally(() => {
                         this.isLoading.reports = false
                     })
+
+                    /* DataHandler.getSupplyTypes().then((message) => {
+                        this.supply_types = message.data
+                        this.filter_add.reports.item_type = this.supply_types.map((data) => {return data.name })
+                    }).catch(err => {
+                        console.log(err)
+                    }) */
                 },
-                
+
                 viewReports(id) {
-                    window.open(`donors_reports.html?id=${id}`,'_self')
+                    window.open(`donors_reports.html?id=${id}`, '_self')
                 },
-                
+
                 //<!----------INDEPENDENT-USER--------------
-                    onAddNewOrg() {
-                        this.orgs_input = (new DonorsOrganization()).toObject()
-                        this.orgs_input.created_by = this.user.id
-                        this.isEdit = false
-                        $('#orgsModal').modal()
-                    },//onAddNewOrg
-                    
-                    onEditOrg(index) {
-                        const donor = this.orgs_list[index]
-                        this.isEdit = true
-                        this.orgs_input = donor.toObject()
-                        this.orgs_input.date_updated = new Date()
-                        $('#orgsModal').modal()
-                    },//onEditOrg
-                    
-                    onSaveOrgDonor() {
-                        const input = DonorsOrganization.parse(this.orgs_input)
-                        
-                        DataHandler.addDonor(input, true).then((data) => {
+                onAddNewOrg() {
+                    this.orgs_input = (new DonorsOrganization()).toObject()
+                    this.orgs_input.created_by = this.user.id
+                    this.isEdit = false
+                    $('#orgsModal').modal()
+                }, //onAddNewOrg
+
+                onEditOrg(index) {
+                    const donor = this.orgs_list[index]
+                    this.isEdit = true
+                    this.orgs_input = donor.toObject()
+                    this.orgs_input.date_updated = new Date()
+                    $('#orgsModal').modal()
+                }, //onEditOrg
+
+                onSaveOrgDonor() {
+                    const input = DonorsOrganization.parse(this.orgs_input)
+
+                    DataHandler.addDonor(input, true).then((data) => {
+                        if (data.error) {
+                            alert(`Can't Save Entry: ${data.error}`)
+                        } else {
+                            alert(`Entry Was Saved Successfuly`)
+                            this.fetchOrg()
+                        }
+                    }).catch(error => {
+                        console.log(error)
+                    })
+                }, //onSaveOrgDonor
+
+                onDeleteOrg(index) {
+                    let onConfirm = confirm('Deleting Entry?\nPress confirm to proceed')
+                    if (onConfirm) {
+                        DataHandler.deleteDonor(this.orgs_list[index].id, true).then((data) => {
+                            console.log(data)
                             if (data.error) {
-                                alert(`Can't Save Entry: ${data.error}`)
+                                alert(`Can't Delete Entry ${data.error}`)
                             } else {
-                                alert(`Entry Was Saved Successfuly`)
+                                alert(`Entry Was Deleted Successfuly`)
                                 this.fetchOrg()
                             }
-                        }).catch(error => {
-                            console.log(error)
                         })
-                    },//onSaveOrgDonor
-                    
-                    onDeleteOrg(index) {
-                        let onConfirm = confirm('Deleting Entry?\nPress confirm to proceed')
-                        if (onConfirm) {
-                            DataHandler.deleteDonor(this.orgs_list[index].id, true).then((data) => {
-                                console.log(data)
-                                if (data.error) {
-                                    alert(`Can't Delete Entry ${data.error}`)
-                                } else {
-                                    alert(`Entry Was Deleted Successfuly`)
-                                    this.fetchOrg()
-                                }
-                            })
-                        }
-                    },//onDeleteOrg
-                    //----------INDEPENDENT-USER--------------!>
-                    
-                    
-                    //<!----------DEPENDENT-USER-----------------
-                        onAddNewIndv() {
-                            this.isEdit = false
-                            this.indv_input = (new DonorsIndividual()).toObject()
-                            this.indv_input.created_by = this.user.id
-                            $('#indvModal').modal()
-                        },//onAddNewIndv
-                        
-                        onEditIndv(index) {
-                            this.isEdit = true
-                            this.indv_input = this.indv_list[index].toObject()
-                            this.indv_input.date_updated = new Date()
-                            $('#indvModal').modal()
-                        },//onEditIndv
-                        
-                        onSaveIndvDonor() {                    
-                            const input = DonorsIndividual.parse(this.indv_input)
-                            
-                            DataHandler.addDonor(input, false).then((data) => {
-                                if (data.error) {
-                                    alert(`Can't Save Entry: ${data.error}`)
-                                } else {
-                                    alert(`Entry Was Saved Successfuly`)
-                                    this.fetchIndv()
-                                }
-                            }).catch(error => {
-                                console.log(error)
-                            })
-                        },//onSaveIndvDonor
-                        
-                        onDeleteIndv(index) {
-                            if (confirm('Deleting Entry?\nPress confirm to proceed')) {
-                                DataHandler.deleteDonor(this.indv_list[index].id, false).then((data) => {
-                                    console.log(data)
-                                    if (data.error) {
-                                        alert(`Can't Delete Entry ${data.error}`)
-                                    } else {
-                                        alert(`Entry Was Deleted Successfuly`)
-                                        this.fetchIndv()
-                                    }
-                                })
-                            }
-                        },//onDeleteIndv
-                        
-                        //----------DEPENDENT-USER-----------------!>
-                        
-                        onViewAllReports(){
-                            window.open(`donors_reports.html`,'_self')
-                        }
-                        
                     }
-                })
-                
-                /* $(document).ready(() => {
-                    header.onStart()
-                }) */
-            </script>
-            
-        </body>
-        
-        </html>
+                }, //onDeleteOrg
+                //----------INDEPENDENT-USER--------------!>
+
+
+                //<!----------DEPENDENT-USER-----------------
+                onAddNewIndv() {
+                    this.isEdit = false
+                    this.indv_input = (new DonorsIndividual()).toObject()
+                    this.indv_input.created_by = this.user.id
+                    $('#indvModal').modal()
+                }, //onAddNewIndv
+
+                onEditIndv(index) {
+                    this.isEdit = true
+                    this.indv_input = this.indv_list[index].toObject()
+                    this.indv_input.date_updated = new Date()
+                    $('#indvModal').modal()
+                }, //onEditIndv
+
+                onSaveIndvDonor() {
+                    const input = DonorsIndividual.parse(this.indv_input)
+
+                    DataHandler.addDonor(input, false).then((data) => {
+                        if (data.error) {
+                            alert(`Can't Save Entry: ${data.error}`)
+                        } else {
+                            alert(`Entry Was Saved Successfuly`)
+                            this.fetchIndv()
+                        }
+                    }).catch(error => {
+                        console.log(error)
+                    })
+                }, //onSaveIndvDonor
+
+                onDeleteIndv(index) {
+                    if (confirm('Deleting Entry?\nPress confirm to proceed')) {
+                        DataHandler.deleteDonor(this.indv_list[index].id, false).then((data) => {
+                            console.log(data)
+                            if (data.error) {
+                                alert(`Can't Delete Entry ${data.error}`)
+                            } else {
+                                alert(`Entry Was Deleted Successfuly`)
+                                this.fetchIndv()
+                            }
+                        })
+                    }
+                }, //onDeleteIndv
+
+                //----------DEPENDENT-USER-----------------!>
+
+                onViewAllReports() {
+                    window.open(`donors_reports.html`, '_self')
+                },
+
+                //----------REPORT FILTERS----------------!>
+                /* FILTER / SEARCH */
+                onFilterReport(filter) {
+                    console.log("filter %o", filter)
+
+                    var view_list = this.donor_report_list.filter((data) => {
+                        let date_created    = new Date(data.date_created)
+                        let date_updated    = new Date(data.date_updated)
+                        let evac            = this.evac_dict[data.evac_id]
+                        return (
+                            (filter.year == 'all' ||
+                                filter.year == date_created.getFullYear() ||
+                                filter.year == date_updated.getFullYear()
+                                ) &&
+                            (filter.month == 'all' ||
+                                filter.month == (months_array[date_created.getMonth()] || 0) ||
+                                filter.month == (months_array[date_updated.getMonth()] || 0)
+                                ) && 
+                            (filter.municipality == 'all' || 
+                            filter.municipality == evac.municipality)
+                        )
+                    });
+
+                    view_list = view_list.filter((data) => {
+                        return (filter.status == 'all' || 
+                            filter.status == data.status
+                        )
+                    })
+
+                    view_list = view_list.filter((data) => {
+                        let evac_name =  filter.evacuation
+
+                        if (evac_name == 'all') {
+                            return true
+                        }
+                        
+                        if (evac_name == 'public' && data.evac_id == "") {
+                            console.log("report %o", data)
+                            return true
+                        }
+
+                        let data_evac = this.evac_dict[data.evac_id].name 
+                        return  data_evac == evac_name
+                    })
+
+                    view_list = view_list.filter((data) => {
+                        let supplies = data.reports.map((report) => {
+                            return this.supply_types[report.inventory_type].name.trim().toLowerCase()
+                        })
+                        console.log("data %o -- %o", data, supplies)
+                        return (filter.item_type == 'all' || supplies.includes(filter.item_type.toLowerCase()))
+                    })
+
+                    this.donor_report_view_list = view_list
+                },
+
+                onSearchReport(filter) {
+                    this.onFilterReport(filter)
+
+                    this.donor_report_view_list = this.donor_report_view_list.filter((data) => {
+                        var object = {
+                            ...data.toObject()
+                        }
+                        let evac = this.evac_dict[data.evac_id]
+                        object['evac_name'] = evac ? evac.name : "public"
+                        object['municipal'] = evac ? evac.municipal : "public"
+                        return SearchObject(object, filter.searchTerm)
+                    })
+                },
+
+                onCancelSearchReport(filter) {
+                    this.onFilterReport(filter)
+                },
+
+                onClearFilterReport() {
+                    this.donor_report_view_list = [...this.donor_report_list]
+                },
+
+            }
+        })
+
+        /* $(document).ready(() => {
+            header.onStart()
+        }) */
+    </script>
+
+</body>
+
+</html>

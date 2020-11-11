@@ -487,7 +487,7 @@ class MOABCParameters extends Model {
 
     constructor(id, date_created, date_updated, created_by, max_length, max_val, population_size, trial_limit, max_epoch, min_shuffle, max_shuffle, is_active) {
         super()
-        this.id = id || keygenID("param", 5)//"param-" + genID(5)
+        this.id = id || keyGenID("param", 5)//"param-" + genID(5)
         this.date_created = date_created || new Date()
         this.date_updated = date_updated || new Date()
         this.created_by = created_by || '0'
@@ -1546,7 +1546,8 @@ class ReportType extends Model  {
         'user_id',
         'evac_id',
         'date_created',
-        'date_updated'
+        'date_updated',
+        'status'
     ]
 
     toObject() {

@@ -1285,20 +1285,8 @@ class DonorHandler extends MunicipalInventoryHandler {
                     console.log(doc.id, " => ", doc.data());
                     let data = doc.data()
                     let id = doc.id
-                    var object = {
-                        id,
-                        ...data
-                    }
 
-                    Object.keys(object).filter((key) => {
-                        return key.includes('date')
-                    }).forEach((key) => {
-                        try {
-                            object[key] = object[key].toDate()
-                        } catch (err) {
-                            console.log(err)
-                        }
-                    })
+                    const object = parseObject({id,...data})
                     reports.push(DonorsReport.parse(object))
                 });
                 var message = new Message()

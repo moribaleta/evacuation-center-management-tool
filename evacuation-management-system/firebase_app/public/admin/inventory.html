@@ -174,14 +174,18 @@
 
             </div>
         </div>
-
+    
 
         <inventory-supplytype-editor :user="user" v-on:change="onSuppyTypeDidChange"></inventory-supplytype-editor>
+        
 
         <div class="subcontent">
             <div class="section header">
                 <h1>Inventory</h1>
             </div>
+
+            <filter-component :filter_add="filter_add" v-on:filter="onFilter($event)" v-on:search="onSearch($event)"
+                    v-on:cancel="onCancelSearch($event)" v-on:clear="onClearFilter()"></filter-component>
 
             <div class="section">
                 <button type="button" id="add-report" class="btn btn-success button-view"
@@ -510,6 +514,14 @@
                 isLoading: {
                     evac_inv: false,
                     muni_inv: false
+                },
+
+                filter_add: {},
+
+                view_list: {
+                    evac_inv:       [],
+                    muni_inv:       [],
+                    pending_list:   []
                 }
             },
             methods: {
@@ -525,15 +537,8 @@
                 },
 
                 fetchData() {
-                    /* this.fetchMunicipalInv()
-                    this.fetchEvacationCenter() */
-
-                    //this.$refs.supply_type_component.fetchSupplyType()
-                    //this.$children[0].fetchSupplyType()
-
                     this.fetchAll()
                     this.$children[0].fetchSupplyType()
-                    //this.fetchSupplyType()
                 },
 
                 fetchAll() {
@@ -560,27 +565,6 @@
                         return data.data
                     })
                 },
-
-                /* fetchMunicipalInv() {
-                    this.isLoading.muni_inv = true
-                    console.log("municipality %o", this.user.municipality)
-                    DataHandler.getMunicipalInventories(this.user.municipality).then((data) => {
-                        this.muni_inv_list = data.data
-                        console.log("muni list %o", this.muni_inv_list)
-                    }).catch((err) => {
-                        console.log(err)
-                    }).finally(() => {
-                        this.isLoading.muni_inv = false
-                    })
-                },
-
-                fetchEvacationCenter() {
-                    DataHandler.getEvacuationCenters(this.user.municipality).then((data) => {
-                        this.setEvacationCenter(data.data)
-                    }).catch(err => {
-                        console.log(err)
-                    })
-                }, */
 
                 getSupplyType(id) {
                     console.log(id)

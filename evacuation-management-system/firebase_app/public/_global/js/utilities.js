@@ -415,7 +415,7 @@ const parseObject = (object) => {
             object[key] = date
         } catch (err) {
             try {
-                console.log(err) 
+                //console.log(err) 
                 if (object[key].seconds &&
                     object[key].nanoseconds) {
                         let timestamp = new firebase.firestore.Timestamp(object[key].seconds,
@@ -427,7 +427,7 @@ const parseObject = (object) => {
                 
                 //console.log("im here?")
             } catch (err) {
-                console.log(err) 
+                //console.log(err) 
             }
             /* console.log("key %o, value %o", key, object[key])
             console.log(err) */
