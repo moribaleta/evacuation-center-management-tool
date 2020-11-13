@@ -415,7 +415,7 @@ const InventorySupplyTypeEditor = Vue.extend({
         //supply_type_input: Object,
     },
     watch: {
-        user(){
+        user() {
             console.log("user updated %o", this.user)
             if (this.user) {
                 console.log("user updated %o", this.user)
@@ -423,7 +423,7 @@ const InventorySupplyTypeEditor = Vue.extend({
             }
         },
 
-        load(){
+        load() {
             if (this.supply_types.isEmpty()) {
                 this.supply_types = this.load
             }
@@ -439,11 +439,11 @@ const InventorySupplyTypeEditor = Vue.extend({
         //this.fetchSupplyType()
     },
     methods: {
-        fetchSupplyType(){
+        fetchSupplyType() {
             DataHandler.getSupplyTypes().then((data) => {
                 this.supply_types = data.data || []
                 console.log("supply types %o", this.supply_types)
-                this.$emit('onchange',this.supply_types)
+                this.$emit('onchange', this.supply_types)
             }).catch(err => {
                 console.log(err)
             })
@@ -503,6 +503,87 @@ const InventorySupplyTypeEditor = Vue.extend({
 Vue.component('inventory-supplytype-editor', InventorySupplyTypeEditor)
 
 
+const ReportEditorModal = Vue.extend({
+    template: `
+    <div id="editorModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">{{isedit ? 'Edit ': 'Add '}} Donor Report</h4>
+                </div>
+                <div class="modal-body">
+                    <form-generator :form="formModel" :input.sync="input" ></form-generator>
+                    <ol class="list-group">
+                        <li class="list-group-item danger">
+                            <button type="button" class="btn btn-info" v-on:click="addInputInventory()">Add Item Request</button>
+                        </li>
+                        
+                        <li class="list-group-item" v-for="report,index in input.reports">
+                            <form-generator :form="formReportModel" :input.sync="report" ></form-generator>
+                            <button type="button" class="btn btn-danger" v-on:click="removeInputInventory(index)">Remove</button>
+                        </li>
+                    </ol>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" v-on:click="saveReport()">Save</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+            
+        </div>
+    </div>`,
+    props: {
+        isedit: Boolean,
+        input: Object,
+        evacuations: Array,
+        supplytypes: Array,
+    },
+    watch: {
+        evacuations() {
+            this.formModel.evac_id.options = [{
+                title: 'Public',
+                value: ''
+            }]
+            this.formModel.evac_id.options = this.formModel.evac_id.options.concat(this.evacuations.map((evac) => {
+                return {
+                    title: evac.name,
+                    value: evac.id
+                }
+            }))
+        },
+        supplytypes(){
+            //console.log("updated supply types %o",)
+            this.formReportModel.inventory_type.options = this.supplytypes
+        }
+    },
+    data(){
+        return {
+            formModel: ReportType.formModel,
+            formReportModel: ReportItemType.reportItemFormModel
+        }
+    },
+    created(){
+
+    },
+    methods: {
+        addInputInventory(){
+            this.input.reports.push({inventory_type: '',qty: 0,remarks: ''})
+        },
+        removeInputInventory(index) {
+            this.input.reports.splice(index, 1)
+        },
+        saveReport(){
+            this.$emit('persist',true)
+        }
+    }
+
+})
+
+Vue.component('report-editor-modal', ReportEditorModal)
+
+
+
 const InventorySelector = Vue.extend({
     template: `<div id="inventorySelectionModal" class="modal fade" role="dialog">
         <div class="modal-dialog">
@@ -541,7 +622,7 @@ const InventorySelector = Vue.extend({
         </div>
         <div class="panel-body">
         <button type="button" id="add-report" class="btn btn-success button-view"
-        v-on:click="tranferInventory(muni_inv.id)" :disabled="muni_inv.id == supply.inventory_id">
+        v-on:click="tranferInventory(muni_inv.id)" :disabled="supplies[0] && muni_inv.id == supplies[0].inventory_id">
         TRANSFER HERE
         </button>
         </div>
@@ -558,7 +639,7 @@ const InventorySelector = Vue.extend({
         </div>
         <div class="table-container" id="tableData">
         <div class="panel-group" v-for="evac,index in evac_list">
-        <div class="panel panel-default">
+        <div :class="evac.id == evac_id ? 'panel panel-success' : 'panel panel-default'">
         <div class="panel-heading">
         <h4 class="panel-title">
         <p class="item-value">
@@ -605,7 +686,7 @@ const InventorySelector = Vue.extend({
         <button type="button" id="add-report"
         class="btn btn-success button-view"
         v-on:click="tranferInventory(inventory.id)"
-        :disabled="inventory.id == supply.inventory_id">
+        :disabled="supplies[0] && inventory.id == supplies[0].inventory_id">
         TRANSFER HERE
         </button>
         </div>
@@ -627,9 +708,10 @@ const InventorySelector = Vue.extend({
     props: {
         muni_inv_list: Array,
         evac_list: Array,
+        evac_id: String,
         inventory_list: Object,
         isLoading: Object,
-        supply: Object
+        supplies: Array
     },
     created: function () {
         console.log('user data from parent component:')
@@ -654,7 +736,11 @@ var inventory_selection = new Vue({
         user: new AdminUser,
         muni_inv_list: [],
         evac_list: [],
+        evac_id: null,
+        
         inventory_list: {},
+        inventory_dict: {},
+
         evac_inv_input: new EvacuationInventory(), //new EvacuationCenter(),
         muni_inv_input: new MunicipalInventory(),
         municipalities: [],
@@ -664,15 +750,31 @@ var inventory_selection = new Vue({
             evac_inv: false,
             muni_inv: false
         },
-        supply: new EvacuationSupply(),
-        callable: (id) => {}
+
+        isTransformDonation: false,
+
+        supplies: [EvacuationSupply],
+        callable: (success) => {}
     },
     methods: {
         onStart(supply, callable) {
             this.user = header.user
             this.municipalities = municipalities
             this.callable = callable
-            this.supply = supply
+            this.supplies = [supply]
+            this.isTransformDonation = false
+            this.fetchData()
+        }, //onStart
+
+        onTransferDonation(supplies, evac_id, callable) {
+            this.user = header.user
+            this.municipalities = municipalities
+            this.callable = callable
+            this.supplies = supplies
+            console.log("supplies %o", this.supplies)
+            this.isTransformDonation = true
+            this.evac_id = evac_id
+            console.log("evac_id %o", this.evac_id)
             this.fetchData()
         }, //onStart
 
@@ -682,10 +784,19 @@ var inventory_selection = new Vue({
             $('#inventorySelectionModal').modal()
         }, //fetchData
 
+        getInventoryById(id) {
+            return this.inventory_dict[id]
+        },
+
         fetchMunicipalInv() {
             this.isLoading.muni_inv = true
             DataHandler.getMunicipalInventories(this.user.municipality).then((data) => {
                 this.muni_inv_list = data.data
+                
+                this.muni_inv_list.forEach((inv) => {
+                    this.inventory_dict[inv.id] = inv
+                })
+
                 console.log("muni list %o", this.muni_inv_list)
             }).catch((err) => {
                 console.log(err)
@@ -701,6 +812,10 @@ var inventory_selection = new Vue({
             }).then((data) => {
                 this.evac_list = data.evac_list
                 this.inventory_list = data.inventory_list
+
+                this.inventory_list.forEach((inv) => {
+                    this.inventory_dict[inv.id] = inv
+                })
             }).catch(err => {
                 console.log(err)
             }).finally(() => {
@@ -725,9 +840,49 @@ var inventory_selection = new Vue({
             })
         }, //setEvacationCenter
 
-        onSelectInventory(id) {
+        /* onSelectInventory(id) {
             console.log("selected %o", id)
             this.callable(id)
+        }, */
+
+        onSelectInventory(id) {
+            if (confirm("transfer inventory here?")) {
+                var success = false
+                console.log("supplies %o", this.supplies)
+                let promises = this.supplies.map((supply) => {
+                    let prevInv = this.getInventoryById(supply.inventory_id) || new EvacuationInventory()
+                    supply.inventory_id = id
+                    supply.date_updated = new Date()
+                    supply.status = SupplyStatus.pending
+                    supply.logs = supply.logs + "<br>" + "Transferred from: " +
+                    prevInv.name + " by: " + this.user.id
+
+                    inventory_selection.onDismiss()
+                    return DataHandler.addSupply(supply)
+                })
+                
+                Promise.all(promises).then((data) => {
+                    let errors = data.filter((data) => {
+                        return data.error
+                    })
+                    if (errors.isEmpty()) {
+                        success = true
+                        alert(`Item Have Been Persisted Successfuly`)
+                    } else {
+                        var error_str = ""
+                        errors.forEach((error) => {
+                            error_str  += error.error + "\n"
+                        })
+                        throw error_str
+                    }
+                }).catch((err) => {
+                    console.log(err)
+                    alert(`Can't Persist Data ${err}`)
+                }).finally(() => {
+                    this.callable(success)
+                    this.onDismiss()
+                })
+            }
         },
 
         onDismiss() {

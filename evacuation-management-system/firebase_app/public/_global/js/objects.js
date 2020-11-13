@@ -1611,7 +1611,7 @@ class PublicUserReport extends ReportType {
         this.user_id    = user_id
         this.evac_id    = evac_id
         this.reports    = reports || []
-        this.status     = status || ""
+        this.status     = status || SupplyStatus.pending
     }
 
     static parse(object = {}) {
@@ -1641,7 +1641,7 @@ class DonorsReport extends ReportType {
         this.user_id    = user_id
         this.evac_id    = evac_id || ""
         this.reports    = reports || []
-        this.status     = status || ""
+        this.status     = status || SupplyStatus.pending
     }
 
     static parse(object = {}) {

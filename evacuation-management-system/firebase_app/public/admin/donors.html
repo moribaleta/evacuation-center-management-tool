@@ -55,6 +55,11 @@
             </a>
         </div>
     </div>
+    <div id="inventory-list-picker">
+        <inventory-selector :muni_inv_list="muni_inv_list" :evac_list="evac_list" :inventory_list="inventory_list"
+            :is-loading="isLoading" :supplies="supplies" v-on:on-select-inventory="id => {onSelectInventory(id)}" :evac_id="evac_id">
+        </inventory-selector>
+    </div>
     <div class="container" id="content">
         <div id="orgsModal" class="modal fade" role="dialog">
             <div class="modal-dialog">
@@ -95,12 +100,13 @@
 
             </div>
         </div>
+        <report-editor-modal :isedit="isEdit" :input.sync="report_input" :evacuations="evac_list" :supplytypes="supply_types_option" v-on:persist="saveReport" ></report-editor-modal>
 
         <h1>Donors</h1>
 
         <!-- LATEST REPORTS -->
         <div class="section">
-            <h3>Latest Reports</h3>
+            <h3>Latest Pending Reports</h3>
 
             <filter-component :filter_add="filter_add.reports" v-on:filter="onFilterReport($event)"
                 v-on:search="onSearchReport($event)" v-on:cancel="onCancelSearchReport($event)" v-on:clear="onClearFilterReport()">
@@ -121,15 +127,13 @@
                         <div class="col col-md-4 item-info " v-for="info,index in donor_report_headers"
                             v-if="info != 'user_id'">
                             <entry-single-component v-if="info=='evac_id'" :label="'EVACUATION NAME'" :value="item.evac_id.isEmpty() ? 'public' : evac_names[item.evac_id]" ></entry-single-component>
-                            <!-- <div v-if="info != 'evac_id' && !info.includes('date')">
-                                <p class="item-label">{{info.replace(/_/g,' ').toUpperCase() +": "}}</p>
-                                <p class="item-value">{{item[info] ? item[info] : 'N/A'}}</p>
-                            </div> -->
                             <entry-single-component v-if="info != 'evac_id'" :label="info" :value="item[info]"></entry-single-component>
                         </div>
                         <div class="col col-md-12">
-                            <button class="btn btn-default btn-info" :href="'#requestrow-'+index"
-                                data-toggle="collapse">View Request</button>
+                            <button class="btn btn-default btn-info"    :href="'#requestrow-'+index" data-toggle="collapse">View Request</button>
+                            <button class="btn btn-default btn-success" v-on:click="onMoveRequestInventory(index)">Move To Inventory</button>
+                            <button class="btn btn-default btn-warning" v-on:click="onUpdateDonorRequest(index)">Update Request</button>
+                            <button class="btn btn-default btn-danger" v-on:click="onDeleteDonorRequest(index)">Delete Request</button>
                         </div>
                     </div>
                     <div :id="'requestrow-'+index" class="panel-collapse collapse">
@@ -147,14 +151,13 @@
                                                 {{supply_types[report.inventory_type].name}}
                                             </p>
                                         </div>
-                                        <div class="col col-md-12 item-info">
-                                            <p class="item-label">
-                                                QTY:
-                                            </p>
-                                            <p class="item-value">
-                                                {{report.qty}}
-                                            </p>
+                                        <div class="col col-md-3 item-info">
+                                            <entry-single-component :label="'qty'" :value="report.qty"></entry-single-component>
                                         </div>
+                                        <div class="col col-md-12 item-info">
+                                            <entry-single-component :label="'remarks'" :value="report.remarks"></entry-single-component>
+                                        </div>
+                                        
                                     </div>
                                 </li>
                             </ul>
@@ -355,6 +358,7 @@
                 evac_dict: {},
                 evac_names: {},
                 supply_types: {},
+                supply_types_option: [],
 
                 //ENTRIES
                 orgs_list: [],
@@ -369,6 +373,7 @@
                 //MODEL INPUTS
                 orgs_input: {},
                 indv_input: {},
+                report_input: {},
 
                 //FORM MODELS
                 org_headers: Object.keys(DonorsOrganization.headers),
@@ -595,7 +600,8 @@
                     var view_list = this.donor_report_list.filter((data) => {
                         let date_created    = new Date(data.date_created)
                         let date_updated    = new Date(data.date_updated)
-                        let evac            = this.evac_dict[data.evac_id]
+                        let evac            = this.evac_dict[data.evac_id] || new EvacuationCenter()
+                        
                         return (
                             (filter.year == 'all' ||
                                 filter.year == date_created.getFullYear() ||
@@ -606,7 +612,7 @@
                                 filter.month == (months_array[date_updated.getMonth()] || 0)
                                 ) && 
                             (filter.municipality == 'all' || 
-                            filter.municipality == evac.municipality)
+                            (filter.municipality == evac.municipality))
                         )
                     });
 
@@ -665,6 +671,75 @@
                     this.donor_report_view_list = [...this.donor_report_list]
                 },
 
+                //------------- DONORS REPORT ---------------------
+                onUpdateDonorRequest(index) {
+                    let string          = JSON.stringify(this.donor_report_view_list[index].toObject())
+                    this.report_input   = DonorsReport.parse(JSON.parse(string))
+                    this.report_input.date_updated = new Date()
+                    console.log("report input %o", this.report_input)
+                    this.isEdit = true
+                    $('#editorModal').modal()
+                },
+
+                saveReport() {
+                    DataHandler.addDonorsReport(this.report_input).then((data) => {
+                        console.log('response %o', data)
+                        if (data.error) {
+                            throw date.error
+                        } else {
+                            AlertMessages.success()
+                            location.reload()
+                        }
+                    }).catch(err => {
+                        AlertMessages.error(err)
+                    })
+                },
+
+                onDeleteDonorRequest(index) {
+                    let id = this.donor_report_view_list[index].id
+                    let onConfirm = confirm(`delete item id: ${id}`)
+                    if (onConfirm) {
+                        DataHandler.deleteDonorsReport(id).then((data) => {
+                            console.log('response %o', data)
+                            if (data.error) {
+                                throw data.error
+                            } else {
+                                AlertMessages.deleted()
+                                location.reload()
+                            }
+                        }).catch(err => {
+                            AlertMessages.error(err)
+                        })
+                    }
+                },
+
+                onMoveRequestInventory(index) {
+                    let string          = JSON.stringify(this.donor_report_view_list[index].toObject())
+                    this.report_input   = DonorsReport.parse(JSON.parse(string))
+                    this.report_input.date_updated = new Date()
+
+                    //let supply = EvacuationSupply()
+                    let supplies = this.report_input.reports.map((supply) => {
+                        var evac_supply             = new EvacuationSupply()
+                        evac_supply.inventory_type  = supply.inventory_type
+                        evac_supply.date_supplied   = new Date()
+                        evac_supply.qty             = supply.qty
+                        evac_supply.remarks         = supply.remarks
+                        evac_supply.status          = SupplyStatus.stored
+                        evac_supply.logs            = "Converted From Donor Report - "+ this.report_input.id +" by: "+this.user.id
+                        return evac_supply
+                    })
+                    
+                    inventory_selection.onTransferDonation(supplies, this.report_input.evac_id, this.onSelectedInventory)
+                },
+
+                onSelectedInventory(success) {
+                    console.log("success %o", success)
+                    if (success) {
+                        this.report_input.status = SupplyStatus.addressed
+                        this.saveReport()
+                    }
+                },
             }
         })
 

@@ -853,8 +853,9 @@
                     //$('#inventorySelectionModal').modal()
                 },
 
-                onSelectedInventory(id) {
-                    if (confirm("transfer inventory here?")) {
+                onSelectedInventory(success) {
+                    console.log("success %o", success)
+                    /* if (confirm("transfer inventory here?")) {
                         let prevInv = this.getInventoryById(this.transfer_supply.inventory_id)
                         this.transfer_supply.inventory_id = id
                         this.transfer_supply.date_updated = new Date()
@@ -874,7 +875,7 @@
                         }).catch(err => {
                             console.log(err)
                         })
-                    }
+                    } */
                 },
                 /*!!=============== PENDING-SUPPLY-TYPE ===============!!!*/
 
