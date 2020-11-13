@@ -1558,7 +1558,8 @@ class ReportType extends Model  {
             created_by: this.created_by,
             user_id: this.user_id,
             evac_id: this.evac_id,
-            reports: this.reports
+            reports: this.reports,
+            status: this.status,
         }
     }
 
@@ -1653,7 +1654,7 @@ class DonorsReport extends ReportType {
             object.user_id,
             object.evac_id,
             object.reports,
-            object.status
+            object.status,
         )
     }
 

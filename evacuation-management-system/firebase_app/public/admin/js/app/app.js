@@ -839,12 +839,7 @@ var inventory_selection = new Vue({
                 }
             })
         }, //setEvacationCenter
-
-        /* onSelectInventory(id) {
-            console.log("selected %o", id)
-            this.callable(id)
-        }, */
-
+        
         onSelectInventory(id) {
             if (confirm("transfer inventory here?")) {
                 var success = false
@@ -854,9 +849,10 @@ var inventory_selection = new Vue({
                     supply.inventory_id = id
                     supply.date_updated = new Date()
                     supply.status = SupplyStatus.pending
-                    supply.logs = supply.logs + "<br>" + "Transferred from: " +
-                    prevInv.name + " by: " + this.user.id
-
+                    if (!this.isTransformDonation) {
+                        supply.logs = supply.logs + "<br>" + "Transferred from: " +
+                                        prevInv.name + " by: " + this.user.id
+                    } 
                     inventory_selection.onDismiss()
                     return DataHandler.addSupply(supply)
                 })

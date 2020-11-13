@@ -1300,7 +1300,9 @@ class DonorHandler extends MunicipalInventoryHandler {
     } //getPublicUserReports
 
     addDonorsReport(params = new DonorsReport) {
-        return this.addEntry(params.id, params.toObject(), UserHandler.tables.donor_reports)
+        let object = params.toObject()
+        console.log(object)
+        return this.addEntry(params.id, object, UserHandler.tables.donor_reports)
     }
 
     deleteDonorsReport(id) {

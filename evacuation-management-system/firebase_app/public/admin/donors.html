@@ -138,29 +138,22 @@
                     </div>
                     <div :id="'requestrow-'+index" class="panel-collapse collapse">
                         <div class="panel-body">
-                            <ul class="list-group">
-                                <li class="list-group-item" v-if="item.reports.isEmpty()">
-                                    <p>No Request</p>
-                                </li>
-
-                                <li class="list-group-item" v-for="report,index in item.reports">
-                                    <div class="row">
-                                        <div class="col col-md-12 item-info">
-                                            <p class="item-label">
-                                                {{ index + 1 }}.
-                                                {{supply_types[report.inventory_type].name}}
-                                            </p>
-                                        </div>
-                                        <div class="col col-md-3 item-info">
-                                            <entry-single-component :label="'qty'" :value="report.qty"></entry-single-component>
-                                        </div>
-                                        <div class="col col-md-12 item-info">
-                                            <entry-single-component :label="'remarks'" :value="report.remarks"></entry-single-component>
-                                        </div>
-                                        
-                                    </div>
-                                </li>
-                            </ul>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <tr>    
+                                        <th>#</th>
+                                        <th>name</th>
+                                        <th>qty</th>
+                                        <th>remarks</th>
+                                    </tr>
+                                    <tr v-for="report,index in item.reports">
+                                        <td>{{index + 1}}</td>
+                                        <td>{{supply_types[report.inventory_type] ? supply_types[report.inventory_type].name : report.inventory_type}}</td>
+                                        <td>{{report.qty}}</td>
+                                        <td>{{report.remarks}}</td>
+                                    </tr>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -632,6 +625,8 @@
                         if (evac_name == 'public' && data.evac_id == "") {
                             console.log("report %o", data)
                             return true
+                        } else if (data.evac_id == "") {
+                            return false
                         }
 
                         let data_evac = this.evac_dict[data.evac_id].name 
@@ -682,6 +677,7 @@
                 },
 
                 saveReport() {
+                    console.log("report input %o", this.report_input)
                     DataHandler.addDonorsReport(this.report_input).then((data) => {
                         console.log('response %o', data)
                         if (data.error) {
@@ -737,6 +733,7 @@
                     console.log("success %o", success)
                     if (success) {
                         this.report_input.status = SupplyStatus.addressed
+                        console.log("report status %o", this.report_input.status)
                         this.saveReport()
                     }
                 },
