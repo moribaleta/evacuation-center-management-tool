@@ -165,8 +165,11 @@
             </div>
         </div>
 
-        <h3>Donors Users</h3>
+        
+        <!-------- DONOR HEADERS ------------->
         <div class="section">
+            <h3>Donors Users</h3>
+            <search-component :ref_id="'donor-search'" v-on:search="onSearchDonor" v-on:cancel="onCancelSearchDonor" ></search-component>
             <div class="button-container">
                 <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="onAddNewOrg()">Add
                     New Organization</button>
@@ -185,7 +188,7 @@
             </div>
 
             <div class="table-container" id="tableData" v-if="!isLoading.org">
-                <div class="well" v-for="item,index in orgs_list">
+                <div class="well" v-for="item,index in view_orgs_list">
                     <div class="row">
                         <div class="col col-xs-12 item-info">
                             <p class="item-label">
@@ -223,7 +226,7 @@
             </div>
 
             <div class="table-container" id="tableData" v-if="!isLoading.indv">
-                <div class="well" v-for="item,index in indv_list">
+                <div class="well" v-for="item,index in view_indv_list">
                     <div class="row">
                         <div class="col col-xs-12 item-info">
                             <p class="item-label">
@@ -355,7 +358,9 @@
 
                 //ENTRIES
                 orgs_list: [],
+                view_orgs_list: [],
                 indv_list: [],
+                view_indv_list: [],
                 donor_ref: {},
                 
                 //REPORTS
@@ -407,6 +412,7 @@
                     this.isLoading.org = true
                     DataHandler.getDonorOrganizations().then((message) => {
                         this.orgs_list = message.data
+                        this.view_orgs_list = message.data
                         this.orgs_list.forEach((org) => {
                             this.donor_ref[org.id] = org
                         })
@@ -421,6 +427,8 @@
                     this.isLoading.indv = true
                     DataHandler.getDonorIndividual().then((message) => {
                         this.indv_list = message.data
+                        this.view_indv_list = message.data
+
                         this.indv_list.forEach((indv) => {
                             this.donor_ref[indv.id] = indv
                         })
@@ -578,6 +586,20 @@
                         })
                     }
                 }, //onDeleteIndv
+
+                onSearchDonor(search){
+                    this.view_orgs_list = this.orgs_list.filter((org) => {
+                        return SearchObject(org.toObject(), search)
+                    })
+                    this.view_indv_list = this.indv_list.filter((indv) => {
+                        return SearchObject(indv.toObject(), search)
+                    })
+                },
+
+                onCancelSearchDonor(){
+                    this.view_orgs_list = [...this.orgs_list]
+                    this.view_indv_list = [...this.indv_list]
+                },
 
                 //----------DEPENDENT-USER-----------------!>
 
