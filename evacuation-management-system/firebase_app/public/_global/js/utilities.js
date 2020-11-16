@@ -304,6 +304,8 @@ const EntryComponent = Vue.extend({
 Vue.component('entry-component', EntryComponent)
 
 
+
+
 var municipalities = [
     'Alaminos',
     'Bay',

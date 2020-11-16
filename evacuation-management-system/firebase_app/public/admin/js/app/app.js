@@ -202,7 +202,7 @@ const FilterComponent = Vue.extend({
     <input id="input_searchTerm" class="input input-text" type="text" v-model="filter.searchTerm" >
     <button type="button" class="btn btn-warning button-view" v-on:click="$emit('search', filter)">Search
     </button>
-    <button type="button" class="btn btn-danger button-view" v-if="filter.searchTerm.length > 0" v-on:click="$emit('cancel', filter)">Cancel
+    <button type="button" class="btn btn-danger button-view" v-if="filter.searchTerm.length > 0" v-on:click="onCancelSearch">Cancel
     </button>
     </div>
     </div>
@@ -288,6 +288,7 @@ const FilterComponent = Vue.extend({
         },
         onCancelSearch() {
             this.filter.searchTerm = ""
+            this.$emit('cancel', this.filter)
         },
         onClear() {
             Object.keys(this.filter).map((key) => {
@@ -303,19 +304,17 @@ Vue.component('filter-component', FilterComponent)
 const SearchComponent = Vue.extend({
     template: 
     `
-    <div :id="{{'searchbox' + ref_id || '0'}}" class="panel panel-default">
-        <div class="panel-body well">
-            <p class="input-label">Search</p>
-                <input id="input_searchTerm" class="input input-text" type="text" v-model="searchTerm" >
-                <button type="button" class="btn btn-warning button-view" v-on:click="$emit('search', searchTerm)">Search
-                </button>
-                <button type="button" class="btn btn-danger button-view" v-if="searchTerm.length > 0" v-on:click="onCancelSearch">Cancel
-            </button>
-        </div>
+    <div class="well">
+        <p class="input-label,">{{title || "Search"}}</p>
+        <input id="input_searchTerm" class="input input-text" type="text" v-model="searchTerm" >
+        <button type="button" class="btn btn-warning button-view" v-on:click="$emit('search', searchTerm)">Search
+        </button>
+        <button type="button" class="btn btn-danger button-view" v-if="searchTerm.length > 0" v-on:click="onCancelSearch">Cancel
+        </button>
     </div>
     `,
     props: {
-        ref_id: String,
+        title: String
     },
     data() {
         return {
@@ -325,7 +324,7 @@ const SearchComponent = Vue.extend({
     methods: {
         onCancelSearch() {
             this.searchTerm = ""
-            $emit('cancel', this.searchTerm)
+            this.$emit('cancel', this.searchTerm)
         },
     }
 })

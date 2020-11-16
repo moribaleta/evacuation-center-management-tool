@@ -100,49 +100,23 @@
         <h1>Public Users</h1>
 
         <h3>Users</h3>
+
+
+        <div class="section">
+            <filter-component :filter_add="filter_add" v-on:filter="onFilterReport($event)"
+                v-on:search="onSearchReport($event)" v-on:cancel="onCancelSearchReport($event)"
+                v-on:clear="onClearFilterReport()">
+            </filter-component>
+            <div class="button-container">
+                <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="onAddNewUser()">Add New User</button>
+                <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="onGenerateReport()">Generate Report</button>
+            </div>
+        </div>
         <div class="loader-container" v-if="isLoading">
             <div class="loader"></div>
         </div>
-        <div class="well input-container" style="padding:10px; width: 100%; min-height: 70px">
-            <div class="col col-md-1">
-                <p class="input-label">YEAR</p>
-                <select id="input-type" class="input input-select" v-model="filter.year">
-                    <option v-for="(item,index) in selections.years" :selected="index == filter.year ? true : false">{{item ? item : "NOT AVAILABLE"}}</option>
-                </select>
-            </div>
-            <div class="col col-md-2">
-                <p class="input-label">MONTH</p>
-                <select id="input-type" class="input input-select" v-model="filter.month">
-                    <option v-for="(item,index) in selections.months" :selected="index == filter.month ? true : false"> {{item}}</option>
-                </select>
-            </div>
-            
-            <div class="col col-md-3 button-filter-container">
-                <div>&nbsp;</div>
-                <button type="button" class="btn btn-warning button-view" v-on:click="filterList()">filter
-                </button>
-                <button type="button" class="btn btn-danger button-view " href="#searchbox" data-toggle="collapse">Show Search
-                </button>
-            </div>
-        </div>
-        <div class="section">
-            <div id="searchbox" class="panel-collapse collapse">
-                <div class="panel-body well">
-                    <p class="input-label">Search</p>
-                    <input id="input_searchTerm" class="input input-text" type="text" v-model="filter.searchTerm" >
-                    <button type="button" class="btn btn-warning button-view" v-on:click="onSearch()">Search
-                    </button>
-                    <button type="button" class="btn btn-danger button-view" v-if="filter.searchTerm.length > 0" v-on:click="onCancelSearch()">Cancel
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="section">
-            <div class="button-container">
-                <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="onAddNewUser()">Add
-                    New User</button>
-            </div>
-        </div>
+
+
         <div class="section" v-if="!isLoading">
             <div class="table-container" id="tableData">
                 <div class="well" v-for="item,index in view_user_list">
@@ -155,13 +129,15 @@
                         <div class="col col-md-12">
                             <entry-component :entry="item" :headers="headers" :labels="user_labels"></entry-component>
                         </div>
-                        
+
 
                         <div class="col col-md-12">
                             <button class="btn btn-default btn-info" :href="'#dependentrow'+index"
                                 data-toggle="collapse">View Dependents</button>
-                            <button class="btn btn-default btn-info" v-on:click="onViewHistory(item.id)">View History</button>
-                            <button class="btn btn-default btn-info" v-on:click="onViewReports(item.id)">View Reports</button>
+                            <button class="btn btn-default btn-info" v-on:click="onViewHistory(item.id)">View
+                                History</button>
+                            <button class="btn btn-default btn-info" v-on:click="onViewReports(item.id)">View
+                                Reports</button>
                             <button class="btn btn-default btn-info" v-on:click="onEditItem(index)">edit</button>
                             <button class="btn btn-default btn-danger" v-on:click="onDeleteItem(index)">delete</button>
                         </div>
@@ -211,7 +187,7 @@
             </div>
         </div>
 
-        
+
     </div>
 
     <script src="js/app/app.js"></script>
@@ -260,46 +236,11 @@
                 municipalities: [],
                 isLoading: false,
 
-                filter: {
-                    year: 'all',
-                    month: 'all',
-                    station: 'all',
-                    municipal: 'all',
-                    searchTerm: ''
-                },
-                selections: {
-                    years: ['all'],
-                    months: [
-                        'all',
-                        'JANUARY',
-                        'FEBRUARY',
-                        'MARCH',
-                        'APRIL',
-                        'MAY',
-                        'JUNE',
-                        'JULY',
-                        'AUGUST',
-                        'SEPTEMBER',
-                        'OCTOBER',
-                        'NOVEMBER',
-                        'DECEMBER',
-                    ],
-                    months_only: [
-                        'JANUARY',
-                        'FEBRUARY',
-                        'MARCH',
-                        'APRIL',
-                        'MAY',
-                        'JUNE',
-                        'JULY',
-                        'AUGUST',
-                        'SEPTEMBER',
-                        'OCTOBER',
-                        'NOVEMBER',
-                        'DECEMBER',
-                    ],
-                    stations: ['']
-                },
+                filter_add: {
+                    sex: ['all', 'MALE', 'FEMALE'],
+                    admitted: ['all', 'TRUE', 'FALSE'],
+                    dependents: ['all', 'NONE', 'HAS']
+                }
             },
             methods: {
                 onStart() {
@@ -382,22 +323,11 @@
                 }, //onViewHistory
 
                 onViewReports(id) {
-                    window.open(`user_reports.html?id=${id}`,'_self')
+                    window.open(`user_reports.html?id=${id}`, '_self')
                 }, //onViewReports
 
-                onSearch(){
-                    this.view_user_list = this.user_list.filter((user) => {
-                        const _user = user.toObject()
-                        let contains_user = SearchObject(_user, this.filter.searchTerm)
-                        let contains_dep = user.dependents.filter((dependent) => {
-                            return SearchObject(dependent.toObject(), this.filter.searchTerm)
-                        })
-                        return contains_user || (contains_dep.length > 0)
-                    })
-                    console.log("searchTerm %o",this.filter.searchTerm)
-                    console.log("onSearch %o",this.view_user_list)
-                },
-                
+
+
                 onCancelSearch() {
                     this.filter.searchTerm = ""
                     this.view_user_list = this.user_list
@@ -491,6 +421,98 @@
 
                 //----------DEPENDENT-USER-----------------!>
 
+                /* FILTER / SEARCH */
+                onFilterReport(filter) {
+                    console.log("filter %o", filter)
+
+                    var view_list = this.user_list.filter((data) => {
+                        /* let date_created = new Date(data.date_created)
+                        let date_updated = new Date(data.date_updated) */
+                        //let evac = this.evac_dict[data.evac_id] || new EvacuationCenter()
+                        let birthdate = new Date(data.birthdate)
+
+                        return (
+                            (filter.year == 'all' ||
+                                filter.year == birthdate.getFullYear()
+                            ) &&
+                            (filter.month == 'all' ||
+                                filter.month == (months_array[birthdate.getMonth()] || 0)
+                            ) &&
+                            (filter.municipality == 'all' ||
+                                (filter.municipality == data.municipality))
+                        )
+                    });
+
+                    view_list = view_list.filter((data) => {
+                        let sex = filter.sex
+                        //return (sex == 'all' || data.sex.toLowerCase() == sex.toLowerCase())
+                        if (sex == 'all') {
+                            return true
+                        } else if(sex == 'MALE') {
+                            return data.sex == 0
+                        } else {
+                            return data.sex == 1
+                        }
+                    })
+
+                    view_list = view_list.filter((data) => {
+                        let admitted = filter.admitted
+                        //return (admitted == 'all' || admitted == data.is_active)
+                        if (admitted == 'all') {
+                            return true
+                        } else if (admitted == 'TRUE') {
+                            return data.is_active
+                        } else {
+                            return !data.is_active
+                        }
+                    })
+
+                    view_list = view_list.filter((data) => {
+                        let dependents = filter.dependents
+                        if (dependents == 'all') {
+                            return true
+                        } else if (dependents == 'NONE') {
+                            return data.dependents.isEmpty()
+                        } else {
+                            return !data.dependents.isEmpty()
+                        }
+                    })
+                    
+
+                    this.view_user_list = view_list
+                },
+
+                onSearchReport(filter) {
+                    this.onFilterReport(filter)
+
+                    this.view_user_list = this.view_user_list.filter((data) => {
+                        var object = {
+                            ...data.toObject(),
+                        }
+                        let user_search = SearchObject(object, filter.searchTerm)
+
+                        let found = data.dependents.map((dep) => {
+                            return SearchObject(dep)
+                        }).filter((dep) => {
+                            return dep
+                        })
+                        
+                        return user_search || !found.isEmpty()
+                    })
+                },
+
+                onCancelSearchReport(filter) {
+                    this.onFilterReport(filter)
+                },
+
+                onClearFilterReport() {
+                    this.view_user_list = [...this.user_list]
+                },
+
+                onGenerateReport() {
+                    let csv = ConvertToCSV(this.view_user_list)
+                    saveTextAsFile('public_user.csv', csv)
+                },
             }
         })
 

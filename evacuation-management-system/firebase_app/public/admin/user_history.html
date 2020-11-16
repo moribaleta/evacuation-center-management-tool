@@ -87,17 +87,6 @@
         <div class="section">
             <div class="well">
                 <div class="row">
-                    <!-- <div class="col col-md-4 item-info" v-for="key,index in public_user_headers" v-if="key !='id'">
-                        <p class="item-label">
-                            {{public_user_formModel[key].title}}:
-                        </p>
-                        <p class="item-value" v-if="key != 'sex'">
-                            {{public_user[key] || '--'}}
-                        </p>
-                        <p class="item-value" v-if="key == 'sex'">
-                            {{public_user[key] == 0 ? 'Male' : 'Female'}}
-                        </p>
-                    </div> -->
                     <div class="col col-md-12">
                         <entry-component :entry="public_user" :headers="public_user_headers"></entry-component>
                     </div>
@@ -128,7 +117,7 @@
         <!-- CONTENT -->
         <div class="section">
             <!-- HEADER FILTER -->
-            <div class="header-container">
+            <!-- <div class="header-container">
                 <div class="well input-container" style="padding:10px; width: 100%; min-height: 70px">
                     <div class="col col-md-1">
                         <p class="input-label">YEAR</p>
@@ -188,7 +177,12 @@
                         REPORT
                     </button>
                 </div>
-            </div>
+            </div> -->
+
+            <filter-component :filter_add="filter_add" v-on:filter="onFilterReport($event)"
+                v-on:search="onSearchReport($event)" v-on:cancel="onCancelSearchReport($event)"
+                v-on:clear="onClearFilterReport()">
+            </filter-component>
 
             <!-- LOADER -->
             <div class="loader_container" v-if="isDataLoading">
@@ -253,58 +247,23 @@
             el: '#content',
             data: {
                 user: null,
-                evac_list: [],
-                evac_dict: {},
+                evac_list:  [],
+                evac_names: {},
+                evac_dict:  {},
 
                 reports: [],
                 reports_view: [],
                 active_history: null,
 
-                selections: {
-                    years: ['all'],
-                    months: [
-                        'all',
-                        'JANUARY',
-                        'FEBRUARY',
-                        'MARCH',
-                        'APRIL',
-                        'MAY',
-                        'JUNE',
-                        'JULY',
-                        'AUGUST',
-                        'SEPTEMBER',
-                        'OCTOBER',
-                        'NOVEMBER',
-                        'DECEMBER',
-                    ],
-                    months_only: [
-                        'JANUARY',
-                        'FEBRUARY',
-                        'MARCH',
-                        'APRIL',
-                        'MAY',
-                        'JUNE',
-                        'JULY',
-                        'AUGUST',
-                        'SEPTEMBER',
-                        'OCTOBER',
-                        'NOVEMBER',
-                        'DECEMBER',
-                    ],
-                    stations: ['']
-                },
-                filter: {
-                    year: 'all',
-                    month: 'all',
-                    station: 'all',
-                    municipal: 'all'
-                },
                 data_input: {},
                 municipalities: [],
                 isDataLoading: true,
                 isEdit: false,
                 isAdmit: false,
 
+                filter_add: {
+                    evacuations : [],
+                },
 
                 header: PublicUserHistory.headers,
                 formModel: PublicUserHistory.formModel,
@@ -327,23 +286,7 @@
                 },
 
                 fetchHistory(id, isAll) {
-                    this.setLoading(true)
-
-                    DataHandler.getPublicUserHistory(id).then((message) => {
-                        let history = message.data.filter((history) => {
-                            if (!history.date_cleared) {
-                                this.active_history = history
-                                return false
-                            }
-                            return true
-                        })
-                        this.setData(history)
-                    }).catch(error => {
-                        console.log(error)
-                    }).finally(() => {
-                        this.setLoading(false)
-                    })
-
+                    this.isDataLoading = true
                     if (id) {
                         DataHandler.getPublicUsers(null, id).then((message) => {
                             console.log("public user %o", message.data)
@@ -354,11 +297,29 @@
                         })
                     }
 
-                    DataHandler.getEvacuationCenters().then((data) => {
-                        this.evac_list = data.data
+                    let historyPromise  = DataHandler.getPublicUserHistory(id)
+                    let evacPromise     = DataHandler.getEvacuationCenters()
+
+                    Promise.all([historyPromise, evacPromise]).then((data) => {
+
+                        let history = data[0].data.filter((history) => {
+                            if (!history.date_cleared) {
+                                this.active_history = history
+                                return false
+                            }
+                            return true
+                        })
+                        this.reports        = history
+                        this.reports_view   = history
+
+                        this.evac_list = data[1].data
+                        this.filter_add.evacuations = ['all']
 
                         this.formModel.evac_id.options = this.evac_list.map((evac) => {
                             this.evac_dict[evac.id] = evac
+                            this.evac_names[evac.name] = evac.id
+                            this.filter_add.evacuations.push(evac.name)
+                            
                             return {
                                 title: evac.name,
                                 value: evac.id
@@ -366,98 +327,15 @@
                         })
                     }).catch(err => {
                         console.log("err %o", err)
+                    }).finally(() => {
+                        this.isDataLoading = false
                     })
 
                 }, //fetchHistory
 
-                setData(data) {
-                    console.log("data %o", data)
-                    if (data.length > 0) {
-                        this.reports = data
-                        this.reports_view = this.reports
-                        this.getDistinctParams()
-                    }
-                }, //setData
-
                 getEvacFromId(id) {
                     return this.evac_dict[id]
                 }, //getEvacFromId
-
-                getDistinctParams() {
-                    this.selections.years = ['all']
-                    this.selections.stations = ['all']
-
-                    this.reports.map((report = new PublicUserHistory()) => {
-                        let date = new Date()
-                        var year = date.getFullYear()
-                        //var month = date.getMonth()
-
-                        if (!this.selections.years.includes(year)) {
-                            this.selections.years.push(year)
-                        }
-                    })
-                },
-
-                setLoading(isLoading) {
-                    this.isDataLoading = isLoading
-                },
-
-                filterList() {
-                    //year
-                    this.reports_view = this.reports.filter((item = new PublicUserHistory()) => {
-                        let item_year = item.report_date.getFullYear()
-                        if (!this.filter.year || this.filter.year == 'all' || this.filter.year ==
-                            item_year) {
-                            return true
-                        } else {
-                            return false
-                        }
-                    })
-
-
-                    //month
-
-                    let index_selection_month = this.selections.months.indexOf(this.filter.month)
-                    console.log("month index %o", index_selection_month)
-                    this.reports_view = this.reports_view.filter((item = new PublicUserHistory()) => {
-                        let item_month = item.report_date.getMonth()
-                        if (!this.filter.month || this.filter.month == 'all' || item_month ==
-                            index_selection_month) {
-                            return true
-                        } else {
-                            return false
-                        }
-                    })
-
-                    //evacuation center
-                    this.reports_view = this.reports_view.filter((item = new PublicUserHistory()) => {
-                        let evac = this.getEvacFromId(item.evac_id)
-                        if (!this.filter.station || this.filter.station == 'all' || this.filter
-                            .station == evac.name) {
-                            return true
-                        } else {
-                            return false
-                        }
-                    })
-
-                    //municipalities
-                    this.reports_view = this.reports_view.filter((item = new PublicUserHistory()) => {
-                        let evac = this.getEvacFromId(item.evac_id)
-                        if (!this.filter.municipal || this.filter.municipal == 'all' || this.filter
-                            .municipal.toLowerCase() == evac.municipality.toLowerCase()) {
-                            return true
-                        } else {
-                            return false
-                        }
-                    })
-
-                    console.log("filtered %o", this.reports_view)
-                },
-
-                openGenerateReport() {
-                    let reports = JSON.stringify(this.reports)
-                    saveTextAsFile(reports)
-                },
 
                 editItem(index) {
                     this.data_input = PublicUserHistory.parse(this.reports_view[index].toObject())
@@ -568,6 +446,73 @@
                     }
                 }, //deleteItem
 
+
+                /* FILTER / SEARCH */
+                onFilterReport(filter) {
+                    console.log("filter %o", filter)
+
+                    var view_list = this.reports.filter((data) => {
+                        let date_admitted   = new Date(data.date_admitted)
+                        let date_cleared    = new Date(data.date_cleared)
+                        let evac            = this.evac_dict[data.evac_id] || new EvacuationCenter()
+
+                        return (
+                            (filter.year == 'all' ||
+                                filter.year == date_admitted.getFullYear() ||
+                                filter.year == date_cleared.getFullYear()
+                            ) &&
+                            (filter.month == 'all' ||
+                                filter.month == (months_array[date_admitted.getMonth()] || 0) ||
+                                filter.month == (months_array[date_cleared.getMonth()] || 0)
+                            ) &&
+                            (filter.municipality == 'all' ||
+                                (filter.municipality == evac.municipality))
+                        )
+                    });
+
+                    
+                    view_list = view_list.filter((data) => {
+                        let evac = filter.evacuations
+                        if (evac == 'all') {
+                            return true
+                        } else {
+                            let evac_id = this.evac_names[evac]
+                            return data.evac_id == evac_id
+                        }
+                    })
+
+                    this.reports_view = view_list
+                },
+
+                onSearchReport(filter) {
+                    this.onFilterReport(filter)
+
+                    this.reports_view = this.reports_view.filter((data) => {
+                        //let user = this.donor_ref[data.user_id]
+
+                        var object = {
+                            ...data.toObject(),
+                        }
+                        let evac = this.evac_dict[data.evac_id]
+                        object['evac_name'] = evac ? evac.name : "public"
+                        object['municipal'] = evac ? evac.municipal : "public"
+                        console.log("object search %o", object)
+                        return SearchObject(object, filter.searchTerm)
+                    })
+                },
+
+                onCancelSearchReport(filter) {
+                    this.onFilterReport(filter)
+                },
+
+                onClearFilterReport() {
+                    this.reports_view = [...this.reports]
+                },
+
+                onGenerateReport(){
+                    let csv = ConvertToCSV(this.reports_view)
+                    saveTextAsFile('donors_report.csv', csv)
+                },
 
             }
         })

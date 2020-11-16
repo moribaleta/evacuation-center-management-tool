@@ -111,6 +111,12 @@
             <filter-component :filter_add="filter_add.reports" v-on:filter="onFilterReport($event)"
                 v-on:search="onSearchReport($event)" v-on:cancel="onCancelSearchReport($event)" v-on:clear="onClearFilterReport()">
             </filter-component>
+
+            <div class="button-container">
+                <button type="button" id="add-report" class="btn btn-info button-view"
+                    v-on:click="onViewAllReports()">View All Reports</button>
+            </div>
+
             <div class="loader-container" v-if="isLoading.reports">
                 <div class="loader"></div>
             </div>
@@ -159,17 +165,14 @@
                 </div>
             </div>
             <div>&nbsp;</div>
-            <div class="button-container">
-                <button type="button" id="add-report" class="btn btn-info button-view"
-                    v-on:click="onViewAllReports()">View All Reports</button>
-            </div>
+            
         </div>
 
         
         <!-------- DONOR HEADERS ------------->
         <div class="section">
             <h3>Donors Users</h3>
-            <search-component :ref_id="'donor-search'" v-on:search="onSearchDonor" v-on:cancel="onCancelSearchDonor" ></search-component>
+            <search-component title="Search Donor" v-on:search="onSearchDonor" v-on:cancel="onCancelSearchDonor" ></search-component>
             <div class="button-container">
                 <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="onAddNewOrg()">Add
                     New Organization</button>
@@ -645,7 +648,6 @@
                         }
                         
                         if (evac_name == 'public' && data.evac_id == "") {
-                            console.log("report %o", data)
                             return true
                         } else if (data.evac_id == "") {
                             return false
@@ -670,14 +672,17 @@
                     this.onFilterReport(filter)
 
                     this.donor_report_view_list = this.donor_report_view_list.filter((data) => {
+                        let user = this.donor_ref[data.user_id]
                         var object = {
-                            ...data.toObject()
+                            ...data.toObject(),
+                            ...user
                         }
                         let evac = this.evac_dict[data.evac_id]
                         object['evac_name'] = evac ? evac.name : "public"
                         object['municipal'] = evac ? evac.municipal : "public"
                         return SearchObject(object, filter.searchTerm)
                     })
+                    console.log("report view list %o", this.donor_report_view_list)
                 },
 
                 onCancelSearchReport(filter) {
