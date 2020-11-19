@@ -27,6 +27,7 @@
     <script src="js/vue.js"></script>
     <script src="../_global/js/objects.js"></script>
     <script src="../_global/js/utilities.js"></script>
+    <script src="../_global/js/datahandler.js"></script>
 
 </head>
 
@@ -59,7 +60,8 @@
 
         <!-- CONTENT -->
         <div class="section">
-            <h1>Public Contents</h1>
+            <h1>Home</h1>
+            <h3>Contents</h3>
             <div class="row selection-grid">
                 <div class="col col-md-4 selection-grid-item" v-for="item in selections">
                     <div class="selection-grid-item-content" :style="'background:'+item.color">
@@ -73,19 +75,162 @@
                 </div>
             </div>
         </div>
+        <div class="section">
+
+            <h3>Evacuations</h3>
+
+            <div class="loader-container" v-if="isLoading">
+                <div class="loader"></div>
+            </div>
+
+            <div class="section" v-if="evac_list.length > 0">
+                <div class="table-container" id="tableData">
+                    <div class="well" v-for="item,index in view_list">
+                        <div class="row">
+                            <div class="col col-md-12 item-info">
+                                <p class="item-label">
+                                    {{header_labels['id']}}:
+                                </p>
+                                <p class="item-value">
+                                    {{item.id}}
+                                </p>
+                            </div>
+
+                            <div class="col col-md-12 item-info">
+                                <p class="item-label">
+                                    {{header_labels['name']}}:
+                                </p>
+                                <p class="item-value">
+                                    {{item.name}}
+                                </p>
+                            </div>
+                            <div class="col col-md-12 item-info">
+                                <p class="item-label">
+                                    {{header_labels['admin_id']}}:
+                                </p>
+                                <p class="item-value">
+                                    {{admins_selection[item.admin_id]}}
+                                </p>
+                            </div>
+                            <div class="col col-md-3 item-info">
+                                <p class="item-label">
+                                    {{header_labels['population_capacity']}}:
+                                </p>
+                                <p class="item-value">
+                                    {{item.population_capacity}}
+                                </p>
+                            </div>
+                            <div class="col col-md-3 item-info">
+                                <p class="item-label">
+                                    {{header_labels['floor_space']}}:
+                                </p>
+                                <p class="item-value">
+                                    {{item.floor_space}}
+                                </p>
+                            </div>
+                            <div class="col col-md-3 item-info">
+                                <p class="item-label">
+                                    {{header_labels['contact_numbers']}}:
+                                </p>
+                                <p class="item-value">
+                                    {{item.contact_numbers}}
+                                </p>
+                            </div>
+                            <div class="col col-md-4 item-info">
+                                <p class="item-label">
+                                    {{header_labels['category']}}:
+                                </p>
+                                <p class="item-value">
+                                    {{item.category}}
+                                </p>
+                            </div>
+                            <div class="col col-md-12 item-info">
+                                <p class="item-label">
+                                    {{header_labels['facilities']}}:
+                                </p>
+                                <p class="item-value">
+                                    {{item.facilities}}
+                                </p>
+                            </div>
+                            <div class="col col-md-12 item-info">
+                                <p class="item-label">
+                                    {{header_labels['exact_address']}}:
+                                </p>
+                                <p class="item-value">
+                                    {{item.exact_address}}
+                                </p>
+                            </div>
+                            <div class="col col-md-12 item-info">
+                                <p class="item-label">
+                                    {{header_labels['location']}}:
+                                </p>
+                                <p class="item-value" style="margin-right: 10px;">
+                                    lat: {{item.location.lat}}
+                                </p>
+                                <p class="item-value">
+                                    lng: {{item.location.lng}}
+                                </p>
+                            </div>
+                            <div class="col col-md-12 item-info">
+                                <p class="item-label">
+                                    Date:
+                                </p>
+                                <p class="item-value" style="margin-right: 10px;">
+                                    Created: {{ formatDate(item.date_created)}}
+                                </p>
+                                <p class="item-value">
+                                    Updated: {{ formatDate(item.date_updated)}}
+                                </p>
+                            </div>
+                            <div class="col col-md-12">
+                                <button class="btn btn-default btn-info" :href="'#imagerow'+index"
+                                    data-toggle="collapse">view pictures</button>
+                            </div>
+                        </div>
+                        <div :id="'imagerow'+index" class="panel-collapse collapse">
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col col-md-12" v-if="!item.images || item.images.length <= 0">
+                                        <p>Images are empty</p>
+                                    </div>
+                                    <div class="col col-md-2 item-info" v-for="image,index in item.images">
+                                        <!-- <img :src="cdn+image" class="img-thumbnail img-grid"/> -->
+                                        <div class="image-area">
+                                            <img :src="cdn+image" alt="Preview">
+                                            <a class="remove-image" v-on:click="onDeleteImage(item.id, index)"
+                                                style="display: inline;">&#215;</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="panel-footer">
+                                <div class="row">
+                                    <p>Upload Images</p>
+                                    <input :id="'input_images'+index" type="file" name="files[]" multiple
+                                        style="margin-bottom: 12px;" />
+                                    <button class="btn btn-default btn-info" v-on:click="onAddImages(index)">upload
+                                        pictures</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <script src="js/app/datahandler.js"></script>
+
     <script src="js/app/app.js"></script>
-    <script src="js/app/constants.js"></script>
 
     <script>
         app = new Vue({
             el: '#content',
             data: {
                 user: new AdminUser(),
-                selections: [
-                    {
+                admins: [],
+                admins_selection: {},
+
+                selections: [{
                         id: 'homepage',
                         href: "content_homepage.html",
                         icon: 'web',
@@ -120,13 +265,57 @@
                         title: 'Other Informations',
                         color: '#eb4034'
                     },
-                ]
+                ],
+
+                /* EVACUATIONS */
+                evac_list: [],
+                view_list: [],
+                headers: Object.keys(EvacuationCenter.headers),
+                header_labels: EvacuationCenter.headers,
+                evac_data_input: new EvacuationCenter(), //new EvacuationCenter(), 
+                evacFormModel: EvacuationCenter.formModel,
+                cdn: DataHandlerType.api_host,
+                isLoading: false
             },
             methods: {
                 onStart() {
                     this.user = header.user
+                    this.fetchAllAdmins()
+                    this.fetchEvacationCenter()
                 },
-                
+
+                fetchAllAdmins() {
+                    /* let evacs = this.evac_list
+                    this.evac_list = [] */
+                    DataHandler.getAdminUsers(this.user.id).then((message) => {
+                        this.admins = message.data
+
+                        this.admins.map(admin => {
+                            this.admins_selection[admin.id] =
+                                `${admin.lastname}, ${admin.firstname}`
+                        });
+
+                        //this.evac_list = evacs
+                    }).catch((error) => {
+                        console.log(error)
+                    })
+                }, //fetchAllAdmins
+
+                fetchEvacationCenter() {
+                    this.isLoading = true
+
+                    DataHandler.getEvacuationCenters(this.user.municipality).then((data) => {
+                        this.evac_list = data.data
+                        this.view_list = data.data
+                        console.log("evac_list %o", this.evac_list)
+                    }).catch(err => {
+                        console.log(err)
+                    }).finally(() => {
+                        this.isLoading = false
+                    })
+
+                }, //fetchEvacationCenter
+
             }
         })
     </script>
