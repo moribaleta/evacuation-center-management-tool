@@ -96,20 +96,8 @@
         <h1>Public User Reports</h1>
 
         <div class="section">
-
-            <div class="well">
+            <div class="well" v-if="public_user != nil">
                 <div class="row">
-                    <!-- <div class="col col-md-4 item-info" v-for="key,index in public_user_headers" v-if="key !='id'">
-                        <p class="item-label">
-                            {{public_user_formModel[key].title}}:
-                        </p>
-                        <p class="item-value" v-if="key != 'sex'">
-                            {{public_user[key] || '--'}}
-                        </p>
-                        <p class="item-value" v-if="key == 'sex'">
-                            {{public_user[key] == 0 ? 'Male' : 'Female'}}
-                        </p>
-                    </div> -->
                     <div class="col col-md-12">
                         <entry-component :entry="public_user" :labels="public_user_labels" :headers="public_user_headers" ></entry-component>
                     </div>
@@ -275,7 +263,7 @@
                     public_user_headers     : PublicUser.visiblekeys,
                     dependentsHeaders       : DependentUser.formDependent,
 
-                    public_user     : new PublicUser(),
+                    public_user     : null,
                     public_users_ref: {},
 
                     supply_types: {},
@@ -313,7 +301,6 @@
                             }
                         }
 
-                        this.form
                     },
 
                     fetchReports(id, isAll) {
@@ -387,14 +374,8 @@
                     },
 
                     getEvacFromId(id) {
-                        for (var i = 0; i < this.evac_list.length; i++) {
-                            if (this.evac_list[i].id == id) {
-                                return this.evac_list[i]
-                            }
-                        }
-                        return null
+                        return this.evac_dict[id]
                     },
-
 
 
                     editReport(index) {

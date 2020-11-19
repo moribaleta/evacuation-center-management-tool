@@ -97,19 +97,141 @@
             </div>
         </div>
 
-        <h1>Public Users</h1>
+        <!-- MODAL -->
+        <div id="reportModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">{{isEdit ? 'Edit ': 'Add '}} User Request Report</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form-generator :form="pending_formModel" :input.sync="report_input"></form-generator>
+                        <ol class="list-group">
+                            <li class="list-group-item danger">
+                                <button type="button" class="btn btn-info" v-on:click="addInputInventory()">Add Item
+                                    Request</button>
+                            </li>
 
-        <h3>Users</h3>
+                            <li class="list-group-item" v-for="report,index in report_input.reports">
+                                <form-generator :form="pending_formReportModel" :input.sync="report"></form-generator>
+                                <button type="button" class="btn btn-danger"
+                                    v-on:click="removeInputInventory(index)">Remove</button>
+                            </li>
+                        </ol>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal"
+                            v-on:click="saveReport()">Save</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+
+            </div>
+        </div><!-- MODAL -->
+
+        <h1>Public Users</h1>
 
 
         <div class="section">
+            <h3>Latest Reports</h3>
+            <!-- HEADER FILTER -->
+            <div class="header-container">
+                <filter-component :filter_add="filter_pending_add" v-on:filter="onFilterPendingReports($event)"
+                    v-on:search="onSearchPendingReports($event)" v-on:cancel="onCancelSearchPendingReports($event)"
+                    v-on:clear="onClearFilterPendingReports()">
+                </filter-component>
+                <div class="button-container">
+                    <button type="button" class="btn btn-info button-view" v-on:click="onViewAllPending()">VIEW
+                        ALL</button>
+                    <button type="button" class="btn btn-info button-view"
+                        v-on:click="onGeneratePendingReports()">GENERATE
+                        REPORT DATA</button>
+                </div>
+            </div>
+
+            <!-- LOADER -->
+            <div class="loader_container" v-if="isReportsLoading">
+                <div class="loader"></div>
+            </div>
+
+            <!-- TABLE VIEW -->
+            <div class="table-container" v-if="!isReportsLoading">
+                <div class="table" id="tableData">
+                    <div class="well" v-for="item,index in pending_reports_view">
+                        <div class="row">
+                            <div class="col col-md-12 item-info">
+                                <p class="item-value">{{index + 1}}.</p>
+                            </div>
+                            <div class="col col-md-3 item-info " v-for="info,index in pending_header">
+                                <div v-if="info == 'evac_id'">
+                                    <p class="item-label">EVACUATION NAME</p>
+                                    <p class="item-value">
+                                        {{item.evac_id.isEmpty() ? 'public' : getEvacFromId(item.evac_id).name}}</p>
+                                </div>
+                                <entry-single-component v-if="info != 'evac_id'" :label="info" :value="item[info]">
+                                </entry-single-component>
+                            </div>
+                            <div class="col col-md-12">
+                                <button class="btn btn-default btn-info" :href="'#requestrow-'+index"
+                                    data-toggle="collapse">View Request</button>
+                                <button class="btn btn-default btn-warning" v-on:click="editReport(index)">edit</button>
+                                <button class="btn btn-default btn-danger"
+                                    v-on:click="deleteItem(index)">delete</button>
+                            </div>
+                        </div>
+                        <div :id="'requestrow-'+index" class="panel-collapse collapse">
+                            <div class="panel-body">
+                                <ul class="list-group">
+                                    <li class="list-group-item" v-if="item.reports.isEmpty()">
+                                        <p>No Request</p>
+                                    </li>
+
+                                    <li class="list-group-item" v-for="report,index in item.reports">
+                                        <!-- <img :src="cdn+image" class="img-thumbnail img-grid"/> -->
+                                        <div class="row">
+                                            <div class="col col-md-12 item-info">
+                                                <p class="item-label">
+                                                    {{ index + 1 }}. {{supply_types[report.inventory_type].name}}
+                                                </p>
+                                            </div>
+                                            <div class="col col-md-12 item-info">
+                                                <p class="item-label">
+                                                    QTY:
+                                                </p>
+                                                <p class="item-value">
+                                                    {{report.qty}}
+                                                </p>
+                                            </div>
+                                            <div class="col col-md-12 item-info">
+                                                <p class="item-label">
+                                                    remarks:
+                                                </p>
+                                                <p class="item-value">
+                                                    {{report.remarks}}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>Users</h3>
             <filter-component :filter_add="filter_add" v-on:filter="onFilterReport($event)"
                 v-on:search="onSearchReport($event)" v-on:cancel="onCancelSearchReport($event)"
                 v-on:clear="onClearFilterReport()">
             </filter-component>
             <div class="button-container">
-                <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="onAddNewUser()">Add New User</button>
-                <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="onGenerateReport()">Generate Report</button>
+                <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="onAddNewUser()">Add
+                    New User</button>
+                <button type="button" id="add-report" class="btn btn-info button-view"
+                    v-on:click="onGenerateReport()">Generate Report</button>
             </div>
         </div>
         <div class="loader-container" v-if="isLoading">
@@ -192,12 +314,6 @@
 
     <script src="js/app/app.js"></script>
     <script>
-        /* let formDependent = DependentUser.formDependent.reduce((prev, key) => {
-            prev = prev || {}
-            prev[key] = PublicUser.formModel[key]
-            console.log("prev %o", prev)
-            return prev
-        }) */
         var formDependent = {}
         DependentUser.formDependent.forEach((key) => {
             formDependent[key] = PublicUser.formModel[key]
@@ -234,12 +350,39 @@
 
                 editUserId: null,
                 municipalities: [],
+
                 isLoading: false,
 
                 filter_add: {
                     sex: ['all', 'MALE', 'FEMALE'],
                     admitted: ['all', 'TRUE', 'FALSE'],
                     dependents: ['all', 'NONE', 'HAS']
+                },
+
+
+                report_input: {},
+
+                evac_list: [],
+                evac_dict: {},
+                evac_names: {},
+                public_users_ref: {},
+
+                pending_reports: [],
+                pending_reports_view: [],
+
+                pending_header: PublicUserReport.headers,
+                pending_formModel: PublicUserReport.formModel,
+                pending_formReportModel: {},
+
+                supply_types: {},
+                supply_types_option: [],
+
+                isReportsLoading: false,
+
+                filter_pending_add: {
+                    evacuation: [],
+                    status: ['all', ...Object.keys(SupplyStatus)],
+                    item_type: []
                 }
             },
             methods: {
@@ -253,6 +396,7 @@
                         }
                     })
                     this.fetchUser()
+                    this.fetchPendingReports()
                 }, //onStart
 
                 fetchUser() {
@@ -264,6 +408,7 @@
                     }).finally(() => {
                         this.isLoading = false
                     })
+
                 }, //fetchUser
 
                 setUser(data) {
@@ -448,7 +593,7 @@
                         //return (sex == 'all' || data.sex.toLowerCase() == sex.toLowerCase())
                         if (sex == 'all') {
                             return true
-                        } else if(sex == 'MALE') {
+                        } else if (sex == 'MALE') {
                             return data.sex == 0
                         } else {
                             return data.sex == 1
@@ -477,7 +622,7 @@
                             return !data.dependents.isEmpty()
                         }
                     })
-                    
+
 
                     this.view_user_list = view_list
                 },
@@ -496,7 +641,7 @@
                         }).filter((dep) => {
                             return dep
                         })
-                        
+
                         return user_search || !found.isEmpty()
                     })
                 },
@@ -512,6 +657,241 @@
                 onGenerateReport() {
                     let csv = ConvertToCSV(this.view_user_list)
                     saveTextAsFile('public_user.csv', csv)
+                },
+
+                //-----------PENDING REPORTS------------------!>
+
+                fetchPendingReports(id, isAll) {
+                    let promiseEvac = DataHandler.getEvacuationCenters()
+                    let promiseSuppType = DataHandler.getSupplyTypes()
+
+                    this.isReportsLoading = true
+
+                    this.pending_formReportModel = {
+                            inventory_type: {
+                                title: 'Supply Type',
+                                type: FormModels.dropdown,
+                                options: []
+                            },
+                            qty: {
+                                title: 'QTY',
+                                type: FormModels.number
+                            },
+                            remarks: {
+                                title: 'Remarks',
+                                type: FormModels.textarea
+                            }
+                        }
+
+                    Promise.all([promiseEvac, promiseSuppType]).then((messages) => {
+                        console.log("promises 1:%o 2:%o", messages[0], messages[1])
+
+                        this.evac_list = messages[0].data
+                        this.filter_pending_add.evacuation = ['all']
+
+                        this.pending_formModel.evac_id.options = this.evac_list.map((evac) => {
+                            this.evac_dict[evac.id] = evac
+                            this.evac_names[evac.name] = evac.id
+                            this.filter_pending_add.evacuation.push(evac.name)
+                            return {
+                                title: evac.name,
+                                value: evac.id
+                            }
+                        })
+
+                        this.supply_types_option = []
+                        this.filter_pending_add.item_type = ['all']
+                        this.supply_types_option = messages[1].data.map((supply) => {
+                            this.supply_types[supply.id] = supply
+                            this.filter_pending_add.item_type.push(supply.name)
+                            return {
+                                title: supply.name,
+                                value: supply.id
+                            }
+                        })
+
+                        this.pending_formReportModel.inventory_type.options = this.supply_types_option
+
+                        DataHandler.getPublicUserReports(id).then((message) => {
+                            console.log("reports %o", message)
+                            this.pending_reports = message.data
+                            this.pending_reports_view = this.pending_reports
+                        }).catch(err => {
+                            console.log("err %o", err)
+                        }).finally(() => {
+                            console.log("hey im")
+                            this.isReportsLoading = false
+                        })
+                    }).catch(err => {
+                        console.log("err %o", err)
+                    })
+
+
+
+                    DataHandler.getPublicUsers(this.user.municipality).then((message) => {
+                        message.data.forEach((user) => {
+                            this.public_users_ref[user.id] = user
+                        })
+                    }).catch(err => {
+                        console.log(err)
+                    })
+                }, //fetchPendingReports
+
+                getEvacFromId(id) {
+                    return this.evac_dict[id]
+                },
+
+                editReport(index) {
+                    let string = JSON.stringify(this.pending_reports_view[index].toObject())
+                    this.report_input = PublicUserReport.parse(JSON.parse(string))
+                    this.report_input.date_updated = new Date()
+                    this.isEdit = true
+                    $('#reportModal').modal()
+                },
+
+                saveReport() {
+                    DataHandler.addPublicUserReport(this.report_input).then((data) => {
+                        console.log('response %o', data)
+                        if (data.error) {
+                            throw date.error
+                        } else {
+                            AlertMessages.success()
+                            location.reload()
+                        }
+                    }).catch(err => {
+                        AlertMessages.error(err)
+                    })
+                },
+
+                deleteItem(index) {
+                    let id = this.pending_reports_view[index].id
+                    let onConfirm = confirm(`delete item id: ${id}`)
+                    if (onConfirm) {
+                        DataHandler.deletePublicUserReport(id).then((data) => {
+                            console.log('response %o', data)
+                            if (data.error) {
+                                throw data.error
+                            } else {
+                                AlertMessages.deleted()
+                                location.reload()
+                            }
+                        }).catch(err => {
+                            AlertMessages.error(err)
+                        })
+                    }
+                },
+
+                addInputInventory() {
+                    this.report_input.reports.push({
+                        inventory_type: '',
+                        qty: 0,
+                        remarks: ''
+                    })
+                },
+
+                removeInputInventory(index) {
+                    this.report_input.reports.splice(index, 1)
+                },
+
+                //----------REPORT FILTERS----------------!>
+                /* FILTER / SEARCH */
+                onFilterPendingReports(filter) {
+                    console.log("filter %o", filter)
+
+                    var view_list = this.pending_reports.filter((data) => {
+                        let date_created = new Date(data.date_created)
+                        let date_updated = new Date(data.date_updated)
+                        let evac = this.evac_dict[data.evac_id] || new EvacuationCenter()
+
+                        return (
+                            (filter.year == 'all' ||
+                                filter.year == date_created.getFullYear() ||
+                                filter.year == date_updated.getFullYear()
+                            ) &&
+                            (filter.month == 'all' ||
+                                filter.month == (months_array[date_created.getMonth()] || 0) ||
+                                filter.month == (months_array[date_updated.getMonth()] || 0)
+                            ) &&
+                            (filter.municipality == 'all' ||
+                                (filter.municipality == evac.municipality))
+                        )
+                    });
+
+                    view_list = view_list.filter((data) => {
+                        return (filter.status == 'all' ||
+                            filter.status == data.status
+                        )
+                    })
+
+                    view_list = view_list.filter((data) => {
+                        let evac_name = filter.evacuation
+
+                        if (evac_name == 'all') {
+                            return true
+                        }
+
+                        if (evac_name == 'public' && data.evac_id == "") {
+                            console.log("report %o", data)
+                            return true
+                        } else if (data.evac_id == "") {
+                            return false
+                        }
+
+                        let data_evac = this.evac_dict[data.evac_id].name
+                        return data_evac == evac_name
+                    })
+
+                    view_list = view_list.filter((data) => {
+                        let supplies = data.reports.map((report) => {
+                            return this.supply_types[report.inventory_type].name.trim()
+                                .toLowerCase()
+                        })
+                        console.log("data %o -- %o", data, supplies)
+                        return (filter.item_type == 'all' || supplies.includes(filter.item_type
+                            .toLowerCase()))
+                    })
+
+                    this.pending_reports_view = view_list
+                },
+
+                onSearchPendingReports(filter) {
+                    this.onFilterPendingReports(filter)
+
+                    this.pending_reports_view = this.pending_reports_view.filter((data) => {
+                        let user = this.isAll ? this.public_users_ref[data.user_id] : this
+                            .public_user //this.donor_ref[data.user_id]
+                        var object = {
+                            ...data.toObject(),
+                            ...user
+                        }
+                        let evac = this.evac_dict[data.evac_id]
+                        object['evac_name'] = evac ? evac.name : "public"
+                        object['municipal'] = evac ? evac.municipal : "public"
+                        console.log("object search %o", object)
+                        let search = SearchObject(object, filter.searchTerm)
+
+                        let item_search = data.reports.filter((report) => {
+                            return SearchObject(report)
+                        })
+                        return !item_search.isEmpty() || search
+                    })
+                },
+
+                onCancelSearchPendingReports(filter) {
+                    this.onFilterPendingReports(filter)
+                },
+
+                onClearFilterPendingReports() {
+                    this.pending_reports_view = [...this.pending_reports]
+                },
+
+                onViewAllPending() {
+                    window.open('user_reports.html','_self')
+                },
+
+                onGeneratePendingReports() {
+                    let csv = ConvertToCSV(this.pending_reports_view)
+                    saveTextAsFile(`public_user_pending_reports-${(new Date()).toLocaleDateString()}.csv`, csv)
                 },
             }
         })
