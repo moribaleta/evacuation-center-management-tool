@@ -1137,6 +1137,10 @@ class PublicUserHistory extends Model {
     user_id
     /** evac id of the evacuation center*/
     evac_id
+
+    /** municipality of the evacuation center */
+    municipality
+
     /** date admitted */
     date_admitted
     /** date where the user has signed out */
@@ -1161,23 +1165,25 @@ class PublicUserHistory extends Model {
     static headers = [
         'user_id',
         'evac_id',
+        'municipality',
         'date_admitted',
         'date_cleared',
         'date_created',
-        'date_updated'
+        'date_updated',
     ]
     
 
-    constructor(id, date_created, date_updated, created_by, user_id, evac_id, date_admitted, date_cleared) {
+    constructor(id, date_created, date_updated, created_by, user_id, evac_id, date_admitted, date_cleared, municipality) {
         super()
         this.id = id || keyGenID("publicuserhistory") //"publicuserhistory-" + genID(5)
-        this.date_created = date_created    || new Date()
-        this.date_updated = date_updated    || new Date()
-        this.date_admitted = date_admitted  || new Date()
-        this.date_cleared = date_cleared    || ""
-        this.created_by = created_by        || '0'
-        this.user_id = user_id
-        this.evac_id = evac_id
+        this.date_created   = date_created  || new Date()
+        this.date_updated   = date_updated  || new Date()
+        this.date_admitted  = date_admitted || new Date()
+        this.date_cleared   = date_cleared  || ""
+        this.created_by     = created_by    || '0'
+        this.municipality   = municipality  || ""
+        this.user_id        = user_id
+        this.evac_id        = evac_id
     }
 
 
@@ -1191,6 +1197,7 @@ class PublicUserHistory extends Model {
             created_by: this.created_by,
             user_id: this.user_id,
             evac_id: this.evac_id,
+            municipality: this.municipality
         }
     }
 
@@ -1204,6 +1211,7 @@ class PublicUserHistory extends Model {
             object.evac_id,
             object.date_admitted,
             object.date_cleared,
+            object.municipality
         )
     }
 

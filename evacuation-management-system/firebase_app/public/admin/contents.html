@@ -58,6 +58,113 @@
     </div>
     <div class="container" id="content">
 
+        <!-- editor modal -->
+        <div id="evacModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Evacuation Center</h4>
+                    </div>
+                    <div class="modal-body" v-if="view_item">
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <entry-single-component :value="view_item.id" 
+                                :label="header_labels['id']" ></entry-single-component>
+                            </li>
+                            <li class="list-group-item">
+                                <entry-single-component :value="view_item.name" 
+                                :label="header_labels['name']" ></entry-single-component>
+                            </li>
+                            <li class="list-group-item">
+                                <entry-single-component :value="population_dict[view_item.id] || 0" 
+                                    label="Current Population" ></entry-single-component>
+                            </li>
+                            <li class="list-group-item">
+                                <entry-single-component :value="view_item.population_capacity" 
+                                :label="header_labels['population_capacity']" ></entry-single-component>
+                            </li>
+                            <li class="list-group-item">
+                                <entry-single-component :value="view_item.floor_space" 
+                                :label="header_labels['floor_space']" ></entry-single-component>
+                            </li>
+                            <li class="list-group-item">
+                                <entry-single-component :value="admins_selection[view_item.admin_id]" 
+                                :label="header_labels['admin_id']" ></entry-single-component>
+                            </li>
+                            <li class="list-group-item">
+                                <entry-single-component :value="view_item.contact_numbers" 
+                                :label="header_labels['contact_numbers']" ></entry-single-component>
+                            </li>
+                            <li class="list-group-item">
+                                <entry-single-component :value="view_item.category" 
+                                :label="header_labels['category']" ></entry-single-component>
+                            </li>
+                            <li class="list-group-item">
+                                <entry-single-component :value="view_item.facilities" 
+                                :label="header_labels['facilities']" ></entry-single-component>
+                            </li>
+                            <li class="list-group-item">
+                                <entry-single-component :value="view_item.exact_address" 
+                                :label="header_labels['exact_address']" ></entry-single-component>
+                            </li>
+                            <li class="list-group-item">
+                                <p class="item-label">
+                                    {{header_labels['location']}}:
+                                </p>
+                                <p class="item-value" style="margin-right: 10px;">
+                                    lat: {{view_item.location.lat}}
+                                </p>
+                                <p class="item-value">
+                                    lng: {{view_item.location.lng}}
+                                </p>
+                            </li>
+                            <li class="list-group-item">
+                                <p class="item-label">
+                                    Date:
+                                </p>
+                                <div class="row">
+                                    <div class="col col-md-4">
+                                        Created: {{ formatDate(view_item.date_created)}}
+                                    </div>
+                                    <div class="col col-md-4">
+                                        Updated: {{ formatDate(view_item.date_updated)}}
+                                    </div>
+                                </div>
+                            </li>
+
+                            <li class="list-group-item">
+                                <button class="btn btn-default btn-info" href="#evacimagerow"
+                                    data-toggle="collapse">view images</button>
+                            </li>
+                        </ul>
+                        <div id="evacimagerow" class="panel-collapse collapse">
+                            <div class="panel panel-default">
+                                <div class="panel-body">
+                                    <div class="row">
+                                        <div class="col col-md-12"
+                                            v-if="!view_item.images || view_item.images.length <= 0">
+                                            <p>Images are empty</p>
+                                        </div>
+                                        <div class="col col-md-2 item-info" v-for="image,index in view_item.images">
+                                            <div class="image-area">
+                                                <img :src="cdn+image" alt="Preview">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal"
+                            v-on:click="onSaveItem()">Save</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- CONTENT -->
         <div class="section">
             <h1>Home</h1>
@@ -85,135 +192,37 @@
 
             <div class="section" v-if="evac_list.length > 0">
                 <div class="table-container" id="tableData">
-                    <div class="well" v-for="item,index in view_list">
-                        <div class="row">
-                            <div class="col col-md-12 item-info">
-                                <p class="item-label">
-                                    {{header_labels['id']}}:
-                                </p>
-                                <p class="item-value">
-                                    {{item.id}}
-                                </p>
-                            </div>
+                    <table class="table">
+                        <tr>
+                            <th>
+                                #
+                            </th>
+                            <th>
+                                NAME
+                            </th>
+                            <th>
+                                Current Population
+                            </th>
+                            <th>
+                                Maximum Population
+                            </th>
+                            <th>
+                                Floor Space &#13217;
+                            </th>
+                            <th></th>
+                        </tr>
+                        <tr v-for="item,index in view_list">
+                            <td>{{item.id}}</td>
+                            <td>{{item.name}}</td>
+                            <td>{{population_dict[item.id] || 0}}</td>
+                            <td>{{item.population_capacity}}</td>
+                            <td>{{item.floor_space || 0}}</td>
+                            <td><button class="btn btn-default btn-info" v-on:click="viewEvac(index)">view
+                                    details</button></td>
+                        </tr>
+                    </table>
 
-                            <div class="col col-md-12 item-info">
-                                <p class="item-label">
-                                    {{header_labels['name']}}:
-                                </p>
-                                <p class="item-value">
-                                    {{item.name}}
-                                </p>
-                            </div>
-                            <div class="col col-md-12 item-info">
-                                <p class="item-label">
-                                    {{header_labels['admin_id']}}:
-                                </p>
-                                <p class="item-value">
-                                    {{admins_selection[item.admin_id]}}
-                                </p>
-                            </div>
-                            <div class="col col-md-3 item-info">
-                                <p class="item-label">
-                                    {{header_labels['population_capacity']}}:
-                                </p>
-                                <p class="item-value">
-                                    {{item.population_capacity}}
-                                </p>
-                            </div>
-                            <div class="col col-md-3 item-info">
-                                <p class="item-label">
-                                    {{header_labels['floor_space']}}:
-                                </p>
-                                <p class="item-value">
-                                    {{item.floor_space}}
-                                </p>
-                            </div>
-                            <div class="col col-md-3 item-info">
-                                <p class="item-label">
-                                    {{header_labels['contact_numbers']}}:
-                                </p>
-                                <p class="item-value">
-                                    {{item.contact_numbers}}
-                                </p>
-                            </div>
-                            <div class="col col-md-4 item-info">
-                                <p class="item-label">
-                                    {{header_labels['category']}}:
-                                </p>
-                                <p class="item-value">
-                                    {{item.category}}
-                                </p>
-                            </div>
-                            <div class="col col-md-12 item-info">
-                                <p class="item-label">
-                                    {{header_labels['facilities']}}:
-                                </p>
-                                <p class="item-value">
-                                    {{item.facilities}}
-                                </p>
-                            </div>
-                            <div class="col col-md-12 item-info">
-                                <p class="item-label">
-                                    {{header_labels['exact_address']}}:
-                                </p>
-                                <p class="item-value">
-                                    {{item.exact_address}}
-                                </p>
-                            </div>
-                            <div class="col col-md-12 item-info">
-                                <p class="item-label">
-                                    {{header_labels['location']}}:
-                                </p>
-                                <p class="item-value" style="margin-right: 10px;">
-                                    lat: {{item.location.lat}}
-                                </p>
-                                <p class="item-value">
-                                    lng: {{item.location.lng}}
-                                </p>
-                            </div>
-                            <div class="col col-md-12 item-info">
-                                <p class="item-label">
-                                    Date:
-                                </p>
-                                <p class="item-value" style="margin-right: 10px;">
-                                    Created: {{ formatDate(item.date_created)}}
-                                </p>
-                                <p class="item-value">
-                                    Updated: {{ formatDate(item.date_updated)}}
-                                </p>
-                            </div>
-                            <div class="col col-md-12">
-                                <button class="btn btn-default btn-info" :href="'#imagerow'+index"
-                                    data-toggle="collapse">view pictures</button>
-                            </div>
-                        </div>
-                        <div :id="'imagerow'+index" class="panel-collapse collapse">
-                            <div class="panel-body">
-                                <div class="row">
-                                    <div class="col col-md-12" v-if="!item.images || item.images.length <= 0">
-                                        <p>Images are empty</p>
-                                    </div>
-                                    <div class="col col-md-2 item-info" v-for="image,index in item.images">
-                                        <!-- <img :src="cdn+image" class="img-thumbnail img-grid"/> -->
-                                        <div class="image-area">
-                                            <img :src="cdn+image" alt="Preview">
-                                            <a class="remove-image" v-on:click="onDeleteImage(item.id, index)"
-                                                style="display: inline;">&#215;</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="panel-footer">
-                                <div class="row">
-                                    <p>Upload Images</p>
-                                    <input :id="'input_images'+index" type="file" name="files[]" multiple
-                                        style="margin-bottom: 12px;" />
-                                    <button class="btn btn-default btn-info" v-on:click="onAddImages(index)">upload
-                                        pictures</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+
                 </div>
             </div>
         </div>
@@ -268,8 +277,11 @@
                 ],
 
                 /* EVACUATIONS */
+                population_dict: {},
                 evac_list: [],
                 view_list: [],
+                view_item: null,
+
                 headers: Object.keys(EvacuationCenter.headers),
                 header_labels: EvacuationCenter.headers,
                 evac_data_input: new EvacuationCenter(), //new EvacuationCenter(), 
@@ -304,17 +316,36 @@
                 fetchEvacationCenter() {
                     this.isLoading = true
 
-                    DataHandler.getEvacuationCenters(this.user.municipality).then((data) => {
-                        this.evac_list = data.data
-                        this.view_list = data.data
-                        console.log("evac_list %o", this.evac_list)
+                    DataHandler.getActivePublicUserHistory(this.user.municipality).then((data) => {
+                        /* this.population_dict[data.evac_id] = this.population_dict[data.evac_id] || 0
+                        this.population_dict[data.evac_id]++ */
+                        data.data.map(data => {
+                            this.population_dict[data.evac_id] = this.population_dict[data
+                                .evac_id] || 0
+                            this.population_dict[data.evac_id]++
+                        })
+
+                        console.log(this.population_dict)
+
+                        DataHandler.getEvacuationCenters(this.user.municipality).then((data) => {
+                            this.evac_list = data.data
+                            this.view_list = data.data
+
+                            console.log("evac_list %o", this.evac_list)
+                        }).catch(err => {
+                            console.log(err)
+                        }).finally(() => {
+                            this.isLoading = false
+                        })
                     }).catch(err => {
                         console.log(err)
-                    }).finally(() => {
-                        this.isLoading = false
                     })
-
                 }, //fetchEvacationCenter
+
+                viewEvac(index) {
+                    this.view_item = this.view_list[index]
+                    $('#evacModal').modal();
+                }
 
             }
         })

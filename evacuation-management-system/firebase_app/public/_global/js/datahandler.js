@@ -304,50 +304,6 @@ class PublicUserHandler extends UserHandler {
         })
     } //getUsers
 
-    /** gets active public users by municipality and evacuations */
-    getPublicActiveUsers(municipality, evacs = []) {
-        return new Promise((resolve, reject) => {
-            const ref = this.firestore.collection(UserHandler.tables.public_user)
-            var query = ref.where('is_active', '==', true)
-
-            if (municipality && !municipality.trim().isEmpty() && municipality != 0) {
-                query = ref.where('municipality', '==', municipality)
-            }
-
-            if (!evacs.isEmpty()) {
-                query = ref.where('evac_id', 'in', evacs)
-            }
-
-            query.get().then((querySnapshot) => {
-                var users = []
-
-                querySnapshot.forEach(function (doc) {
-                    console.log(doc.id, " => ", doc.data());
-                    let data = doc.data()
-                    let id = doc.id
-                    const object = parseObject({
-                        id,
-                        ...data
-                    })
-                    users.push(PublicUser.parse(object))
-                });
-
-                var message = new Message()
-
-                if (!id.isEmpty()) {
-                    message.data = users[0]
-                } else {
-                    message.data = users
-                }
-
-                resolve(message)
-            }).catch((error) => {
-                console.log("Error getting documents: ", error);
-                reject(error)
-            });
-        })
-    } //getPublicActiveUsers
-
     addPublicUser(params = new PublicUser()) {
         return new Promise((resolve, reject) => {
             var ref = this.firestore.collection(UserHandler.tables.public_user)
@@ -450,6 +406,40 @@ class PublicUserHandler extends UserHandler {
 
             query = query.orderBy('date_admitted', 'desc')
 
+            query.get().then(function (querySnapshot) {
+                var history = []
+                querySnapshot.forEach(function (doc) {
+                    let data = doc.data()
+                    let id = doc.id
+                    const object = parseObject({
+                        id,
+                        ...data
+                    })
+                    history.push(PublicUserHistory.parse(object))
+                });
+                var message = new Message()
+                message.data = history
+                resolve(message)
+            }).catch(function (error) {
+                console.log("Error getting documents: ", error);
+                reject(error)
+            });
+        })
+    } //getPublicUserHistory
+
+    /** returns the public history of the user or general if given empty id */
+    getActivePublicUserHistory(municipality ) {
+        return new Promise((resolve, reject) => {
+            const ref = this.firestore.collection(UserHandler.tables.public_user_history)
+            var query = ref
+
+            if (municipality && !municipality.trim().isEmpty() && municipality != 0) {
+                query = query.where('municipality', '==', municipality)
+            }
+
+            query = query.where('date_cleared','==','')
+            query = query.orderBy('date_admitted', 'desc')
+            
             query.get().then(function (querySnapshot) {
                 var history = []
                 querySnapshot.forEach(function (doc) {

@@ -86,7 +86,7 @@
 
         <div class="section">
             <div class="well">
-                <div class="row">
+                <div class="row" v-if="public_user">
                     <div class="col col-md-12">
                         <entry-component :entry="public_user" :headers="public_user_headers"></entry-component>
                     </div>
@@ -184,6 +184,12 @@
                 v-on:clear="onClearFilterReport()">
             </filter-component>
 
+            <div class="section" v-if="public_user">
+                <button class="btn btn-default btn-warning" v-if="!public_user.is_active" v-on:click="admitHistory()">Admit</button>
+                <button class="btn btn-default btn-success" v-on:click="addPastHistory()">Add Past History</button>
+                <button class="btn btn-default btn-info" v-on:click="onGenerateReport()">Generate Report</button>
+            </div>
+
             <!-- LOADER -->
             <div class="loader_container" v-if="isDataLoading">
                 <div class="loader"></div>
@@ -192,7 +198,7 @@
             <!-- TABLE VIEW -->
             <div class="table-container" v-if="!isDataLoading">
                 <div class="table" id="tableData">
-                    <div class="well" v-if="active_history != null">
+                    <!-- <div class="well" v-if="active_history != null">
                         <div class="row">
                             <div class="col col-md-3 item-info">
                                 <p class="item-value">{{1}}.</p>
@@ -213,7 +219,7 @@
                                     v-on:click="deleteAdmission()">delete</button>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                     <div class="well" v-for="item,index in reports_view">
                         <div class="row">
                             <div class="col col-md-3 item-info">
@@ -224,7 +230,12 @@
                                     <p class="item-label">EVACUATION NAME</p>
                                     <p class="item-value">{{getEvacFromId(item.evac_id).name}}</p>
                                 </div>
-                                <entry-single-component v-if="info != 'evac_id'" :label="info" :value="item[info]" :showtime="true">
+                                <entry-single-component v-if="info != 'evac_id' && info == 'date_cleared'" :label="info"
+                                    :value="isDateValid(item[info]) ? 'active' : item[info]" :showtime="true">
+                                </entry-single-component>
+                                <entry-single-component v-if="info != 'evac_id' && info != 'date_cleared'" :label="info" 
+                                    :value="item[info]"
+                                    :showtime="true">
                                 </entry-single-component>
                             </div>
                             <div class="col col-md-12">
@@ -247,9 +258,9 @@
             el: '#content',
             data: {
                 user: null,
-                evac_list:  [],
+                evac_list: [],
                 evac_names: {},
-                evac_dict:  {},
+                evac_dict: {},
 
                 reports: [],
                 reports_view: [],
@@ -262,7 +273,7 @@
                 isAdmit: false,
 
                 filter_add: {
-                    evacuations : [],
+                    evacuations: [],
                 },
 
                 header: PublicUserHistory.headers,
@@ -271,7 +282,7 @@
                 public_user_formModel: PublicUser.formModel,
                 public_user_headers: PublicUserHistory.visiblekeys,
                 dependentsHeaders: DependentUser.formDependent,
-                public_user: new PublicUser(),
+                public_user: null,
             },
             methods: {
                 onStart() {
@@ -297,29 +308,25 @@
                         })
                     }
 
-                    let historyPromise  = DataHandler.getPublicUserHistory(id)
-                    let evacPromise     = DataHandler.getEvacuationCenters()
+                    let historyPromise = DataHandler.getPublicUserHistory(id)
+                    let evacPromise = DataHandler.getEvacuationCenters()
 
                     Promise.all([historyPromise, evacPromise]).then((data) => {
 
-                        let history = data[0].data.filter((history) => {
-                            if (!history.date_cleared) {
-                                this.active_history = history
-                                return false
-                            }
-                            return true
-                        })
-                        this.reports        = history
-                        this.reports_view   = history
+                        let history = data[0].data
+                        this.reports = history
+                        this.reports_view = history
 
                         this.evac_list = data[1].data
                         this.filter_add.evacuations = ['all']
+
+                        console.log("history %o", history)
 
                         this.formModel.evac_id.options = this.evac_list.map((evac) => {
                             this.evac_dict[evac.id] = evac
                             this.evac_names[evac.name] = evac.id
                             this.filter_add.evacuations.push(evac.name)
-                            
+
                             return {
                                 title: evac.name,
                                 value: evac.id
@@ -336,6 +343,14 @@
                 getEvacFromId(id) {
                     return this.evac_dict[id]
                 }, //getEvacFromId
+
+                isDateValid(date) {
+                    if (Object.prototype.toString.call(date) === "[object Date]") {
+                        return isNaN(date.getTime())
+                    } else {
+                        return false
+                    }
+                },
 
                 editItem(index) {
                     this.data_input = PublicUserHistory.parse(this.reports_view[index].toObject())
@@ -365,16 +380,19 @@
                     this.formModel.date_cleared.isHidden = true
                     this.isAdmit = true
                     $('#editorModal').modal()
-                },//admitHistory
+                }, //admitHistory
 
                 clearAdmission() {
                     this.data_input = PublicUserHistory.parse(this.active_history.toObject())
                     this.data_input.date_cleared = new Date()
                     this.saveHistory()
                     this.updateUserActive(false)
-                },//clearAdmission
+                }, //clearAdmission
 
                 saveHistory() {
+                    this.data_input.municipality = this.getEvacFromId(this.data_input.evac_id).municipality ||
+                        ""
+
                     DataHandler.addPublicUserHistory(this.data_input).then((data) => {
                         console.log('response %o', data)
                         if (data.error) {
@@ -406,7 +424,7 @@
                     }).catch(err => {
                         console.log("error %o", err)
                     })
-                },//updateUserActive
+                }, //updateUserActive
 
                 deleteAdmission() {
                     let id = this.active_history.id
@@ -426,7 +444,7 @@
 
                         this.updateUserActive(false)
                     }
-                },//deleteAdmission
+                }, //deleteAdmission
 
                 deleteItem(index) {
                     let id = this.reports_view[index].id
@@ -452,9 +470,9 @@
                     console.log("filter %o", filter)
 
                     var view_list = this.reports.filter((data) => {
-                        let date_admitted   = new Date(data.date_admitted)
-                        let date_cleared    = new Date(data.date_cleared)
-                        let evac            = this.evac_dict[data.evac_id] || new EvacuationCenter()
+                        let date_admitted = new Date(data.date_admitted)
+                        let date_cleared = new Date(data.date_cleared)
+                        let evac = this.evac_dict[data.evac_id] || new EvacuationCenter()
 
                         return (
                             (filter.year == 'all' ||
@@ -470,7 +488,7 @@
                         )
                     });
 
-                    
+
                     view_list = view_list.filter((data) => {
                         let evac = filter.evacuations
                         if (evac == 'all') {
@@ -509,7 +527,7 @@
                     this.reports_view = [...this.reports]
                 },
 
-                onGenerateReport(){
+                onGenerateReport() {
                     let csv = ConvertToCSV(this.reports_view)
                     saveTextAsFile('donors_report.csv', csv)
                 },

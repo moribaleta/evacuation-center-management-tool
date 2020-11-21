@@ -223,6 +223,7 @@
 
 .image-area img {
     max-width: 100%;
+    min-width: 250px;
     height: auto;
 }
 
@@ -230,7 +231,7 @@
     display: none;
     position: absolute;
     top: -10px;
-    right: -10px;
+    
     border-radius: 10em;
     padding: 2px 6px 3px;
     text-decoration: none;
@@ -242,20 +243,17 @@
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
     -webkit-transition: background 0.5s;
     transition: background 0.5s;
+
 }
 
 .remove-image:hover {
     background: #E54E4E;
-    padding: 3px 7px 5px;
-    top: -11px;
-    right: -11px;
     cursor: pointer;
+    text-decoration: none
 }
 
 .remove-image:active {
     background: #E54E4E;
-    top: -10px;
-    right: -11px;
 }
 
 .selection-grid {

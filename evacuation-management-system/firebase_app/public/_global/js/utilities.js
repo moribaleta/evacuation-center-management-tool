@@ -79,6 +79,18 @@ function SearchObject(object = {}, searchTerm = "") {
 }
 
 
+function combineDateAndTime(date, time) {
+    timeString = time.getHours() + ':' + time.getMinutes() + ':00';
+
+    var year = date.getFullYear();
+    var month = date.getMonth() + 1; // Jan is 0, dec is 11
+    var day = date.getDate();
+    var dateString = '' + year + '-' + month + '-' + day;
+    var combined = new Date(dateString + ' ' + timeString);
+
+    return combined;
+}
+
 Array.prototype.isEmpty = function () {
     return this.length <= 0
 }
@@ -89,6 +101,14 @@ Array.prototype.first = function () {
 
 String.prototype.isEmpty = function () {
     return this.length <= 0
+}
+
+//expected input dd/mm/yyyy or dd.mm.yyyy or dd-mm-yyyy
+function isValidDate(s) {
+    var separators = ['\\.', '\\-', '\\/'];
+    var bits = s.split(new RegExp(separators.join('|'), 'g'));
+    var d = new Date(bits[2], bits[1] - 1, bits[0]);
+    return d.getFullYear() == bits[2] && d.getMonth() + 1 == bits[1];
 }
 
 /** parses all date string to date */
@@ -140,8 +160,18 @@ const FormGenerator = Vue.extend({
     <input v-if="form[key].type == 'date'" type="date" class="input input-item"
     :id="'inputINP'+key"  :value="formatDate(input[key], false)" v-on:change="dateChange">
     
-    <input v-if="form[key].type == 'datetime'" type="datetime-local" class="input input-item"
-    :id="'inputINP'+key"  :value="formatDate(input[key], true)" v-on:change="dateChange"">
+    <div class="row" v-if="form[key].type == 'datetime'">
+        <div class="col col-md-3">
+            <input type="date" class="input input-item"
+                    :id="'dateINP'+key"
+                    :value="formatDate(input[key], false)" v-on:change="datetimeChange">
+        </div>
+        <div class="col col-md-3">
+            <input type="time" :id="'timeINP'+key" name="time"
+                    :value="formatDate(input[key], true)" v-on:change="datetimeChange">
+        </div>
+    </div>
+    
     
     <textarea v-if="form[key].type == 'textarea'" class="form-control"
     :id="'inputINP'+key" name="exact_address" v-model="input[key]"></textarea>
@@ -212,14 +242,65 @@ const FormGenerator = Vue.extend({
     },
 
     methods: {
-        dateChange(event){
+        datetimeChange(event) {
             console.log("event %o", event)
 
             let id = event.srcElement.id
+            let ids = id.split('INP');
+
+            var date_value = null
+            var time_value = null
+
+            if (ids[0] == "date") {
+                date_value = $('#' + id).val()
+                time_value = $('#timeINP' + ids[1]).val()
+            } else {
+                time_value = $('#' + id).val()
+                date_value = $('#dateINP' + ids[1]).val()
+            }
+
+            console.log("date %o", date_value)
+            console.log("time %o", time_value)
+
+            //let _date = combineDateAndTime(date_value, time_value)
+            "yyyy-MM-ddThh:mm"
+            let date_time = date_value + "T" + time_value
+
+            /*  if (ids > 1) {
+                 this.input[ids[1]][ids[2]] = _date
+                 console.log("compound")
+             } else { */
+            this.input[ids[1]] = date_time
+            //}
+
+            /* 
             let date = $('#'+id).val()
+            let ids = id.split('INP')
+            let data_value = $('#inputINP')
+
+            let _date = new Date(date.toString())
+
+
+            console.log("date changed %o",_date)
+            if (ids > 1) {
+                this.input[ids[1]][ids[2]] = _date
+                console.log("compound")
+            } else {
+                this.input[ids[1]] = _date
+            }
+            console.log("ids %o", ids)
+            console.log(this.input) */
+        },
+
+        dateChange(event) {
+            console.log("event %o", event)
+
+            let id = event.srcElement.id
+            let date = $('#' + id).val()
             //this.input[id.substr(('input_').length)] = new Date(date)
             let ids = id.split('INP')
-            let _date = new Date(date)
+            let _date = new Date(date.toString())
+            console.log("date changed %o", _date)
             if (ids > 1) {
                 this.input[ids[1]][ids[2]] = _date
                 console.log("compound")
@@ -231,7 +312,10 @@ const FormGenerator = Vue.extend({
         },
 
         formatDate(date, isTime) {
-            return isTime ? moment(date).format('YYYY-MM-DD HH:MM') : moment(date).format('YYYY-MM-DD')
+
+            let format = isTime ? moment(date).format('hh:mm') : moment(date).format('YYYY-MM-DD')
+            console.log("format date %o", format)
+            return format
             /* let _date = new Date(date)
             let format = isTime ? _date.toLocaleString() : _date.toLocaleDateString()
             console.log("formatted input date %o", format )
@@ -386,8 +470,18 @@ const EntrySingleComponent = Vue.extend({
 
     methods: {
         formatDate(date) {
-            let _date = new Date(date)
-            return this.showtime ? _date.toLocaleString() : _date.toLocaleDateString()
+            try {
+                if (typeof date.getMonth === 'function') {
+                    let _date = new Date(date)
+                    console.log("am i valid? %o", date)
+                    return this.showtime ? _date.toLocaleString() : _date.toLocaleDateString()   
+                } else {
+                    return date
+                }
+            }catch {
+                return date
+            }
+            
         },
 
         getLabel(key) {
@@ -420,13 +514,13 @@ const parseObject = (object) => {
                 //console.log(err) 
                 if (object[key].seconds &&
                     object[key].nanoseconds) {
-                        let timestamp = new firebase.firestore.Timestamp(object[key].seconds,
-                            object[key].nanoseconds)
-                       object[key] = new Date(timestamp.toDate())
+                    let timestamp = new firebase.firestore.Timestamp(object[key].seconds,
+                        object[key].nanoseconds)
+                    object[key] = new Date(timestamp.toDate())
                 } else {
                     object[key] = new Date(object[key])
                 }
-                
+
                 //console.log("im here?")
             } catch (err) {
                 //console.log(err) 
