@@ -69,44 +69,44 @@
                     <div class="modal-body" v-if="view_item">
                         <ul class="list-group">
                             <li class="list-group-item">
-                                <entry-single-component :value="view_item.id" 
-                                :label="header_labels['id']" ></entry-single-component>
+                                <entry-single-component :value="view_item.id" :label="header_labels['id']">
+                                </entry-single-component>
                             </li>
                             <li class="list-group-item">
-                                <entry-single-component :value="view_item.name" 
-                                :label="header_labels['name']" ></entry-single-component>
+                                <entry-single-component :value="view_item.name" :label="header_labels['name']">
+                                </entry-single-component>
                             </li>
                             <li class="list-group-item">
-                                <entry-single-component :value="population_dict[view_item.id] || 0" 
-                                    label="Current Population" ></entry-single-component>
+                                <entry-single-component :value="population_dict[view_item.id] || 0"
+                                    label="Current Population"></entry-single-component>
                             </li>
                             <li class="list-group-item">
-                                <entry-single-component :value="view_item.population_capacity" 
-                                :label="header_labels['population_capacity']" ></entry-single-component>
+                                <entry-single-component :value="view_item.population_capacity"
+                                    :label="header_labels['population_capacity']"></entry-single-component>
                             </li>
                             <li class="list-group-item">
-                                <entry-single-component :value="view_item.floor_space" 
-                                :label="header_labels['floor_space']" ></entry-single-component>
+                                <entry-single-component :value="view_item.floor_space"
+                                    :label="header_labels['floor_space']"></entry-single-component>
                             </li>
                             <li class="list-group-item">
-                                <entry-single-component :value="admins_selection[view_item.admin_id]" 
-                                :label="header_labels['admin_id']" ></entry-single-component>
+                                <entry-single-component :value="admins_selection[view_item.admin_id]"
+                                    :label="header_labels['admin_id']"></entry-single-component>
                             </li>
                             <li class="list-group-item">
-                                <entry-single-component :value="view_item.contact_numbers" 
-                                :label="header_labels['contact_numbers']" ></entry-single-component>
+                                <entry-single-component :value="view_item.contact_numbers"
+                                    :label="header_labels['contact_numbers']"></entry-single-component>
                             </li>
                             <li class="list-group-item">
-                                <entry-single-component :value="view_item.category" 
-                                :label="header_labels['category']" ></entry-single-component>
+                                <entry-single-component :value="view_item.category" :label="header_labels['category']">
+                                </entry-single-component>
                             </li>
                             <li class="list-group-item">
-                                <entry-single-component :value="view_item.facilities" 
-                                :label="header_labels['facilities']" ></entry-single-component>
+                                <entry-single-component :value="view_item.facilities"
+                                    :label="header_labels['facilities']"></entry-single-component>
                             </li>
                             <li class="list-group-item">
-                                <entry-single-component :value="view_item.exact_address" 
-                                :label="header_labels['exact_address']" ></entry-single-component>
+                                <entry-single-component :value="view_item.exact_address"
+                                    :label="header_labels['exact_address']"></entry-single-component>
                             </li>
                             <li class="list-group-item">
                                 <p class="item-label">
@@ -182,14 +182,32 @@
                 </div>
             </div>
         </div>
-        <div class="section">
-
-            <h3>Evacuations</h3>
-
-            <div class="loader-container" v-if="isLoading">
-                <div class="loader"></div>
+        <div class="loader-container" v-if="isLoading">
+            <div class="loader"></div>
+        </div>
+        <div class="section" v-if="!isLoading">
+            <h3>Municipality: {{user.municipality == '0' ? 'Public' : user.municipality}}</h3>
+            <div class="section" v-if="municipality.length > 0">
+                <table class="table">
+                    <tr>
+                        <th>
+                            #
+                        </th>
+                        <th>
+                            Municipality
+                        </th>
+                        <th>
+                            Current Population
+                        </th>
+                    </tr>
+                    <tr v-for="item,index in muni_list">
+                        <td>{{index + 1}}</td>
+                        <td>{{item.name}}</td>
+                        <td>{{item.count}}</td>
+                    </tr>
+                </table>
             </div>
-
+            <h3>Evacuations</h3>
             <div class="section" v-if="evac_list.length > 0">
                 <div class="table-container" id="tableData">
                     <table class="table">
@@ -238,6 +256,7 @@
                 user: new AdminUser(),
                 admins: [],
                 admins_selection: {},
+                municipality: [],
 
                 selections: [{
                         id: 'homepage',
@@ -278,6 +297,8 @@
 
                 /* EVACUATIONS */
                 population_dict: {},
+                muni_list: [],
+                
                 evac_list: [],
                 view_list: [],
                 view_item: null,
@@ -292,22 +313,18 @@
             methods: {
                 onStart() {
                     this.user = header.user
+                    this.municipality = this.user.municipality == '0' ? municipalities : [this.user.municipality]
                     this.fetchAllAdmins()
                     this.fetchEvacationCenter()
                 },
 
                 fetchAllAdmins() {
-                    /* let evacs = this.evac_list
-                    this.evac_list = [] */
                     DataHandler.getAdminUsers(this.user.id).then((message) => {
                         this.admins = message.data
-
                         this.admins.map(admin => {
                             this.admins_selection[admin.id] =
                                 `${admin.lastname}, ${admin.firstname}`
                         });
-
-                        //this.evac_list = evacs
                     }).catch((error) => {
                         console.log(error)
                     })
@@ -317,12 +334,30 @@
                     this.isLoading = true
 
                     DataHandler.getActivePublicUserHistory(this.user.municipality).then((data) => {
-                        /* this.population_dict[data.evac_id] = this.population_dict[data.evac_id] || 0
-                        this.population_dict[data.evac_id]++ */
+
+                        var muni_dict = {}
+
+                        this.municipality.forEach((muni) => {
+                            muni_dict[muni] = 0
+                        })
+
                         data.data.map(data => {
                             this.population_dict[data.evac_id] = this.population_dict[data
                                 .evac_id] || 0
                             this.population_dict[data.evac_id]++
+                            muni_dict[data.municipality] = muni_dict[data.municipality] || 0 
+                            muni_dict[data.municipality]++
+                        })
+
+                        let object = Object.keys(muni_dict).map((name) => {
+                            return {
+                                name,
+                                count: muni_dict[name]
+                            }
+                        })
+
+                        this.muni_list = object.sort((lhs, rhs) => {
+                            return rhs.count - lhs.count
                         })
 
                         console.log(this.population_dict)
