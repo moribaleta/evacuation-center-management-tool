@@ -122,6 +122,9 @@ class MapApp {
     /** contains all the history of the evacuation centers */
     history_list = []
 
+    /** contains the current number of population per evacuation center */
+    active_history_dict = {}
+
     /** defines the parameters of the MOAB*/
     model_param = {}
 
@@ -157,14 +160,25 @@ class MapApp {
         DataHandler.getEvacuationHistory().then((message) => {
             this.history_list = message.data
         }).catch(error => {
-            console.log(err)
+            console.log(error)
+        })
+
+        DataHandler.getActivePublicUserHistory().then((message) => {
+            message.data.map(data => {
+                this.active_history_dict[data.evac_id] = this.active_history_dict[data.evac_id] || 0
+                this.active_history_dict[data.evac_id]++
+                console.log("active history %o", this.active_history_dict)
+            })
+            modal_vue.active_dict = this.active_history_dict
+        }).catch(error => {
+            console.log(error)
         })
 
         DataHandler.getModelParams(true).then((message) => {
             this.model_param = message.data[0]
             console.log(this.model_param)
         }).catch(error => {
-            console.log(err)
+            console.log(error)
         })
 
         this.getRoadMap()
@@ -304,65 +318,29 @@ class MapApp {
     getAvailableEvacuation(_evacs = []) {
         return new Observable((obs) => {
             setTimeout(() => {
-                /* var output = {}
-                var evacs = [] */
+                
+                var curr_population = []
 
                 const evacs_id = _evacs.map((evac) => {
+                    var history = new EvacuationHistory()
+                    history.evac_id = evac.id 
+                    history.current_population = this.active_history_dict[evac.id] || 0
+                    curr_population.push(history)
                     return evac.id
                 })
-                const history_list = this.history_list.filter((history) => {
+
+                const history_list = curr_population.concat(this.history_list.filter((history) => {
                     return evacs_id.includes(history.evac_id)
-                })
+                })) 
 
-                /* //GENERATE 5 distinct probably best evacs : OPTIONAL
-                while (evacs.length < 5) {
-                    let test            = new TesterABC()
-                    test.evacuations    = _evacs
-                    test.history_list   = history_list
-                    const test_output   = test.generate(this.model_param)
-                    const best_value    = test_output.output.best
+                console.log("history data %o",history_list)
 
-                    if (!output[best_value.evac.id]) {
-                        output[best_value.evac.id] = best_value
-                        evacs.push(best_value.evac)
-                        console.log("model pass %o", evacs.length)
-                    } else {
-                        const prev = output[best_value.evac.id]
-                        const _new = best_value
-
-                        if (prev.conflicts > _new.conflicts) {
-                            output[best_value.evac.id] = _new
-                        }
-                    }
-                } */
-                //let test            = new TesterABC()
                 let test            = new TesterABC()
                 test.evacuations    = _evacs
                 test.history_list   = history_list
                 const test_output   = test.generate(this.model_param)
-                //const best_value    = test_output.output.best   
-
+                
                 obs.next(test_output)
-
-                /* var winner = null
-
-                const test_outputs = Object.keys(output).map((key) => {
-                    let _output = output[key]
-                    if (winner == null || winner.conflicts > _output.conflicts) {
-                        winner = _output
-                    }
-                    return _output
-                })
-
-                const test_results = {
-                    winner,
-                    evacs: test_outputs,
-                }
-
-                console.log("im done %o")
-
-                obs.next(test_results)
-                obs.complete() */
             })
         })
     } //getAvailableEvacuation
@@ -418,7 +396,8 @@ var modal_vue = new Vue({
         items: null,
         winner: null,
         emergency: null,
-        elapsedtime: null
+        elapsedtime: null,
+        active_dict: {}
     },
     methods: {
         setList(test_results, emergency) {
@@ -428,6 +407,7 @@ var modal_vue = new Vue({
             this.winner = test_results.output.best;
             this.elapsedtime  = test_results.elapsed_time
             this.emergency = emergency;
+            console.log("active history %o", this.active_dict)
         },
 
         proceed() {

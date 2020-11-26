@@ -161,6 +161,40 @@ class DataHandlerClass extends DataHandlerType {
         })
     } //getEvacuationHistory
 
+    /** returns the public history of the user or general if given empty id */
+    getActivePublicUserHistory(municipality ) {
+        return new Promise((resolve, reject) => {
+            const ref = this.firestore.collection('public_user_history')
+            var query = ref
+
+            if (municipality && !municipality.trim().isEmpty() && municipality != 0) {
+                query = query.where('municipality', '==', municipality)
+            }
+
+            query = query.where('date_cleared','==','')
+            query = query.orderBy('date_admitted', 'desc')
+            
+            query.get().then(function (querySnapshot) {
+                var history = []
+                querySnapshot.forEach(function (doc) {
+                    let data = doc.data()
+                    let id = doc.id
+                    const object = parseObject({
+                        id,
+                        ...data
+                    })
+                    history.push(PublicUserHistory.parse(object))
+                });
+                var message = new Message()
+                message.data = history
+                resolve(message)
+            }).catch(function (error) {
+                console.log("Error getting documents: ", error);
+                reject(error)
+            });
+        })
+    } //getPublicUserHistory
+
 }
 
 const DataHandler = new DataHandlerClass()

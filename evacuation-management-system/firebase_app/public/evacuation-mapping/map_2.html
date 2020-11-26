@@ -83,7 +83,7 @@
     </div>
 
     <div id="myModal" class="modal fade" role="dialog">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
 
             <!-- Modal content-->
             <div class="modal-content" id="modal-body">
@@ -95,28 +95,71 @@
                     <!--<div class="container">-->
                     <div class="panel panel-default">
                         <div class="panel-body" v-if='items!=null'>
-                            <div class="panel panel-default" v-for='test,index in items'>
+                            <!-- <div class="panel panel-default" v-for='test,index in items'>
                                 <div class="panel-heading success">{{(index+1)+". "}} Name: {{test.evac.name}}</div>
                                 <div class="panel-body">
                                     <div class="col-md-4">Distance: {{test.evac.distance.toFixed(2)+" km"}}</div>
                                     <div class="col-md-2">Capacity: {{test.evac.population_capacity}}</div>
+                                    <div class="col-md-2">Current Population: {{active_dict[test.evac.id] || 0}}</div>
                                     <div class="col-md-2">Floor Space: {{test.evac.floor_space}}</div>
                                     <div class="col-md-2">Objective Output: {{test.conflicts.toFixed(4)}}</div>
                                     <div class="col-md-2">Fitness Output: {{test.fitness.toFixed(4)}}</div>
                                 </div>
-                            </div>
+                            </div> -->            
+                            <table class="table table-bordered">
+                                <tr>
+                                    <th>#</th>
+                                    <th>NAME</th>
+                                    <th>DISTANCE</th>
+                                    <th>CAPACITY</th>
+                                    <th>CURRENT POPULATION</th>
+                                    <th>FLOOR SPACE</th>
+                                    <th>OBJECTIVE OUTPUT</th>
+                                    <th>FITNESS OUTPUT</th>
+                                </tr>
+                                <tr v-for='test,index in items'>
+                                    <td>{{index + 1}}</td>
+                                    <td>{{test.evac.name}}</td>
+                                    <td>{{test.evac.distance.toFixed(2)+" km"}}</td>
+                                    <td>{{test.evac.population_capacity}}</td>
+                                    <td>{{active_dict[test.evac.id] || 0}}</td>
+                                    <td>{{test.evac.floor_space}}</td>
+                                    <td>{{test.conflicts.toFixed(4)}}</td>
+                                    <td>{{test.fitness.toFixed(4)}}</td>
+                                </tr>
+                            </table>            
                         </div>
                     </div>
+                    
 
 
                     <div class="panel panel-success" v-if='winner!=null'>
                         <div class="panel-heading">The Best: {{winner.evac.name}}</div>
                         <div class="panel-body">
-                            <div class="col-md-4">Distance: {{winner.evac.distance.toFixed(2)+" km"}}</div>
+                            <!-- <div class="col-md-4">Distance: {{winner.evac.distance.toFixed(2)+" km"}}</div>
                             <div class="col-md-2">Capacity: {{winner.evac.population_capacity}}</div>
+                            <div class="col-md-2">Current Population: {{active_dict[winner.evac.id] || 0}}</div>
                             <div class="col-md-2">Floor Space: {{winner.evac.floor_space}}</div>
                             <div class="col-md-2">Objective Output: {{winner.conflicts.toFixed(4)}}</div>
-                            <div class="col-md-2">Fitness Output: {{winner.fitness.toFixed(4)}}</div>
+                            <div class="col-md-2">Fitness Output: {{winner.fitness.toFixed(4)}}</div> -->
+                            <table class="table table-bordered">
+                                <tr>
+                                    <th>DISTANCE</th>
+                                    <th>CAPACITY</th>
+                                    <th>CURRENT POPULATION</th>
+                                    <th>FLOOR SPACE</th>
+                                    <th>OBJECTIVE OUTPUT</th>
+                                    <th>FITNESS OUTPUT</th>
+                                </tr>
+                                <tr>
+                                    <td>{{winner.evac.distance.toFixed(2)+" km"}}</td>
+                                    <td>{{winner.evac.population_capacity}}</td>
+                                    <td>{{active_dict[winner.evac.id] || 0}}</td>
+                                    <td>{{winner.evac.floor_space}}</td>
+                                    <td>{{winner.conflicts.toFixed(4)}}</td>
+                                    <td>{{winner.fitness.toFixed(4)}}</td>
+                                </tr>
+                            </table>
                         </div>
                         <div class="panel-footer">
                             <p>Elapsed Time: {{elapsedtime}}</p>
