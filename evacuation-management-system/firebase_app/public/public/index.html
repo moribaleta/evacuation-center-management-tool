@@ -102,7 +102,7 @@
                             <div class="col col-md-10">
                                 <div class="post-list-item">
                                     <h3 class="title">{{item.title}}</h3>
-                                    <p class="time">{{item.date_updated}}</p>
+                                    <p class="time">{{formatDate(item.date_updated)}}</p>
                                 </div>
                             </div>              
                         </li>
@@ -118,7 +118,7 @@
                         <li class="well well-sm"v-for="event in events">
                             <div class="post-list-item">
                                 <h6 class="title">{{event.title}}</h6>
-                                <p class="time">{{event.date_start}}</p>
+                                <p class="time">{{formatDate(event.date_start)}}</p>
                             </div>
                         </li>
                     </ul>

@@ -114,13 +114,16 @@
                 </div>
 
                 <div class="row" v-if="posts.length > 0">
-                    <div class="col col-md-4 well well-lg" v-for="(item,index) in posts" v-on:click="viewItem(index)">
-                        <div class="post-list-item">
-                            <img :src="cdn + item.images[0]" alt=""
-                                style="height: 100px; width: '100%'; background-size: contain;">
-                            <h3 class="title">{{item.title}}</h3>
-                            <p class="time">{{item.date_updated}}</p>
+                    <div class="col col-md-4" v-for="(item,index) in posts" v-on:click="viewItem(index)">
+                        <div class="well well-lg">
+                            <div class="post-list-item">
+                                <img :src="cdn + item.images[0]" alt=""
+                                    style="height: 100px; width: '100%'; background-size: contain;">
+                                <h3 class="title">{{item.title}}</h3>
+                                <p class="time">{{formatDate(item.date_updated)}}</p>
+                            </div>
                         </div>
+                        
                     </div>
                 </div>
             </div>
