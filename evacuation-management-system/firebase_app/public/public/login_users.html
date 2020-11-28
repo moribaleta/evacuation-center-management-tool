@@ -238,18 +238,20 @@
                     <div class="login-form" v-if="!isloading">
                         <input type="text" placeholder="username" v-model="username" />
                         <input type="password" placeholder="password" v-model="password" />
-                        <button v-on:click="onLogin">login</button>
+                        <button v-on:click="onLogin">Sign In</button>
+                        <div>&nbsp;</div>
+                        <button v-on:click="onSignUp">Sign Up</button>
                     </div>
                 </div>
             </div>
             
-            <div class="footer">
+            <!-- <div class="footer">
                 <img class="footer-img" src="resources/images/govph-seal-mono-footer.jpg">
                 <div class="footer-item">
                     <p class="footer-label">REPUBLIC OF THE PHILIPPINES</p>
                     <p>All content is in the public domain unless otherwise stated.</p>
                 </div>
-            </div>
+            </div> -->
             
         </div>
         
@@ -291,6 +293,10 @@
                             //AlertMesssages.error(error)
                         })
                     },
+
+                    onSignUp(){
+                        window.open('register_users.html','_self')
+                    }
                     
                 }
             })

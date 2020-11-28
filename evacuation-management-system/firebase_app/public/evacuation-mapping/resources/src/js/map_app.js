@@ -463,6 +463,12 @@ class MapRouterClass {
         this.tree = tree
         this.showColor = showColor
 
+        localStorage.setItem('roadTree', JSON.stringify({
+            data: this.tree
+        }))
+
+        console.log("loaded tree %o", this.tree)
+
         this.initializeDjikstra()
         this.placeTrafficPoints()
         //this.displayColor(this.showColor)

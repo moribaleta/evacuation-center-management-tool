@@ -235,11 +235,11 @@ class UserHandler extends DataHandlerType {
                     let data = doc.data()
                     let id = doc.id
 
-                    let object = {
+                    /* let object = {
                         id,
                         ...data
-                    }
-                    Object.keys(object).filter((key) => {
+                    } */
+                    /* Object.keys(object).filter((key) => {
                         return key.includes('date')
                     }).forEach((key) => {
                         try {
@@ -247,6 +247,10 @@ class UserHandler extends DataHandlerType {
                         } catch (err) {
                             console.log(err)
                         }
+                    }) */
+                    let object = parseObject({
+                        id,
+                        ...data
                     })
                     donors.push(objecttype.parse(object))
                 });

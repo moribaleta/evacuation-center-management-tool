@@ -191,10 +191,10 @@
                                             {{muni_inv.municipality}}
                                         </p>
                                         <p class="item-value">
-                                            {{muni_inv.date_created}}
+                                            {{formatDate(muni_inv.date_created)}}
                                         </p>
                                         <p class="item-value">
-                                            {{muni_inv.date_updated}}
+                                            {{formatDate(muni_inv.date_updated)}}
                                         </p>
                                         <p class="item-value">
                                             {{muni_inv.description}}
@@ -236,13 +236,13 @@
                                                 {{evac.exact_address}}
                                             </p>
                                             <p class="item-value">
-                                                inventories: {{evacuation_inventories[evac.id].length}}
+                                                inventories: {{evacuation_inventories[evac.id] ? evacuation_inventories[evac.id].length : 0}}
                                             </p>
                                         </h4>
                                     </div>
                                     <div class="panel-body">
                                         <ul class="list-group"
-                                            v-if="evacuation_inventories[evac.id] == undefined ||evacuation_inventories[evac.id].length <= 0">
+                                            v-if="evacuation_inventories[evac.id] == undefined || evacuation_inventories[evac.id].length <= 0">
                                             <div class="col col-md-8">
                                                 <p class="item-value">No Inventory</p>
                                             </div>
@@ -284,7 +284,7 @@
                                                                             Name:
                                                                         </p>
                                                                         <p class="item-value">
-                                                                            {{supply_types[supply.inventory_type].name}}
+                                                                            {{supply_types[supply.inventory_type] ? supply_types[supply.inventory_type].name : ""}}
                                                                         </p>
                                                                     </div>
                                                                     <div class="col col-md-2 item-info">
@@ -300,7 +300,7 @@
                                                                             Date Supplied:
                                                                         </p>
                                                                         <p class="item-value">
-                                                                            {{supply.date_supplied}}
+                                                                            {{formatDate(supply.date_supplied)}}
                                                                         </p>
                                                                     </div>
                                                                 </div>
@@ -560,7 +560,7 @@
                 donor_inv_form: DonorsIndividual.formModel,
                 donor_org_form: DonorsOrganization.formModel,
                 donor_report_form: DonorsReport.formModel,
-                donor_report_item_form: DonorsReport.reportItemFormModel,
+                donor_report_item_form: ReportItemType.reportItemFormModel,
 
                 donor_org_headers: DonorsOrganization.headers,
                 donor_inv_headers: DonorsIndividual.headers,
@@ -635,6 +635,7 @@
 
                     DataHandler.getEvacuationCenters().then((data) => {
                         this.evac_list = data.data
+                        console.log("evacuations %o", this.evac_list)
                         var promiseInv = []
                         let evac_options = this.evac_list.map((evac) => {
                             this.evac_names[evac.id] = evac.name
@@ -644,9 +645,11 @@
                                 value: evac.id
                             }
                         })
+                        console.log("loaded evacuations")
                         return Promise.all(promiseInv)
                     }).then((data) => {
                         var promiseInvSupp = []
+                        console.log("loaded inventories")
                         data.forEach(message => {
                             const inventory = message.data
                             this.evacuation_inventories[inventory.id] = inventory.inventories ||
@@ -658,6 +661,7 @@
                         });
                         return Promise.all(promiseInvSupp)
                     }).then((data) => {
+                        console.log("loaded supplies")
                         data.forEach((val) => {
                             val.data.forEach((supply) => {
                                 this.inventory_supplies[supply.inventory_id] = supply
