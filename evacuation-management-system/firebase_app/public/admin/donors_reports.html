@@ -68,6 +68,9 @@
         
         <report-editor-modal :isedit="isEdit" :input.sync="data_input" :evacuations="evac_list"
             :supplytypes="supply_types_option" v-on:persist="saveReport"></report-editor-modal>
+
+        <update-status-modal :input.sync="data_input" v-on:persist="saveReport"></update-status-modal>
+
         <!-- MODAL -->
 
         <h1>Donors Donation Reports</h1>
@@ -134,6 +137,7 @@
                                 <button class="btn btn-default btn-info" :href="'#requestrow-'+index"
                                     data-toggle="collapse">View Request</button>
                                 <button class="btn btn-default btn-warning" v-on:click="editReport(index)">Edit</button>
+                                <button class="btn btn-default btn-warning" v-on:click="editStatus(index)">Update Status</button>
                                 <button class="btn btn-default btn-success" v-on:click="onMoveRequestInventory(index)">Move To Inventory</button>
                                 <button class="btn btn-default btn-danger"
                                     v-on:click="deleteItem(index)">Delete</button>
@@ -320,6 +324,14 @@
                     this.data_input.date_updated = new Date()
                     this.isEdit = true
                     $('#editorModal').modal()
+                },
+
+                editStatus(index) {
+                    let string = JSON.stringify(this.reports_view[index].toObject())
+                    this.data_input = DonorsReport.parse(JSON.parse(string))
+                    this.data_input.date_updated = new Date()
+                    this.isEdit = true
+                    $('#updateStatusModal').modal()
                 },
 
                 addReport() {

@@ -100,7 +100,9 @@
 
             </div>
         </div>
+
         <report-editor-modal :isedit="isEdit" :input.sync="report_input" :evacuations="evac_list" :supplytypes="supply_types_option" v-on:persist="saveReport" ></report-editor-modal>
+        <update-status-modal :input.sync="report_input" v-on:persist="saveReport"></update-status-modal>
 
         <h1>Donors</h1>
 
@@ -139,6 +141,7 @@
                             <button class="btn btn-default btn-info"    :href="'#requestrow-'+index" data-toggle="collapse">View Request</button>
                             <button class="btn btn-default btn-success" v-on:click="onMoveRequestInventory(index)">Move To Inventory</button>
                             <button class="btn btn-default btn-warning" v-on:click="onUpdateDonorRequest(index)">Update Request</button>
+                            <button class="btn btn-default btn-warning" v-on:click="onUpdateStatus(index)">Update Status</button>
                             <button class="btn btn-default btn-danger" v-on:click="onDeleteDonorRequest(index)">Delete Request</button>
                         </div>
                     </div>
@@ -701,6 +704,15 @@
                     console.log("report input %o", this.report_input)
                     this.isEdit = true
                     $('#editorModal').modal()
+                },
+
+                onUpdateStatus(index){
+                    let string          = JSON.stringify(this.donor_report_view_list[index].toObject())
+                    this.report_input   = DonorsReport.parse(JSON.parse(string))
+                    this.report_input.date_updated = new Date()
+                    console.log("report input %o", this.report_input)
+                    this.isEdit = true
+                    $('#updateStatusModal').modal()
                 },
 
                 saveReport() {

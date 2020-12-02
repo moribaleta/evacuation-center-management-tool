@@ -97,6 +97,8 @@
             </div>
         </div>
 
+        <update-status-modal :input.sync="report_input" v-on:persist="saveReport"></update-status-modal>
+
         <!-- MODAL -->
         <div id="reportModal" class="modal fade" role="dialog">
             <div class="modal-dialog">
@@ -174,8 +176,9 @@
                             </div>
                             <div class="col col-md-12">
                                 <button class="btn btn-default btn-info" :href="'#requestrow-'+index"
-                                    data-toggle="collapse">View Request</button>
+                                    data-toggle="collapse">view details</button>
                                 <button class="btn btn-default btn-warning" v-on:click="editReport(index)">edit</button>
+                                <button class="btn btn-default btn-warning" v-on:click="editStatus(index)">update status</button>
                                 <button class="btn btn-default btn-danger"
                                     v-on:click="deleteItem(index)">delete</button>
                             </div>
@@ -747,6 +750,14 @@
                     this.report_input.date_updated = new Date()
                     this.isEdit = true
                     $('#reportModal').modal()
+                },
+
+                editStatus(index){
+                    let string = JSON.stringify(this.pending_reports_view[index].toObject())
+                    this.report_input = PublicUserReport.parse(JSON.parse(string))
+                    this.report_input.date_updated = new Date()
+                    this.isEdit = true
+                    $('#updateStatusModal').modal()
                 },
 
                 saveReport() {

@@ -169,16 +169,20 @@ const FilterComponent = Vue.extend({
     </select>
     </div>
     
-    <div class="col button-filter-container">
-    <div>&nbsp;</div>
-    <button type="button" class="btn btn-warning button-view" v-on:click="$emit('filter', filter)">filter
-    </button>
-    <button type="button" class="btn btn-warning button-view" v-on:click="$emit('clear', 0); onClear()">clear
-    </button>
-    <button type="button" class="btn btn-warning button-view " href="#filteradd" data-toggle="collapse">Additional Filter
-    </button>
-    <button type="button" class="btn btn-danger button-view " href="#searchbox" data-toggle="collapse">Show Search
-    </button>
+    <div class="col col-2 button-filter-container">
+        <div>&nbsp;</div>
+        <button type="button" class="btn btn-warning button-view" v-on:click="$emit('filter', filter)">Filter
+        </button>
+        <button type="button" class="btn btn-warning button-view" v-on:click="$emit('clear', 0); onClear()">Clear
+        </button>
+        
+    </div>
+    <div class="col col-12  button-filter-container">
+        <div>&nbsp;</div>
+        <button type="button" class="btn btn-warning button-view " href="#filteradd" data-toggle="collapse">Additional Filter
+        </button>
+        <button type="button" class="btn btn-danger button-view " href="#searchbox" data-toggle="collapse">Show Search
+        </button>
     </div>
     
     </div>
@@ -607,7 +611,71 @@ const ReportEditorModal = Vue.extend({
 
 Vue.component('report-editor-modal', ReportEditorModal)
 
-
+/** component modal for updating report status */
+const UpdateStatusModal = Vue.extend({
+    template: `
+    <div id="updateStatusModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+    <div class="modal-content">
+    <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">&times;</button>
+    <h4 class="modal-title">Update Status Report</h4>
+    </div>
+    <div class="modal-body">
+    <form-generator :form="formModel" :input.sync="input" ></form-generator>
+    </div>
+    <div class="modal-footer">
+    <button type="button" class="btn btn-default" data-dismiss="modal" v-on:click="saveReport()">Save</button>
+    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+    </div>
+    </div>
+    
+    </div>
+    </div>`,
+    props: {
+        input: Object,
+    },
+    watch: {
+        evacuations() {
+            this.formModel.evac_id.options = [{
+                title: 'Public',
+                value: ''
+            }]
+            this.formModel.evac_id.options = this.formModel.evac_id.options.concat(this.evacuations.map((evac) => {
+                return {
+                    title: evac.name,
+                    value: evac.id
+                }
+            }))
+        },
+        supplytypes(){
+            //console.log("updated supply types %o",)
+            this.formReportModel.inventory_type.options = this.supplytypes
+        }
+    },
+    data(){
+        return {
+            formModel: {
+                status: {
+                    title: 'Status',
+                    type: FormModels.dropdown,
+                    options: Object.keys(SupplyStatus).map((key) => {
+                        return {title: key, value: key}
+                    })
+                }
+            },
+        }
+    },
+    created(){
+        
+    },
+    methods: {
+        saveReport(){
+            this.$emit('persist',true)
+        }
+    }
+})//UpdateStatusModal
+Vue.component('update-status-modal', UpdateStatusModal)
 
 const InventorySelector = Vue.extend({
     template: `<div id="inventorySelectionModal" class="modal fade" role="dialog">
