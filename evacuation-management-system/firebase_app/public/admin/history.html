@@ -67,7 +67,7 @@
                         <h4 class="modal-title">{{isEdit ? 'Edit ': 'Add '}} Evacuation History</h4>
                     </div>
                     <div class="modal-body">
-                        <form-generator :form="formModel" :input.sync="data_input" ></form-generator>
+                        <form-generator :form="formModel" :input.sync="data_input"></form-generator>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal"
@@ -119,7 +119,8 @@
                             </div>
                             <div class="col col-md-12 item-info">
                                 <p class="item-label">EVACUATION NAME</p>
-                                <p class="item-value">{{getEvacFromId(item.evac_id).name}}</p>
+                                <p class="item-value">
+                                    {{getEvacFromId(item.evac_id) ? getEvacFromId(item.evac_id).name : ""}}</p>
                             </div>
                             <div class="col col-md-12">
                                 <entry-component :entry="item" :headers="history_header">
@@ -132,7 +133,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                 </div>
             </div>
         </div>
@@ -145,6 +146,7 @@
         app = new Vue({
             el: '#content',
             data: {
+                user: null,
                 evac_list: [],
                 evac_dict: {},
                 evac_names: {},
@@ -166,18 +168,19 @@
             },
             methods: {
                 onStart() {
+                    this.user = header.user
                     this.fetchReports()
                     this.municipalities = municipalities
                 },
 
                 fetchReports() {
 
-                    DataHandler.getEvacuationCenters().then((data) => {
+                    DataHandler.getEvacuationCenters(this.user.municipality).then((data) => {
                         this.evac_list = data.data
                         //this.filter_add['evacuation'] = ['all']
                         var evac_options = []
                         var evac_filter = ['all']
-                        this.evac_list.forEach((entry)=>{
+                        this.evac_list.forEach((entry) => {
                             this.evac_dict[entry.id] = entry
                             this.evac_names[entry.name] = entry.id
                             evac_filter.push(entry.name);
@@ -186,24 +189,35 @@
                                 value: entry.id
                             })
                         })
+                        console.log("evac list %o", this.evac_list)
                         this.filter_add = {
-                            populations: ['all','0-100','101-500','501-1000','1001+'],
+                            populations: ['all', '0-100', '101-500', '501-1000', '1001+'],
                             evacuations: evac_filter
                         }
                         this.formModel.evac_id.options = evac_options
+
+                        this.isDataLoading = true
+                        DataHandler.getEvacuationHistory().then((message) => {
+
+                            this.reports = message.data.filter((val) => {
+                                return this.evac_dict[val.evac_id] != null
+                            })
+
+                            //this.reports    = message.data
+                            this.view_list = this.reports
+                            console.log("reports %o", this.reports)
+
+                        }).catch(error => {
+                            console.log(error)
+                        }).finally(() => {
+                            this.isDataLoading = false
+                        })
+
                     }).catch(err => {
                         console.log("err %o", err)
                     })
 
-                    this.isDataLoading = true
-                    DataHandler.getEvacuationHistory().then((message) => {
-                        this.reports    = message.data
-                        this.view_list  = message.data
-                    }).catch(error => {
-                        console.log(error)
-                    }).finally(() => {
-                        this.isDataLoading = false
-                    })
+
 
                 },
 
@@ -229,7 +243,7 @@
                         this.data_input.created_by = header.user.id
                     }
 
-                    console.log("saving %o",this.data_input)
+                    console.log("saving %o", this.data_input)
 
                     DataHandler.addEvacuationHistory(this.data_input).then((data) => {
                         console.log('response %o', data)
@@ -272,19 +286,19 @@
                     var view_list = this.reports.filter((data) => {
                         let date_created = new Date(data.date_created)
                         let date_updated = new Date(data.date_updated)
-                        let date_report  = new Date(data.report_date)
+                        let date_report = new Date(data.report_date)
                         let evac = this.evac_dict[data.evac_id]
 
                         return (
-                            (filter.year == 'all' || 
-                                filter.year == date_report.getFullYear()  ) &&
-                            (filter.month == 'all' || 
+                            (filter.year == 'all' ||
+                                filter.year == date_report.getFullYear()) &&
+                            (filter.month == 'all' ||
                                 filter.month == (months_array[date_report.getMonth()] || 0)) &&
-                            (filter.municipality == 'all' || 
-                            filter.municipality == evac.municipality)
+                            (filter.municipality == 'all' ||
+                                filter.municipality == evac.municipality)
                         )
                     });
-                    
+
                     view_list = view_list.filter((data) => {
                         let population_range = filter.populations
                         if (population_range == 'all') {
@@ -292,7 +306,8 @@
                         } else if (!population_range.split('-').isEmpty()) {
                             let range = population_range.split('-')
                             console.log("let range %o", range)
-                            return (data.current_population >= Number(range[0]) && data.current_population <= Number(range[1]))
+                            return (data.current_population >= Number(range[0]) && data
+                                .current_population <= Number(range[1]))
                         } else {
                             let max_range = population_range.split('+')[0]
                             console.log("let max_range %o", max_range)
@@ -318,9 +333,11 @@
                     this.onFilter(filter)
 
                     this.view_list = this.view_list.filter((data) => {
-                        var object = {...data.toObject()}
+                        var object = {
+                            ...data.toObject()
+                        }
                         let evac = this.evac_dict[data.evac_id]
-                        object['evac_name'] = evac.name 
+                        object['evac_name'] = evac.name
                         object['municipal'] = evac.municipal
                         return SearchObject(object, filter.searchTerm)
                     })
@@ -336,9 +353,11 @@
 
                 onDownloadReport() {
                     let view_list = this.view_list.map((data) => {
-                        var object = {...data.toObject()}
+                        var object = {
+                            ...data.toObject()
+                        }
                         let evac = this.evac_dict[data.evac_id]
-                        object['evac_name'] = evac.name 
+                        object['evac_name'] = evac.name
                         object['municipal'] = evac.municipality
                         return object
                     })

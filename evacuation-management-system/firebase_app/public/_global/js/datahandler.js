@@ -45,8 +45,10 @@ class UserHandler extends DataHandlerType {
         this.configure()
         return new Promise((resolve, reject) => {
             console.log(username + "--" + password)
+            let ref = validateEmail(username) ? "email" : "username"
+                
             this.firestore.collection('admin_user')
-                .where("username", "==", username)
+                .where(ref, "==", username)
                 .where("password", "==", password)
                 .get().then(function (querySnapshot) {
                     var users = []
@@ -59,7 +61,6 @@ class UserHandler extends DataHandlerType {
                             id,
                             ...data
                         })
-
                         users.push(AdminUser.parse(object))
                     });
 
@@ -112,6 +113,34 @@ class UserHandler extends DataHandlerType {
                 });
         })
     } //getUsers
+
+    getAdminUserMunicipality(municipality){
+        return new Promise((resolve, reject) => {
+            this.firestore.collection('admin_user')
+                .where('municipality', '==', municipality)
+                .get().then(function (querySnapshot) {
+                    var users = []
+                    querySnapshot.forEach(function (doc) {
+                        console.log(doc.id, " => ", doc.data());
+                        let data = doc.data()
+                        let id = doc.id
+                        const object = parseObject({
+                            id,
+                            ...data
+                        })
+                        users.push(AdminUser.parse(object))
+                    });
+
+                    var message = new Message()
+                    message.data = users
+                    resolve(message)
+                })
+                .catch(function (error) {
+                    console.log("Error getting documents: ", error);
+                    reject(error)
+                });
+        })
+    }
 
     addAdminUsers(params = new AdminUser(), images = []) {
         if (images.length > 0) {
@@ -613,11 +642,11 @@ class EvacuationHandler extends PublicUserHandler {
 
     /** returns history */
     getEvacuationHistory(evac_id = null) {
-        let collection = this.firestore.collection('evacuation_history')
+        let collection = this.firestore.collection(UserHandler.tables.evacuation_history)
         var ref = evac_id != null ? ref.where('evac_id', '==', evac_id) : collection
 
         ref = ref.orderBy("report_date", "desc") //.limit(limit)
-
+        console.log("fetch history running %o", evac_id)
         return new Promise((resolve, reject) => {
             ref.get().then((querySnapshot) => {
                     var models = []

@@ -665,7 +665,7 @@
                 //-----------PENDING REPORTS------------------!>
 
                 fetchPendingReports(id, isAll) {
-                    let promiseEvac = DataHandler.getEvacuationCenters()
+                    let promiseEvac = DataHandler.getEvacuationCenters(this.user.municipality)
                     let promiseSuppType = DataHandler.getSupplyTypes()
 
                     this.isReportsLoading = true
@@ -717,7 +717,13 @@
 
                         DataHandler.getPublicUserReports(id).then((message) => {
                             console.log("reports %o", message)
-                            this.pending_reports = message.data
+                            //this.pending_reports = message.data
+                            this.pending_reports = []
+                            message.data.forEach((data) => {
+                                if (this.evac_dict[data]) {
+                                    this.pending_reports.push(data)
+                                }
+                            })
                             this.pending_reports_view = this.pending_reports
                         }).catch(err => {
                             console.log("err %o", err)

@@ -57,7 +57,8 @@
     </div>
     <div id="inventory-list-picker">
         <inventory-selector :muni_inv_list="muni_inv_list" :evac_list="evac_list" :inventory_list="inventory_list"
-            :is-loading="isLoading" :supplies="supplies" v-on:on-select-inventory="id => {onSelectInventory(id)}" :evac_id="evac_id">
+            :is-loading="isLoading" :supplies="supplies" v-on:on-select-inventory="id => {onSelectInventory(id)}"
+            :evac_id="evac_id">
         </inventory-selector>
     </div>
     <div class="container" id="content">
@@ -101,7 +102,8 @@
             </div>
         </div>
 
-        <report-editor-modal :isedit="isEdit" :input.sync="report_input" :evacuations="evac_list" :supplytypes="supply_types_option" v-on:persist="saveReport" ></report-editor-modal>
+        <report-editor-modal :isedit="isEdit" :input.sync="report_input" :evacuations="evac_list"
+            :supplytypes="supply_types_option" v-on:persist="saveReport"></report-editor-modal>
         <update-status-modal :input.sync="report_input" v-on:persist="saveReport"></update-status-modal>
 
         <h1>Donors</h1>
@@ -111,7 +113,8 @@
             <h3>Latest Pending Reports</h3>
 
             <filter-component :filter_add="filter_add.reports" v-on:filter="onFilterReport($event)"
-                v-on:search="onSearchReport($event)" v-on:cancel="onCancelSearchReport($event)" v-on:clear="onClearFilterReport()">
+                v-on:search="onSearchReport($event)" v-on:cancel="onCancelSearchReport($event)"
+                v-on:clear="onClearFilterReport()">
             </filter-component>
 
             <div class="button-container">
@@ -134,22 +137,30 @@
                         </div>
                         <div class="col col-md-4 item-info " v-for="info,index in donor_report_headers"
                             v-if="info != 'user_id'">
-                            <entry-single-component v-if="info=='evac_id'" :label="'EVACUATION NAME'" :value="item.evac_id.isEmpty() ? 'public' : evac_names[item.evac_id]" ></entry-single-component>
-                            <entry-single-component v-if="info != 'evac_id'" :label="info" :value="item[info]"></entry-single-component>
+                            <entry-single-component v-if="info=='evac_id'" :label="'EVACUATION NAME'"
+                                :value="item.evac_id.isEmpty() ? 'public' : evac_names[item.evac_id]">
+                            </entry-single-component>
+                            <entry-single-component v-if="info != 'evac_id'" :label="info" :value="item[info]">
+                            </entry-single-component>
                         </div>
                         <div class="col col-md-12">
-                            <button class="btn btn-default btn-info"    :href="'#requestrow-'+index" data-toggle="collapse">View Request</button>
-                            <button class="btn btn-default btn-success" v-on:click="onMoveRequestInventory(index)">Move To Inventory</button>
-                            <button class="btn btn-default btn-warning" v-on:click="onUpdateDonorRequest(index)">Update Request</button>
-                            <button class="btn btn-default btn-warning" v-on:click="onUpdateStatus(index)">Update Status</button>
-                            <button class="btn btn-default btn-danger" v-on:click="onDeleteDonorRequest(index)">Delete Request</button>
+                            <button class="btn btn-default btn-info" :href="'#requestrow-'+index"
+                                data-toggle="collapse">View Request</button>
+                            <button class="btn btn-default btn-success" v-on:click="onMoveRequestInventory(index)">Move
+                                To Inventory</button>
+                            <button class="btn btn-default btn-warning" v-on:click="onUpdateDonorRequest(index)">Update
+                                Request</button>
+                            <button class="btn btn-default btn-warning" v-on:click="onUpdateStatus(index)">Update
+                                Status</button>
+                            <button class="btn btn-default btn-danger" v-on:click="onDeleteDonorRequest(index)">Delete
+                                Request</button>
                         </div>
                     </div>
                     <div :id="'requestrow-'+index" class="panel-collapse collapse">
                         <div class="panel-body">
                             <div class="table-responsive">
                                 <table class="table">
-                                    <tr>    
+                                    <tr>
                                         <th>#</th>
                                         <th>name</th>
                                         <th>qty</th>
@@ -157,7 +168,8 @@
                                     </tr>
                                     <tr v-for="report,index in item.reports">
                                         <td>{{index + 1}}</td>
-                                        <td>{{supply_types[report.inventory_type] ? supply_types[report.inventory_type].name : report.inventory_type}}</td>
+                                        <td>{{supply_types[report.inventory_type] ? supply_types[report.inventory_type].name : report.inventory_type}}
+                                        </td>
                                         <td>{{report.qty}}</td>
                                         <td>{{report.remarks}}</td>
                                     </tr>
@@ -168,14 +180,15 @@
                 </div>
             </div>
             <div>&nbsp;</div>
-            
+
         </div>
 
-        
+
         <!-------- DONOR HEADERS ------------->
         <div class="section">
             <h3>Donors Users</h3>
-            <search-component title="Search Donor" v-on:search="onSearchDonor" v-on:cancel="onCancelSearchDonor" ></search-component>
+            <search-component title="Search Donor" v-on:search="onSearchDonor" v-on:cancel="onCancelSearchDonor">
+            </search-component>
             <div class="button-container">
                 <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="onAddNewOrg()">Add
                     New Organization</button>
@@ -368,7 +381,7 @@
                 indv_list: [],
                 view_indv_list: [],
                 donor_ref: {},
-                
+
                 //REPORTS
                 donor_report_view_list: [],
                 donor_report_list: [],
@@ -394,9 +407,9 @@
 
                 filter_add: {
                     reports: {
-                        status:  ['all'].concat(Object.keys(SupplyStatus)),
+                        status: ['all'].concat(Object.keys(SupplyStatus)),
                         evacuation: [],
-                        item_type:  []
+                        item_type: []
                     },
                     donors: {}
                 }
@@ -454,16 +467,17 @@
                                 value: supply.id
                             }
                         })
-                        this.filter_add.reports.item_type = ['all'].concat(this.supply_types_option.map((data) => {
-                            return data.title;
-                        }))
+                        this.filter_add.reports.item_type = ['all'].concat(this.supply_types_option.map(
+                            (data) => {
+                                return data.title;
+                            }))
                         //this.donor_report_item_form.inventory_type.options = this.supply_types_option
                         console.log("supply types %o", this.supply_types)
                     }).catch(err => {
                         console.log("err %o", err)
                     })
 
-                    DataHandler.getEvacuationCenters().then((data) => {
+                    DataHandler.getEvacuationCenters(this.user.municipality).then((data) => {
                         this.evac_list = data.data
                         this.filter_add.reports.evacuation = []
                         var evacuation_names = []
@@ -472,22 +486,37 @@
                             evacuation_names.push(evac.name)
                             this.evac_dict[evac.id] = evac
                         })
-                        this.filter_add.reports.evacuation = ['all','public'].concat(evacuation_names)
-                        
+                        this.filter_add.reports.evacuation = ['all', 'public'].concat(evacuation_names)
+                        return true
+                    }).then(() => {
+                        this.isLoading.reports = true
+                        DataHandler.getDonorReports(null, this.user.admin_type == AdminUser.admin_types
+                            .pdrrmo ? 10 : 1000).then((message) => {
+                            //this.donor_report_list = message.data
+                            console.log("data %o", message)
+                            this.donor_reports_list = []
+                            message.data.forEach((data) => {
+                                let evac = this.evac_dict[data.evac_id]
+                                console.log("evac %o", evac)
+                                if (evac) {
+                                    this.donor_report_list.push(data)
+                                }
+                            })
+                            
+                            console.log("reports %o", this.donor_report_list)
+
+                            this.donor_report_view_list = this.donor_report_list
+                            
+                        }).catch(err => {
+                            console.log(err)
+                        }).finally(() => {
+                            this.isLoading.reports = false
+                        })
                     }).catch(err => {
                         console.log("err %o", err)
                     })
 
-                    this.isLoading.reports = true
-                    DataHandler.getDonorReports(null, 10).then((message) => {
-                        this.donor_report_list = message.data
-                        this.donor_report_view_list = this.donor_report_list
-                        console.log("reports %o", this.donor_report_list)
-                    }).catch(err => {
-                        console.log(err)
-                    }).finally(() => {
-                        this.isLoading.reports = false
-                    })
+
 
                     /* DataHandler.getSupplyTypes().then((message) => {
                         this.supply_types = message.data
@@ -593,7 +622,7 @@
                     }
                 }, //onDeleteIndv
 
-                onSearchDonor(search){
+                onSearchDonor(search) {
                     this.view_orgs_list = this.orgs_list.filter((org) => {
                         return SearchObject(org.toObject(), search)
                     })
@@ -602,7 +631,7 @@
                     })
                 },
 
-                onCancelSearchDonor(){
+                onCancelSearchDonor() {
                     this.view_orgs_list = [...this.orgs_list]
                     this.view_indv_list = [...this.indv_list]
                 },
@@ -619,53 +648,55 @@
                     console.log("filter %o", filter)
 
                     var view_list = this.donor_report_list.filter((data) => {
-                        let date_created    = new Date(data.date_created)
-                        let date_updated    = new Date(data.date_updated)
-                        let evac            = this.evac_dict[data.evac_id] || new EvacuationCenter()
-                        
+                        let date_created = new Date(data.date_created)
+                        let date_updated = new Date(data.date_updated)
+                        let evac = this.evac_dict[data.evac_id] || new EvacuationCenter()
+
                         return (
                             (filter.year == 'all' ||
                                 filter.year == date_created.getFullYear() ||
                                 filter.year == date_updated.getFullYear()
-                                ) &&
+                            ) &&
                             (filter.month == 'all' ||
                                 filter.month == (months_array[date_created.getMonth()] || 0) ||
                                 filter.month == (months_array[date_updated.getMonth()] || 0)
-                                ) && 
-                            (filter.municipality == 'all' || 
-                            (filter.municipality == evac.municipality))
+                            ) &&
+                            (filter.municipality == 'all' ||
+                                (filter.municipality == evac.municipality))
                         )
                     });
 
                     view_list = view_list.filter((data) => {
-                        return (filter.status == 'all' || 
+                        return (filter.status == 'all' ||
                             filter.status == data.status
                         )
                     })
 
                     view_list = view_list.filter((data) => {
-                        let evac_name =  filter.evacuation
+                        let evac_name = filter.evacuation
 
                         if (evac_name == 'all') {
                             return true
                         }
-                        
+
                         if (evac_name == 'public' && data.evac_id == "") {
                             return true
                         } else if (data.evac_id == "") {
                             return false
                         }
 
-                        let data_evac = this.evac_dict[data.evac_id].name 
-                        return  data_evac == evac_name
+                        let data_evac = this.evac_dict[data.evac_id].name
+                        return data_evac == evac_name
                     })
 
                     view_list = view_list.filter((data) => {
                         let supplies = data.reports.map((report) => {
-                            return this.supply_types[report.inventory_type].name.trim().toLowerCase()
+                            return this.supply_types[report.inventory_type].name.trim()
+                                .toLowerCase()
                         })
                         console.log("data %o -- %o", data, supplies)
-                        return (filter.item_type == 'all' || supplies.includes(filter.item_type.toLowerCase()))
+                        return (filter.item_type == 'all' || supplies.includes(filter.item_type
+                            .toLowerCase()))
                     })
 
                     this.donor_report_view_list = view_list
@@ -698,17 +729,17 @@
 
                 //------------- DONORS REPORT ---------------------
                 onUpdateDonorRequest(index) {
-                    let string          = JSON.stringify(this.donor_report_view_list[index].toObject())
-                    this.report_input   = DonorsReport.parse(JSON.parse(string))
+                    let string = JSON.stringify(this.donor_report_view_list[index].toObject())
+                    this.report_input = DonorsReport.parse(JSON.parse(string))
                     this.report_input.date_updated = new Date()
                     console.log("report input %o", this.report_input)
                     this.isEdit = true
                     $('#editorModal').modal()
                 },
 
-                onUpdateStatus(index){
-                    let string          = JSON.stringify(this.donor_report_view_list[index].toObject())
-                    this.report_input   = DonorsReport.parse(JSON.parse(string))
+                onUpdateStatus(index) {
+                    let string = JSON.stringify(this.donor_report_view_list[index].toObject())
+                    this.report_input = DonorsReport.parse(JSON.parse(string))
                     this.report_input.date_updated = new Date()
                     console.log("report input %o", this.report_input)
                     this.isEdit = true
@@ -749,23 +780,25 @@
                 },
 
                 onMoveRequestInventory(index) {
-                    let string          = JSON.stringify(this.donor_report_view_list[index].toObject())
-                    this.report_input   = DonorsReport.parse(JSON.parse(string))
+                    let string = JSON.stringify(this.donor_report_view_list[index].toObject())
+                    this.report_input = DonorsReport.parse(JSON.parse(string))
                     this.report_input.date_updated = new Date()
 
                     //let supply = EvacuationSupply()
                     let supplies = this.report_input.reports.map((supply) => {
-                        var evac_supply             = new EvacuationSupply()
-                        evac_supply.inventory_type  = supply.inventory_type
-                        evac_supply.date_supplied   = new Date()
-                        evac_supply.qty             = supply.qty
-                        evac_supply.remarks         = supply.remarks
-                        evac_supply.status          = SupplyStatus.stored
-                        evac_supply.logs            = "Converted From Donor Report - "+ this.report_input.id +" by: "+this.user.id
+                        var evac_supply = new EvacuationSupply()
+                        evac_supply.inventory_type = supply.inventory_type
+                        evac_supply.date_supplied = new Date()
+                        evac_supply.qty = supply.qty
+                        evac_supply.remarks = supply.remarks
+                        evac_supply.status = SupplyStatus.stored
+                        evac_supply.logs = "Converted From Donor Report - " + this.report_input.id +
+                            " by: " + this.user.id
                         return evac_supply
                     })
-                    
-                    inventory_selection.onTransferDonation(supplies, this.report_input.evac_id, this.onSelectedInventory)
+
+                    inventory_selection.onTransferDonation(supplies, this.report_input.evac_id, this
+                        .onSelectedInventory)
                 },
 
                 onSelectedInventory(success) {

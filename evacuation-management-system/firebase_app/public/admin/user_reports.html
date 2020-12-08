@@ -346,7 +346,15 @@
 
                         DataHandler.getPublicUserReports(id).then((message) => {
                             console.log("reports %o", message)
-                            this.reports = message.data
+                            /* this.reports = message.data
+                            this.reports_view = this.reports */
+
+                            this.reports = []
+                            message.data.forEach((data) => {
+                                if (this.evac_dict[data]) {
+                                    this.reports.push(data)
+                                }
+                            })
                             this.reports_view = this.reports
                         }).catch(err => {
                             console.log("err %o", err)

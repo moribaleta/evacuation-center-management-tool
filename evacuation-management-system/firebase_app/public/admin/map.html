@@ -68,7 +68,7 @@
                 <iframe class="iframe" :src="'../evacuation-mapping/'+link"></iframe>
                 <div class="section">
                     <button type="button" id="add-report" class="btn btn-info button-view"
-                        v-on:click="onEditMap()">Edit Map
+                        v-on:click="onEditMap()" v-if="user.admin_type == 'pdrrmo'">Edit Map
                     </button>
                     <button type="button" id="add-report" class="btn btn-info button-view"
                         v-on:click="onTestMap()">Test Map

@@ -90,11 +90,11 @@
                         <ul class="list-group">
                             <li class="list-group-item" v-for="type, index in evacuation_types">
                                 <div class="row">
-                                    <div class="col col-md-6">{{type.name}}</div>
+                                    <div class="col col-md-5">{{index + 1}}. {{type.name}}</div>
                                     <div class="col col-md-3">is active: {{type.is_active}}</div>
-                                    <div class="col">
-                                        <button type="button" class="btn btn-danger"
-                                            v-on:click="onDeleteCategory(index)">Close</button>
+                                    <div class="col"  v-if="user.admin_type == 'pdrrmo'">
+                                        <button type="button" :class="type.is_active ? 'btn btn-warning' : 'btn btn-success'" v-on:click="onEnableCategory(index)">{{type.is_active ? "Disable" : "Enable"}}</button>
+                                        <button type="button" class="btn btn-danger" v-on:click="onDeleteCategory(index)">Delete</button>
                                     </div>
                                 </div>
                             </li>
@@ -102,7 +102,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal"
-                            v-on:click="onNewCategory()">Add New</button>
+                            v-on:click="onNewCategory()" v-if="user.admin_type == 'pdrrmo'">Add New</button>
                         <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
                     </div>
                 </div>
@@ -167,7 +167,7 @@
                         <div class="row">
                             <div class="col col-md-12 item-info">
                                 <p class="item-label">
-                                    {{header_labels['id']}}:
+                                    {{index+1}}. {{header_labels['id']}}:
                                 </p>
                                 <p class="item-value">
                                     {{item.id}}
@@ -351,8 +351,7 @@
                             }
                         })
 
-                        this.evacFormModel.municipality.isHidden = this.user.admin_type == AdminUser.admin_types
-                            .mdrrmo
+                        this.evacFormModel.municipality.isHidden = this.user.admin_type == AdminUser.admin_types.mdrrmo
 
                     } catch (err) {
                         console.log(err)
@@ -362,7 +361,7 @@
                 fetchEvacationCenter() {
                     this.isLoading = true
 
-                    DataHandler.getEvacuationCenters().then((data) => {
+                    DataHandler.getEvacuationCenters(this.user.municipality).then((data) => {
                         this.setEvacationCenter(data.data)
                     }).catch(err => {
                         console.log(err)
@@ -375,7 +374,7 @@
                 fetchEvacuationCenterTypes() {
                     DataHandler.getEvacuationCenterType().then((message) => {
                         this.evacuation_types = message.data
-
+                        console.log("evacuation_types %o", this.evacuation_types)
                         var filter_evac_type = []
 
                         this.evacFormModel.category.options = this.evacuation_types.filter((val) => {
@@ -395,11 +394,9 @@
                 }, //fetchEvacuationCenterTypes
 
                 fetchAllAdmins() {
-                    /* let evacs = this.evac_list
-                    this.evac_list = [] */
-                    DataHandler.getAdminUsers(this.user.id).then((message) => {
+                    let promise = this.user.admin_type == 'mdrrmo' ? DataHandler.getAdminUserMunicipality(this.user.municipality) : DataHandler.getAdminUsers(this.user.id)
+                    promise.then((message) => {
                         this.admins = message.data
-
                         this.evacFormModel.admin_id.options = this.admins.map(admin => {
                             this.admins_selection[admin.id] =
                                 `${admin.lastname}, ${admin.firstname}`
@@ -408,8 +405,6 @@
                                 value: admin.id
                             }
                         });
-
-                        //this.evac_list = evacs
                     }).catch((error) => {
                         console.log(error)
                     })
@@ -456,6 +451,8 @@
                         lng: null
                     }
                     this.evac_data_input.created_by = this.user.id
+                    this.admin_id = this.user.id
+                    this.evac_data_input.municipality = this.user.admin_type == AdminUser.admin_types.mdrrmo ? this.user.municipality : ''
                     $('#editorModal').modal()
                 }, //onAddItem
 
@@ -565,6 +562,13 @@
                             AlertMessages.error(err)
                         })
                     }
+                },
+
+                onEnableCategory(index) {
+                    this.type_data_input = EvacuationCenterType.parse(this.evacuation_types[index].toObject()) 
+                    this.type_data_input.is_active = !this.type_data_input.is_active
+                    console.log("update %o", this.type_data_input)
+                    this.onSaveCategory()
                 },
 
                 onNewCategory() {

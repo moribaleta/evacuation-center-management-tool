@@ -223,7 +223,7 @@
                 fetchReports(id) {
                     this.setLoading(true)
 
-                    let promiseEvac = DataHandler.getEvacuationCenters()
+                    let promiseEvac = DataHandler.getEvacuationCenters(this.user.municipality)
                     let promiseSuppType = DataHandler.getSupplyTypes()
 
                     Promise.all([promiseEvac, promiseSuppType]).then((data) => {
@@ -253,7 +253,10 @@
                     }).then((data) => {
                         console.log("user id %o", id)
                         DataHandler.getDonorReports(id).then((message) => {
-                            this.setData(message.data)
+                            this.reports = message.data.filter((data) => {
+                                return this.evac_dict[data.evac_id] != null
+                            })
+                            this.reports_view = this.reports
                         }).catch(error => {
                             console.log(error)
                         }).finally(() => {
@@ -307,16 +310,9 @@
                     return this.evac_dict[id]
                 },
 
-                setData(data) {
-                    console.log("data %o", data)
-                    this.reports = data
-                    this.reports_view = this.reports
-                },
-
                 setLoading(isLoading) {
                     this.isDataLoading = isLoading
                 },
-
 
                 editReport(index) {
                     let string = JSON.stringify(this.reports_view[index].toObject())

@@ -67,6 +67,59 @@ methods: {
         try {
             let user = JSON.parse(sessionStorage.getItem('user'))
             user = AdminUser.parse(user)
+
+            if (user.admin_type == 'mdrrmo') {
+                this.header_items = [{
+                    id: 'content',
+                    href: 'contents.html',
+                    icon: 'language',
+                    title: 'Contents'
+                },
+                {
+                    id: 'evacuations',
+                    href: "evacuations.html",
+                    icon: 'home_work',
+                    title: 'Evacuations'
+                },
+                {
+                    id: 'history',
+                    href: "history.html",
+                    icon: 'assessment',
+                    title: 'History'
+                },
+                {
+                    id: 'inventory',
+                    href: 'inventory.html',
+                    icon: 'storage',
+                    title: 'Inventory'
+                },
+                {
+                    id: 'admin',
+                    href: 'admin.html',
+                    icon: 'group',
+                    title: 'Admin'
+                },
+                {
+                    id: 'map',
+                    href: 'map.html',
+                    icon: 'room',
+                    title: 'Map'
+                },
+                {
+                    id: 'donors',
+                    href: 'donors.html',
+                    icon: 'reduce_capacity',
+                    title: 'Donors'
+                },
+                {
+                    id: 'users',
+                    href: 'users.html',
+                    icon: 'account_circle',
+                    title: 'Public'
+                }]
+            }
+
+
             console.log("user %o", user)
             if (user != undefined && user != null) {
                 console.log(user)
@@ -368,11 +421,11 @@ const InventorySupplyTypeEditor = Vue.extend({
     <td>{{formatDate(item.date_updated)}}</td>
     <td>
     <button class="btn btn-info"
-    v-on:click="editSupplyType(index)">edit</button>
+    v-on:click="editSupplyType(index)" v-if="user.admin_type == 'pdrrmo'">edit</button>
     </td>
     <td>
     <button class="btn btn-danger"
-    v-on:click="onDeleteSupplyType(index)">delete</button>
+    v-on:click="onDeleteSupplyType(index)" v-if="user.admin_type == 'pdrrmo'">delete</button>
     </td>
     </tr>
     </tbody>
@@ -382,7 +435,7 @@ const InventorySupplyTypeEditor = Vue.extend({
     </div>
     <div class="modal-footer">
     <button type="button" id="add-report" class="btn btn-warning button-view"
-    v-on:click="addSupplyType()">Add New Type
+    v-on:click="addSupplyType()" v-if="user.admin_type == 'pdrrmo'">Add New Type
     </button>
     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
     </div>

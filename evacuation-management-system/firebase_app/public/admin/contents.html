@@ -168,8 +168,8 @@
         <!-- CONTENT -->
         <div class="section">
             <h1>Home</h1>
-            <h3>Contents</h3>
-            <div class="row selection-grid">
+            <h3 v-if="user.admin_type == 'pdrrmo'">Contents</h3>
+            <div class="row selection-grid" v-if="user.admin_type == 'pdrrmo'">
                 <div class="col col-md-4 selection-grid-item" v-for="item in selections">
                     <div class="selection-grid-item-content" :style="'background:'+item.color">
                         <a class="selection-grid-item-content-link" :href="item.href">

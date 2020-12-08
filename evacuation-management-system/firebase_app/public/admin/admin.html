@@ -85,21 +85,22 @@
                             </div>
 
                             <div class="col col-md-6 input-container">
+                                <p>admin type</p>
+                                <select id="input-district" class="input input-item input-select" v-model="data_input.admin_type">
+                                    <option v-for="admin_type,index in admint_types" v-bind:value="admin_type">{{admin_type}}</option>
+                                </select>
+                            </div>
+
+                            <div class="col col-md-6 input-container">
                                 <p>municipal</p>
-                                <p v-if="user.municipality == 0">{{user.municipality == 0 ? "\"admin\"" : user.municipality}}</p>
+                                <p v-if="data_input.admin_type == 'pdrrmo'">{{user.municipality == 0 ? "\"admin\"" : user.municipality}}</p>
                                 <select id="input-district" class="input input-item input-select"
-                                    v-model="data_input.municipality" v-if="user.municipality != 0">
+                                    v-model="data_input.municipality" v-if="data_input.admin_type != 'pdrrmo'">
                                     <option v-for="municipal in municipalities" v-bind:value="municipal">
                                         {{municipal}}</option>
                                 </select>
                             </div>
 
-                            <div class="col col-md-6 input-container">
-                                <p>admin type</p>
-                                <select id="input-district" class="input input-item input-select" v-model="data_input.admin_type">
-                                    <option v-for="admin_type,index in admint_types" v-bind:value="index">{{admin_type}}</option>
-                                </select>
-                            </div>
                             <div class="col col-md-12 input-container">
                                 <p>profile</p>
                                 <input id="input_images" type="file" name="files[]"/>
@@ -208,11 +209,13 @@
                 cdn: DataHandlerType.api_host
             },
             methods: {
+                
                 onStart(){
                     this.user = header.user
                     this.municipalities = ["admin",...municipalities]
                     this.fetchUser()
                 },
+
                 fetchUser() {
                     this.isLoading = true
                     DataHandler.getAdminUsers(this.user.id).then((message) => {
@@ -223,17 +226,17 @@
                         this.isLoading = false
                     })
                 },
+
                 setUser(data) {
                     this.user_list = data
                     console.log(this.user_list)
                 },
                 
-                
                 addNewUser(){
-                    this.isEdit     = false
-                    this.editUserId = null
-                    this.data_input = new AdminUser()
-                    this.data_input.created_by = this.user.id
+                    this.isEdit                 = false
+                    this.editUserId             = null
+                    this.data_input             = new AdminUser()
+                    this.data_input.created_by  = this.user.id
                     $('#userModal').modal()
                 },
 

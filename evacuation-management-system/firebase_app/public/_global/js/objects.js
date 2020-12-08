@@ -48,9 +48,12 @@ class AdminUser extends Model {
     password
     admin_type
 
+    /**
+     * used to determine the type of access of user
+     */
     static admin_types = {
-        pdrrmo: 'pdrrmo',
-        mdrrmo: 'mdrrmo'
+        pdrrmo: 'pdrrmo', //higher - provincial
+        mdrrmo: 'mdrrmo' //lower - municipal
     }
 
     static keys = ['admin_type', 'date_created', 'firstname', 'lastname', 'municipality', 'username', 'email']
@@ -58,18 +61,18 @@ class AdminUser extends Model {
     constructor(id, admin_type, created_by, date_created, date_updated, firstname,
         lastname, municipality, username, email, password, images) {
         super()
-        this.id = id || keyGenID("admin")//"admin-" + genID(5)
-        this.admin_type = admin_type
-        this.created_by = created_by
-        this.date_created = date_created || new Date()
-        this.firstname = firstname
-        this.lastname = lastname
-        this.municipality = municipality
-        this.username = username
-        this.email = email
-        this.password = password
-        this.date_updated = date_updated || new Date()
-        this.images = images || []
+        this.id             = id || keyGenID("admin")//"admin-" + genID(5)
+        this.admin_type     = admin_type || AdminUser.admin_types.mdrrmo
+        this.created_by     = created_by
+        this.date_created   = date_created || new Date()
+        this.firstname      = firstname
+        this.lastname       = lastname
+        this.municipality   = municipality || 'admin'
+        this.username       = username
+        this.email          = email
+        this.password       = password
+        this.date_updated   = date_updated || new Date()
+        this.images         = images || []
     }
 
     toObject() {
@@ -233,7 +236,7 @@ class EvacuationCenter extends Model {
             options: []
         },
         facilities: {
-            title: 'Exact Address',
+            title: 'Facilities',
             type: FormModels.textarea
         },
 
@@ -351,7 +354,7 @@ class EvacuationCenterType extends Model {
         this.created_by   = created_by
 
         this.name = name
-        this.is_active = is_active || true
+        this.is_active = is_active
     }
 
     /**returns instance to json object */
