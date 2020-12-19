@@ -31,6 +31,7 @@
     <script src="../_global/js/objects.js"></script>
     <script src="../_global/js/utilities.js"></script>
     <script src="../_global/js/datahandler.js"></script>
+    
 </head>
 
 <body>
@@ -56,15 +57,12 @@
                     </li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
-                    <!-- <li><a href="https://bfpforecast.000webhostapp.com/admin/login.html?"><span
-                                class="glyphicon glyphicon-user"></span>
-                            Login</a></li> -->
-                            <li v-for="item in right_header">
-                                <a :href="item.href" >
-                                    <span :class="'glyphicon '+item.icon"></span>
-                                    {{item.title}}
-                                </a>
-                            </li>
+                    <li v-for="item in right_header">
+                        <a :href="item.href">
+                            <span :class="'glyphicon '+item.icon"></span>
+                            {{item.title}}
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -116,7 +114,7 @@
                     </li>
                 </ul>
             </div>
-            <label>{{formatDate(post.date_updated)}}</label>
+            <label>{{formatDate(post.date_updated,)}}</label>
             <h6>{{post.created_by}}</h6>
             <div>&nbsp;</div>
         </div>
@@ -134,8 +132,8 @@
 
     <!--  Scripts-->
     
+    
     <script src="js/app/app.js"></script>
-
 
     <script>
         app = new Vue({

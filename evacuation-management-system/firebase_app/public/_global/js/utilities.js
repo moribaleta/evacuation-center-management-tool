@@ -476,8 +476,9 @@ const EntrySingleComponent = Vue.extend({
     methods: {
         formatDate(date) {
             try {
-                if (typeof date.getMonth === 'function') {
-                    let _date = new Date(date)
+                let _date = new Date(date)
+                if (typeof _date.getMonth === 'function') {
+                    
                     console.log("am i valid? %o", date)
                     return this.showtime ? _date.toLocaleString() : _date.toLocaleDateString()   
                 } else {
@@ -494,7 +495,7 @@ const EntrySingleComponent = Vue.extend({
         },
 
         getValue(key, value) {
-            if (key.includes('date')) {
+            if (key.toLowerCase().includes('date')) {
                 return this.formatDate(value)
             } else if (key.includes('sex')) {
                 return value == 0 ? 'Male' : 'Female'

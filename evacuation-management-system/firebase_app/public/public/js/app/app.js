@@ -75,9 +75,9 @@ var header = new Vue({
                 }, 1000)
             })
 
-            app.formatDate = ((date) => {
+            app.formatDate = ((date, dateOnly = true) => {
                 let _date = new Date(date)
-                return _date.toLocaleDateString()
+                return dateOnly ? _date.toLocaleDateString() : _date.toLocaleString()
             })
 
             app.formateDateRange = ((d1, d2) => {

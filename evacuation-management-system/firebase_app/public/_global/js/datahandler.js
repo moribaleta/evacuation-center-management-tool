@@ -90,7 +90,7 @@ class UserHandler extends DataHandlerType {
         return new Promise((resolve, reject) => {
             this.firestore.collection('admin_user')
                 .where('created_by', '==', userid)
-                .get().then(function (querySnapshot) {
+                .get().then((querySnapshot) => {
                     var users = []
                     querySnapshot.forEach(function (doc) {
                         console.log(doc.id, " => ", doc.data());
@@ -113,6 +113,47 @@ class UserHandler extends DataHandlerType {
                 });
         })
     } //getUsers
+
+    /**
+     * used to get a single admin by id
+     * @param {*} userid - admin id to select
+     */
+    getAdminById(userid = ""){
+        return new Promise((resolve, reject) => {
+
+            if (userid.isEmpty()) {
+                var message = new Message()
+                message.error = "No ID passed"
+                reject(message)
+                return
+            }
+
+            this.firestore.collection('admin_user')
+            .where('id','==',userid)
+            .get().then((querySnapshot) => {
+                var users
+                querySnapshot.forEach((doc) => {
+                    console.log(doc.id, " => ", doc.data());
+                    let data = doc.data()
+                    let id = doc.id
+                    const object = parseObject({
+                        id,
+                        ...data
+                    })
+                    //users.push(AdminUser.parse(object))
+                    users = AdminUser.parse(object)
+                });
+
+                var message = new Message()
+                message.data = users
+                resolve(message)
+            })
+            .catch(function (error) {
+                console.log("Error getting documents: ", error);
+                reject(error)
+            });
+        })
+    }//getAdminById
 
     getAdminUserMunicipality(municipality){
         return new Promise((resolve, reject) => {

@@ -76,8 +76,8 @@
             
             <div v-html="content"></div>
             <div>&nbsp;</div>
-            <label>{{post.date_updated}}</label>
-            <h6>{{post.created_by}}</h6>
+            <h6>date last updated: {{formatDate(post.date_updated)}}</h6>
+            <h6>created by: {{admin_name || post.created_by}}</h6>
             <div>&nbsp;</div>
             <h4>Images</h4>
             <slideshow-container :images="post.images" :cdn="cdn" ></slideshow-container>
@@ -105,8 +105,7 @@
             data: {
                 post: new PublicContent(),
                 cdn: DataHandlerType.api_host,
-                //admins_selection: [],
-                //admins: [],
+                admin_name: null,
                 content: "",
             },
             methods: {
@@ -125,10 +124,13 @@
                         DataHandler.getContentPost(id).then((data) => {
                             this.post = data.data[0]
                             console.log("entry %o", this.post)
+                            this.fetchAdmin(this.post.created_by)
                             return DataHandler.getPublicPostContent(this.post.path)
                         }).then((data) => {
                             this.content = data
                             console.log("content %o", data)
+                            console.log("im here")
+                            
                         }).catch(err => {
                             console.log(err)
                         }).finally(() => {
@@ -138,8 +140,17 @@
                     }
                 }, //fetchPost
 
-                /* fetchAllAdmins() {
-                    DataHandler.getAdminUsers(this.user.id).then((message) => {
+                fetchAdmin(id) {
+                    console.log("im here")
+                    DataHandler.getAdminById(id).then((message) => {
+                        let admin = message.data
+
+                        this.admin_name = `${admin.lastname}, ${admin.firstname}`
+                        console.log(this.admin_name)
+                    }).catch((err) => {
+                        console.log(err)
+                    })
+                    /* DataHandler.getAdminUsers(this.user.id).then((message) => {
                         this.admins = message.data
                         this.admins.forEach(admin => {
                             this.admins_selection[admin.id] =
@@ -147,8 +158,8 @@
                         });
                     }).catch((error) => {
                         console.log(error)
-                    })
-                }, //fetchAllAdmins */
+                    }) */
+                }, //fetchAllAdmins
             }
         })
     </script>

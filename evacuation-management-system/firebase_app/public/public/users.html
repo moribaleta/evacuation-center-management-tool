@@ -105,6 +105,96 @@
 
             </div>
         </div>
+        <div id="viewReportModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">User Request Report</h4>
+                    </div>
+                    <div class="modal-body" v-if="report_data_view">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col col-md-12">
+                                    <entry-single-component
+                                    :value="report_data_view.id"
+                                    :label="'Request ID'">
+                                    </entry-single-component>
+                                </div>
+                                <div class="col col-md-6">
+                                    <entry-single-component
+                                    :value="getEvacFromId(report_data_view.evac_id).name || 'N/A'"
+                                    :label="'Evacuation Center'">
+                                    </entry-single-component>
+                                </div>
+                                <div class="col col-md-6">
+                                    <entry-single-component
+                                    :value="getEvacFromId(report_data_view.evac_id).municipality || 'N/A'"
+                                    :label="'Municipality'">
+                                    </entry-single-component>
+                                </div>
+                                <div class="col col-md-12">
+                                    <entry-single-component
+                                    :value="report_data_view.status"
+                                    :label="'Status'">
+                                    </entry-single-component>
+                                </div>
+                                <div class="col col-md-6">
+                                    <entry-single-component
+                                    :value="report_data_view.date_created"
+                                    :label="'Date Requested'" :showtime="true">
+                                    </entry-single-component>
+                                </div>
+                                <div class="col col-md-6">
+                                    <entry-single-component
+                                    :value="report_data_view.date_updated"
+                                    :label="'Date Updated'" :showtime="true">
+                                    </entry-single-component>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="panel-body">
+                            <ul class="list-group">
+                                <li class="list-group-item" v-if="report_data_view.reports.isEmpty()">
+                                    <p>No Request</p>
+                                </li>
+
+                                <li class="list-group-item" v-for="report,index in report_data_view.reports">
+                                    <div class="row">
+                                        <div class="col col-md-12 item-info">
+                                            <p class="item-label">
+                                                {{ index + 1 }}. {{supply_types[report.inventory_type].name}}
+                                            </p>
+                                        </div>
+                                        <div class="col col-md-12 item-info">
+                                            <p class="item-label">
+                                                QTY:
+                                            </p>
+                                            <p class="item-value">
+                                                {{report.qty}}
+                                            </p>
+                                        </div>
+                                        <div class="col col-md-12 item-info">
+                                            <p class="item-label">
+                                                remarks:
+                                            </p>
+                                            <p class="item-value">
+                                                {{report.remarks}}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
         <!-- MODAL -->
 
         <div id="historyModal" class="modal fade" role="dialog">
@@ -173,8 +263,6 @@
 
         <div class="container">
             <div id="jumbotron" class="jumbotron">
-                <!-- <img class="foreground backgroundesources/images/logo1.png"> -->
-                <!-- <img class="foreground" src="resources/images/background.jpg"> -->
                 <p class="time">Today: {{time}}</p>
             </div>
             <div>&nbsp;</div>
@@ -244,7 +332,41 @@
                         v-on:click="onAdmit()">Admit</button>
                 </div>
                 <div>&nbsp;</div>
-                <div class="well" v-if="current_history != null">
+                <div class="table-responsive">
+                    <table class="table">
+                        <tr>
+                            <th>#</th>
+                            <th>Evacuation Center</th>
+                            <th>Municipality</th>
+                            <th>Date Admitted</th>
+                            <th>Date Cleared</th>
+                            <th>Options</th>
+                        </tr>
+                        <tr v-if="current_history">
+                            <td>{{1}}</td>
+                            <td>{{getEvacFromId(current_history.evac_id).name}}</td>
+                            <td>{{getEvacFromId(current_history.evac_id).municipality}}</td>
+                            <td>{{formatDate(current_history.date_admitted, false)}}</td>
+                            <td>Admitted</td>
+                            <td>
+                                <button class="btn btn-default btn-success" v-on:click="clearHistory()"> Clear
+                                    Admission</button>
+                                <button class="btn btn-default btn-danger" v-on:click="deleteAdmission()"> Cancel
+                                    Admission</button>
+                            </td>
+                        </tr>
+                        <tr v-for="entry, index in history">
+                            <td>{{index + (current_history ? 2 : 1)}}</td>
+                            <td>{{getEvacFromId(entry.evac_id).name}}</td>
+                            <td>{{getEvacFromId(entry.evac_id).municipality}}</td>
+                            <td>{{formatDate(entry.date_admitted, false)}}</td>
+                            <td>{{formatDate(entry.date_cleared, false)}}</td>
+                            <td>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <!-- <div class="well" v-if="current_history != null">
                     <div class="row">
                         <div class="col col-md-12 item-info">
                             <p class="item-label">Current Admission</p>
@@ -264,8 +386,8 @@
                                 Admission</button>
                         </div>
                     </div>
-                </div>
-                <div class="well" v-for="item,index in history">
+                </div> -->
+                <!-- <div class="well" v-for="item,index in history">
                     <div class="row">
                         <div class="col col-md-12 item-info">
                             <p class="item-value">{{index + 1}}.</p>
@@ -279,7 +401,7 @@
                                 :label="info" :showtime="true"></entry-single-component>
                         </div>
                     </div>
-                </div>
+                </div> -->
 
 
                 <!-- REQUEST REPORT-->
@@ -289,7 +411,31 @@
                         Report</button>
                 </div>
                 <div>&nbsp;</div>
-                <div class="well" v-for="item,index in reports">
+                <div class="table-responsive">
+                    <table class="table">
+                        <tr>
+                            <th>#</th>
+                            <th>Request ID</th>
+                            <th>Evacuation Center</th>
+                            <th>Municipality</th>
+                            <th>Date Created</th>
+                            <th>Date Updated</th>
+                            <th>Status</th>
+                            <th>Options</th>
+                        </tr>
+                        <tr v-for="item,index in reports">
+                            <td>{{index + 1}}</td>
+                            <td>{{item.id}}</td>
+                            <td>{{getEvacFromId(item.evac_id).name}}</td>
+                            <td>{{getEvacFromId(item.evac_id).municipality}}</td>
+                            <td>{{formatDate(item.date_created, false)}}</td>
+                            <td>{{formatDate(item.date_updated, false)}}</td>
+                            <td>{{item.status}}</td>
+                            <td><button class="btn btn-default btn-info" v-on:click="viewReport(index)" >View Request</button></td>
+                        </tr>
+                    </table>
+                </div>
+                <!-- <div class="well" v-for="item,index in reports">
                     <div class="row">
                         <div class="col col-md-12 item-info">
                             <p class="item-value">{{index + 1}}.</p>
@@ -306,8 +452,6 @@
                         <div class="col col-md-12">
                             <button class="btn btn-default btn-info" :href="'#requestrow-'+index"
                                 data-toggle="collapse">View Request</button>
-                            <!-- <button class="btn btn-default btn-warning" v-on:click="editReport(index)">edit</button>
-                                <button class="btn btn-default btn-danger" v-on:click="deleteItem(index)">delete</button> -->
                         </div>
                     </div>
                     <div :id="'requestrow-'+index" class="panel-collapse collapse">
@@ -345,7 +489,7 @@
                             </ul>
                         </div>
                     </div>
-                </div>
+                </div> -->
             </div>
         </div>
 
@@ -402,6 +546,7 @@
                 //REPORTS
                 reports: [],
                 report_data_input: new PublicUserReport(),
+                report_data_view: null,
                 report_headers: PublicUserReport.headers,
                 reportFormModel: PublicUserReport.formModel,
                 reportItemFormModel: {},
@@ -467,7 +612,6 @@
                 }, //fetchData
 
                 fetchReports(id) {
-
                     DataHandler.getEvacuationCenters().then((data) => {
                         this.evac_list = data.data
 
@@ -507,7 +651,7 @@
 
                     DataHandler.getPublicUserHistory(id).then((message) => {
                         this.history = message.data.filter((history) => {
-                            if (!history.date_cleared) {
+                            if (history.date_cleared == "Invalid Date") {
                                 this.current_history = history
                                 return false
                             }
@@ -520,12 +664,6 @@
 
                 getEvacFromId(id) {
                     return this.evac_dict[id]
-                    /* for (var i = 0; i < this.evac_list.length; i++) {
-                        if (this.evac_list[i].id == id) {
-                            return this.evac_list[i]
-                        }
-                    }
-                    return null */
                 },
 
                 viewItem(index) {
@@ -539,6 +677,11 @@
                     this.isEdit = false
                     $('#reportModal').modal()
                 }, //addReport
+
+                viewReport(index) {
+                    this.report_data_view = this.reports[index]
+                    $('#viewReportModal').modal()
+                },
 
                 saveReport() {
                     DataHandler.addPublicUserReport(this.report_data_input).then((data) => {
@@ -581,6 +724,7 @@
                 },
 
                 saveHistory(isActive = true) {
+                    console.log("history %o", this.history_data_input)
                     DataHandler.addPublicUserHistory(this.history_data_input).then((data) => {
                         console.log('response %o', data)
                         if (data.error) {
@@ -595,8 +739,6 @@
                     }).catch(err => {
                         AlertMessages.error(err)
                     })
-
-                    //this.updateUserActive(isActive)
                 },
 
                 deleteAdmission() {
@@ -616,8 +758,6 @@
                         }).catch(err => {
                             AlertMessages.error(err)
                         })
-
-
                     }
                 }, //deleteAdmission
 
@@ -720,7 +860,7 @@
 
                 onDeleteDependent(index) {
                     if (confirm("confirm delete entry?")) {
-                        let user = PublicUser.parse(this.user.toObject()) 
+                        let user = PublicUser.parse(this.user.toObject())
                         user.dependents.splice(index, 1)
                         DataHandler.savePublicUser(user).then((message) => {
                             if (message.error) {

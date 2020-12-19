@@ -215,12 +215,7 @@
                             </p>
                         </div>
                         <div class="col col-xs-4 item-info" v-for="key,index in org_headers" v-if="key !='id'">
-                            <p class="item-label">
-                                {{key}}:
-                            </p>
-                            <p class="item-value">
-                                {{item[key] || '--'}}
-                            </p>
+                            <entry-single-component :label="key" :value="item[key]"></entry-single-component>
                         </div>
 
                         <div class="col col-xs-12">
@@ -253,17 +248,8 @@
                             </p>
                         </div>
                         <div class="col col-xs-4 item-info" v-for="key,index in indv_headers" v-if="key !='id'">
-                            <p class="item-label">
-                                {{key}}:
-                            </p>
-                            <p class="item-value" v-if="key != 'sex'">
-                                {{item[key] || '--'}}
-                            </p>
-                            <p class="item-value" v-if="key == 'sex'">
-                                {{item[key] == 0 ? 'Male' : 'Female'}}
-                            </p>
+                            <entry-single-component :label="key" :value="item[key]"></entry-single-component>
                         </div>
-
                         <div class="col col-xs-12">
                             <button class="btn btn-default btn-info" v-on:click="viewReports(item.id)">View
                                 Reports</button>
