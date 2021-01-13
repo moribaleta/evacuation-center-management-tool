@@ -595,18 +595,20 @@
                 /* FILTER / SEARCH */
                 onFilter(filter) {
                     console.log("filter %o", filter)
+
                     var view_list = this.evac_list.filter((data) => {
                         let date_created = new Date(data.date_created)
                         let date_updated = new Date(data.date_updated)
 
                         return (
                             (filter.year == 'all' || filter.year == date_created.getFullYear() || filter.year == date_updated.getFullYear()) &&
-                            (filter.month == (months_array[date_created.getMonth()] || 0) ||
-                                filter.month == (months_array[date_updated.getMonth()] || 0)) &&
+                            (filter.month == 'all' || filter.month == (months_array[date_created.getMonth()] || 0) || filter.month == (months_array[date_updated.getMonth()] || 0)) &&
                             (filter.municipality == 'all' || filter.municipality == data
                                 .municipality)
                         )
                     });
+
+                    //var view_list = this.evac_list
 
                     let keys = EvacuationCenter.filter_keys
 

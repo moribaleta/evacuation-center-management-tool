@@ -720,9 +720,9 @@
                             //this.pending_reports = message.data
                             this.pending_reports = []
                             message.data.forEach((data) => {
-                                if (this.evac_dict[data]) {
+                                //if (this.evac_dict[data]) {
                                     this.pending_reports.push(data)
-                                }
+                                //}
                             })
                             this.pending_reports_view = this.pending_reports
                         }).catch(err => {

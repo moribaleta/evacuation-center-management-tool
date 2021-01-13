@@ -366,44 +366,7 @@
                         </tr>
                     </table>
                 </div>
-                <!-- <div class="well" v-if="current_history != null">
-                    <div class="row">
-                        <div class="col col-md-12 item-info">
-                            <p class="item-label">Current Admission</p>
-                        </div>
-                        <div class="col col-md-3 item-info " v-for="info,index in history_headers">
-                            <div v-if="info == 'evac_id'">
-                                <p class="item-label">EVACUATION NAME</p>
-                                <p class="item-value">{{evac_names[current_history.evac_id]}}</p>
-                            </div>
-                            <entry-single-component v-if="info != 'evac_id'" :value="current_history[info]"
-                                :label="info" :showtime="true"></entry-single-component>
-                        </div>
-                        <div class="col col-md-12">
-                            <button class="btn btn-default btn-warning" v-on:click="clearHistory()">Clear
-                                Admission</button>
-                            <button class="btn btn-default btn-danger" v-on:click="deleteAdmission()">Cancel
-                                Admission</button>
-                        </div>
-                    </div>
-                </div> -->
-                <!-- <div class="well" v-for="item,index in history">
-                    <div class="row">
-                        <div class="col col-md-12 item-info">
-                            <p class="item-value">{{index + 1}}.</p>
-                        </div>
-                        <div class="col col-md-3 item-info " v-for="info,index in history_headers">
-                            <div v-if="info == 'evac_id'">
-                                <p class="item-label">EVACUATION NAME</p>
-                                <p class="item-value">{{evac_names[item.evac_id]}}</p>
-                            </div>
-                            <entry-single-component v-if="info != 'evac_id'" :value="item[info] ? item[info] : 'N/A'"
-                                :label="info" :showtime="true"></entry-single-component>
-                        </div>
-                    </div>
-                </div> -->
-
-
+                
                 <!-- REQUEST REPORT-->
                 <div class="page-subheader">
                     <h3>REPORTS</h3>
@@ -435,61 +398,7 @@
                         </tr>
                     </table>
                 </div>
-                <!-- <div class="well" v-for="item,index in reports">
-                    <div class="row">
-                        <div class="col col-md-12 item-info">
-                            <p class="item-value">{{index + 1}}.</p>
-                        </div>
-                        <div class="col col-md-3 item-info " v-for="key,index in report_headers">
-                            <div v-if="key == 'evac_id'">
-                                <p class="item-label">EVACUATION NAME</p>
-                                <p class="item-value">{{item.evac_id.isEmpty() ? 'public' : evac_names[item.evac_id]}}
-                                </p>
-                            </div>
-                            <entry-single-component v-if="key != 'evac_id'" :value="item[key] ? item[key] : 'N/A'"
-                                :label="key" :showtime="true"></entry-single-component>
-                        </div>
-                        <div class="col col-md-12">
-                            <button class="btn btn-default btn-info" :href="'#requestrow-'+index"
-                                data-toggle="collapse">View Request</button>
-                        </div>
-                    </div>
-                    <div :id="'requestrow-'+index" class="panel-collapse collapse">
-                        <div class="panel-body">
-                            <ul class="list-group">
-                                <li class="list-group-item" v-if="item.reports.isEmpty()">
-                                    <p>No Request</p>
-                                </li>
-
-                                <li class="list-group-item" v-for="report,index in item.reports">
-                                    <div class="row">
-                                        <div class="col col-md-12 item-info">
-                                            <p class="item-label">
-                                                {{ index + 1 }}. {{supply_types[report.inventory_type].name}}
-                                            </p>
-                                        </div>
-                                        <div class="col col-md-12 item-info">
-                                            <p class="item-label">
-                                                QTY:
-                                            </p>
-                                            <p class="item-value">
-                                                {{report.qty}}
-                                            </p>
-                                        </div>
-                                        <div class="col col-md-12 item-info">
-                                            <p class="item-label">
-                                                remarks:
-                                            </p>
-                                            <p class="item-value">
-                                                {{report.remarks}}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div> -->
+                
             </div>
         </div>
 
@@ -725,6 +634,11 @@
 
                 saveHistory(isActive = true) {
                     console.log("history %o", this.history_data_input)
+
+                    if (this.history_data_input.municipality.trim().isEmpty()) {
+                        this.history_data_input.municipality = this.getEvacFromId(this.history_data_input.evac_id).municipality
+                    }
+
                     DataHandler.addPublicUserHistory(this.history_data_input).then((data) => {
                         console.log('response %o', data)
                         if (data.error) {

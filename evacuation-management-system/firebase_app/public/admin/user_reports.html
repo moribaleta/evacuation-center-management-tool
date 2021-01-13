@@ -91,13 +91,14 @@
                 </div>
 
             </div>
-        </div><!-- MODAL -->
+        </div>
+        <!-- MODAL -->
 
         <update-status-modal :input.sync="data_input" v-on:persist="saveReport"></update-status-modal>
         <h1>Public User Reports</h1>
 
         <div class="section">
-            <div class="well" v-if="public_user != nil">
+            <div class="well" v-if="public_user != null">
                 <div class="row">
                     <div class="col col-md-12">
                         <entry-component :entry="public_user" :labels="public_user_labels" :headers="public_user_headers" ></entry-component>
@@ -148,8 +149,8 @@
                         v-on:clear="onClearFilterReport()">
                     </filter-component>
                     <div class="button-container">
-                        <button type="button" class="btn btn-info button-view" v-on:click="addReport()">ADD REQUEST
-                            REPORT</button>
+                        <!-- <button type="button" class="btn btn-info button-view" v-on:click="addReport()">ADD REQUEST
+                            REPORT</button> -->
                         <button type="button" class="btn btn-info button-view"
                             v-on:click="onGenerateReport()">GENERATE REPORT DATA</button>
                     </div>
@@ -176,10 +177,6 @@
                                     </div>
                                     <entry-single-component v-if="info != 'evac_id'" :label="info" :value="item[info]">
                                     </entry-single-component>
-                                    <!-- <div v-if="info != 'evac_id'">
-                                        <p class="item-label">{{info.replace(/_/g,' ').toUpperCase() +": "}}</p>
-                                        <p class="item-value">{{item[info] ? item[info] : 'N/A'}}</p>
-                                    </div> -->
                                 </div>
                                 <div class="col col-md-12">
                                     <button class="btn btn-default btn-info" :href="'#requestrow-'+index"
@@ -200,7 +197,6 @@
                                         </li>
 
                                         <li class="list-group-item" v-for="report,index in item.reports">
-                                            <!-- <img :src="cdn+image" class="img-thumbnail img-grid"/> -->
                                             <div class="row">
                                                 <div class="col col-md-12 item-info">
                                                     <p class="item-label">
@@ -340,28 +336,30 @@
                             })
 
                             this.formReportModel.inventory_type.options = this.supply_types_option
+                            
                         }).catch(err => {
                             console.log("err %o", err)
-                        })
-
+                        }).finally(() => {
+                            console.log("public user id %o", id)
                         DataHandler.getPublicUserReports(id).then((message) => {
-                            console.log("reports %o", message)
-                            /* this.reports = message.data
-                            this.reports_view = this.reports */
-
+                            console.log("public user reports %o", message)
+                            console.log("evac_dict %o", this.evac_dict)
                             this.reports = []
-                            message.data.forEach((data) => {
-                                if (this.evac_dict[data]) {
-                                    this.reports.push(data)
-                                }
-                            })
+                            /* message.data.forEach((report) => {
+                                this.reports.push(report)
+                            }) */
+                            this.reports = message.data
                             this.reports_view = this.reports
+                            console.log("reports view %o", this.reports_view)
                         }).catch(err => {
                             console.log("err %o", err)
                         }).finally(() => {
                             console.log("hey im")
                             this.isDataLoading = false
                         })
+                        })
+
+                        
 
                         if (id) {
                             DataHandler.getPublicUsers(null, id).then((message) => {
@@ -406,9 +404,9 @@
                     },
 
                     addReport() {
-                        this.data_input = new PublicUserReport()
-                        this.data_input.user_id = this.public_user.id
-                        this.data_input.created_by = this.user.id
+                        this.data_input             = new PublicUserReport()
+                        //this.data_input.user_id     = this.public_user.id
+                        this.data_input.created_by  = this.user.id
                         this.isEdit = false
                         $('#editorModal').modal()
                     },

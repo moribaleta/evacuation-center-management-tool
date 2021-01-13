@@ -511,6 +511,7 @@ class PublicUserHandler extends UserHandler {
                 query = query.where('municipality', '==', municipality)
             }
 
+            //checks if the public user is not yet cleared
             query = query.where('date_cleared','==','')
             query = query.orderBy('date_admitted', 'desc')
             
