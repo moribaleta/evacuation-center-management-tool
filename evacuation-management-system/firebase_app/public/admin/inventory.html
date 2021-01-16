@@ -56,7 +56,7 @@
     </div>
     <div id="inventory-list-picker">
         <inventory-selector :muni_inv_list="muni_inv_list" :evac_list="evac_list" :inventory_list="inventory_list"
-            :is-loading="isLoading" :supply="supply" v-on:on-select-inventory="id => {onSelectInventory(id)}">
+            :is-loading="isLoading" :supplies="supplies" v-on:on-select-inventory="id => {onSelectInventory(id)}">
         </inventory-selector>
     </div>
     <!-- <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#evacModal">Open Modal</button> -->
@@ -849,7 +849,14 @@
                 onTransferSupply(index) {
                     let supply = this.pending_supplies[index]
                     this.transfer_supply = EvacuationSupply.parse(supply.toObject())
-                    inventory_selection.onStart(supply, this.onSelectedInventory)
+                    
+
+                    let selected_inventory = this.inventory_dict[supply.inventory_id]
+                    console.log("supply %o", supply)
+                    console.log("selected inventory %o", selected_inventory)
+                    inventory_selection.onStart(supply, () => {
+                        
+                    })
                     //$('#inventorySelectionModal').modal()
                 },
 
