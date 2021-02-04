@@ -56,7 +56,7 @@
     </div>
     <div id="inventory-list-picker">
         <inventory-selector :muni_inv_list="muni_inv_list" :evac_list="evac_list" :inventory_list="inventory_list"
-            :is-loading="isLoading" :supply="supply" v-on:on-select-inventory="id => {onSelectInventory(id)}">
+            :is-loading="isLoading" :supplies="supplies" v-on:on-select-inventory="id => {onSelectInventory(id)}">
         </inventory-selector>
     </div>
     <!-- <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#evacModal">Open Modal</button> -->
@@ -205,8 +205,8 @@
                 <div class="section header">
                     <h4>Latest Pending Supplies</h4>
 
-                    <div class="table-container" id="tableData" v-if="pending_supplies.length > 0">
-                        <div class="well" v-for="item,index in pending_supplies">
+                    <div class="table-container" id="tableData" v-if="view_list.pending_supplies.length > 0">
+                        <div class="well" v-for="item,index in view_list.pending_supplies">
                             <div class="row">
                                 <div class="col col-md-12 item-info">
                                     <p class="item-label">
@@ -521,7 +521,7 @@
                 view_list: {
                     evac_inv:       [],
                     muni_inv:       [],
-                    pending_list:   []
+                    pending_supplies:   []
                 }
             },
             methods: {
@@ -638,6 +638,7 @@
                                 })
                                 console.log("pending supplies %o", value)
                                 this.pending_supplies = value
+                                this.view_list.pending_supplies = value
                             })
                         })
                         .catch((err) => {
@@ -805,7 +806,7 @@
 
                 /*!!=============== PENDING-SUPPLY-TYPE ===============!!!*/
                 editSupplyItem(index) {
-                    let supply = this.pending_supplies[index]
+                    let supply = this.view_list.pending_supplies[index]
                     this.supply_input = EvacuationSupply.parse(supply.toObject())
                     $('#supplyModal').modal()
                 },
@@ -823,15 +824,15 @@
                         } else {
                             alert(`Item Have Been Persisted Successfuly`)
                             this.supply_input = new EvacuationSupply()
-                            //this.fetchSupply()
-                            this.getSupplyDetails(this.inventory.id)
+                            this.fetchAll()
+                            //this.getSupplyDetails(this.inventory.id)
                         }
                     })
                 },
 
                 onDeleteSupplyItem(index) {
                     console.log("id %o", index)
-                    let id = this.supplies[index].id
+                    let id = this.view_list.pending_supplies[index].id
                     let onConfirm = confirm('Deleting Item\nPress confirm to proceed')
                     if (onConfirm) {
                         DataHandler.deleteSupply(id).then((data) => {
@@ -840,16 +841,24 @@
                                 alert(`Can't Delete Item ${data.error}`)
                             } else {
                                 alert(`Item Have Been Deleted Successfuly`)
-                                this.getSupplyDetails(this.inventory.id)
+                                this.fetchAll()
+                                //this.getSupplyDetails(this.inventory.id)
                             }
                         })
                     }
                 },
 
                 onTransferSupply(index) {
-                    let supply = this.pending_supplies[index]
+                    let supply = this.view_list.pending_supplies[index]
                     this.transfer_supply = EvacuationSupply.parse(supply.toObject())
-                    inventory_selection.onStart(supply, this.onSelectedInventory)
+                    
+
+                    let selected_inventory = this.inventory_dict[supply.inventory_id]
+                    console.log("supply %o", supply)
+                    console.log("selected inventory %o", selected_inventory)
+                    inventory_selection.onStart(supply, () => {
+                        
+                    })
                     //$('#inventorySelectionModal').modal()
                 },
 
@@ -878,6 +887,85 @@
                     } */
                 },
                 /*!!=============== PENDING-SUPPLY-TYPE ===============!!!*/
+
+                /* FILTER / SEARCH */
+                onFilter(filter) {
+                    console.log("filter %o", filter)
+
+                    var view_list = this.view_list.pending_supplies.filter((data) => {
+                        let date_created    = new Date(data.date_created)
+                        let date_updated    = new Date(data.date_updated)
+                        let date_report     = new Date(data.report_date)
+                        let inventory       = this.inventory_dict[data.inventory_id]
+
+                        return (
+                            (filter.year == 'all' ||
+                                filter.year == date_created.getFullYear() ||
+                                filter.year == date_updated.getFullYear()
+                                 ) &&
+                            (filter.month == 'all' ||
+                                filter.month == (months_array[date_created.getMonth()] || 0) ||
+                                filter.month == (months_array[date_updated.getMonth()] || 0)) &&
+                            (filter.municipality == 'all' ||
+                                filter.municipality == inventory.municipality)
+                        )
+                    });
+
+                    /* view_list = view_list.filter((data) => {
+                        let population_range = filter.populations
+                        if (population_range == 'all') {
+                            return true
+                        } else if (!population_range.split('-').isEmpty()) {
+                            let range = population_range.split('-')
+                            console.log("let range %o", range)
+                            return (data.current_population >= Number(range[0]) && data
+                                .current_population <= Number(range[1]))
+                        } else {
+                            let max_range = population_range.split('+')[0]
+                            console.log("let max_range %o", max_range)
+                            return (data.current_population >= Number(max_range))
+                        }
+                    })
+
+                    view_list = view_list.filter((data) => {
+                        let evac = filter.evacuations
+                        if (evac == 'all') {
+                            return true
+                        } else {
+                            let evac_id = this.evac_names[evac]
+                            return data.evac_id === evac_id
+                        }
+                    }) */
+
+
+                    this.view_list.pending_supplies = view_list
+                },
+
+                onSearch(filter) {
+                    this.onFilter(filter)
+                    console.log("onSearch viewlist %o",this.view_list.pending_supplies)
+                    this.view_list.pending_supplies = this.view_list.pending_supplies.filter((data) => {
+                        var object = {
+                            ...data.toObject(),
+                            ...this.supply_types_ref[data.inventory_type]
+                        }
+                        let inv = this.inventory_dict[data.inventory_id]
+                        object['inventory_name'] = inv.name
+                        object['municipal'] = inv.municipal
+
+                        //object = this.supply_types_ref[object.inventory_type]
+
+                        return SearchObject(object, filter.searchTerm)
+                    })
+                },
+
+                onCancelSearch(filter) {
+                    this.onFilter(filter)
+                },
+
+                onClearFilter() {
+                    this.view_list.pending_supplies = [...this.pending_supplies]
+                },
 
                 generateReport() {
                     let view_list = this.pending_supplies.map((data) => {

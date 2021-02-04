@@ -57,14 +57,9 @@
     </div>
     
     <div id="inventory-list-picker">
-        <inventory-selector 
-        :muni_inv_list="muni_inv_list" 
-        :evac_list="evac_list" 
-        :inventory_list="inventory_list" 
-        :is-loading="isLoading"
-        :supply="supply"
-        v-on:on-select-inventory="id => {onSelectInventory(id)}"
-        ></inventory-selector>
+        <inventory-selector :muni_inv_list="muni_inv_list" :evac_list="evac_list" :inventory_list="inventory_list"
+            :is-loading="isLoading" :supplies="supplies" v-on:on-select-inventory="id => {onSelectInventory(id)}">
+        </inventory-selector>
     </div>
     <!-- <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#editorModal">Open Modal</button> -->
     <div class="container" id="content">
