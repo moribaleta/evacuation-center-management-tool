@@ -84,9 +84,9 @@ interface MOABCOutput {
 }
 
 interface MOABCParameters {
-    id          : string,
-    date_created: string,
-    created_by  : string,
+    id              : string,
+    date_created    : string,
+    created_by      : string,
     
     max_length      : number
     max_val         : number
