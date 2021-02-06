@@ -1,7 +1,7 @@
 var TesterABC = (function () {
     function TesterABC() {
         this.runtimes = [];
-        console.log("created");
+        //console.log("created");
     }
     TesterABC.prototype.generate = function (params) {
         this.abc = new ArtificialBeeColony(params.max_length, params.max_val, params.population_size, params.trial_limit, params.max_epoch, params.min_shuffle, params.max_shuffle, this.evacuations, this.history);
@@ -17,7 +17,8 @@ var TesterABC = (function () {
             output: {
                 best: this.abc.gBest,
                 foodsources: this.abc.foodSources,
-                solutions: this.abc.getSolutions()
+                solutions: this.abc.getSolutions(),
+                iterations: this.abc.iterations
             },
             elapsed_time: totalTime
         };
@@ -36,7 +37,8 @@ var TesterABC = (function () {
             output: {
                 best: this.abc.gBest,
                 foodsources: this.abc.foodSources,
-                solutions: this.abc.getSolutions()
+                solutions: this.abc.getSolutions(),
+                iterations: this.abc.iterations
             },
             elapsed_time: totalTime
         };

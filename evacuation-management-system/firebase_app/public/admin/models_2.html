@@ -22,6 +22,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <script src="js/jquery-3.0.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/6.1.0/rxjs.umd.js"></script>
     <script src="bootstrap/js/bootstrap.min.js"></script>
     <link href="css/main-style.css" rel="stylesheet">
     <script src="js/vue.js"></script>
@@ -117,7 +118,7 @@
                                 </div>
 
                                 <!-- Text input-->
-                                <!-- <div class="form-group">
+                                <div class="form-group">
                                     <label class="col-md-4 control-label" for="min_shuffle">Minimum Shuffle
                                         Value</label>
                                     <div class="col-md-4">
@@ -125,10 +126,10 @@
                                             class="form-control input-md" v-model="data_input.min_shuffle">
                                         <span class="help-block">the minimum value of the number of shuffles</span>
                                     </div>
-                                </div> -->
+                                </div>
 
                                 <!-- Text input-->
-                                <!-- <div class="form-group">
+                                <div class="form-group">
                                     <label class="col-md-4 control-label" for="max_shuffle">Maximum Shuffle
                                         Value</label>
                                     <div class="col-md-4">
@@ -136,7 +137,7 @@
                                             class="form-control input-md" v-model="data_input.max_shuffle">
                                         <span class="help-block">the maximum value of the number of shuffles</span>
                                     </div>
-                                </div> -->
+                                </div>
 
                             </fieldset>
                         </form>
@@ -266,13 +267,31 @@
     <script src="../_global/js/moabc/test.js"></script>
 
     <script>
+        const {
+            map,
+            filter,
+            concatMap
+        } = rxjs.operators;
+        const {
+            Observable
+        } = rxjs;
+
         const parameters_label = MOABCParameters.parameters_shown
+
+        const test_data = [{"evac":"toTek","test":{"4eWc6":2254,"822h7":1528,"P0JK2":3177,"coIWm":2250,"em0ll":1931,"lutMM":2835,"p9Hww":1830,"qELWS":1528,"qtm2Y":2092,"toTek":1270,"ty299":2017}},{"evac":"lutMM","test":{"4eWc6":2819,"822h7":1254,"P0JK2":2823,"coIWm":2404,"em0ll":1663,"lutMM":1164,"p9Hww":2320,"qELWS":2005,"qtm2Y":1930,"toTek":1650,"ty299":2629}},{"evac":"qtm2Y","test":{"4eWc6":1877,"822h7":2023,"P0JK2":2835,"coIWm":3322,"em0ll":1622,"lutMM":2573,"p9Hww":3202,"qELWS":2024,"qtm2Y":1078,"toTek":2277,"ty299":2727}},{"evac":"822h7","test":{"4eWc6":2585,"822h7":840,"P0JK2":3405,"coIWm":3138,"em0ll":1569,"lutMM":2901,"p9Hww":2265,"qELWS":2052,"qtm2Y":2658,"toTek":2285,"ty299":1831}},{"evac":"4eWc6","test":{"4eWc6":801,"822h7":1930,"P0JK2":2734,"coIWm":2715,"em0ll":2304,"lutMM":1583,"p9Hww":3062,"qELWS":1802,"qtm2Y":1800,"toTek":2802,"ty299":2502}},{"evac":"p9Hww","test":{"4eWc6":2740,"822h7":1428,"P0JK2":3037,"coIWm":2033,"em0ll":1590,"lutMM":2454,"p9Hww":1514,"qELWS":1793,"qtm2Y":3061,"toTek":2266,"ty299":3009}},{"evac":"822h7","test":{"4eWc6":2365,"822h7":790,"P0JK2":3168,"coIWm":3472,"em0ll":2348,"lutMM":2726,"p9Hww":2379,"qELWS":2077,"qtm2Y":2045,"toTek":2687,"ty299":3060}},{"evac":"toTek","test":{"4eWc6":2093,"822h7":1807,"P0JK2":2402,"coIWm":3309,"em0ll":1925,"lutMM":2478,"p9Hww":3229,"qELWS":2469,"qtm2Y":3178,"toTek":960,"ty299":3014}},{"evac":"qELWS","test":{"4eWc6":2174,"822h7":1163,"P0JK2":2779,"coIWm":2186,"em0ll":2261,"lutMM":3021,"p9Hww":3216,"qELWS":850,"qtm2Y":2746,"toTek":1528,"ty299":1699}},{"evac":"P0JK2","test":{"4eWc6":2767,"822h7":1558,"P0JK2":1716,"coIWm":2691,"em0ll":2532,"lutMM":2827,"p9Hww":1770,"qELWS":2786,"qtm2Y":2505,"toTek":2816,"ty299":3276}},{"evac":"em0ll","test":{"4eWc6":2104,"822h7":1093,"P0JK2":2875,"coIWm":2572,"em0ll":1076,"lutMM":2013,"p9Hww":3197,"qELWS":2664,"qtm2Y":1732,"toTek":2330,"ty299":2331}},{"evac":"P0JK2","test":{"4eWc6":1610,"822h7":2056,"P0JK2":946,"coIWm":2207,"em0ll":2595,"lutMM":2753,"p9Hww":3128,"qELWS":2506,"qtm2Y":2103,"toTek":2285,"ty299":1760}},{"evac":"qtm2Y","test":{"4eWc6":2276,"822h7":1794,"P0JK2":3254,"coIWm":2187,"em0ll":2082,"lutMM":2068,"p9Hww":2167,"qELWS":1795,"qtm2Y":1627,"toTek":2486,"ty299":2652}},{"evac":"toTek","test":{"4eWc6":3061,"822h7":2090,"P0JK2":2838,"coIWm":3564,"em0ll":1534,"lutMM":2597,"p9Hww":3204,"qELWS":2585,"qtm2Y":2357,"toTek":906,"ty299":2483}},{"evac":"P0JK2","test":{"4eWc6":2650,"822h7":1240,"P0JK2":1142,"coIWm":2914,"em0ll":2297,"lutMM":1999,"p9Hww":2582,"qELWS":2465,"qtm2Y":2583,"toTek":1993,"ty299":2658}},{"evac":"822h7","test":{"4eWc6":2121,"822h7":650,"P0JK2":2107,"coIWm":1890,"em0ll":2503,"lutMM":2755,"p9Hww":1737,"qELWS":1516,"qtm2Y":2858,"toTek":2408,"ty299":3029}},{"evac":"toTek","test":{"4eWc6":2338,"822h7":2039,"P0JK2":2249,"coIWm":2574,"em0ll":1787,"lutMM":1669,"p9Hww":1952,"qELWS":2652,"qtm2Y":3105,"toTek":889,"ty299":3178}},{"evac":"4eWc6","test":{"4eWc6":1286,"822h7":1336,"P0JK2":2069,"coIWm":2460,"em0ll":1436,"lutMM":1935,"p9Hww":2639,"qELWS":2242,"qtm2Y":1774,"toTek":1688,"ty299":3114}},{"evac":"822h7","test":{"4eWc6":2308,"822h7":864,"P0JK2":2086,"coIWm":3308,"em0ll":1441,"lutMM":1870,"p9Hww":2880,"qELWS":1951,"qtm2Y":2409,"toTek":2850,"ty299":2521}},{"evac":"em0ll","test":{"4eWc6":2671,"822h7":1186,"P0JK2":2072,"coIWm":3445,"em0ll":1316,"lutMM":2918,"p9Hww":2444,"qELWS":1723,"qtm2Y":2303,"toTek":1790,"ty299":2265}},{"evac":"p9Hww","test":{"4eWc6":2007,"822h7":2052,"P0JK2":3561,"coIWm":2640,"em0ll":2088,"lutMM":2107,"p9Hww":1394,"qELWS":2035,"qtm2Y":2935,"toTek":2133,"ty299":2021}},{"evac":"qtm2Y","test":{"4eWc6":2371,"822h7":1252,"P0JK2":3145,"coIWm":3583,"em0ll":2669,"lutMM":2496,"p9Hww":2601,"qELWS":2346,"qtm2Y":1430,"toTek":2485,"ty299":2833}},{"evac":"toTek","test":{"4eWc6":2724,"822h7":2020,"P0JK2":2103,"coIWm":1899,"em0ll":2280,"lutMM":1906,"p9Hww":3113,"qELWS":2411,"qtm2Y":2166,"toTek":1190,"ty299":3328}},{"evac":"822h7","test":{"4eWc6":3077,"822h7":794,"P0JK2":1824,"coIWm":3663,"em0ll":2761,"lutMM":3034,"p9Hww":3262,"qELWS":2865,"qtm2Y":1985,"toTek":1999,"ty299":2296}},{"evac":"coIWm","test":{"4eWc6":2948,"822h7":2000,"P0JK2":2652,"coIWm":1731,"em0ll":1682,"lutMM":2456,"p9Hww":2264,"qELWS":2804,"qtm2Y":1961,"toTek":1934,"ty299":2726}},{"evac":"822h7","test":{"4eWc6":2575,"822h7":726,"P0JK2":2143,"coIWm":2144,"em0ll":2633,"lutMM":1957,"p9Hww":2910,"qELWS":1824,"qtm2Y":1891,"toTek":1973,"ty299":2852}},{"evac":"coIWm","test":{"4eWc6":2078,"822h7":1388,"P0JK2":2994,"coIWm":1289,"em0ll":1877,"lutMM":1951,"p9Hww":2263,"qELWS":2150,"qtm2Y":3195,"toTek":2038,"ty299":1755}},{"evac":"qtm2Y","test":{"4eWc6":2133,"822h7":1964,"P0JK2":2529,"coIWm":3664,"em0ll":1399,"lutMM":1854,"p9Hww":2132,"qELWS":2835,"qtm2Y":989,"toTek":2627,"ty299":2159}},{"evac":"4eWc6","test":{"4eWc6":1283,"822h7":1228,"P0JK2":3548,"coIWm":2415,"em0ll":2407,"lutMM":2669,"p9Hww":2702,"qELWS":2767,"qtm2Y":1818,"toTek":2555,"ty299":3110}},{"evac":"4eWc6","test":{"4eWc6":1517,"822h7":1264,"P0JK2":3439,"coIWm":2966,"em0ll":2514,"lutMM":1849,"p9Hww":2832,"qELWS":1939,"qtm2Y":3011,"toTek":1835,"ty299":3191}},{"evac":"lutMM","test":{"4eWc6":2015,"822h7":1899,"P0JK2":2736,"coIWm":2359,"em0ll":2069,"lutMM":1509,"p9Hww":2833,"qELWS":2500,"qtm2Y":2626,"toTek":2350,"ty299":1968}},{"evac":"em0ll","test":{"4eWc6":2802,"822h7":1755,"P0JK2":1876,"coIWm":3158,"em0ll":1036,"lutMM":1908,"p9Hww":3038,"qELWS":2505,"qtm2Y":2392,"toTek":1959,"ty299":2484}},{"evac":"coIWm","test":{"4eWc6":1766,"822h7":1676,"P0JK2":2408,"coIWm":1313,"em0ll":2676,"lutMM":1870,"p9Hww":2052,"qELWS":1487,"qtm2Y":1832,"toTek":1531,"ty299":2168}},{"evac":"qELWS","test":{"4eWc6":2174,"822h7":1136,"P0JK2":3050,"coIWm":3104,"em0ll":1404,"lutMM":2616,"p9Hww":2474,"qELWS":1132,"qtm2Y":2790,"toTek":1921,"ty299":2947}},{"evac":"em0ll","test":{"4eWc6":2011,"822h7":1320,"P0JK2":3389,"coIWm":3567,"em0ll":970,"lutMM":2328,"p9Hww":3187,"qELWS":1882,"qtm2Y":2816,"toTek":2089,"ty299":3354}},{"evac":"P0JK2","test":{"4eWc6":1700,"822h7":1093,"P0JK2":1159,"coIWm":3298,"em0ll":2329,"lutMM":2785,"p9Hww":2310,"qELWS":2605,"qtm2Y":2630,"toTek":2471,"ty299":3249}},{"evac":"P0JK2","test":{"4eWc6":2209,"822h7":1745,"P0JK2":972,"coIWm":2025,"em0ll":2580,"lutMM":2778,"p9Hww":2231,"qELWS":2569,"qtm2Y":2968,"toTek":2434,"ty299":2656}},{"evac":"P0JK2","test":{"4eWc6":2604,"822h7":1886,"P0JK2":1376,"coIWm":3286,"em0ll":1437,"lutMM":1603,"p9Hww":2304,"qELWS":2120,"qtm2Y":1796,"toTek":2237,"ty299":2543}},{"evac":"qELWS","test":{"4eWc6":1937,"822h7":1283,"P0JK2":1968,"coIWm":2470,"em0ll":2031,"lutMM":2047,"p9Hww":1956,"qELWS":1046,"qtm2Y":2498,"toTek":1555,"ty299":2540}},{"evac":"p9Hww","test":{"4eWc6":2522,"822h7":2089,"P0JK2":2623,"coIWm":3298,"em0ll":2172,"lutMM":1652,"p9Hww":1289,"qELWS":2833,"qtm2Y":2393,"toTek":1678,"ty299":1854}},{"evac":"coIWm","test":{"4eWc6":2237,"822h7":1882,"P0JK2":3518,"coIWm":1275,"em0ll":2026,"lutMM":2336,"p9Hww":1989,"qELWS":1478,"qtm2Y":1749,"toTek":2842,"ty299":2847}},{"evac":"coIWm","test":{"4eWc6":2506,"822h7":1760,"P0JK2":2708,"coIWm":1257,"em0ll":1757,"lutMM":2243,"p9Hww":1928,"qELWS":1845,"qtm2Y":2961,"toTek":2169,"ty299":1820}},{"evac":"p9Hww","test":{"4eWc6":2483,"822h7":1391,"P0JK2":2470,"coIWm":3536,"em0ll":1699,"lutMM":1587,"p9Hww":1129,"qELWS":2897,"qtm2Y":1909,"toTek":1467,"ty299":2032}},{"evac":"p9Hww","test":{"4eWc6":2208,"822h7":1402,"P0JK2":2374,"coIWm":1845,"em0ll":2439,"lutMM":2408,"p9Hww":1151,"qELWS":1828,"qtm2Y":2871,"toTek":2810,"ty299":1776}},{"evac":"lutMM","test":{"4eWc6":2255,"822h7":1207,"P0JK2":2067,"coIWm":2981,"em0ll":2511,"lutMM":836,"p9Hww":2023,"qELWS":1732,"qtm2Y":2620,"toTek":2198,"ty299":3072}},{"evac":"lutMM","test":{"4eWc6":2344,"822h7":1572,"P0JK2":2217,"coIWm":2375,"em0ll":2539,"lutMM":1416,"p9Hww":3245,"qELWS":1963,"qtm2Y":1845,"toTek":1476,"ty299":3255}},{"evac":"toTek","test":{"4eWc6":2573,"822h7":1405,"P0JK2":3204,"coIWm":2600,"em0ll":2414,"lutMM":2182,"p9Hww":3227,"qELWS":1473,"qtm2Y":1658,"toTek":832,"ty299":1768}},{"evac":"822h7","test":{"4eWc6":2805,"822h7":565,"P0JK2":2468,"coIWm":2336,"em0ll":2644,"lutMM":2348,"p9Hww":2845,"qELWS":1895,"qtm2Y":2801,"toTek":2793,"ty299":2070}},{"evac":"P0JK2","test":{"4eWc6":1971,"822h7":1468,"P0JK2":1383,"coIWm":3146,"em0ll":1654,"lutMM":2143,"p9Hww":3081,"qELWS":2587,"qtm2Y":1968,"toTek":1575,"ty299":2798}},{"evac":"coIWm","test":{"4eWc6":1872,"822h7":1404,"P0JK2":3131,"coIWm":1557,"em0ll":2295,"lutMM":2680,"p9Hww":2813,"qELWS":2485,"qtm2Y":1836,"toTek":1716,"ty299":2700}},{"evac":"p9Hww","test":{"4eWc6":2222,"822h7":1791,"P0JK2":3546,"coIWm":2028,"em0ll":2249,"lutMM":2410,"p9Hww":1660,"qELWS":1463,"qtm2Y":2206,"toTek":2017,"ty299":1837}},{"evac":"qtm2Y","test":{"4eWc6":2460,"822h7":1677,"P0JK2":3073,"coIWm":2038,"em0ll":2410,"lutMM":2308,"p9Hww":3378,"qELWS":1613,"qtm2Y":887,"toTek":1650,"ty299":2917}},{"evac":"qtm2Y","test":{"4eWc6":2334,"822h7":1262,"P0JK2":2624,"coIWm":2015,"em0ll":2419,"lutMM":1824,"p9Hww":1866,"qELWS":1614,"qtm2Y":1471,"toTek":1527,"ty299":2445}},{"evac":"822h7","test":{"4eWc6":2617,"822h7":718,"P0JK2":2378,"coIWm":3481,"em0ll":1673,"lutMM":1691,"p9Hww":2643,"qELWS":2506,"qtm2Y":2612,"toTek":2072,"ty299":1746}},{"evac":"lutMM","test":{"4eWc6":2711,"822h7":1988,"P0JK2":3501,"coIWm":2369,"em0ll":2707,"lutMM":1160,"p9Hww":3089,"qELWS":2325,"qtm2Y":2974,"toTek":2369,"ty299":3234}},{"evac":"lutMM","test":{"4eWc6":2081,"822h7":1374,"P0JK2":2438,"coIWm":2292,"em0ll":1967,"lutMM":1460,"p9Hww":2985,"qELWS":1594,"qtm2Y":1879,"toTek":1618,"ty299":3239}},{"evac":"lutMM","test":{"4eWc6":2539,"822h7":1207,"P0JK2":2419,"coIWm":1913,"em0ll":2090,"lutMM":1222,"p9Hww":3070,"qELWS":1970,"qtm2Y":1789,"toTek":2789,"ty299":2590}},{"evac":"4eWc6","test":{"4eWc6":1233,"822h7":1933,"P0JK2":3089,"coIWm":2742,"em0ll":1837,"lutMM":1603,"p9Hww":2120,"qELWS":2732,"qtm2Y":2978,"toTek":1630,"ty299":2791}},{"evac":"em0ll","test":{"4eWc6":2629,"822h7":1770,"P0JK2":1997,"coIWm":3512,"em0ll":897,"lutMM":1772,"p9Hww":3162,"qELWS":2750,"qtm2Y":2112,"toTek":2739,"ty299":3379}},{"evac":"p9Hww","test":{"4eWc6":1649,"822h7":1592,"P0JK2":3476,"coIWm":2473,"em0ll":1660,"lutMM":2415,"p9Hww":1033,"qELWS":2122,"qtm2Y":1908,"toTek":2683,"ty299":2699}},{"evac":"toTek","test":{"4eWc6":2023,"822h7":1484,"P0JK2":3079,"coIWm":2322,"em0ll":1872,"lutMM":2056,"p9Hww":2691,"qELWS":2352,"qtm2Y":3115,"toTek":1252,"ty299":2284}},{"evac":"toTek","test":{"4eWc6":1914,"822h7":1374,"P0JK2":2109,"coIWm":2877,"em0ll":2356,"lutMM":2557,"p9Hww":2661,"qELWS":2646,"qtm2Y":1959,"toTek":1300,"ty299":1870}},{"evac":"822h7","test":{"4eWc6":2228,"822h7":759,"P0JK2":2648,"coIWm":2562,"em0ll":2549,"lutMM":1707,"p9Hww":3045,"qELWS":2063,"qtm2Y":2177,"toTek":1444,"ty299":3054}},{"evac":"p9Hww","test":{"4eWc6":2034,"822h7":1595,"P0JK2":2032,"coIWm":2714,"em0ll":2228,"lutMM":1971,"p9Hww":1450,"qELWS":2740,"qtm2Y":1748,"toTek":1481,"ty299":2398}},{"evac":"4eWc6","test":{"4eWc6":1310,"822h7":1235,"P0JK2":2674,"coIWm":3073,"em0ll":1776,"lutMM":2974,"p9Hww":3307,"qELWS":1715,"qtm2Y":2012,"toTek":2112,"ty299":2033}},{"evac":"4eWc6","test":{"4eWc6":1311,"822h7":1852,"P0JK2":2230,"coIWm":3317,"em0ll":2388,"lutMM":1968,"p9Hww":2434,"qELWS":2285,"qtm2Y":2951,"toTek":1592,"ty299":2972}},{"evac":"qELWS","test":{"4eWc6":2031,"822h7":1424,"P0JK2":3350,"coIWm":2599,"em0ll":1584,"lutMM":2091,"p9Hww":1888,"qELWS":931,"qtm2Y":3185,"toTek":2585,"ty299":2867}},{"evac":"em0ll","test":{"4eWc6":2777,"822h7":1912,"P0JK2":3584,"coIWm":2076,"em0ll":1252,"lutMM":2405,"p9Hww":2368,"qELWS":2904,"qtm2Y":2231,"toTek":2523,"ty299":2098}},{"evac":"coIWm","test":{"4eWc6":2375,"822h7":1080,"P0JK2":2556,"coIWm":1523,"em0ll":2544,"lutMM":2571,"p9Hww":2992,"qELWS":2579,"qtm2Y":2378,"toTek":2677,"ty299":3310}},{"evac":"qtm2Y","test":{"4eWc6":3056,"822h7":1819,"P0JK2":2559,"coIWm":2747,"em0ll":1426,"lutMM":1731,"p9Hww":1919,"qELWS":2308,"qtm2Y":1035,"toTek":1639,"ty299":2518}},{"evac":"822h7","test":{"4eWc6":1655,"822h7":660,"P0JK2":2015,"coIWm":2249,"em0ll":2270,"lutMM":2121,"p9Hww":2030,"qELWS":1981,"qtm2Y":3037,"toTek":1881,"ty299":3362}},{"evac":"P0JK2","test":{"4eWc6":2143,"822h7":1270,"P0JK2":1323,"coIWm":2204,"em0ll":2497,"lutMM":1793,"p9Hww":3056,"qELWS":2834,"qtm2Y":3257,"toTek":1516,"ty299":2071}},{"evac":"toTek","test":{"4eWc6":2581,"822h7":1080,"P0JK2":3292,"coIWm":3521,"em0ll":1662,"lutMM":2054,"p9Hww":1795,"qELWS":2648,"qtm2Y":1672,"toTek":1133,"ty299":3272}},{"evac":"4eWc6","test":{"4eWc6":837,"822h7":1344,"P0JK2":3454,"coIWm":3408,"em0ll":2685,"lutMM":2516,"p9Hww":3158,"qELWS":1623,"qtm2Y":2645,"toTek":2250,"ty299":2000}},{"evac":"P0JK2","test":{"4eWc6":2885,"822h7":1939,"P0JK2":1739,"coIWm":2544,"em0ll":1783,"lutMM":2807,"p9Hww":2704,"qELWS":1771,"qtm2Y":1772,"toTek":2710,"ty299":1798}},{"evac":"em0ll","test":{"4eWc6":2604,"822h7":1996,"P0JK2":1919,"coIWm":2427,"em0ll":724,"lutMM":2478,"p9Hww":3414,"qELWS":1645,"qtm2Y":2382,"toTek":2799,"ty299":1964}},{"evac":"4eWc6","test":{"4eWc6":1595,"822h7":1888,"P0JK2":2883,"coIWm":2390,"em0ll":2770,"lutMM":1629,"p9Hww":2170,"qELWS":1610,"qtm2Y":3292,"toTek":1980,"ty299":2384}},{"evac":"p9Hww","test":{"4eWc6":2500,"822h7":1292,"P0JK2":3577,"coIWm":1882,"em0ll":2318,"lutMM":1811,"p9Hww":1583,"qELWS":2269,"qtm2Y":3167,"toTek":2545,"ty299":2721}},{"evac":"qELWS","test":{"4eWc6":2550,"822h7":1711,"P0JK2":2646,"coIWm":2193,"em0ll":2131,"lutMM":2981,"p9Hww":2649,"qELWS":1179,"qtm2Y":2907,"toTek":2103,"ty299":2097}},{"evac":"4eWc6","test":{"4eWc6":1280,"822h7":1760,"P0JK2":3014,"coIWm":1859,"em0ll":1948,"lutMM":2724,"p9Hww":1983,"qELWS":1748,"qtm2Y":3271,"toTek":1598,"ty299":2656}}]
+
+        function computeObjective(evac, population) {
+            var carrying_sum = population / evac.population_capacity
+            var density_sum = population / evac.floor_space
+            return carrying_sum + density_sum;
+        }
+
         app = new Vue({
             el: '#content',
             data: {
                 user: new AdminUser(),
                 report_list: [],
-                
+
                 evac_list: [],
 
                 param_list: [],
@@ -286,6 +305,10 @@
                 isLoading: false,
                 test_result: null,
                 isTesting: false,
+
+                testparams: [],
+
+                evac_weights: {},
 
                 filter_add: {
                     population_size: ['all', '0-10', '11-30', '31-50', '51+'],
@@ -312,6 +335,62 @@
 
                     DataHandler.getEvacuationCenters().then((data) => {
                         this.evac_list = data.data
+
+                        var test = [
+                            /*
+                            output: key,
+                            test: []
+                            */
+                        ]
+
+                        /* this.testparams = this.evac_list.map((evac) => {
+                           var _test = {evac: evac.id, test: {}} 
+                           this.evac_list.forEach((test_evac) => {
+                               if (test_evac.id == evac.id) {
+                                    _test.test[test_evac.id] = getRandomValue((test_evac.population_capacity)/4, (test_evac.population_capacity)/2)
+                               } else {
+                                    _test.test[test_evac.id] = getRandomValue((test_evac.population_capacity)/2, test_evac.population_capacity)
+                               }
+                           })
+                           return _test
+                        }) */
+
+                        var evac_dict = {}
+
+                        this.evac_list.forEach((evac) => {
+                            evac_dict[evac.id] = evac
+                        })
+
+                        test_data.map((test, index) => {
+                            test_data[index].name = evac_dict[test.evac].name
+                        })
+                        console.log("testparams %o", test_data)
+                        console.log(JSON.stringify(test_data))
+
+                       /*  for(var i = 0; i < 80; i++) {
+                            var randomSelector = getRandomValue(0, this.evac_list.length - 1)
+                            while(randomSelector > this.evac_list.length) {
+                                randomSelector = getRandomValue(0, this.evac_list.length - 1)
+                            }
+                            
+                            var _test = {evac: this.evac_list[randomSelector].id, test: {}}
+                            this.evac_list.forEach((test_evac) => {
+                               if (test_evac.id == _test.evac) {
+                                    _test.test[test_evac.id] = getRandomValue((test_evac.population_capacity)/4, (test_evac.population_capacity)/2)
+                               } else {
+                                    _test.test[test_evac.id] = getRandomValue((test_evac.population_capacity)/2, test_evac.population_capacity)
+                               }
+                           })
+                           this.testparams.push(_test)
+                           //return _test
+                        } 
+
+                        console.log("testparams %o", this.testparams)
+                        console.log(JSON.stringify(this.testparams)) */
+
+
+
+
                     }).catch(err => {
                         console.log("err %o", err)
                     })
@@ -325,7 +404,7 @@
 
                 setModelParams(data) {
                     this.param_list = data
-                    this.view_list = data 
+                    this.view_list = data
                     console.log(this.param_list)
                 },
 
@@ -343,6 +422,11 @@
                     this.data_input.date_updated = new Date()
                     $('#editorModal').modal()
                 },
+
+                addModelParams() {
+                    this.onSaveEdit()
+                },
+
 
                 onSaveEdit() {
                     console.log("data %o", this.data_input)
@@ -400,6 +484,7 @@
                 },
 
 
+
                 testItem(index) {
                     $('#resultModal').modal()
 
@@ -407,43 +492,193 @@
                     this.isTesting = true
                     const model = this.param_list[index]
 
-                    let promise = new Promise((resolve, reject) => {
+                    //this.accuracytestItem(index)
+
+                    console.log("model %o", JSON.stringify(model.toObject()))
+
+                    let obs = new Observable((obs) => {
+                        setTimeout(() => {
+                            var models = []
+                            var best = null
+                            var best_model = {}
+                            var crossover = 0
+
+                            //while (crossover < 10) {
+                            const test_output = this.computeMOABC(model)
+                            console.log("current test %o", test_output)
+                            const best_value = test_output.output.best
+                            //if (best == null || best.conflicts > best_value.conflicts) {
+                            best = best_value
+                            best_model = test_output
+                            //}
+                            //models.push(test_output)
+                            //crossover++
+
+                            var winner = null
+                            obs.next({
+                                best,
+                                best_model,
+                                models
+                            })
+                        })
+                    })
+
+                    obs.subscribe({
+                        next(results) {
+
+                            console.log("results %o", results)
+                            var evac_results = {}
+                            //let best = results.best_model
+                            let foodSources = results.best_model.output.foodsources
+
+                            foodSources.map((data) => {
+                                evac_results[data.evac.id] = {
+                                    evac: data.evac,
+                                    conflicts: data.conflicts,
+                                }
+                            })
+
+                            console.log("evac_results %o", evac_results)
+
+                            let test_results = test_data.map((test) => {
+                                let answer = test.evac
+                                let computed_results = Object.keys(evac_results).map((evac_id) => {
+                                    let result      = evac_results[evac_id]
+                                    let evac        = result.evac
+                                    let conflicts   = result.conflicts
+                                    let population  = test.test[evac_id]
+                                    let objective   = computeObjective(evac,
+                                        population) * (conflicts)
+                                    return {
+                                        evac: evac_id,
+                                        objective: objective
+                                    }
+                                })
+                                var min = null
+                                computed_results.forEach((val) => {
+                                    if (min == null || min.objective > val.objective) {
+                                        min = val
+                                    }
+                                })
+                                //let best = answer
+                                return {
+                                    answer,
+                                    computed_results,
+                                    output: min, 
+                                    pass: answer == min.evac
+                                }
+                            })
+
+                            console.log("results %o", JSON.stringify(test_results))
+                            
+                            let pass = test_results.filter((result) => {
+                                return result.pass
+                            })
+
+                            let max = pass.length/test_results.length 
+                            console.log("accuracy %o", max)
+
+                            this.test_result = results
+                        },
+                        complete() {
+                            this.isTesting = false
+                        }
+                    })
+                },
+
+
+
+                accuracytestItem(index) {
+                    //$('#resultModal').modal()
+
+                    this.test_result = null
+                    this.isTesting = true
+                    const model = this.param_list[index]
+
+                    console.log("model %o", model)
+
+                    let obs = new Observable((obs) => {
                         setTimeout(() => {
                             var models = []
                             var best = {}
                             var best_model = {}
                             var crossover = 0
 
-                            while (crossover < 10) {
-                                let test = new TesterABC()
-                                const test_output = test.initialize(model, this.evac_list, this
-                                    .report_list) //.generate(model)
-                                const best_value = test_output.output.best
-                                if (best.conflicts > best_value.conflicts) {
-                                    best = best_value
-                                    best_model = test_output
+                            let results = test_data.map((test) => {
+                                let test_output = this.computeAccuraryMOABC(model, test)
+                                test_output.output.best
+                                return {
+                                    test_evac: test.evac,
+                                    result: test_output
                                 }
-                                models.push(test_output)
-                                crossover++
-                            }
-                            var winner = null
-                            resolve({
-                                best,
-                                best_model,
-                                models
                             })
-                        }, )
+
+                            var winner = null
+                            obs.next({
+                                results
+                            })
+                        })
                     })
 
-                    promise.then((result) => {
-                        console.log(result)
-                        this.test_result = result
-                    }).catch((err) => {
-                        console.log(err)
-                    }).finally(() => {
-                        this.isTesting = false
+                    obs.subscribe({
+                        next(results) {
+                            console.log(results);
+                            //this.test_result = results
+                        },
+                        complete() {
+                            this.isTesting = false
+                        }
+                    })
+                },
+
+                computeAccuraryMOABC(model, testdata) {
+                    var curr_population = []
+
+                    const evacs_id = this.evac_list.map((evac) => {
+                        var history = new EvacuationHistory()
+                        history.evac_id = evac.id
+                        history.current_population = testdata.test[evac.id] || 0
+                        curr_population.push(history)
+                        return evac.id
                     })
 
+                    const history_list = curr_population.concat(this.report_list.filter((history) => {
+                        return evacs_id.includes(history.evac_id)
+                    }))
+
+                    console.log("history data %o", history_list)
+
+                    let test = new TesterABC()
+                    test.evacuations = this.evac_list //_evacs
+                    test.history_list = history_list
+                    const test_output = test.generate(model)
+                    return test_output
+                },
+
+
+
+                computeMOABC(model) {
+                    var curr_population = []
+
+                    const evacs_id = this.evac_list.map((evac) => {
+                        var history = new EvacuationHistory()
+                        history.evac_id = evac.id
+                        /*history.current_population = this.active_history_dict[evac.id] || 0
+                        curr_population.push(history)*/
+                        return evac.id
+                    })
+
+                    const history_list = this.report_list.filter((history) => {
+                        return evacs_id.includes(history.evac_id)
+                    })
+
+                    //console.log("history data %o", history_list)
+
+                    let test = new TesterABC()
+                    test.evacuations = this.evac_list //_evacs
+                    test.history_list = history_list
+                    const test_output = test.generate(model)
+                    return test_output
                 },
 
 
@@ -452,18 +687,18 @@
                     console.log("filter %o", filter)
 
                     var view_list = this.param_list.filter((data) => {
-                        let date_created    = new Date(data.date_created)
-                        let date_updated    = new Date(data.date_updated)
+                        let date_created = new Date(data.date_created)
+                        let date_updated = new Date(data.date_updated)
 
                         return (
                             (filter.year == 'all' ||
                                 filter.year == date_created.getFullYear() ||
                                 filter.year == date_updated.getFullYear()
-                                ) &&
+                            ) &&
                             (filter.month == 'all' ||
                                 filter.month == (months_array[date_created.getMonth()] || 0) ||
                                 filter.month == (months_array[date_updated.getMonth()] || 0)
-                                )
+                            )
                         )
                     });
 
@@ -555,7 +790,9 @@
 
                 onGenerateReport() {
                     let view_list = this.view_list.map((data) => {
-                        var object = {...data.toObject()}
+                        var object = {
+                            ...data.toObject()
+                        }
                         return object
                     })
                     let csv = ConvertToCSV(view_list)

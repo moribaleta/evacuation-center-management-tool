@@ -21,10 +21,10 @@ class DataHandlerClass extends DataHandlerType {
                     var message = new Message()
 
                     if (children.length > 0) {
-                        console.log("roadmaps %o", children)
+                        //console.log("roadmaps %o", children)
                         let first = children[0].roadmap
                         let roadmap = JSON.parse(first)
-                        //console.log("road %o", children)
+                        ////console.log("road %o", children)
                         message.data = roadmap
                     } else {
                         message.error = "empty"
@@ -44,7 +44,7 @@ class DataHandlerClass extends DataHandlerType {
                 .get().then(function (querySnapshot) {
                     var evacuations = []
                     querySnapshot.forEach(function (doc) {
-                        console.log(doc.id, " => ", doc.data());
+                        //console.log(doc.id, " => ", doc.data());
                         let data = doc.data()
                         let id = doc.id
 
@@ -73,24 +73,24 @@ class DataHandlerClass extends DataHandlerType {
         return new Promise((resolve, reject) => {
             try {
                 let road = sessionStorage.getItem('roadTree')
-                console.log("sessionRoad %o", road)
+                //console.log("sessionRoad %o", road)
                 if (road) {
                     const data = JSON.parse(road)
                     let message = new Message()
                     message.data = data.data
-                    console.log("saved data")
+                    //console.log("saved data")
                     resolve(message)
                 } else {
                     throw "no save data"
                 }
             } catch (err) {
-                console.log(err)
+                //console.log(err)
                 refTree().then((data) => {
                     let message = new Message()
                     message.data = data
-                    console.log("data %o", message)
+                    //console.log("data %o", message)
                     sessionStorage.setItem('roadTree',JSON.stringify(data))
-                    console.log("saved to session")
+                    //console.log("saved to session")
                     resolve(data)
                 }).catch((error) => {
                     reject(error)
@@ -105,7 +105,7 @@ class DataHandlerClass extends DataHandlerType {
                 .get().then(function (querySnapshot) {
                     var models = []
                     querySnapshot.forEach(function (doc) {
-                        //console.log(doc.id, " => ", doc.data());
+                        ////console.log(doc.id, " => ", doc.data());
                         let data = doc.data()
                         let id = doc.id
 
@@ -136,7 +136,7 @@ class DataHandlerClass extends DataHandlerType {
             ref.get().then((querySnapshot) => {
                     var models = []
                     querySnapshot.forEach(function (doc) {
-                        //console.log(doc.id, " => ", doc.data());
+                        ////console.log(doc.id, " => ", doc.data());
                         let data = doc.data()
                         let id = doc.id
 
@@ -189,7 +189,7 @@ class DataHandlerClass extends DataHandlerType {
                 message.data = history
                 resolve(message)
             }).catch(function (error) {
-                console.log("Error getting documents: ", error);
+                //console.log("Error getting documents: ", error);
                 reject(error)
             });
         })

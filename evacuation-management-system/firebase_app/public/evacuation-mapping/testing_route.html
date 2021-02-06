@@ -31,6 +31,7 @@
     <script src="resources/js/xmlparser.js"></script>
     <link rel="shortcut icon" href="resources/images/favicon.ico" type="image/x-icon">
     <script src="resources/js/astart.js"></script>
+    <script src="resources/js/bfs.js"></script>
 </head>
 
 <body>
@@ -45,13 +46,19 @@
         var finish_location;
         var tree;
 
+        ///'DJ','ASTAR','BFS'
+        var _DJ = 'DJ'
+        var _ASTAR = 'ASTAR'
+        var _BFS = 'BFS'
+        var test_type = _BFS
+
         function getDistance(x1, x2, y1, y2) {
             return Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow((y1 - y2), 2));
         }
 
         function initRoute() {
 
-            console.log("roads_coord %o", road_coord)
+            //console.log("roads_coord %o", road_coord)
 
             tree = [];
             var node_id = 0;
@@ -99,7 +106,7 @@
                     if (i != j) {
                         if ((tree[i].coordinates.lat == tree_temp[j].coordinates.lat &&
                                 tree[i].coordinates.lng == tree_temp[j].coordinates.lng)) {
-                            console.log("match: " + i + " vs " + j + " distance: " + distance);
+                            //console.log("match: " + i + " vs " + j + " distance: " + distance);
                             if (!added.includes(j)) {
                                 for (var k = 0; k < tree_temp[j].vertex.length; k++) {
                                     if (!tree[i].vertex.includes(tree_temp[j].vertex[k])) {
@@ -118,38 +125,31 @@
 
             //dijkstra
             var g = new Graph();
+
             var astargrid = []
             for (var i = 0; i < tree.length; i++) {
                 var vertex = {};
                 var astarvertex = {
                     key: tree[i].node_id,
-                    neighbors : tree[i].vertex,
+                    neighbors: tree[i].vertex,
                     coordinates: tree[i].coordinates
                 }
                 for (var j = 0; j < tree[i].vertex.length; j++) {
                     vertex["" + tree[i].vertex[j].node] = tree[i].vertex[j].distance;
-                    
                 }
                 g.addVertex(tree[i].node_id + "", vertex);
                 astargrid.push(astarvertex)
             }
-            /* for (var i = 0; i < tree.length; i++) {
-                var vertex = {};
-                for (var j = 0; j < tree[i].vertex.length; j++) {
-                    vertex["" + tree[i].vertex[j].node] = tree[i].vertex[j].distance;
-                }
-                //console.log(tree[i].node_id+", %o",vertex);
-                g.addVertex(tree[i].node_id + "", vertex);
 
-            }
+            var bfsgrid = new BFSGraph()
+            var bfs = new BFS()
 
-            let astargrid = Object.keys(g.vertices).map((key) => {
-                var node = Object.keys(g.vertices[key]).map((node) => {
-                    return Number(node)
-                })
-                return node
+            Object.keys(g.vertices).map((key) => {
+                var nodes = Object.keys(g.vertices[key])
+                bfsgrid.addNode(key, nodes)
             })
- */
+
+
             var url_data = window.location.href.split('testing_route.html?').pop();
             url_data = url_data.split("%20").join('');
             url_data = url_data.split("%22").join('"');
@@ -180,38 +180,41 @@
             var finish = tree[hospital_loc].node_id;
             var start = tree[emergency_loc].node_id;
 
-            /*  //var path = g.shortestPath(start + '', finish + '').concat([start + '']).reverse();
-             
-             //console.log("path %o",path);
-             path_data = [];
-
-             for (var i = 0; i < path.length; i++) {
-                 for (var j = 0; j < tree.length; j++) {
-                     if (tree[j].node_id == Number.parseInt(path[i])) {
-                         //console.log("index: %o",tree[j]);
-                         path_data.push(tree[j]);
-                     }
-                 }
-             } */
-
-            var path = astar.search(astargrid, start,
-                finish) // g.shortestPath(start + '', finish + '').concat([start + '']).reverse();
-
+            
+            var path = []
+            
+            switch (test_type) {
+                case "BFS":
+                    console.log("bfs search")
+                    path = bfs.shortestPath(bfsgrid, start, finish)
+                    break;
+                case "ASTAR":
+                    console.log("astar search")
+                    path = astar.search(astargrid, start, finish)
+                    break;
+                default:
+                    console.log("djikstra search")
+                    path = g.shortestPath(start + '', finish + '').concat([start + '']).reverse();
+            }
+    
             console.log("generated path %o", path)
 
             //console.log("path %o", path);
             var path_data = [];
             for (var i = 0; i < path.length; i++) {
                 for (var j = 0; j < tree.length; j++) {
-                    //if (isAstarTesting) {
+                    /*if (tree[j].node_id == path[i].key) {
+                        path_data.push(tree[j]);
+                    }*/
+                    if (test_type == "ASTAR") {
                         if (tree[j].node_id == path[i].key) {
                             path_data.push(tree[j]);
                         }
-                    /* } else {
+                    } else {
                         if (tree[j].node_id == Number.parseInt(path[i])) {
                             path_data.push(tree[j]);
                         }
-                    } */
+                    }
                 }
             }
 
@@ -221,10 +224,10 @@
                     path_data[i].coordinates.lat, path_data[i + 1].coordinates.lat,
                     path_data[i].coordinates.lng, path_data[i + 1].coordinates.lng
                 ));
-                console.log(path_distance);
+                //console.log(path_distance);
             }
 
-            console.log("path data %o", path_data)
+            //console.log("path data %o", path_data)
             console.log("total distance: " + path_distance);
             return path_data;
         }
@@ -254,8 +257,6 @@
             }
             return winner;
         }
-
-        
     </script>
 
 

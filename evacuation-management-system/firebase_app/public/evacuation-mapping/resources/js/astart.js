@@ -16,9 +16,10 @@ var astar = {
     },
     search: function(grid, start, end, heuristic) {
         astar.init(grid);
+        var t0 = performance.now()
         heuristic = heuristic || astar.manhattan;
 
-        console.log("grid %o", astar.grid)
+        //console.log("grid %o", astar.grid)
 
         let _start  = astar.findNode(start)
         let _end    = astar.findNode(end)
@@ -43,14 +44,16 @@ var astar = {
                     ret.push(curr);
                     curr = curr.parent;
                 }
+                var t1 = performance.now()
+                console.log("Call to doSomething took " + (t1 - t0) + " milliseconds.")
                 return ret.reverse();
             }
 
-            console.log("removing lowInd %o", lowInd)
+            //console.log("removing lowInd %o", lowInd)
             // Normal case -- move currentNode from open to closed, process each of its neighbors
             openList.splice(lowInd, 1)
             currentNode.closed = true;
-            console.log("current node %o", currentNode)
+            //console.log("current node %o", currentNode)
             var neighbors = currentNode.neighbors //astar.neighbors(astar.grid, currentNode);
 
             for(var i=0; i<neighbors.length;i++) {
@@ -91,13 +94,15 @@ var astar = {
             }
         }
 
+        var t1 = performance.now()
+        console.log("Call to doSomething took " + (t1 - t0) + " milliseconds.")
         // No result was found -- empty array signifies failure to find path
         return [];
     },
     manhattan: function(pos0, pos1) {
         // See list of heuristics: http://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html
-        console.log("pos0 %o", pos0)
-        console.log("pos1 %o", pos1)
+        //console.log("pos0 %o", pos0)
+        //console.log("pos1 %o", pos1)
 
         var d1 = Math.abs (pos1.coordinates.lat - pos0.coordinates.lat);
         var d2 = Math.abs (pos1.coordinates.lng - pos0.coordinates.lng);

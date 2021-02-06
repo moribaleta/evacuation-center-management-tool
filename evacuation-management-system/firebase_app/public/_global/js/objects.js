@@ -483,8 +483,8 @@ class MOABCParameters extends Model {
         population_size: 'Maximum # of Population',
         trial_limit: 'Trial Limit',
         max_epoch: 'Maximum Generation',
-        min_shuffle: 'Minimum Shuffle Value',
-        max_shuffle: 'Maximum Shuffle Value',
+        /* min_shuffle: 'Minimum Shuffle Value',
+        max_shuffle: 'Maximum Shuffle Value', */
         is_active: 'Is Active'
     }
 

@@ -28,7 +28,7 @@ var Honey = (function () {
     };
     Honey.prototype.initNectar = function () {
         var evac_sub_id = this.evac.id || Utilities.genID(5);
-        console.log("history is here %o %o", this.evac.id, this.history)
+        //console.log("history is here %o %o", this.evac.id, this.history)
         for (var i = 0; i < this.MAX_LENGTH; i++) {
             if (i < this.history.length) {
                 var val = __assign({}, this.history[i]);
@@ -90,8 +90,8 @@ var Honey = (function () {
         return null;
     };
     Honey.prototype.setNectar = function (index, value, type) {
-        console.log("honeybee nectar %o", this.nectar);
-        console.log("set value index: %o, value: %o, type: %o", index, value, type);
+        //console.log("honeybee nectar %o", this.nectar);
+        //console.log("set value index: %o, value: %o, type: %o", index, value, type);
         if (index == null) {
             console.log("fatalError()");
             console.trace();
@@ -134,7 +134,7 @@ var HoneyUtilities = (function () {
                     index: index
                 };
             }
-            console.log("max compare curr_value: %o, max: %o", curr_value, max);
+            //console.log("max compare curr_value: %o, max: %o", curr_value, max);
         });
         return maxHoney;
     };

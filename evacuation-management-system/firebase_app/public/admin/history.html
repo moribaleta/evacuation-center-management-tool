@@ -90,6 +90,10 @@
                     v-on:cancel="onCancelSearch($event)" v-on:clear="onClearFilter()"></filter-component>
 
                 <div class="button-container">
+                    <button type="button" class="btn btn-info button-view" v-on:click="createHistory()">
+                        Generate
+                        History
+                    </button>
                     <button type="button" class="btn btn-info button-view" v-on:click="addHistory()">
                         Add
                         History
@@ -174,7 +178,6 @@
                 },
 
                 fetchReports() {
-
                     DataHandler.getEvacuationCenters(this.user.municipality).then((data) => {
                         this.evac_list = data.data
                         //this.filter_add['evacuation'] = ['all']
@@ -216,9 +219,6 @@
                     }).catch(err => {
                         console.log("err %o", err)
                     })
-
-
-
                 },
 
                 getEvacFromId(id) {
@@ -235,6 +235,53 @@
                     this.data_input = new EvacuationHistory()
                     this.isEdit = false
                     $('#editorModal').modal()
+                },
+
+
+                createHistory() {
+                    var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August",
+                        "September", "October", "November", "December"
+                    ];
+
+                    var history = []
+
+                    for (var year = 2018; year <= 2020; year++) {
+                        monthNames.forEach((month, month_index) => {
+                            let date = new Date(year, month_index, getRandomValue(1, month_index == 1 ? 20 : 30))
+                            let _history = this.createHistoryObject(date)
+                            _history.forEach((data) => {
+                                history.push(data)
+                            })
+                        })
+                        //history = history.concat(month_data)
+                    }
+                    console.log("history %o", history)
+                    //console.log(JSON.stringify(this.testparams))
+
+                    DataHandler.addLargeEvacuationHistory(history).then((data) => {
+                        console.log('response %o', data)
+                        if (data.error) {
+                            alert("error " + data.error)
+                        } else {
+                            alert("item deleted successfuly")
+                            this.fetchReports()
+                        }
+                    }).catch(err => {
+                        console.log(err)
+                    }).finally(() => {
+                        this.data_input = new EvacuationHistory()
+                    })
+                },
+
+                createHistoryObject(date) {
+                    return this.evac_list.map((test_evac) => {
+                        var evac_history = new EvacuationHistory()
+                        evac_history.report_date = date
+                        evac_history.current_population = getRandomValue((test_evac.population_capacity)/5, test_evac.population_capacity/1.5)
+                        evac_history.evac_id = test_evac.id
+                        evac_history.created_by = this.user.id
+                        return evac_history
+                    })
                 },
 
                 saveHistory() {

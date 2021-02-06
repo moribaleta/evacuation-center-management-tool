@@ -31,6 +31,7 @@ function Graph(){
   };
 
   this.shortestPath = function (start, finish) {
+    var t0 = performance.now()
     var nodes = new PriorityQueue(),
         distances = {},
         previous = {},
@@ -79,7 +80,8 @@ function Graph(){
         }
       }
     }
-
+    var t1 = performance.now()
+    //console.log("Call to doSomething took " + (t1 - t0) + " milliseconds.")
     return path;
   };
 }

@@ -679,7 +679,8 @@
 
                 console.log("start %o", start)
                 console.log("finish %o", finish)
-                var path = astar.search(astargrid, start, finish)  // g.shortestPath(start + '', finish + '').concat([start + '']).reverse();
+                //var path = astar.search(astargrid, start, finish)  // 
+                var path = g.shortestPath(start + '', finish + '').concat([start + '']).reverse();
 
                 console.log("generated path %o", path)
 
@@ -687,17 +688,19 @@
                 var path_data = [];
                 for (var i = 0; i < path.length; i++) {
                     for (var j = 0; j < tree.length; j++) {
-                        if (isAstarTesting) {
+                        /* if (isAstarTesting) {
                             if (tree[j].node_id == path[i].key) {
                                 path_data.push(tree[j]);
                             }
-                        } else {
+                        } else { */
                             if (tree[j].node_id == Number.parseInt(path[i])) {
                                 path_data.push(tree[j]);
                             }
-                        }
+                        //}
                     }
                 }
+
+
                 //initial distance from hospital to nearest coordinate
                 var path_distance = getdistance(path_data[0].coordinates.lat, hospital_elem.lat,
                     path_data[0].coordinates.lng, hospital_elem.lng);

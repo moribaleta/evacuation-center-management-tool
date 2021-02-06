@@ -154,31 +154,31 @@ class MapApp {
             $("#progressDirection").hide();
             this.getNearestNodeForEvacs()
         }).catch((err) => {
-            console.log(err)
+            ////console.log(err)
         })
 
         DataHandler.getEvacuationHistory().then((message) => {
             this.history_list = message.data
         }).catch(error => {
-            console.log(error)
+            ////console.log(error)
         })
 
         DataHandler.getActivePublicUserHistory().then((message) => {
             message.data.map(data => {
                 this.active_history_dict[data.evac_id] = this.active_history_dict[data.evac_id] || 0
                 this.active_history_dict[data.evac_id]++
-                console.log("active history %o", this.active_history_dict)
+                //console.log("active history %o", this.active_history_dict)
             })
             modal_vue.active_dict = this.active_history_dict
         }).catch(error => {
-            console.log(error)
+            //console.log(error)
         })
 
         DataHandler.getModelParams(true).then((message) => {
             this.model_param = message.data[0]
-            console.log(this.model_param)
+            //console.log(this.model_param)
         }).catch(error => {
-            console.log(error)
+            //console.log(error)
         })
 
         this.getRoadMap()
@@ -187,7 +187,7 @@ class MapApp {
     /** gets the road coordinates from the database */
     initializeMapRouter() {
         return DataHandler.getRoadTreeStructure().then(((message) => {
-            console.log(message.data)
+            //console.log(message.data)
             MapRouter.loadTree(message.data, this.showPathColor)
             return true
         }))
@@ -199,7 +199,7 @@ class MapApp {
             localStorage.setItem('roads', JSON.stringify(message.data))
             MapRouter.displayColor(this.showPathColor)
         }).catch(err => {
-            console.log(err)
+            //console.log(err)
         })
     }
 
@@ -208,7 +208,7 @@ class MapApp {
         return new Promise((resolve, reject) => {
             DataHandler.getEvacuationCenters().then((message) => {
                 this.evacuation_center_list = message.data
-                console.log("MapHandler %o", MapHandler.bounds)
+                //console.log("MapHandler %o", MapHandler.bounds)
                 var bounds = MapHandler.bounds
 
                 this.evacuation_center_list.forEach(evac => {
@@ -220,7 +220,7 @@ class MapApp {
                 });
                 resolve(true)
             }).catch((error) => {
-                console.log("error %o", error)
+                //console.log("error %o", error)
                 reject(error)
             })
         })
@@ -265,13 +265,13 @@ class MapApp {
                 concatMap((evacs) => {return this.getAvailableEvacuation(evacs)})
             ).subscribe({
                 next(results) {
-                    console.log("test results %o", results)
+                    //console.log("test results %o", results)
                     $("#progressDirection").hide();
                     showDetail(results);
                     $("#button_modal").click();
                 },
                 error(err) {
-                    console.error('something wrong occurred: ' + err);
+                    //console.error('something wrong occurred: ' + err);
                     $("#progressDirection").hide();
                 },
                 complete() {
@@ -284,10 +284,10 @@ class MapApp {
     getNearestEvacuations() {
         return new Observable((obs) => {
             setTimeout(() => {
-                console.log("history list %o", this.history_list)
-                console.log("params %o", this.model_param)
+                //console.log("history list %o", this.history_list)
+                //console.log("params %o", this.model_param)
 
-                console.log("pos: %o %o", this.emergency_marker.position.lat(), this.emergency_marker.position.lng())
+                //console.log("pos: %o %o", this.emergency_marker.position.lat(), this.emergency_marker.position.lng())
 
                 const emergency_location = {
                     lat: this.emergency_marker.position.lat(),
@@ -299,7 +299,7 @@ class MapApp {
                 //FILTER LIST BASED ON ITS DISTANCE FROM THE ORIGIN
                 const _filter_evacs = this.evacuation_center_list.map((evac) => {
                     let distance = MapRouter.getPathOfTwoPoints(emergency_node, evac.node, emergency_location, evac.location)
-                    console.log("distance %o", distance)
+                    //console.log("distance %o", distance)
                     evac['distance'] = distance.distance
                     return evac
                 }).sort((lhs, rhs) => {
@@ -333,7 +333,7 @@ class MapApp {
                     return evacs_id.includes(history.evac_id)
                 })) 
 
-                console.log("history data %o",history_list)
+                ////console.log("history data %o",history_list)
 
                 let test            = new TesterABC()
                 test.evacuations    = _evacs
@@ -359,15 +359,15 @@ class MapApp {
     /** gets the current location of the user */
     getLocation() {
         if (navigator.geolocation) {
-            console.log("getting location")
+            ////console.log("getting location")
             //$("#progressDirection").show();
             navigator.geolocation.getCurrentPosition((val) => {
-                console.log("location %o", val)
+                ////console.log("location %o", val)
                 $("#progressDirection").hide();
                 let position = new google.maps.LatLng(val.coords.latitude, val.coords.longitude)
                 this.onPlaceMarker(position)
             }, (error) => {
-                console.log("error %o", error)
+                ////console.log("error %o", error)
             })
         } else {
             alert("cant get location, you can pin your location on the map")
@@ -401,13 +401,13 @@ var modal_vue = new Vue({
     },
     methods: {
         setList(test_results, emergency) {
-            console.log('items: %o',  test_results);
-            console.log('emergency: %o', emergency);
+            ////console.log('items: %o',  test_results);
+            ////console.log('emergency: %o', emergency);
             this.items  = test_results.output.foodsources;
             this.winner = test_results.output.best;
             this.elapsedtime  = test_results.elapsed_time
             this.emergency = emergency;
-            console.log("active history %o", this.active_dict)
+            ////console.log("active history %o", this.active_dict)
         },
 
         proceed() {
@@ -430,7 +430,7 @@ var modal_vue = new Vue({
                 lng: evacuation_center.location.lng,
             }
 
-            console.log("emergency location %o", emergency_elem)
+            ////console.log("emergency location %o", emergency_elem)
             //window.open('route.html?' + JSON.stringify(evacuation_center) + "**" + JSON.stringify(emergency_elem), '_self');
             window.open(`route_2.html?evac=${JSON.stringify(evac_elem)}&origin=${JSON.stringify(emergency_elem)}`, '_self')
         },
@@ -467,7 +467,7 @@ class MapRouterClass {
             data: this.tree
         }))
 
-        console.log("loaded tree %o", this.tree)
+        ////console.log("loaded tree %o", this.tree)
 
         this.initializeDjikstra()
         this.placeTrafficPoints()
@@ -484,7 +484,7 @@ class MapRouterClass {
         var node_id = 0;
         this.map = MapHandler.map
 
-        console.log(road_map)
+        ////console.log(road_map)
 
         ///generates the node of each coordinates from the path of each road_map
         for (var i = 0; i < this.road_map.length; i++) {
@@ -628,11 +628,11 @@ class MapRouterClass {
                 lng: position.lng
             }
         }
-        console.log("emergency: %o", emergency_elem);
-        console.log("evacuations %o", evacuation)
+        ////console.log("emergency: %o", emergency_elem);
+        ////console.log("evacuations %o", evacuation)
 
         var emergency_loc = this.getNearest(emergency_elem);
-        //console.log("nearest emergency: %o", tree[emergency_loc]);
+        //////console.log("nearest emergency: %o", tree[emergency_loc]);
         var evacuation_detail = [];
         for (var x = 0; x < evacuation.length; x++) {
 
@@ -642,12 +642,12 @@ class MapRouterClass {
             }
             var evacuation_loc = this.getNearest(evacuation_elem);
 
-            //console.log("nearest evacuation: %o", tree[evacuation_loc]);
+            //////console.log("nearest evacuation: %o", tree[evacuation_loc]);
             var start = this.tree[evacuation_loc].node_id;
             var finish = this.tree[emergency_loc].node_id;
 
             var path = this.djikstra.shortestPath(start + '', finish + '').concat([start + '']).reverse();
-            //console.log("path %o", path);
+            //////console.log("path %o", path);
             var path_data = [];
             for (var i = 0; i < path.length; i++) {
                 for (var j = 0; j < this.tree.length; j++) {
@@ -671,9 +671,9 @@ class MapRouterClass {
             path_distance += getdistance(path_data[path_data.length - 1].coordinates.lat, emergency_elem.lat,
                 path_data[path_data.length - 1].coordinates.lng, emergency_elem.lng);
 
-            //console.log("distance: ", path_distance);
+            //////console.log("distance: ", path_distance);
             var time = this.getResponseTime(path_data);
-            console.log(time);
+            ////console.log(time);
             if (time.time < min || min == null) {
 
                 min = time.time;
@@ -692,7 +692,7 @@ class MapRouterClass {
             } else {
                 condition = 'bad';
             }
-            console.log("condition: " + time.condition + " - " + condition);
+            ////console.log("condition: " + time.condition + " - " + condition);
             var detail = {
                 position: x,
                 evacuation_detail: evacuation[x],
@@ -703,7 +703,7 @@ class MapRouterClass {
             evacuation_detail.push(detail);
         }
 
-        console.log("evacuation data: %o", evacuation_detail);
+        ////console.log("evacuation data: %o", evacuation_detail);
 
         var return_data = {
             detail: evacuation_detail,
@@ -725,7 +725,7 @@ class MapRouterClass {
     /** returns the path generated between two points */
     getPathOfTwoPoints(node1, node2, location1, location2) {
 
-        console.log("%o %o", node1, node2)
+        ////console.log("%o %o", node1, node2)
 
         const start = node1.node_id;
         const finish = node2.node_id;
@@ -739,7 +739,7 @@ class MapRouterClass {
             return this.tree_dict[id]
         })
 
-        console.log(path)
+        ////console.log(path)
 
         //initial distance from evacuation to nearest coordinate
         var distance = getdistance(path_data[0].coordinates.lat, location1.lat, path_data[0].coordinates.lng, location1.lng);

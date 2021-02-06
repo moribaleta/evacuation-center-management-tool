@@ -743,6 +743,24 @@ class EvacuationHandler extends PublicUserHandler {
         })
     } //addEvacuationHistory
 
+    addLargeEvacuationHistory( params = []) {
+        return new Promise((resolve, reject) => {
+            var db = this.firestore
+            var batch = db.batch();
+
+            params.forEach((doc) => {
+                batch.set(db.collection(UserHandler.tables.evacuation_history).doc(), doc.toObject());
+            })
+            // Commit the batch
+            batch.commit().then(function () {
+                resolve("Document successfully written!")
+            }).catch(function (error) {
+                reject(error)
+            });
+
+        })
+    } //addEvacuationHistory
+
 
     setDataEvacuationHistory(params = []) {
         let promises = params.map((evac) => {
@@ -750,6 +768,9 @@ class EvacuationHandler extends PublicUserHandler {
         })
         return Promise.all(promises)
     } //addEvacuationHistory
+
+
+    saveEvacuation
 
 
     deleteEvacuationHistory(id) {
