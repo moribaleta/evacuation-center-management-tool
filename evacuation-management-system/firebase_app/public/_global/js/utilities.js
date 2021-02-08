@@ -124,7 +124,7 @@ function isValidDate(s) {
         try {
             object[key] = object[key].toDate()
         } catch (err) {
-            console.log(err)
+            //console.log(err)
         }
     })
     return object
@@ -137,7 +137,7 @@ function isValidDate(s) {
         try {
             this[key] = this[key].toDate()
         } catch (err) {
-            console.log(err)
+            //console.log(err)
         }
     })
     return this
@@ -236,19 +236,19 @@ const FormGenerator = Vue.extend({
     },
 
     created() {
-        console.log('form generator')
+        //console.log('form generator')
 
-        console.log("formModel %o", this.form)
-        console.log("input %o", this.input)
+        //console.log("formModel %o", this.form)
+        //console.log("input %o", this.input)
 
         this.headers = Object.keys(this.form)
 
-        console.log("headers %o", this.headers)
+        //console.log("headers %o", this.headers)
     },
 
     methods: {
         datetimeChange(event) {
-            console.log("event %o", event)
+            //console.log("event %o", event)
 
             let id = event.srcElement.id
             let ids = id.split('INP');
@@ -264,8 +264,8 @@ const FormGenerator = Vue.extend({
                 date_value = $('#dateINP' + ids[1]).val()
             }
 
-            console.log("date %o", date_value)
-            console.log("time %o", time_value)
+            //console.log("date %o", date_value)
+            //console.log("time %o", time_value)
 
             //let _date = combineDateAndTime(date_value, time_value)
             "yyyy-MM-ddThh:mm"
@@ -273,7 +273,7 @@ const FormGenerator = Vue.extend({
 
             /*  if (ids > 1) {
                  this.input[ids[1]][ids[2]] = _date
-                 console.log("compound")
+                 //console.log("compound")
              } else { */
             this.input[ids[1]] = date_time
             //}
@@ -286,44 +286,44 @@ const FormGenerator = Vue.extend({
             let _date = new Date(date.toString())
 
 
-            console.log("date changed %o",_date)
+            //console.log("date changed %o",_date)
             if (ids > 1) {
                 this.input[ids[1]][ids[2]] = _date
-                console.log("compound")
+                //console.log("compound")
             } else {
                 this.input[ids[1]] = _date
             }
-            console.log("ids %o", ids)
-            console.log(this.input) */
+            //console.log("ids %o", ids)
+            //console.log(this.input) */
         },
 
         dateChange(event) {
-            console.log("event %o", event)
+            //console.log("event %o", event)
 
             let id = event.srcElement.id
             let date = $('#' + id).val()
             //this.input[id.substr(('input_').length)] = new Date(date)
             let ids = id.split('INP')
             let _date = new Date(date.toString())
-            console.log("date changed %o", _date)
+            ////console.log("date changed %o", _date)
             if (ids > 1) {
                 this.input[ids[1]][ids[2]] = _date
-                console.log("compound")
+                ////console.log("compound")
             } else {
                 this.input[ids[1]] = _date
             }
-            console.log("ids %o", ids)
-            console.log(this.input)
+            //console.log("ids %o", ids)
+            //console.log(this.input)
         },
 
         formatDate(date, isTime) {
 
             let format = isTime ? moment(date).format('hh:mm') : moment(date).format('YYYY-MM-DD')
-            console.log("format date %o", format)
+            ////console.log("format date %o", format)
             return format
             /* let _date = new Date(date)
             let format = isTime ? _date.toLocaleString() : _date.toLocaleDateString()
-            console.log("formatted input date %o", format )
+            //console.log("formatted input date %o", format )
             return format */
         },
     }
@@ -479,7 +479,7 @@ const EntrySingleComponent = Vue.extend({
                 let _date = new Date(date)
                 if (typeof _date.getMonth === 'function') {
                     
-                    console.log("am i valid? %o", date)
+                    //console.log("am i valid? %o", date)
                     return this.showtime ? _date.toLocaleString() : _date.toLocaleDateString()   
                 } else {
                     return date
@@ -517,7 +517,7 @@ const parseObject = (object) => {
             object[key] = date
         } catch (err) {
             try {
-                //console.log(err) 
+                ////console.log(err) 
                 if (object[key].seconds &&
                     object[key].nanoseconds) {
                     let timestamp = new firebase.firestore.Timestamp(object[key].seconds,
@@ -527,12 +527,12 @@ const parseObject = (object) => {
                     object[key] = new Date(object[key])
                 }
 
-                //console.log("im here?")
+                ////console.log("im here?")
             } catch (err) {
-                //console.log(err) 
+                ////console.log(err) 
             }
-            /* console.log("key %o, value %o", key, object[key])
-            console.log(err) */
+            ///* console.log("key %o, value %o", key, object[key])
+            //console.log(err) */
         }
     })
     return object

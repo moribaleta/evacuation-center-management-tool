@@ -567,7 +567,7 @@
                             let max = pass.length/test_results.length 
                             console.log("accuracy %o", max)
 
-                            console.log("graph %o", results.best_model.output.iterations)
+                            console.log("graph %o", JSON.stringify(results.best_model.output.iterations))
 
                             this.test_result = results
                             this.isTesting = false

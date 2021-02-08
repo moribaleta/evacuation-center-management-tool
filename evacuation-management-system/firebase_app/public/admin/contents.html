@@ -314,7 +314,7 @@
                 onStart() {
                     this.user = header.user
                     this.municipality = this.user.municipality == '0' ? municipalities : [this.user.municipality]
-                    //console.log(this.municipality)
+                    ////console.log(this.municipality)
                     this.fetchAllAdmins()
                     this.fetchEvacationCenter()
                 },
@@ -340,10 +340,10 @@
 
                         this.municipality.forEach((muni) => {
                             muni_dict[muni] = 0
-                            //console.log("muni_dict %s %o", muni, muni_dict[muni])
+                            ////console.log("muni_dict %s %o", muni, muni_dict[muni])
                         })
 
-                        //console.log("log %o", message)
+                        ////console.log("log %o", message)
 
                         message.data.map(data => {
                             this.population_dict[data.evac_id] = this.population_dict[data.evac_id] || 0
@@ -363,15 +363,15 @@
                             return rhs.count - lhs.count
                         })
 
-                        console.log(muni_dict)
-                        console.log(this.muni_list)
-                        console.log(this.population_dict)
+                        //console.log(muni_dict)
+                        //console.log(this.muni_list)
+                        //console.log(this.population_dict)
 
                         DataHandler.getEvacuationCenters(this.user.municipality).then((data) => {
                             this.evac_list = data.data
                             this.view_list = data.data
 
-                            console.log("evac_list %o", this.evac_list)
+                            //console.log("evac_list %o", this.evac_list)
                         }).catch(err => {
                             console.log(err)
                         }).finally(() => {

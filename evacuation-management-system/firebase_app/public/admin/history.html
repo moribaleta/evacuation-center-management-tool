@@ -90,10 +90,10 @@
                     v-on:cancel="onCancelSearch($event)" v-on:clear="onClearFilter()"></filter-component>
 
                 <div class="button-container">
-                    <button type="button" class="btn btn-info button-view" v-on:click="createHistory()">
+                   <!--  <button type="button" class="btn btn-info button-view" v-on:click="createHistory()">
                         Generate
                         History
-                    </button>
+                    </button> -->
                     <button type="button" class="btn btn-info button-view" v-on:click="addHistory()">
                         Add
                         History
@@ -192,7 +192,7 @@
                                 value: entry.id
                             })
                         })
-                        console.log("evac list %o", this.evac_list)
+                        //console.log("evac list %o", this.evac_list)
                         this.filter_add = {
                             populations: ['all', '0-100', '101-500', '501-1000', '1001+'],
                             evacuations: evac_filter
@@ -208,7 +208,7 @@
 
                             //this.reports    = message.data
                             this.view_list = this.reports
-                            console.log("reports %o", this.reports)
+                            //console.log("reports %o", this.reports)
 
                         }).catch(error => {
                             console.log(error)
@@ -255,11 +255,11 @@
                         })
                         //history = history.concat(month_data)
                     }
-                    console.log("history %o", history)
-                    //console.log(JSON.stringify(this.testparams))
+                    //console.log("history %o", history)
+                    ////console.log(JSON.stringify(this.testparams))
 
                     DataHandler.addLargeEvacuationHistory(history).then((data) => {
-                        console.log('response %o', data)
+                        //console.log('response %o', data)
                         if (data.error) {
                             alert("error " + data.error)
                         } else {
@@ -290,10 +290,10 @@
                         this.data_input.created_by = header.user.id
                     }
 
-                    console.log("saving %o", this.data_input)
+                    //console.log("saving %o", this.data_input)
 
                     DataHandler.addEvacuationHistory(this.data_input).then((data) => {
-                        console.log('response %o', data)
+                        //console.log('response %o', data)
                         if (data.error) {
                             alert("error " + data.error)
                         } else {
@@ -312,7 +312,7 @@
                     let onConfirm = confirm(`delete item id: ${id}`)
                     if (onConfirm) {
                         DataHandler.deleteEvacuationHistory(id).then((data) => {
-                            console.log('response %o', data)
+                            //console.log('response %o', data)
                             if (data.error) {
                                 alert("error " + data.error)
                             } else {
@@ -328,7 +328,7 @@
 
                 /* FILTER / SEARCH */
                 onFilter(filter) {
-                    console.log("filter %o", filter)
+                    //console.log("filter %o", filter)
 
                     var view_list = this.reports.filter((data) => {
                         let date_created = new Date(data.date_created)
@@ -352,12 +352,12 @@
                             return true
                         } else if (!population_range.split('-').isEmpty()) {
                             let range = population_range.split('-')
-                            console.log("let range %o", range)
+                            //console.log("let range %o", range)
                             return (data.current_population >= Number(range[0]) && data
                                 .current_population <= Number(range[1]))
                         } else {
                             let max_range = population_range.split('+')[0]
-                            console.log("let max_range %o", max_range)
+                            //console.log("let max_range %o", max_range)
                             return (data.current_population >= Number(max_range))
                         }
                     })
