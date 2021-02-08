@@ -106,6 +106,19 @@
                 }
             }
 
+            var path_distance = 0;
+            for (var i = 0; i < path_data.length - 1; i++) {
+                path_distance += Number.parseFloat(getdistance(
+                    path_data[i].coordinates.lat, path_data[i + 1].coordinates.lat,
+                    path_data[i].coordinates.lng, path_data[i + 1].coordinates.lng
+                ));
+                //console.log(path_distance);
+            }
+
+            //console.log("path data %o", path_data)
+            console.log("total distance: " + path_distance);
+            console.log("computed blocks %o", path_data)
+
         }
 
         /* function getNearest(unit,tree){

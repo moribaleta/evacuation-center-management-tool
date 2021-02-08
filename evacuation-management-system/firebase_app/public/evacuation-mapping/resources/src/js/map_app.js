@@ -410,8 +410,16 @@ var modal_vue = new Vue({
             ////console.log("active history %o", this.active_dict)
         },
 
-        proceed() {
-            var evacuation_center = this.winner.evac;
+        proceed(index) {
+
+            var evacuation_center
+
+            if (index) {
+                evacuation_center = this.items[index].evac
+            } else {
+                evacuation_center = this.winner.evac;
+            }
+            
             var emergency_elem;
             try {
                 emergency_elem = {
