@@ -106,6 +106,7 @@
                                         <th>FLOOR SPACE</th>
                                         <th>OBJECTIVE OUTPUT</th>
                                         <th>FITNESS OUTPUT</th>
+                                        <th>OPTIONS</th>
                                     </tr>
                                     <tr v-for='test,index in items'>
                                         <td>{{index + 1}}</td>
@@ -116,6 +117,7 @@
                                         <td>{{test.evac.floor_space}}</td>
                                         <td>{{test.conflicts.toFixed(4)}}</td>
                                         <td>{{test.fitness.toFixed(4)}}</td>
+                                        <td><button type="button" class="btn btn-success" v-on:click="proceed(index)" data-dismiss="modal">Select</button></td>
                                     </tr>
                                 </table> 
                             </div>    
