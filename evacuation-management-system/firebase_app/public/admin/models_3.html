@@ -567,7 +567,21 @@
                             let max = pass.length/test_results.length 
                             console.log("accuracy %o", max)
 
-                            console.log("graph %o", JSON.stringify(results.best_model.output.iterations))
+                            //console.log("graph %o", JSON.stringify(results.best_model.output.iterations))
+                            var epoch       = [] 
+                            var fitness     = [] 
+                            var objective   = []
+                            results.best_model.output.iterations.map((iteration) => {
+                                epoch.push(iteration.epoch + 1)
+                                fitness.push(iteration.fitness)
+                                objective.push(iteration.objective)
+                            })
+
+                            console.log("epoch %o", JSON.stringify(epoch))
+                            console.log("fitness %o", JSON.stringify(fitness))
+                            console.log("objective %o", JSON.stringify(objective))
+
+
 
                             this.test_result = results
                             this.isTesting = false
