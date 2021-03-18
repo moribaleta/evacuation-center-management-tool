@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>iEvacuate</title>
+    <link rel="shortcut icon" href="resources/images/logo.png" />
+
+    <!-- update the version number as needed -->
+    <script src="/__/firebase/7.24.0/firebase-app.js"></script>
+    <!-- include only the Firebase features as you need -->
+    <script src="/__/firebase/7.24.0/firebase-auth.js"></script>
+    <script src="/__/firebase/7.24.0/firebase-database.js"></script>
+    <script src="/__/firebase/7.24.0/firebase-messaging.js"></script>
+    <script src="/__/firebase/7.24.0/firebase-storage.js"></script>
+    <script src="/__/firebase/7.24.0/firebase-firestore.js"></script>
+    <script src="/__/firebase/7.24.0/firebase-functions.js"></script>
+    <!-- initialize the SDK after all desired features are loaded -->
+    <script src="/__/firebase/init.js"></script>
+
+    <!-- CSS  -->
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <script src="js/jquery-3.0.0.min.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.2.2/jquery.form.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+    <link href="css/main-style.css" rel="stylesheet">
+    <script src="js/vue.js"></script>
+    <!-- <script src="js/materialize.js"></script> -->
+    <script src="../_global/js/objects.js"></script>
+    <script src="../_global/js/utilities.js"></script>
+    <script src="../_global/js/datahandler.js"></script>
+
+</head>
+
+<body>
+    <nav class="navbar navbar-light bg-light navbar-fixed-top" id="header" attr="home">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="index.html">
+                    <p class="img-large">GOV PH</p>
+                    <img class="img-small" src="resources/images/logo.png">
+                </a>
+            </div>
+
+            <div class="collapse navbar-collapse" id="myNavbar">
+                <img class="img-small" src="resources/images/logo.png">
+                <ul class="nav navbar-nav">
+                    <li v-for="item in header_items" :class="active == item.id ? 'active' : ''">
+                        <a :href="item.href">{{item.title}}</a>
+                    </li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li v-for="item in right_header">
+                        <a :href="item.href">
+                            <span :class="'glyphicon '+item.icon"></span>
+                            {{item.title}}
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container" id="post-container">
+        <div id="jumbotron" class="jumbotron">
+            <p class="time">Today: {{time}}</p>
+        </div>
+        <div class="subcontent">
+            <div class="section header">
+                <h1>Inventory Details</h1>
+            </div>
+
+            <div class="section">
+                <div class="well">
+                    <div class="section header">
+                        <h4>Inventory</h4>
+                    </div>
+
+                    <div class="loader" v-if="loading.isInventory"></div>
+
+                    <div class="row" v-if="!loading.isInventory">
+                        <div class="col col-md-12">
+                            <p class="item-value">
+                                name: {{inventory.name}}
+                            </p>
+                            <p class="item-value" v-if="inventory.id.includes('muninv')">
+                                municipality: {{inventory.municipality}}
+                            </p>
+                            <p class="item-value">
+                                description: {{inventory.description}}
+                            </p>
+                            <p class="item-value">
+                                date created: {{formatDate ? formatDate(inventory.date_created) : ""}}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>Supplies</h3>
+
+                <div class="loader-container" v-if="loading.isSupply">
+                    <div class="loader"></div>
+                </div>
+                <div class="table-container" id="tableData" v-if="supplies.length == 0 && !loading.isSupply">
+                    <div class="well">
+                        <div class="row">
+                            <div class="col col-md-12 item-info">
+                                <p class="item-value">
+                                    no supplies stored
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-container" id="tableData">
+                    <table class="table" v-if="view_list.length > 0">
+                        <tr>
+                            <th>#</th>
+                            <th>NAME</th>
+                            <th>QUANTITY</th>
+                            <th>REMARKS</th>
+                            <th>STATUS</th>
+                            <th>DATE SUPPLIED</th>
+                            <th>DATE CREATED</th>
+                            <th>DATE UPDATED</th>
+                        </tr>
+                        <tr v-for="item,index in view_list">
+                            <td>
+                                {{index + 1}}.
+                            </td>
+                            <td>{{getSupplyType(item.inventory_type)}}</td>
+                            <td>{{item.qty}}</td>
+                            <td>{{item.remarks}}</td>
+                            <td>{{item.status}}</td>
+                            <td>{{ formatDate ? formatDate(item.date_supplied) : ""}}</td>
+                            <td>{{formatDate ? formatDate(item.date_created) : ""}}</td>
+                            <td>{{formatDate ? formatDate(item.date_updated) : ""}}</td>
+                        </tr>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+        <div>&nbsp;</div>
+    </div>
+
+    </div>
+
+
+    <script src="js/app/app.js"></script>
+
+    <script>
+        app = new Vue({
+            el: '#post-container',
+            data: {
+                time: null,
+                user: new AdminUser(),
+                inventory: new InventoryType(),
+                supplies: [],
+                view_list: [],
+
+                supply_types: [],
+                supply_types_option: [],
+                supply_types_ref: {},
+
+                inventory_input: {},
+                supply_input: {},
+
+                isedit: false,
+                municipalities: [],
+                loading: {
+                    isInventory: false,
+                    isSupply: false,
+                    isSupplyType: false
+                },
+
+
+
+                supply_form: EvacuationSupply.formModel,
+
+                supply_header: [],
+                supply_type_header: [],
+                isMunicipality: false,
+                supply_type_component: null,
+                transfer_supply: new EvacuationSupply(),
+
+                filter_add: {}
+            },
+            methods: {
+
+                onStart() {
+
+                    this.onStartTime()
+
+                    this.municipalities = municipalities
+                    this.user = header.user
+
+                    const queryString = window.location.search;
+                    console.log(queryString);
+
+                    const urlParams = new URLSearchParams(queryString);
+
+                    const id = urlParams.get('inventory_id')
+                    console.log("inventory id: " + id);
+
+                    const isMuni = urlParams.get('isMuni')
+                    console.log("is Municipality: " + isMuni)
+                    this.isMunicipality = (isMuni == 'true');
+
+                    this.filter_add = {
+                        status: ['all'].concat(Object.keys(SupplyStatus)),
+                        qty: ['all', '0-100', '101-500', '501-1000', '1001+']
+                    }
+
+
+                    try {
+                        console.log("%o children", this.$refs)
+                        this.fetchInventory(id)
+                    } catch (err) {
+                        console.log(err)
+                    }
+                },
+
+                fetchInventory(id) {
+                    this.loading.isInventory = true
+                    this.loading.isSupply = true
+
+                    console.log("get municipal", this.isMunicipality)
+                    if (this.isMunicipality) {
+                        console.log("get municipal", id)
+                        promiseFetch = DataHandler.getMunicipalInventory(id)
+                    } else {
+                        promiseFetch = DataHandler.getInventory(id)
+                    }
+
+                    promiseFetch.then((message) => {
+                        console.log("inventory %o", message.data)
+                        this.setInventory(message.data)
+                    }).catch(err => {
+                        console.log(err)
+                    }).finally(() => {
+                        this.loading.isInventory = false
+                    })
+
+                },
+
+                setInventory(data) {
+                    this.inventory = data
+                    if (this.inventory) {
+                        this.getSupplyDetails(data.id)
+                    } else {
+                        this.loading.isSupply = false
+                    }
+                }, //setInventory
+
+                getSupplyDetails(id) {
+                    Promise.all([this.fetchSupplyTypePromise(), this.fetchSupplyPromise(this.inventory.id)])
+                        .then((data) => {
+                            this.supply_types = data[0].supply_types
+                            this.supply_types_ref = data[0].supply_types_ref
+                            this.supply_type_options = data[0].supply_type_options
+                            this.supplies = data[1]
+                            this.view_list = [...this.supplies]
+                            this.filter_add = {
+                                ...this.filter_add,
+                                types: ['all'].concat(data[0].supply_types.map((sup) => {
+                                    return sup.name
+                                }))
+                            }
+
+                            this.supply_form.inventory_type.options = this.supply_type_options
+                            this.loading.isSupply = false
+                        }).catch((err) => {
+                            console.log(err)
+                            this.loading.isSupply = false
+                        })
+                },
+
+                getSupplyType(id) {
+                    console.log(id)
+                    console.log(this.supply_types_ref)
+                    let type = this.supply_types_ref[id]
+
+                    return type ? type.name : id
+                }, //getSupplyType
+
+                fetchSupplyPromise(id) {
+                    return DataHandler.getSupplies([id]).then((message) => {
+                        console.log("supply %o", message)
+                        return message.data[0].supplies
+                    })
+                }, //fetchSupplyPromise
+
+                fetchSupplyTypePromise() {
+                    return DataHandler.getSupplyTypes().then((data) => {
+                        let supply_types = data.data || []
+                        var supply_types_ref = {}
+                        let supply_type_options = supply_types.map(type => {
+                            supply_types_ref[type.id] = type
+                            return {
+                                title: type.name,
+                                value: type.id
+                            }
+                        });
+                        console.log("fetch %o", {
+                            supply_types,
+                            supply_types_ref
+                        })
+                        return {
+                            supply_types,
+                            supply_types_ref,
+                            supply_type_options
+                        }
+                    })
+                }, //fetchSupplyTypePromises
+            }
+        })
+    </script>
+
+</body>
+
+</html>

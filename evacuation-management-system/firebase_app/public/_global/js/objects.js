@@ -1614,6 +1614,8 @@ class ReportItemType {
 /** defines the model of the report to be requested by the public user */
 class PublicUserReport extends ReportType {
     
+    comments = []
+
     constructor(id, date_created, date_updated, created_by, user_id, evac_id, reports, status) {
         super()
         this.id = id || keyGenID("publicuserreport") //"publicuserhistory-" + genID(5)
@@ -1637,9 +1639,57 @@ class PublicUserReport extends ReportType {
             object.reports,
             object.status
         )
+        
     }
 
 }//PublicUserReport
+
+
+/**
+ * model for comments of the user report by any public user
+ */
+class PublicUserComment extends Model { 
+
+    comment     = ""
+    report_id
+    user_id
+
+    constructor(id, date_created, date_updated, user_id, report_id, comment) {
+        super()
+        this.id             = id || keyGenID("publicusercomment")
+        this.date_created   = date_created    || new Date()
+        this.date_updated   = date_updated    || new Date()
+        this.created_by     = created_by      || '0'
+        this.user_id        = user_id
+        this.report_id      = report_id
+        this.comment        = comment
+    }
+
+    static parse(object = {}) {
+        return new PublicUserReport(
+            object.id          ,
+            object.date_created,
+            object.date_updated,
+            object.created_by  ,
+            object.user_id     ,
+            object.report_id   ,
+            object.comment     ,
+        )
+    }
+
+    toObject() {
+        return {
+            id          : this.id          ,
+            date_created: this.date_created,
+            date_updated: this.date_updated,
+            created_by  : this.created_by  ,
+            user_id     : this.user_id     ,
+            report_id   : this.report_id   ,
+            comment     : this.comment     ,
+        }
+    }
+
+}//PublicUserComment
 
 /** defines the model of a donor to send donations */
 class DonorsReport extends ReportType {

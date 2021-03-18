@@ -186,6 +186,34 @@
                                     </div>
                                 </li>
                             </ul>
+
+                            <ul class="list-group" v-if="report_data_view != null">
+                                <label>Comments</label>
+                                <li class="list-group-item" v-if="report_data_view.comments.isEmpty()">
+                                    <p>No Comments</p>
+                                </li>
+
+                                <li class="list-group-item" v-for="report,index in report_data_view.comments">
+                                    <div class="row">
+                                        <div class="col col-md-12 item-info">
+                                            <p class="item-label">
+                                                {{ index + 1 }}. {{comment.user_id}}
+                                            </p>
+                                        </div>
+                                        <div class="col col-md-12 item-info">
+                                            <p>{{comment.comment}}</p>
+                                        </div>
+                                        <div class="col col-md-12 item-info">
+                                            <p class="item-label">
+                                                Date Updated:
+                                            </p>
+                                            <p class="item-value">
+                                                {{comment.date_updated ? formatDate(comment.date_updated) : "--"}}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -554,6 +582,19 @@
 
                     DataHandler.getPublicUserReports(id).then((message) => {
                         this.reports = message.data
+
+                        DataHandler.getPublicUserComments([id])
+                            .then((message) => {
+                                message.data.forEach((comment) => {
+                                    let index = this.reports.firstIndex((curr) => {
+                                        return curr.id == comment.report_id 
+                                    })
+                                    if (index != null) {
+                                        this.reports[index].comment.push(comment)
+                                    }
+                                })
+                            })
+
                     }).catch(error => {
                         console.log(error)
                     })

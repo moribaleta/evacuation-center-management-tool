@@ -923,7 +923,11 @@
                         return
                     }
                     this.addNewRequest(this.recommendations[0].evac.id)
-                }
+                },
+
+                onViewMuniInventory(id) {
+                    window.open(`inventory_detail.html?inventory_id=${id}&isMuni=true`)
+                },
             }
         })
     </script>

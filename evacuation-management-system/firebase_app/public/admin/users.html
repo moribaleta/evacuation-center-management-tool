@@ -175,8 +175,8 @@
                                 </entry-single-component>
                             </div>
                             <div class="col col-md-12">
-                                <button class="btn btn-default btn-info" :href="'#requestrow-'+index"
-                                    data-toggle="collapse">view details</button>
+                                <button class="btn btn-default btn-info" :href="'#requestrow-'+index" data-toggle="collapse">view details</button>
+                                <button class="btn btn-default btn-info" :href="'#commentrow-'+index" data-toggle="collapse">view comments</button>
                                 <button class="btn btn-default btn-warning" v-on:click="editReport(index)">edit</button>
                                 <button class="btn btn-default btn-warning" v-on:click="editStatus(index)">update status</button>
                                 <button class="btn btn-default btn-danger"
@@ -212,6 +212,36 @@
                                                 </p>
                                                 <p class="item-value">
                                                     {{report.remarks}}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div :id="'commentrow-'+index" class="panel-collapse collapse">
+                            <div class="panel-body">
+                                <ul class="list-group">
+                                    <li class="list-group-item" v-if="item.comments.isEmpty()">
+                                        <p>No Request</p>
+                                    </li>
+
+                                    <li class="list-group-item" v-for="comment,index in item.comments">
+                                        <div class="row">
+                                            <div class="col col-md-12 item-info">
+                                                <p class="item-label">
+                                                    {{ index + 1 }}. {{comment.user_id}}
+                                                </p>
+                                            </div>
+                                            <div class="col col-md-12 item-info">
+                                                <p>{{comment.comment}}</p>
+                                            </div>
+                                            <div class="col col-md-12 item-info">
+                                                <p class="item-label">
+                                                    Date Updated:
+                                                </p>
+                                                <p class="item-value">
+                                                    {{comment.date_updated ? formatDate(comment.date_updated) : "--"}}
                                                 </p>
                                             </div>
                                         </div>
@@ -717,12 +747,9 @@
 
                         DataHandler.getPublicUserReports(id).then((message) => {
                             console.log("reports %o", message)
-                            //this.pending_reports = message.data
                             this.pending_reports = []
                             message.data.forEach((data) => {
-                                //if (this.evac_dict[data]) {
-                                    this.pending_reports.push(data)
-                                //}
+                                this.pending_reports.push(data)
                             })
                             this.pending_reports_view = this.pending_reports
                         }).catch(err => {
@@ -738,9 +765,24 @@
 
 
                     DataHandler.getPublicUsers(this.user.municipality).then((message) => {
+                        var user_ids = []
                         message.data.forEach((user) => {
                             this.public_users_ref[user.id] = user
+                            user_ids.push(user.id)
                         })
+
+                        DataHandler.getPublicUserComments(user_ids)
+                            .then((message) => {
+                                message.data.forEach((comment) => {
+                                    let index = this.pending_reports.firstIndex((curr) => {
+                                        return curr.id == comment.report_id 
+                                    })
+                                    if (index != null) {
+                                        this.pending_reports[index].comment.push(comment)
+                                    }
+                                })
+                            })
+
                     }).catch(err => {
                         console.log(err)
                     })

@@ -104,6 +104,17 @@ Array.prototype.first = function () {
     return this[0]
 }
 
+
+Array.prototype.firstIndex = function (where) {
+    this.forEach((item, index) => {
+        if (where(item)) {
+            return index
+        }
+    })
+    return null
+}
+
+
 String.prototype.isEmpty = function () {
     return this.length <= 0
 }

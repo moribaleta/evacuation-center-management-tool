@@ -92,7 +92,7 @@ class Honey {
         for (let i = 0; i < this.MAX_LENGTH; i++) {
             carrying_sum += (this.nectar[i].current_population / this.evac.population_capacity)
         }
-
+        ///average carrying capacity
         carrying_sum = carrying_sum / this.MAX_LENGTH
 
         let density_sum = 0
@@ -100,55 +100,10 @@ class Honey {
             density_sum += (this.nectar[i].current_population / this.evac.floor_space)
         }
 
+        ///average density
         density_sum = density_sum / this.MAX_LENGTH
 
         this.setConflicts(carrying_sum + density_sum)
-
-        /*  //String board[][] = new String[MAX_LENGTH][MAX_LENGTH]; 
-        let board: Board = new Board()
-        let x = 0; //row
-        let y = 0; //column
-        let tempx = 0;
-        let tempy = 0;
-
-        let dx = [-1, 1, -1, 1]; //to check for diagonal
-        let dy = [-1, 1, 1, -1]; //paired with dx to check for diagonal
-
-        let done = false; //used to check is checking fo diagonal is out of bounds
-        let conflicts = 0; //number of conflicts found
-
-        board = this.clearBoard(board); //clears the board into empty strings
-        board = this.plotQueens(board); //plots the Q in the board
-
-        // Walk through each of the Queens and compute the number of conflicts.
-        for (let i = 0; i < this.MAX_LENGTH; i++) {
-            x = i;
-            y = this.nectar[i]; //will result to no horizontal and vertical conflicts because it will result to diagonal 
-
-            // Check diagonals.
-            for (let j = 0; j < 4; j++) { //because of dx and dy where there are 4 directions for diagonal searching for conflicts
-                tempx = x;
-                tempy = y; // store coordinate in temp
-                done = false;
-
-                while (!done) {
-                    tempx += dx[j];
-                    tempy += dy[j];
-
-                    if ((tempx < 0 || tempx >= this.MAX_LENGTH) || (tempy < 0 || tempy >= this.MAX_LENGTH)) { //if exceeds board
-                        done = true;
-                    } else {
-                        //if(board[tempx][tempy] == "Q") {
-                        if (board.get(tempx, tempy) == "Q") {
-                            conflicts++;
-                        }
-                    }
-                }
-            }
-        }
-
-        this.conflicts = conflicts; //set conflicts of this chromosome */
-
     }
 
     /** Plots the queens in the board.

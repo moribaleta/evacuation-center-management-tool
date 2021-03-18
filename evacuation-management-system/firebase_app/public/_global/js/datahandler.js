@@ -14,6 +14,7 @@ class UserHandler extends DataHandlerType {
         moabc: 'moabc',
         users: 'users',
         public_user: 'public_user',
+        public_comment: 'public_comment',
         public_user_history: 'public_user_history',
         public_user_report: 'public_user_report',
         donor_organization: 'donor_org',
@@ -585,6 +586,79 @@ class PublicUserHandler extends UserHandler {
     deletePublicUserReport(id) {
         return this.deleteEntry(id, UserHandler.tables.public_user_report)
     }
+
+
+    /** returns the public history of the user or general if given empty id */
+    getPublicUserComments(users = []) {
+        return new Promise((resolve, reject) => {
+            const ref = this.firestore.collection(UserHandler.tables.public_comment)
+            //const query z= (municipality != "0") ? ref.where('municipality', '==', municipality) : ref
+            var query = !(users.isEmpty()) ? ref.where('user_id', 'array-contains-any', users) : ref
+
+            query = query.orderBy('date_updated', 'desc')
+
+            query.get().then(function (querySnapshot) {
+                var reports = []
+                querySnapshot.forEach(function (doc) {
+                    console.log(doc.id, " => ", doc.data());
+                    let data = doc.data()
+                    let id = doc.id
+                    let object = parseObject({
+                        id,
+                        ...data
+                    })
+                    reports.push(PublicUserComment.parse(object))
+                });
+                var message = new Message()
+                message.data = reports
+                resolve(message)
+            }).catch(function (error) {
+                console.log("Error getting documents: ", error);
+                reject(error)
+            });
+        })
+    } //getPublicUserReports
+
+    /** returns the public history of the user or general if given empty id */
+    getPublicUserComments(user_id) {
+        return new Promise((resolve, reject) => {
+            const ref = this.firestore.collection(UserHandler.tables.public_comment)
+            //const query z= (municipality != "0") ? ref.where('municipality', '==', municipality) : ref
+            var query = (user_id && !user_id.isEmpty()) ? ref.where('user_id', '==', user_id) : ref
+
+            query = query.orderBy('date_updated', 'desc')
+
+            query.get().then(function (querySnapshot) {
+                var reports = []
+                querySnapshot.forEach(function (doc) {
+                    console.log(doc.id, " => ", doc.data());
+                    let data = doc.data()
+                    let id = doc.id
+                    let object = parseObject({
+                        id,
+                        ...data
+                    })
+                    reports.push(PublicUserComment.parse(object))
+                });
+                var message = new Message()
+                message.data = reports
+                resolve(message)
+            }).catch(function (error) {
+                console.log("Error getting documents: ", error);
+                reject(error)
+            });
+        })
+    } //getPublicUserReports
+
+    addPublicUserComment(params = new PublicUserComment) {
+        return this.addEntry(params.id, params.toObject(), UserHandler.tables.public_comment)
+    }
+
+    deletePublicUserComment(id) {
+        return this.deleteEntry(id, UserHandler.tables.public_comment)
+    }
+
+
 
 } //PublicUserHandler
 
