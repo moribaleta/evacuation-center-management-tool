@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>iEvacuate</title>
+    <link rel="shortcut icon" href="resources/images/logo.png" />
+
+    <!-- update the version number as needed -->
+    <script src="/__/firebase/7.24.0/firebase-app.js"></script>
+    <!-- include only the Firebase features as you need -->
+    <script src="/__/firebase/7.24.0/firebase-auth.js"></script>
+    <script src="/__/firebase/7.24.0/firebase-database.js"></script>
+    <script src="/__/firebase/7.24.0/firebase-messaging.js"></script>
+    <script src="/__/firebase/7.24.0/firebase-storage.js"></script>
+    <script src="/__/firebase/7.24.0/firebase-firestore.js"></script>
+    <script src="/__/firebase/7.24.0/firebase-functions.js"></script>
+    <!-- initialize the SDK after all desired features are loaded -->
+    <script src="/__/firebase/init.js"></script>
+
+    <!-- CSS  -->
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <script src="js/jquery-3.0.0.min.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.2.2/jquery.form.min.js"></script>
+
+    <link href="css/main-style.css" rel="stylesheet">
+    <script src="js/vue.js"></script>
+    <!-- <script src="js/materialize.js"></script> -->
+    <script src="../_global/js/objects.js"></script>
+    <script src="../_global/js/utilities.js"></script>
+    <script src="../_global/js/datahandler.js"></script>
+</head>
+
+<body>
+    <div id="post-container">
+        <div class="container">
+            <div class="row" style="padding-left: 10px; padding-right: 10px; margin-top: 10px;">
+                <div class="page-header">
+                    <h3>Comments</h3>
+                </div>
+
+                <div class="section">
+                    <h3>Latest Reports</h3>
+                    <!-- HEADER FILTER -->
+                    <div class="header-container">
+                        <filter-component :filter_add="filter_pending_add" v-on:filter="onFilterPendingReports($event)"
+                            v-on:search="onSearchPendingReports($event)"
+                            v-on:cancel="onCancelSearchPendingReports($event)"
+                            v-on:clear="onClearFilterPendingReports()">
+                        </filter-component>
+                    </div>
+
+                    <!-- LOADER -->
+                    <div class="loader_container" v-if="isReportsLoading">
+                        <div class="loader"></div>
+                    </div>
+
+                    <!-- TABLE VIEW -->
+                    <div class="table-container" v-if="!isReportsLoading">
+                        <div class="table" id="tableData">
+                            <div class="well" v-for="item,index in pending_reports_view">
+                                <div class="row">
+                                    <div class="col col-md-12 item-info">
+                                        <p class="item-value">{{index + 1}}.</p>
+                                    </div>
+                                    <div class="col col-md-3 item-info " v-for="info,index in pending_header">
+                                        <div v-if="info == 'evac_id'">
+                                            <p class="item-label">EVACUATION NAME</p>
+                                            <p class="item-value">
+                                                {{item.evac_id.isEmpty() ? 'public' : getEvacFromId(item.evac_id).name}}
+                                            </p>
+                                        </div>
+                                        <entry-single-component v-if="info != 'evac_id'" :label="info"
+                                            :value="item[info]">
+                                        </entry-single-component>
+                                    </div>
+                                    <div class="col col-md-12">
+                                        <button class="btn btn-default btn-info" :href="'#requestrow-'+index"
+                                            data-toggle="collapse">view details</button>
+                                        <button class="btn btn-default btn-info" :href="'#commentrow-'+index"
+                                            data-toggle="collapse">view comments</button>
+                                    </div>
+                                </div>
+                                <div :id="'requestrow-'+index" class="panel-collapse collapse">
+                                    <div class="panel-body">
+                                        <ul class="list-group">
+                                            <li class="list-group-item" v-if="item.reports.isEmpty()">
+                                                <p>No Request</p>
+                                            </li>
+
+                                            <li class="list-group-item" v-for="report,index in item.reports">
+                                                <!-- <img :src="cdn+image" class="img-thumbnail img-grid"/> -->
+                                                <div class="row">
+                                                    <div class="col col-md-12 item-info">
+                                                        <p class="item-label">
+                                                            {{ index + 1 }}.
+                                                            {{supply_types[report.inventory_type].name}}
+                                                        </p>
+                                                    </div>
+                                                    <div class="col col-md-12 item-info">
+                                                        <p class="item-label">
+                                                            QTY:
+                                                        </p>
+                                                        <p class="item-value">
+                                                            {{report.qty}}
+                                                        </p>
+                                                    </div>
+                                                    <div class="col col-md-12 item-info">
+                                                        <p class="item-label">
+                                                            remarks:
+                                                        </p>
+                                                        <p class="item-value">
+                                                            {{report.remarks}}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div :id="'commentrow-'+index" class="panel-collapse collapse">
+                                    <div class="panel-body">
+                                        <div class="panel panel-default" v-if="item.comments.isEmpty()">
+                                            <div class="panel-body">
+                                                <p>No Comments</p>
+                                            </div>
+                                        </div>
+                                        <div class="module" v-if="!item.comments.isEmpty()">
+                                            <h4>Comments</h4>
+                                            <div class="collapse" :id="'collapsebody-'+index" aria-expanded="false">
+
+                                                <div class="panel panel-default" v-for="comment,index in item.comments">
+                                                    <div class="panel-heading">
+                                                        <div class="header-flex">
+                                                            <div class="header-flex-left">
+                                                                <p class="item-label">
+                                                                    {{ index + 1 }}. {{comment.user_id}}
+                                                                </p>
+                                                                
+                                                            </div>
+                                                            <div class="header-flex-right">
+                                                                <p class="item-sublabel">
+                                                                    {{comment.date_updated ? timeSince(comment.date_updated) : "--"}}
+                                                                </p>
+                                                            </div>
+                                                            <!-- <div class="header-flex-right">
+                                                                <button class="like-button" v-on:click="upvoteToggle()">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+                                                                        class="bi bi-star" viewBox="0 0 16 16">
+                                                                        <path
+                                                                            d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.523-3.356c.329-.314.158-.888-.283-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767l-3.686 1.894.694-3.957a.565.565 0 0 0-.163-.505L1.71 6.745l4.052-.576a.525.525 0 0 0 .393-.288l1.847-3.658 1.846 3.658a.525.525 0 0 0 .393.288l4.052.575-2.906 2.77a.564.564 0 0 0-.163.506l.694 3.957-3.686-1.894a.503.503 0 0 0-.461 0z" />
+                                                                    </svg>
+                                                                    <p>Like</p>
+                                                                </button>
+                                                                
+                                                            </div> -->
+                                                        </div>
+
+                                                    </div>
+                                                    <div class="panel-body">
+                                                        <p>{{comment.comment}}</p>
+                                                    </div>
+                                                    <div class="panel-footer" v-if="comment.user_id == user.id">
+                                                        <button type="button" class="btn btn-danger"
+                                                            v-on:click="deleteComment(comment.id, index)">Delete</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <a role="button" class="collapsed" data-toggle="collapse"
+                                                :href="'#collapsebody-'+index" aria-expanded="false"
+                                                :aria-controls="'collapsebody-'+index"
+                                                v-if="item.comments.length > 1">
+                                            </a>
+                                        </div>
+
+
+                                        <div class="panel panel-default">
+                                            <div class="panel-body">
+                                                <textarea :id="'comment-box-'+index" name="comments"
+                                                    style="width:100%; min-height:120px;" placeholder="add comments..">
+                                                    </textarea>
+                                                <button type="button" class="btn btn-default"
+                                                    v-on:click="submitComment(item.id, index)">Submit</button>
+                                            </div>
+                                        </div>
+
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div>&nbsp;</div>
+        </div>
+    </div>
+
+
+    <!--  Scripts-->
+    <script src="js/app/app.js"></script>
+
+
+    <script>
+        app = new Vue({
+            el: '#post-container',
+            data: {
+                user: null,
+                posts: [],
+                cdn: DataHandlerType.api_host,
+                time: "",
+
+                municipalities: [],
+
+                evac_list: [],
+                evac_dict: {},
+                evac_names: {},
+                public_users_ref: {},
+
+                pending_reports: [],
+                pending_reports_view: [],
+
+                pending_header: PublicUserReport.headers,
+                pending_formModel: PublicUserReport.formModel,
+                pending_formReportModel: {},
+
+                supply_types: {},
+                supply_types_option: [],
+
+                isReportsLoading: false,
+
+                filter_pending_add: {
+                    evacuation: [],
+                    status: ['all', ...Object.keys(SupplyStatus)],
+                    item_type: []
+                }
+            },
+            methods: {
+                onStart() {
+                    this.onStartTime()
+
+                    this.municipalities = municipalities
+                    this.fetchLoginUser()
+                    this.fetchPendingReports()
+                },
+
+                fetchLoginUser() {
+                    const localuser = localStorage.getItem('user') || "{}"
+                    if (localuser != "{}") {
+                        this.user = PublicUser.parse(JSON.parse(localuser))
+                    } else {
+                        this.user = null
+                    }
+                },
+
+                fetchPendingReports() {
+                    let promiseEvac = DataHandler.getEvacuationCenters()
+                    let promiseSuppType = DataHandler.getSupplyTypes()
+
+                    this.isReportsLoading = true
+
+                    Promise.all([promiseEvac, promiseSuppType]).then((messages) => {
+                        console.log("promises 1:%o 2:%o", messages[0], messages[1])
+
+                        this.evac_list = messages[0].data
+                        this.filter_pending_add.evacuation = ['all']
+
+                        this.pending_formModel.evac_id.options = this.evac_list.map((evac) => {
+                            this.evac_dict[evac.id] = evac
+                            this.evac_names[evac.name] = evac.id
+                            this.filter_pending_add.evacuation.push(evac.name)
+                            return {
+                                title: evac.name,
+                                value: evac.id
+                            }
+                        })
+
+                        this.supply_types_option = []
+                        this.filter_pending_add.item_type = ['all']
+                        this.supply_types_option = messages[1].data.map((supply) => {
+                            this.supply_types[supply.id] = supply
+                            this.filter_pending_add.item_type.push(supply.name)
+                            return {
+                                title: supply.name,
+                                value: supply.id
+                            }
+                        })
+
+                        //this.pending_formReportModel.inventory_type.options = this.supply_types_option
+
+                        DataHandler.getPublicUserReports().then((message) => {
+                            console.log("reports %o", message)
+                            this.pending_reports = []
+                            message.data.forEach((data) => {
+                                this.pending_reports.push(data)
+                            })
+                            this.pending_reports_view = this.pending_reports
+
+                            DataHandler.getPublicUserComments()
+                                .then((user_comments) => {
+                                    user_comments.data.forEach((comment) => {
+                                        let index = this.pending_reports.firstIndex(
+                                            (curr) => {
+                                                console.log("searching %o - %o",
+                                                    curr.id, comment
+                                                    .report_id)
+                                                return curr.id == comment
+                                                    .report_id
+                                            })
+                                        console.log("first? %o index", index)
+                                        if (index != null) {
+                                            this.pending_reports[index].comments
+                                                .push(comment)
+                                        }
+                                    })
+                                    console.log("comments %o", user_comments)
+                                })
+
+                        }).catch(err => {
+                            console.log("err %o", err)
+                        }).finally(() => {
+                            console.log("hey im")
+                            this.isReportsLoading = false
+                        })
+                    }).catch(err => {
+                        console.log("err %o", err)
+                    })
+
+                    DataHandler.getPublicUsers().then((message) => {
+                        var user_ids = []
+                        message.data.forEach((user) => {
+                            this.public_users_ref[user.id] = user
+                            user_ids.push(user.id)
+                        })
+                    }).catch(err => {
+                        console.log(err)
+                    })
+                }, //fetchPendingReports
+
+                getEvacFromId(id) {
+                    return this.evac_dict[id]
+                },
+
+
+
+                submitComment(report_id, index) {
+                    console.log(index)
+                    let textarea        = document.getElementById('comment-box-' + index)
+                    let comment         = textarea.value;
+                    var object          = new PublicUserComment()
+                    object.comment      = comment
+                    object.user_id      = this.user.id
+                    object.report_id    = report_id
+
+                    console.log("to submit %o", object)
+
+                    DataHandler.addPublicUserComment(object)
+                        .then((message) => {
+                            if (message.error) {
+                                alert(`Can't Save Comment: ${data.error}`)
+                            } else {
+                                this.pending_reports_view[index].comments.push(object)
+                                
+                                //this.pending_reports[index].comments.push(object)
+                                textarea.value = ""
+                                alert(`Comment Saved`)
+                            }
+                        })
+                },
+
+                deleteComment(id, index) {
+                    DataHandler.deletePublicUserComment(id)
+                        .then((message) => {
+                            if (message.error) {
+                                alert(`Can't Delete Comment: ${data.error}`)
+                            } else {
+                                this.pending_reports_view[index].comments.splice(index, 1)
+                                alert(`Comment Deleted`)
+                            }
+                        })
+                },
+
+                timeSince(date) {
+
+                    var seconds = Math.floor((new Date() - date) / 1000);
+
+                    var interval = seconds / 31536000;
+
+                    if (interval > 1) {
+                        return Math.floor(interval) + " years ago";
+                    }
+                    interval = seconds / 2592000;
+                    if (interval > 1) {
+                        return Math.floor(interval) + " months ago";
+                    }
+                    interval = seconds / 86400;
+                    if (interval > 1) {
+                        return Math.floor(interval) + " days ago";
+                    }
+                    interval = seconds / 3600;
+                    if (interval > 1) {
+                        return Math.floor(interval) + " hours ago";
+                    }
+                    interval = seconds / 60;
+                    if (interval > 1) {
+                        return Math.floor(interval) + " minutes ago";
+                    }
+                    return Math.floor(seconds) + " seconds ago";
+                },
+
+                //----------REPORT FILTERS----------------!>
+                /* FILTER / SEARCH */
+                onFilterPendingReports(filter) {
+                    console.log("filter %o", filter)
+
+                    var view_list = this.pending_reports.filter((data) => {
+                        let date_created = new Date(data.date_created)
+                        let date_updated = new Date(data.date_updated)
+                        let evac = this.evac_dict[data.evac_id] || new EvacuationCenter()
+
+                        return (
+                            (filter.year == 'all' ||
+                                filter.year == date_created.getFullYear() ||
+                                filter.year == date_updated.getFullYear()
+                            ) &&
+                            (filter.month == 'all' ||
+                                filter.month == (months_array[date_created.getMonth()] || 0) ||
+                                filter.month == (months_array[date_updated.getMonth()] || 0)
+                            ) &&
+                            (filter.municipality == 'all' ||
+                                (filter.municipality == evac.municipality))
+                        )
+                    });
+
+                    view_list = view_list.filter((data) => {
+                        return (filter.status == 'all' ||
+                            filter.status == data.status
+                        )
+                    })
+
+                    view_list = view_list.filter((data) => {
+                        let evac_name = filter.evacuation
+
+                        if (evac_name == 'all') {
+                            return true
+                        }
+
+                        if (evac_name == 'public' && data.evac_id == "") {
+                            console.log("report %o", data)
+                            return true
+                        } else if (data.evac_id == "") {
+                            return false
+                        }
+
+                        let data_evac = this.evac_dict[data.evac_id].name
+                        return data_evac == evac_name
+                    })
+
+                    view_list = view_list.filter((data) => {
+                        let supplies = data.reports.map((report) => {
+                            return this.supply_types[report.inventory_type].name.trim()
+                                .toLowerCase()
+                        })
+                        console.log("data %o -- %o", data, supplies)
+                        return (filter.item_type == 'all' || supplies.includes(filter.item_type
+                            .toLowerCase()))
+                    })
+
+                    this.pending_reports_view = view_list
+                },
+
+                onSearchPendingReports(filter) {
+                    this.onFilterPendingReports(filter)
+
+                    this.pending_reports_view = this.pending_reports_view.filter((data) => {
+                        let user = this.isAll ? this.public_users_ref[data.user_id] : this
+                            .public_user //this.donor_ref[data.user_id]
+                        var object = {
+                            ...data.toObject(),
+                            ...user
+                        }
+                        let evac = this.evac_dict[data.evac_id]
+                        object['evac_name'] = evac ? evac.name : "public"
+                        object['municipal'] = evac ? evac.municipal : "public"
+                        console.log("object search %o", object)
+                        let search = SearchObject(object, filter.searchTerm)
+
+                        let item_search = data.reports.filter((report) => {
+                            return SearchObject(report)
+                        })
+                        return !item_search.isEmpty() || search
+                    })
+                },
+
+                onCancelSearchPendingReports(filter) {
+                    this.onFilterPendingReports(filter)
+                },
+
+                onClearFilterPendingReports() {
+                    this.pending_reports_view = [...this.pending_reports]
+                },
+            }
+        })
+    </script>
+</body>
+
+</html>

@@ -1654,7 +1654,7 @@ class PublicUserComment extends Model {
     report_id
     user_id
 
-    constructor(id, date_created, date_updated, user_id, report_id, comment) {
+    constructor(id, date_created, date_updated, created_by, user_id, report_id, comment) {
         super()
         this.id             = id || keyGenID("publicusercomment")
         this.date_created   = date_created    || new Date()
@@ -1666,7 +1666,7 @@ class PublicUserComment extends Model {
     }
 
     static parse(object = {}) {
-        return new PublicUserReport(
+        return new PublicUserComment(
             object.id          ,
             object.date_created,
             object.date_updated,

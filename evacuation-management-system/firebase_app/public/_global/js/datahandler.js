@@ -626,7 +626,7 @@ class PublicUserHandler extends UserHandler {
             //const query z= (municipality != "0") ? ref.where('municipality', '==', municipality) : ref
             var query = (user_id && !user_id.isEmpty()) ? ref.where('user_id', '==', user_id) : ref
 
-            query = query.orderBy('date_updated', 'desc')
+            query = query.orderBy('date_updated', 'asc')
 
             query.get().then(function (querySnapshot) {
                 var reports = []

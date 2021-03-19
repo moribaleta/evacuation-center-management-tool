@@ -450,3 +450,104 @@ body {
     font-weight: 700;
     margin-right: 10px;
 }
+
+.item-sublabel {
+    font-weight: normal;
+    font-size: 12px;
+    color: gray;
+    margin-right: 10px;
+}
+
+
+.module {
+    width: 100%;
+}
+
+.module div.collapse[aria-expanded="false"] {
+    display: block;
+    height: 200px !important;
+    overflow: hidden;
+}
+
+.module div.collapsing[aria-expanded="false"] {
+    height: 200px !important;
+}
+
+.module a.collapsed:after {
+    content: '+ Show More';
+}
+
+.module a:not(.collapsed):after {
+    content: '- Show Less';
+}
+#upvote {
+    width: 0;
+    height: 0;
+    border-color: orangered;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 8px solid orangered;
+}
+
+#upvote:after {
+    width: 5px;
+    height: 6px;
+    background-color: orangered;
+    content: '';
+    position: absolute;
+    margin-top: 8px;
+    margin-left: -3px;
+}
+
+#downvote {
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid #CCCCFF;
+    margin-left: -1px;
+}
+
+#downvote:after {
+    width: 5px;
+    height: 6px;
+    background-color: #CCCCFF;
+    content: '';
+    position: absolute;
+    margin-left: -2px;
+    margin-top: -14px;
+}
+
+.right-header{
+    position: absolute;
+    right: 10px;
+    top: 10px;
+}
+
+.header-flex{
+    display: flex;
+    width: 100%;
+}
+
+.header-flex-left {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.like-button {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+}
+
+.like-button p {
+    margin: 0;
+    margin-left: 5px;
+}
+
+.like-button svg {
+    height: 16px;
+    width: 16px;
+}
