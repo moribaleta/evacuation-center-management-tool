@@ -237,9 +237,6 @@
                                                 <p>{{comment.comment}}</p>
                                             </div>
                                             <div class="col col-md-12 item-info">
-                                                <p class="item-label">
-                                                    Date Updated:
-                                                </p>
                                                 <p class="item-value">
                                                     {{comment.date_updated ? formatDate(comment.date_updated) : "--"}}
                                                 </p>
@@ -752,6 +749,19 @@
                                 this.pending_reports.push(data)
                             })
                             this.pending_reports_view = this.pending_reports
+
+                            DataHandler.getPublicUserComments()
+                            .then((message) => {
+                                console.log("comments %o", message.data)
+                                message.data.forEach((comment) => {
+                                    let index = this.pending_reports.firstIndex((curr) => {
+                                        return curr.id == comment.report_id 
+                                    })
+                                    if (index != null) {
+                                        this.pending_reports[index].comments.push(comment)
+                                    }
+                                })
+                            })
                         }).catch(err => {
                             console.log("err %o", err)
                         }).finally(() => {
@@ -771,17 +781,7 @@
                             user_ids.push(user.id)
                         })
 
-                        DataHandler.getPublicUserComments(user_ids)
-                            .then((message) => {
-                                message.data.forEach((comment) => {
-                                    let index = this.pending_reports.firstIndex((curr) => {
-                                        return curr.id == comment.report_id 
-                                    })
-                                    if (index != null) {
-                                        this.pending_reports[index].comment.push(comment)
-                                    }
-                                })
-                            })
+                        
 
                     }).catch(err => {
                         console.log(err)

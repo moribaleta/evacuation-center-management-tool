@@ -199,164 +199,164 @@ class AlertMessages {
     }
 }
 
-const FilterComponent = Vue.extend({
-    template: `
-    <div class="section">
-    <div class="well input-container" style="padding:10px; width: 100%; min-height: 70px">
-    <div class="col col-md-1">
-    <p class="input-label">YEAR</p>
-    <select id="input-type" class="input input-select" v-model="filter.year">
-    <option v-for="(item,index) in selections.years" :selected="index == filter.year ? true : false">{{item ? item : "NOT AVAILABLE"}}</option>
-    </select>
-    </div>
-    <div class="col col-md-2">
-    <p class="input-label">MONTH</p>
-    <select id="input-type" class="input input-select" v-model="filter.month">
-    <option v-for="(item,index) in selections.months" :selected="index == filter.month ? true : false"> {{item}}</option>
-    </select>
-    </div>
-    <div class="col col-md-3" v-if="!disable_municipal">
-    <p class="input-label">MUNICIPALITY</p>
-    <select id="input-type" class="input input-select" v-model="filter.municipality">
-    <option v-for="(item,index) in selections.municipality" :selected="index == filter.municipality ? true : false"> {{item}}</option>
-    </select>
-    </div>
+// const FilterComponent = Vue.extend({
+//     template: `
+//     <div class="section">
+//     <div class="well input-container" style="padding:10px; width: 100%; min-height: 70px">
+//     <div class="col col-md-1">
+//     <p class="input-label">YEAR</p>
+//     <select id="input-type" class="input input-select" v-model="filter.year">
+//     <option v-for="(item,index) in selections.years" :selected="index == filter.year ? true : false">{{item ? item : "NOT AVAILABLE"}}</option>
+//     </select>
+//     </div>
+//     <div class="col col-md-2">
+//     <p class="input-label">MONTH</p>
+//     <select id="input-type" class="input input-select" v-model="filter.month">
+//     <option v-for="(item,index) in selections.months" :selected="index == filter.month ? true : false"> {{item}}</option>
+//     </select>
+//     </div>
+//     <div class="col col-md-3" v-if="!disable_municipal">
+//     <p class="input-label">MUNICIPALITY</p>
+//     <select id="input-type" class="input input-select" v-model="filter.municipality">
+//     <option v-for="(item,index) in selections.municipality" :selected="index == filter.municipality ? true : false"> {{item}}</option>
+//     </select>
+//     </div>
     
-    <div class="col col-2 button-filter-container">
-        <div>&nbsp;</div>
-        <button type="button" class="btn btn-warning button-view" v-on:click="$emit('filter', filter)">Filter
-        </button>
-        <button type="button" class="btn btn-warning button-view" v-on:click="$emit('clear', 0); onClear()">Clear
-        </button>
+//     <div class="col col-2 button-filter-container">
+//         <div>&nbsp;</div>
+//         <button type="button" class="btn btn-warning button-view" v-on:click="$emit('filter', filter)">Filter
+//         </button>
+//         <button type="button" class="btn btn-warning button-view" v-on:click="$emit('clear', 0); onClear()">Clear
+//         </button>
         
-    </div>
-    <div class="col col-12  button-filter-container">
-        <div>&nbsp;</div>
-        <button type="button" class="btn btn-warning button-view " href="#filteradd" data-toggle="collapse">Additional Filter
-        </button>
-        <button type="button" class="btn btn-danger button-view " href="#searchbox" data-toggle="collapse">Show Search
-        </button>
-    </div>
+//     </div>
+//     <div class="col col-12  button-filter-container">
+//         <div>&nbsp;</div>
+//         <button type="button" class="btn btn-warning button-view " href="#filteradd" data-toggle="collapse">Additional Filter
+//         </button>
+//         <button type="button" class="btn btn-danger button-view " href="#searchbox" data-toggle="collapse">Show Search
+//         </button>
+//     </div>
     
-    </div>
-    <div id="filteradd" class="panel-collapse collapse">
-    <div class="panel-body well">
-    <div class="col col-md-12">
-    <div class="row">
-    <div class="col col-md-3" v-for="key, index in Object.keys(filter_add)">
-    <p class="input-label">{{key.toUpperCase().replace('_'," ")}}</p>
-    <select id="input-type" class="input input-select" v-model="filter[key]">
-    <option v-for="(item,index) in filter_add[key]" :selected="index == filter[key] ? true : false"> {{item}}</option>
-    </select>
-    </div>
-    </div>
-    </div>
-    </div>
-    </div>
-    <div id="searchbox" class="panel-collapse collapse">
-    <div class="panel-body well">
-    <p class="input-label">Search</p>
-    <input id="input_searchTerm" class="input input-text" type="text" v-model="filter.searchTerm" >
-    <button type="button" class="btn btn-warning button-view" v-on:click="$emit('search', filter)">Search
-    </button>
-    <button type="button" class="btn btn-danger button-view" v-if="filter.searchTerm.length > 0" v-on:click="onCancelSearch">Cancel
-    </button>
-    </div>
-    </div>
-    </div>`,
-    props: {
-        filter_add: {},
-        disable_municipal: Boolean
-    },
-    watch: {
-        filter_add() {
-            Object.keys(this.filter_add).forEach((key) => {
-                this.filter[key] = 'all'
-            })
-            console.log("filter %o", this.filter_add)
-        }
-    },
-    data() {
-        return {
-            filter: {
-                year: 'all',
-                month: 'all',
-                municipality: 'all',
-                searchTerm: ''
-            },
-            selections: {
-                years: ['all'],
-                months: [
-                    'all',
-                    'JANUARY',
-                    'FEBRUARY',
-                    'MARCH',
-                    'APRIL',
-                    'MAY',
-                    'JUNE',
-                    'JULY',
-                    'AUGUST',
-                    'SEPTEMBER',
-                    'OCTOBER',
-                    'NOVEMBER',
-                    'DECEMBER',
-                ],
-                months_only: [
-                    'JANUARY',
-                    'FEBRUARY',
-                    'MARCH',
-                    'APRIL',
-                    'MAY',
-                    'JUNE',
-                    'JULY',
-                    'AUGUST',
-                    'SEPTEMBER',
-                    'OCTOBER',
-                    'NOVEMBER',
-                    'DECEMBER',
-                ],
-                municipality: ['all'].concat(municipalities),
+//     </div>
+//     <div id="filteradd" class="panel-collapse collapse">
+//     <div class="panel-body well">
+//     <div class="col col-md-12">
+//     <div class="row">
+//     <div class="col col-md-3" v-for="key, index in Object.keys(filter_add)">
+//     <p class="input-label">{{key.toUpperCase().replace('_'," ")}}</p>
+//     <select id="input-type" class="input input-select" v-model="filter[key]">
+//     <option v-for="(item,index) in filter_add[key]" :selected="index == filter[key] ? true : false"> {{item}}</option>
+//     </select>
+//     </div>
+//     </div>
+//     </div>
+//     </div>
+//     </div>
+//     <div id="searchbox" class="panel-collapse collapse">
+//     <div class="panel-body well">
+//     <p class="input-label">Search</p>
+//     <input id="input_searchTerm" class="input input-text" type="text" v-model="filter.searchTerm" >
+//     <button type="button" class="btn btn-warning button-view" v-on:click="$emit('search', filter)">Search
+//     </button>
+//     <button type="button" class="btn btn-danger button-view" v-if="filter.searchTerm.length > 0" v-on:click="onCancelSearch">Cancel
+//     </button>
+//     </div>
+//     </div>
+//     </div>`,
+//     props: {
+//         filter_add: {},
+//         disable_municipal: Boolean
+//     },
+//     watch: {
+//         filter_add() {
+//             Object.keys(this.filter_add).forEach((key) => {
+//                 this.filter[key] = 'all'
+//             })
+//             console.log("filter %o", this.filter_add)
+//         }
+//     },
+//     data() {
+//         return {
+//             filter: {
+//                 year: 'all',
+//                 month: 'all',
+//                 municipality: 'all',
+//                 searchTerm: ''
+//             },
+//             selections: {
+//                 years: ['all'],
+//                 months: [
+//                     'all',
+//                     'JANUARY',
+//                     'FEBRUARY',
+//                     'MARCH',
+//                     'APRIL',
+//                     'MAY',
+//                     'JUNE',
+//                     'JULY',
+//                     'AUGUST',
+//                     'SEPTEMBER',
+//                     'OCTOBER',
+//                     'NOVEMBER',
+//                     'DECEMBER',
+//                 ],
+//                 months_only: [
+//                     'JANUARY',
+//                     'FEBRUARY',
+//                     'MARCH',
+//                     'APRIL',
+//                     'MAY',
+//                     'JUNE',
+//                     'JULY',
+//                     'AUGUST',
+//                     'SEPTEMBER',
+//                     'OCTOBER',
+//                     'NOVEMBER',
+//                     'DECEMBER',
+//                 ],
+//                 municipality: ['all'].concat(municipalities),
                 
-                filter_additional: {}
-            },
-        }
-    },
-    created() {
-        console.log('user data from parent component:')
+//                 filter_additional: {}
+//             },
+//         }
+//     },
+//     created() {
+//         console.log('user data from parent component:')
         
-        for (var i = (new Date()).getFullYear(); i >= 2000; i--) {
-            this.selections.years.push(i)
-        }
+//         for (var i = (new Date()).getFullYear(); i >= 2000; i--) {
+//             this.selections.years.push(i)
+//         }
         
-        try {
-            Object.keys(this.filter_add).forEach((key) => {
-                this.selections.filter_additional[key] = ['all'].concat(this.filter_add[key] || [])
-                this.filter[key] = 'all'
-            })
-        } catch (err) {
-            console.log(err)
-        }
+//         try {
+//             Object.keys(this.filter_add).forEach((key) => {
+//                 this.selections.filter_additional[key] = ['all'].concat(this.filter_add[key] || [])
+//                 this.filter[key] = 'all'
+//             })
+//         } catch (err) {
+//             console.log(err)
+//         }
         
-    },
-    methods: {
-        formatDate(date) {
-            let _date = new Date(date)
-            return _date.toLocaleDateString()
-        },
-        onCancelSearch() {
-            this.filter.searchTerm = ""
-            this.$emit('cancel', this.filter)
-        },
-        onClear() {
-            Object.keys(this.filter).map((key) => {
-                this.filter[key] = 'all'
-            })
-            this.filter.searchTerm = ''
-        }
-    }
-})
+//     },
+//     methods: {
+//         formatDate(date) {
+//             let _date = new Date(date)
+//             return _date.toLocaleDateString()
+//         },
+//         onCancelSearch() {
+//             this.filter.searchTerm = ""
+//             this.$emit('cancel', this.filter)
+//         },
+//         onClear() {
+//             Object.keys(this.filter).map((key) => {
+//                 this.filter[key] = 'all'
+//             })
+//             this.filter.searchTerm = ''
+//         }
+//     }
+// })
 
-Vue.component('filter-component', FilterComponent)
+// Vue.component('filter-component', FilterComponent)
 
 const SearchComponent = Vue.extend({
     template: 

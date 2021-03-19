@@ -222,6 +222,7 @@
                         <li class="active"><a data-toggle="tab" href="#evacuation_centers">Evacuation Centers</a></li>
                         <li><a data-toggle="tab" href="#supplies">Supplies</a></li>
                         <li><a data-toggle="tab" href="#donors">Donor Supply</a></li>
+                        <li><a data-toggle="tab" href="#comments">Public Users</a></li>
                     </ul>
                     <div class="tab-content">
                         <div class="tab-pane active table-container" id="evacuation_centers">
@@ -400,6 +401,10 @@
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                        <div class="tab-pane table-container" id="comments">
+                            <iframe :onload="iframeLoaded()" id="comment-iframe" src="comments.html"
+                                style="width: 100%; border: 0; height: 700px;"></iframe>
                         </div>
                     </div>
 
@@ -825,6 +830,15 @@
 
                 removeInputInventory(index) {
                     this.donor_exist.donor_request.reports.splice(index, 1)
+                },
+
+                iframeLoaded() {
+                    // var iFrameID = document.getElementById('comment-iframe');
+                    // if (iFrameID) {
+                    //     // here you can make the height, I delete it first, then I make it again
+                    //     iFrameID.height = "";
+                    //     iFrameID.height = iFrameID.contentWindow.document.body.scrollHeight + "px";
+                    // }
                 },
 
                 saveReport() {

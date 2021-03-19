@@ -33,170 +33,158 @@
     <script src="../_global/js/datahandler.js"></script>
 </head>
 
-<body>
+<body style="margin-top: 0px !important;">
     <div id="post-container">
-        <div class="container">
-            <div class="row" style="padding-left: 10px; padding-right: 10px; margin-top: 10px;">
-                <div class="page-header">
-                    <h3>Comments</h3>
-                </div>
+        <h3>Public Users</h3>
+        <div class="section">
+            <!-- HEADER FILTER -->
+            <div class="header-container">
+                <filter-component :filter_add="filter_pending_add" v-on:filter="onFilterPendingReports($event)"
+                    v-on:search="onSearchPendingReports($event)" v-on:cancel="onCancelSearchPendingReports($event)"
+                    v-on:clear="onClearFilterPendingReports()">
+                </filter-component>
+            </div>
 
-                <div class="section">
-                    <h3>Latest Reports</h3>
-                    <!-- HEADER FILTER -->
-                    <div class="header-container">
-                        <filter-component :filter_add="filter_pending_add" v-on:filter="onFilterPendingReports($event)"
-                            v-on:search="onSearchPendingReports($event)"
-                            v-on:cancel="onCancelSearchPendingReports($event)"
-                            v-on:clear="onClearFilterPendingReports()">
-                        </filter-component>
+            <!-- LOADER -->
+            <div class="loader_container" v-if="isReportsLoading"
+                style="display:flex; flex-direction:column; align-items:center; justify-content: center;">
+                <div class="loader"></div>
+            </div>
+
+            <!-- TABLE VIEW -->
+            <div v-if="!isReportsLoading">
+                <div class="well" v-for="item,index in pending_reports_view">
+                    <div class="row">
+                        <div class="col col-md-12 item-info">
+                            <p class="item-value">{{index + 1}}.</p>
+                        </div>
+                        <div class="col col-md-3 item-info " v-for="info,index in pending_header">
+                            <div v-if="info == 'evac_id'">
+                                <p class="item-label">EVACUATION NAME</p>
+                                <p class="item-value">
+                                    {{item.evac_id.isEmpty() ? 'public' : getEvacFromId(item.evac_id).name}}
+                                </p>
+                            </div>
+                            <entry-single-component v-if="info != 'evac_id'" :label="info" :value="item[info]">
+                            </entry-single-component>
+                        </div>
+                        <div class="col col-md-12">
+                            <button class="btn btn-default btn-info" :href="'#requestrow-'+index"
+                                data-toggle="collapse">view details</button>
+                            <button class="btn btn-default btn-info" :href="'#commentrow-'+index"
+                                data-toggle="collapse">view comments</button>
+                        </div>
                     </div>
+                    <div :id="'requestrow-'+index" class="panel-collapse collapse">
+                        <div class="panel-body">
+                            <ul class="list-group">
+                                <li class="list-group-item" v-if="item.reports.isEmpty()">
+                                    <p>No Request</p>
+                                </li>
 
-                    <!-- LOADER -->
-                    <div class="loader_container" v-if="isReportsLoading">
-                        <div class="loader"></div>
-                    </div>
-
-                    <!-- TABLE VIEW -->
-                    <div class="table-container" v-if="!isReportsLoading">
-                        <div class="table" id="tableData">
-                            <div class="well" v-for="item,index in pending_reports_view">
-                                <div class="row">
-                                    <div class="col col-md-12 item-info">
-                                        <p class="item-value">{{index + 1}}.</p>
-                                    </div>
-                                    <div class="col col-md-3 item-info " v-for="info,index in pending_header">
-                                        <div v-if="info == 'evac_id'">
-                                            <p class="item-label">EVACUATION NAME</p>
-                                            <p class="item-value">
-                                                {{item.evac_id.isEmpty() ? 'public' : getEvacFromId(item.evac_id).name}}
+                                <li class="list-group-item" v-for="report,index in item.reports">
+                                    <!-- <img :src="cdn+image" class="img-thumbnail img-grid"/> -->
+                                    <div class="row">
+                                        <div class="col col-md-12 item-info">
+                                            <p class="item-label">
+                                                {{ index + 1 }}.
+                                                {{supply_types[report.inventory_type].name}}
                                             </p>
                                         </div>
-                                        <entry-single-component v-if="info != 'evac_id'" :label="info"
-                                            :value="item[info]">
-                                        </entry-single-component>
-                                    </div>
-                                    <div class="col col-md-12">
-                                        <button class="btn btn-default btn-info" :href="'#requestrow-'+index"
-                                            data-toggle="collapse">view details</button>
-                                        <button class="btn btn-default btn-info" :href="'#commentrow-'+index"
-                                            data-toggle="collapse">view comments</button>
-                                    </div>
-                                </div>
-                                <div :id="'requestrow-'+index" class="panel-collapse collapse">
-                                    <div class="panel-body">
-                                        <ul class="list-group">
-                                            <li class="list-group-item" v-if="item.reports.isEmpty()">
-                                                <p>No Request</p>
-                                            </li>
-
-                                            <li class="list-group-item" v-for="report,index in item.reports">
-                                                <!-- <img :src="cdn+image" class="img-thumbnail img-grid"/> -->
-                                                <div class="row">
-                                                    <div class="col col-md-12 item-info">
-                                                        <p class="item-label">
-                                                            {{ index + 1 }}.
-                                                            {{supply_types[report.inventory_type].name}}
-                                                        </p>
-                                                    </div>
-                                                    <div class="col col-md-12 item-info">
-                                                        <p class="item-label">
-                                                            QTY:
-                                                        </p>
-                                                        <p class="item-value">
-                                                            {{report.qty}}
-                                                        </p>
-                                                    </div>
-                                                    <div class="col col-md-12 item-info">
-                                                        <p class="item-label">
-                                                            remarks:
-                                                        </p>
-                                                        <p class="item-value">
-                                                            {{report.remarks}}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                                <div :id="'commentrow-'+index" class="panel-collapse collapse">
-                                    <div class="panel-body">
-                                        <div class="panel panel-default" v-if="item.comments.isEmpty()">
-                                            <div class="panel-body">
-                                                <p>No Comments</p>
-                                            </div>
+                                        <div class="col col-md-12 item-info">
+                                            <p class="item-label">
+                                                QTY:
+                                            </p>
+                                            <p class="item-value">
+                                                {{report.qty}}
+                                            </p>
                                         </div>
-                                        <div class="module" v-if="!item.comments.isEmpty()">
-                                            <h4>Comments</h4>
-                                            <div class="collapse" :id="'collapsebody-'+index" aria-expanded="false">
-
-                                                <div class="panel panel-default" v-for="comment,index in item.comments">
-                                                    <div class="panel-heading">
-                                                        <div class="header-flex">
-                                                            <div class="header-flex-left">
-                                                                <p class="item-label">
-                                                                    {{ index + 1 }}. {{comment.user_id}}
-                                                                </p>
-                                                                
-                                                            </div>
-                                                            <div class="header-flex-right">
-                                                                <p class="item-sublabel">
-                                                                    {{comment.date_updated ? timeSince(comment.date_updated) : "--"}}
-                                                                </p>
-                                                            </div>
-                                                            <!-- <div class="header-flex-right">
-                                                                <button class="like-button" v-on:click="upvoteToggle()">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor"
-                                                                        class="bi bi-star" viewBox="0 0 16 16">
-                                                                        <path
-                                                                            d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.523-3.356c.329-.314.158-.888-.283-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767l-3.686 1.894.694-3.957a.565.565 0 0 0-.163-.505L1.71 6.745l4.052-.576a.525.525 0 0 0 .393-.288l1.847-3.658 1.846 3.658a.525.525 0 0 0 .393.288l4.052.575-2.906 2.77a.564.564 0 0 0-.163.506l.694 3.957-3.686-1.894a.503.503 0 0 0-.461 0z" />
-                                                                    </svg>
-                                                                    <p>Like</p>
-                                                                </button>
-                                                                
-                                                            </div> -->
-                                                        </div>
-
-                                                    </div>
-                                                    <div class="panel-body">
-                                                        <p>{{comment.comment}}</p>
-                                                    </div>
-                                                    <div class="panel-footer" v-if="comment.user_id == user.id">
-                                                        <button type="button" class="btn btn-danger"
-                                                            v-on:click="deleteComment(comment.id, index)">Delete</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <a role="button" class="collapsed" data-toggle="collapse"
-                                                :href="'#collapsebody-'+index" aria-expanded="false"
-                                                :aria-controls="'collapsebody-'+index"
-                                                v-if="item.comments.length > 1">
-                                            </a>
+                                        <div class="col col-md-12 item-info">
+                                            <p class="item-label">
+                                                remarks:
+                                            </p>
+                                            <p class="item-value">
+                                                {{report.remarks}}
+                                            </p>
                                         </div>
-
-
-                                        <div class="panel panel-default">
-                                            <div class="panel-body">
-                                                <textarea :id="'comment-box-'+index" name="comments"
-                                                    style="width:100%; min-height:120px;" placeholder="add comments..">
-                                                    </textarea>
-                                                <button type="button" class="btn btn-default"
-                                                    v-on:click="submitComment(item.id, index)">Submit</button>
-                                            </div>
-                                        </div>
-
-                                        </ul>
                                     </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div :id="'commentrow-'+index" class="panel-collapse collapse">
+                        <div class="panel-body">
+                            <div class="panel panel-default" v-if="item.comments.isEmpty()">
+                                <div class="panel-body">
+                                    <p>No Comments</p>
                                 </div>
                             </div>
+                            <div class="module" v-if="!item.comments.isEmpty()">
+                                <h4>Comments</h4>
+                                <div class="collapse" :id="'collapsebody-'+index" aria-expanded="false">
+
+                                    <div class="panel panel-default" v-for="comment,index in item.comments">
+                                        <div class="panel-heading">
+                                            <div class="header-flex">
+                                                <div class="header-flex-left">
+                                                    <p class="item-label">
+                                                        {{ index + 1 }}. {{comment.user_id}}
+                                                    </p>
+
+                                                </div>
+                                                <div class="header-flex-right">
+                                                    <p class="item-sublabel">
+                                                        {{comment.date_updated ? timeSince(comment.date_updated) : "--"}}
+                                                    </p>
+                                                </div>
+                                                <!-- <div class="header-flex-right">
+                                                            <button class="like-button" v-on:click="upvoteToggle()">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+                                                                    class="bi bi-star" viewBox="0 0 16 16">
+                                                                    <path
+                                                                        d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.523-3.356c.329-.314.158-.888-.283-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767l-3.686 1.894.694-3.957a.565.565 0 0 0-.163-.505L1.71 6.745l4.052-.576a.525.525 0 0 0 .393-.288l1.847-3.658 1.846 3.658a.525.525 0 0 0 .393.288l4.052.575-2.906 2.77a.564.564 0 0 0-.163.506l.694 3.957-3.686-1.894a.503.503 0 0 0-.461 0z" />
+                                                                </svg>
+                                                                <p>Like</p>
+                                                            </button>
+                                                            
+                                                        </div> -->
+                                            </div>
+
+                                        </div>
+                                        <div class="panel-body">
+                                            <p>{{comment.comment}}</p>
+                                        </div>
+                                        <div class="panel-footer" v-if="comment.user_id == user.id">
+                                            <button type="button" class="btn btn-danger"
+                                                v-on:click="deleteComment(comment.id, index)">Delete</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <a role="button" class="collapsed" data-toggle="collapse" :href="'#collapsebody-'+index"
+                                    aria-expanded="false" :aria-controls="'collapsebody-'+index"
+                                    v-if="item.comments.length > 1">
+                                </a>
+                            </div>
+
+
+                            <div class="panel panel-default">
+                                <div class="panel-body">
+                                    <textarea :id="'comment-box-'+index" name="comments"
+                                        style="width:100%; min-height:120px;" placeholder="add comments..">
+                                                </textarea>
+                                    <button type="button" class="btn btn-default"
+                                        v-on:click="submitComment(item.id, index)">Submit</button>
+                                </div>
+                            </div>
+
+                            </ul>
                         </div>
                     </div>
                 </div>
-
             </div>
-            <div>&nbsp;</div>
         </div>
+
+
     </div>
 
 
@@ -347,28 +335,33 @@
 
 
                 submitComment(report_id, index) {
-                    console.log(index)
-                    let textarea        = document.getElementById('comment-box-' + index)
-                    let comment         = textarea.value;
-                    var object          = new PublicUserComment()
-                    object.comment      = comment
-                    object.user_id      = this.user.id
-                    object.report_id    = report_id
 
-                    console.log("to submit %o", object)
+                    if (this.user) {
+                        console.log(index)
+                        let textarea = document.getElementById('comment-box-' + index)
+                        let comment = textarea.value;
+                        var object = new PublicUserComment()
+                        object.comment = comment
+                        object.user_id = this.user.id
+                        object.report_id = report_id
 
-                    DataHandler.addPublicUserComment(object)
-                        .then((message) => {
-                            if (message.error) {
-                                alert(`Can't Save Comment: ${data.error}`)
-                            } else {
-                                this.pending_reports_view[index].comments.push(object)
-                                
-                                //this.pending_reports[index].comments.push(object)
-                                textarea.value = ""
-                                alert(`Comment Saved`)
-                            }
-                        })
+                        console.log("to submit %o", object)
+
+                        DataHandler.addPublicUserComment(object)
+                            .then((message) => {
+                                if (message.error) {
+                                    alert(`Can't Save Comment: ${data.error}`)
+                                } else {
+                                    this.pending_reports_view[index].comments.push(object)
+
+                                    //this.pending_reports[index].comments.push(object)
+                                    textarea.value = ""
+                                    alert(`Comment Saved`)
+                                }
+                            })
+                    } else {
+                        alert("You need to be logged in as a Public User to add Comments")
+                    }
                 },
 
                 deleteComment(id, index) {
