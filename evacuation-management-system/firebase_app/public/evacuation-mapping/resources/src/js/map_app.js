@@ -7,6 +7,13 @@ const {
     Observable
 } = rxjs;
 
+
+function computeObjective(evac, population) {
+    var carrying_sum = population / evac.population_capacity
+    var density_sum = population / evac.floor_space
+    return carrying_sum + density_sum;
+}
+
 /**
  * class defines the marker of the user pinned on the map
  */
@@ -320,12 +327,17 @@ class MapApp {
             setTimeout(() => {
                 
                 var curr_population = []
+                var evac_results    = {}
+
+                ///contains the current population
+                var evac_test       = {}
 
                 const evacs_id = _evacs.map((evac) => {
                     var history = new EvacuationHistory()
                     history.evac_id = evac.id 
                     history.current_population = this.active_history_dict[evac.id] || 0
                     curr_population.push(history)
+                    evac_test[evac.id] = history.current_population
                     return evac.id
                 })
 
@@ -338,12 +350,53 @@ class MapApp {
                 let test            = new TesterABC()
                 test.evacuations    = _evacs
                 test.history_list   = history_list
-                const test_output   = test.generate(this.model_param)
-                
+                var test_output   = test.generate(this.model_param)
+
+
+                let foodSources = test_output.output.foodsources
+
+                foodSources.map((data) => {
+                    evac_results[data.evac.id] = {
+                        evac: data.evac,
+                        conflicts: data.conflicts,
+                    }
+                })
+
+                let computed_results = Object.keys(evac_results).map((
+                    evac_id) => {
+                    let result      = evac_results[evac_id]
+                    let evac        = result.evac
+                    let conflicts   = result.conflicts
+                    let population  = evac_test[evac_id] //test.test[evac_id]
+                    let objective   = computeObjective(evac, population) * (conflicts)
+
+                    let val = {
+                        evac: evac_id,
+                        objective: objective,
+                        population,
+                        conflicts,
+                    }
+
+                    return val
+                })
+
+                var min = null
+                computed_results.forEach((val) => {
+                    if (min == null || min.objective > val.objective) {
+                        min = val
+                    }
+                })
+                test_output["classified_result"] = computed_results
+                test_output["classified"] = min
+
+                console.log("output %o", test_output)
+
                 obs.next(test_output)
             })
         })
     } //getAvailableEvacuation
+
+    
 
     /** removes a specific emergency marker from the map */
     removeMarker() {

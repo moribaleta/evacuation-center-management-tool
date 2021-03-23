@@ -122,6 +122,9 @@ Array.prototype.firstIndex = function (where) {
     return null
 }
 
+Array.prototype.hasValue = function () {
+    return this.length > 0
+}
 
 String.prototype.isEmpty = function () {
     return this.length <= 0

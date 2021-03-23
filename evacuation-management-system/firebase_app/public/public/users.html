@@ -193,7 +193,7 @@
                                     <p>No Comments</p>
                                 </li>
 
-                                <li class="list-group-item" v-for="report,index in report_data_view.comments">
+                                <li class="list-group-item" v-for="comment,index in report_data_view.comments">
                                     <div class="row">
                                         <div class="col col-md-12 item-info">
                                             <p class="item-label">
@@ -583,14 +583,15 @@
                     DataHandler.getPublicUserReports(id).then((message) => {
                         this.reports = message.data
 
-                        DataHandler.getPublicUserComments([id])
+                        DataHandler.getPublicUserComments()
                             .then((message) => {
+                                console.log(message.data)
                                 message.data.forEach((comment) => {
                                     let index = this.reports.firstIndex((curr) => {
                                         return curr.id == comment.report_id 
                                     })
                                     if (index != null) {
-                                        this.reports[index].comment.push(comment)
+                                        this.reports[index].comments.push(comment)
                                     }
                                 })
                             })
