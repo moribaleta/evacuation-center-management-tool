@@ -41,8 +41,13 @@ class DataHandlerType {
     /** app config */
     config
 
-    static cdn_host = 'https://ievacuate-laguna.000webhostapp.com/api/uploads/'
-    static api_host = 'https://ievacuate-laguna.000webhostapp.com/api/'
+
+    static base_url = 'https://ievacuate-laguna-cdn.000webhostapp.com/'
+    //static cdn_host = 'https://ievacuate-laguna.000webhostapp.com/api/uploads/'
+    //static api_host = 'https://ievacuate-laguna.000webhostapp.com/api/'
+
+    static api_host  = DataHandlerType.base_url + "api/"
+    static cdn_host  = DataHandlerType.api_host + "uploads"
 
     /** configures firebase functionality */
     configure() {
@@ -51,14 +56,14 @@ class DataHandlerType {
             this.config = firebase.app()
         } else {
             var firebaseConfig = {
-                apiKey: "AIzaSyDkbPEnpffZuVgv2R1hjs_wb_uvz5sfYpg",
-                authDomain: "ievacuate-laguna.firebaseapp.com",
-                databaseURL: "https://ievacuate-laguna.firebaseio.com",
-                projectId: "ievacuate-laguna",
-                storageBucket: "ievacuate-laguna.appspot.com",
-                messagingSenderId: "22070474230",
-                appId: "1:22070474230:web:eaa15ae6cd54d68fd203d7",
-                measurementId: "G-9V7V2C0H3Q"
+                apiKey              : "AIzaSyDkbPEnpffZuVgv2R1hjs_wb_uvz5sfYpg",
+                authDomain          : "ievacuate-laguna.firebaseapp.com",
+                databaseURL         : "https://ievacuate-laguna.firebaseio.com",
+                projectId           : "ievacuate-laguna",
+                storageBucket       : "ievacuate-laguna.appspot.com",
+                messagingSenderId   : "22070474230",
+                appId               : "1:22070474230:web:eaa15ae6cd54d68fd203d7",
+                measurementId       : "G-9V7V2C0H3Q"
             };
             // Initialize Firebase
             this.config = firebase.initializeApp(firebaseConfig);
