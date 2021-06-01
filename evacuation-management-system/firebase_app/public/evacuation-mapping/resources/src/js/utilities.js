@@ -112,7 +112,7 @@ function genID(length) {
     return result;
 }
 
-
+/*
 ///generates a file of json contains
 function saveTextAsFile(text) {
     const textToWrite = text
@@ -138,6 +138,7 @@ function saveTextAsFile(text) {
 
     downloadLink.click();
 } //saveTextAsFile
+*/
 
 function getRandomColor() {
     var letters = '0123456789ABCDEF';
