@@ -652,14 +652,14 @@ const FilterComponent = Vue.extend({
     </div>
     <div class="col col-12  button-filter-container">
         <div>&nbsp;</div>
-        <button type="button" class="btn btn-warning button-view " href="#filteradd" data-toggle="collapse">Additional Filter
+        <button type="button" class="btn btn-warning button-view " :href="'#'+filter.id+'filteradd'" data-toggle="collapse">Additional Filter
         </button>
-        <button type="button" class="btn btn-danger button-view " href="#searchbox" data-toggle="collapse">Show Search
+        <button type="button" class="btn btn-danger button-view " :href="'#'+filter.id+'searchbox'" data-toggle="collapse">Show Search
         </button>
     </div>
     
     </div>
-    <div id="filteradd" class="panel-collapse collapse">
+    <div :id="filter.id+'filteradd'" class="panel-collapse collapse">
     <div class="panel-body well">
     <div class="col col-md-12">
     <div class="row">
@@ -673,7 +673,7 @@ const FilterComponent = Vue.extend({
     </div>
     </div>
     </div>
-    <div id="searchbox" class="panel-collapse collapse">
+    <div :id="filter.id+'searchbox'" class="panel-collapse collapse">
     <div class="panel-body well">
     <p class="input-label">Search</p>
     <input id="input_searchTerm" class="input input-text" type="text" v-model="filter.searchTerm" >
@@ -699,6 +699,7 @@ const FilterComponent = Vue.extend({
     data() {
         return {
             filter: {
+                id: keyGenID("filter",5),
                 year: 'all',
                 month: 'all',
                 municipality: 'all',
