@@ -151,7 +151,7 @@ class MapApp {
     initializeMap() {
         DataHandler.configure()
         MapHandler.configure(document.getElementById('map'), this.map_boundaries, this.onPlaceMarker)
-
+        
         const promiseRoute = this.initializeMapRouter()
         const promiseEvac = this.initEvacuationCenters()
 

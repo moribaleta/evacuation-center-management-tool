@@ -21,21 +21,24 @@ class MapHandlerClass {
         this.element = element
         this.bounds = new google.maps.LatLngBounds();
         this.map = new google.maps.Map(this.element, {
+            center: {lat: 14.424533, lng: 121.450262},
             zoom: 15,
             disableDefaultUI: true,
             draggableCursor:'crosshair',
             styles: [
+            // {
+            //     featureType: 'all',
+            //     stylers: [
+            //     { "color": "#C0C0C0" }
+            //     ]
+            // }
             {
-                featureType: 'all',
-                stylers: [
-                { "color": "#C0C0C0" }
-                ]
-            },{
                 featureType: 'poi',
                 stylers: [
                 { "visibility": "off" }
                 ]
-            },{
+            }
+            ,{
                 featureType: 'road.arterial',
                 elementType: 'geometry',
                 stylers: [
