@@ -261,6 +261,29 @@
                                 </p>
                             </div>
                             <div class="col col-md-12">
+                                <div class="well">
+                                    <div class="row">
+                                        <div class="col col-md-6 item-info">
+                                            <p class="item-label">
+                                                Status:
+                                            </p>
+                                            <p class="item-value" style="margin-right: 10px;">
+                                                {{ item.status }}
+                                            </p>
+                                        </div>
+                                        <div class="col col-md-6 item-info" v-if="item.status == `inactive`">
+                                            <p class="item-label">
+                                                Remarks:
+                                            </p>
+                                            <p class="item-value">
+                                                {{ item.remarks }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col col-md-12">
                                 <button class="btn btn-default btn-info" :href="'#imagerow'+index"
                                     data-toggle="collapse">view pictures</button>
                                 <button class="btn btn-default btn-warning" v-on:click="onEditItem(index)">edit</button>
@@ -397,7 +420,11 @@
                     let promise = this.user.admin_type == 'mdrrmo' ? DataHandler.getAdminUserMunicipality(this.user.municipality) : DataHandler.getAdminUsers(this.user.id)
                     promise.then((message) => {
                         this.admins = message.data
-                        this.evacFormModel.admin_id.options = this.admins.map(admin => {
+                        this.evacFormModel.admin_id.options = this.admins
+                        .filter(admin => {
+                            return admin.admin_type == AdminUser.admin_types.evacuation
+                        })
+                        .map(admin => {
                             this.admins_selection[admin.id] =
                                 `${admin.lastname}, ${admin.firstname}`
                             return {
@@ -472,6 +499,28 @@
                             alert(`User Have Been Added Successfuly`)
                             this.fetchEvacationCenter()
                         }
+
+                        var evac_admin = this.admins.find(
+                            (admin) => {
+                                return admin.id == this.evac_data_input.admin_id
+                            }
+                        )
+
+                        console.log(evac_admin)
+
+                        if (evac_admin != null) {
+                            evac_admin.evacuation_id = this.evac_data_input.id;
+                            DataHandler.addAdminUsers(evac_admin, []).then((data) => {
+                                if (data.error) {
+                                    alert(`Can't Save User ${data.error}`)
+                                }
+                            }).catch((err) => {
+                                console.log(err)
+                            }).finally(() => {
+                                this.conf_password = null
+                            })
+                        }
+
                     }).finally(() => {
                         this.evac_data_input = new EvacuationCenter()
                     })

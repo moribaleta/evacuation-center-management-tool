@@ -174,7 +174,7 @@ function isValidDate(s) {
 const FormGenerator = Vue.extend({
     template: `
     <div class="row">
-    <div class="col col-md-12 input-container" v-for="key in headers" v-if="!(form[key].isHidden || false)">
+    <div class="col col-md-12 input-container" v-for="key in headers" v-if="!(form[key].isHidden || false) && eval(form[key])">
     <p>{{form[key].title}}</p>
     
     <input v-if="form[key].type == 'text'" type="text" class="input input-item"
@@ -206,7 +206,8 @@ const FormGenerator = Vue.extend({
     
     
     <textarea v-if="form[key].type == 'textarea'" class="form-control"
-    :id="'inputINP'+key" name="exact_address" v-model="input[key]"></textarea>
+    :id="'inputINP'+key" name="exact_address" v-model="input[key]"
+    ></textarea>
     
     <select v-if="form[key].type == 'dropdown'" class="input input-item input-select"
     :id="'inputINP'+key" v-model="input[key]">
@@ -274,6 +275,25 @@ const FormGenerator = Vue.extend({
     },
 
     methods: {
+
+        eval(form){
+            if (form.logic) {
+                try {
+                    let logic           = form.logic
+                    let key_value       = this.input[logic.key]
+                    let condition       = logic.condition
+                    let condition_value = logic.value
+                    let string          = `"${key_value}"` + condition + `"${condition_value}"`
+                    
+                    return eval(string)
+                }catch(err){
+                    return true
+                }
+                
+            }
+            return true
+        },
+
         datetimeChange(event) {
             //console.log("event %o", event)
 

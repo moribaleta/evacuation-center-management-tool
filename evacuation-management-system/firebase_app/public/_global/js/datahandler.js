@@ -185,6 +185,7 @@ class UserHandler extends DataHandlerType {
     }
 
     addAdminUsers(params = new AdminUser(), images = []) {
+        console.log(params)
         if (images.length > 0) {
             return this.uploadImages(images).then((resp) => {
                 console.log("response %o", resp)

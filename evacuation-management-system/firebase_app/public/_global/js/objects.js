@@ -17,14 +17,14 @@ class Model {
 
 /** statics cases for form model type */
 const FormModels = {
-    text: 'text',
+    text    : 'text',
     textarea: 'textarea',
-    date: 'date',
+    date    : 'date',
     datetime: 'datetime',
-    number: 'number',
+    number  : 'number',
     dropdown: 'dropdown',
     password: 'password',
-    email: 'email',
+    email   : 'email',
     compound: 'compound'
 }
 
@@ -47,48 +47,53 @@ class AdminUser extends Model {
     email
     password
     admin_type
+    ///contains the id of the evacuation managed
+    evacuation_id
 
     /**
      * used to determine the type of access of user
      */
     static admin_types = {
-        pdrrmo: 'pdrrmo', //higher - provincial
-        mdrrmo: 'mdrrmo' //lower - municipal
+        pdrrmo      : 'pdrrmo',     //higher - provincial
+        mdrrmo      : 'mdrrmo',     //lower - municipal
+        evacuation  : 'evacuation'  //lowest - evacuation level
     }
 
     static keys = ['admin_type', 'date_created', 'firstname', 'lastname', 'municipality', 'username', 'email']
 
     constructor(id, admin_type, created_by, date_created, date_updated, firstname,
-        lastname, municipality, username, email, password, images) {
+        lastname, municipality, username, email, password, images, evacuation_id) {
         super()
-        this.id             = id || keyGenID("admin")//"admin-" + genID(5)
-        this.admin_type     = admin_type || AdminUser.admin_types.mdrrmo
+        this.id             = id            || keyGenID("admin")//"admin-" + genID(5)
+        this.admin_type     = admin_type    || AdminUser.admin_types.mdrrmo
         this.created_by     = created_by
-        this.date_created   = date_created || new Date()
+        this.date_created   = date_created  || new Date()
         this.firstname      = firstname
         this.lastname       = lastname
-        this.municipality   = municipality || 'admin'
+        this.municipality   = municipality  || 'admin'
         this.username       = username
         this.email          = email
         this.password       = password
-        this.date_updated   = date_updated || new Date()
-        this.images         = images || []
+        this.date_updated   = date_updated  || new Date()
+        this.images         = images        || []
+        this.evacuation_id  = evacuation_id || ""
     }
 
     toObject() {
         return {
-            id: this.id,
-            admin_type: this.admin_type,
-            created_by: this.created_by,
-            date_created: this.date_created,
-            date_updated: this.date_updated,
-            firstname: this.firstname,
-            lastname: this.lastname,
-            municipality: this.municipality,
-            username: this.username,
-            email: this.email,
-            password: this.password,
-            images: this.images
+            id              : this.id,
+            admin_type      : this.admin_type,
+            created_by      : this.created_by,
+            date_created    : this.date_created,
+            date_updated    : this.date_updated,
+            firstname       : this.firstname,
+            lastname        : this.lastname,
+            municipality    : this.municipality,
+            username        : this.username,
+            email           : this.email,
+            password        : this.password,
+            images          : this.images, 
+            evacuation_id   : this.evacuation_id
         }
     }
 
@@ -105,7 +110,9 @@ class AdminUser extends Model {
             object.username,
             object.email,
             object.password,
-            object.images)
+            object.images,
+            object.evacuation_id
+            )
     }
 } //AdminUser
 
@@ -150,18 +157,34 @@ class EvacuationCenter extends Model {
     /** any avialable facilities */
     facilities
 
+    /** used for determining the status of the evacuation center */
+    status
+
+    /** remarks for the status */
+    remarks 
+
+    /** enum for the status of the evacuation center */
+    static EvacuationStatus = {
+        active      : "active",
+        inactive    : "inactive"
+    }
+
+    
+
     /** used to show the data of the evacuation center */
     static headers = {
-        id: 'Evacuation Center Code',
-        name: 'Name',
+        id                 : 'Evacuation Center Code',
+        name               : 'Name',
         population_capacity: 'Population Capacity',
-        floor_space: 'Area (sq)',
-        exact_address: 'Address',
-        location: 'LatLng',
-        contact_numbers: 'Contact Number',
-        admin_id: 'Evacuation Center In-charge',
-        category: 'Category',
-        facilities: 'Available Facilities',
+        floor_space        : 'Area (sq)',
+        exact_address      : 'Address',
+        location           : 'LatLng',
+        contact_numbers    : 'Contact Number',
+        admin_id           : 'Evacuation Center In-charge',
+        category           : 'Category',
+        facilities         : 'Available Facilities',
+        status             : 'Status',
+        remarks            : 'Remarks'
     }
 
     static filter_keys = [
@@ -169,6 +192,7 @@ class EvacuationCenter extends Model {
         'floor_space',
         'category',
         'facilities',
+        'status'
     ]
 
     /** static enum contains type of categories used to define Evacuation Center */
@@ -235,18 +259,45 @@ class EvacuationCenter extends Model {
             type: FormModels.dropdown,
             options: []
         },
+
         facilities: {
             title: 'Facilities',
             type: FormModels.textarea
         },
 
+        status: {
+            title: 'Status',
+            type: FormModels.dropdown,
+            options: [
+                {
+                    title: "active",
+                    value: "active"
+                }
+                ,
+                {
+                    title: "inactive",
+                    value: "inactive"
+                }
+            ]
+        },
+
+        remarks: {
+            title   : 'Remarks',
+            type    :  FormModels.textarea,
+            logic   : {
+                key         : 'status',
+                condition   : '==',
+                value       : 'inactive'
+            }
+        }
     }
 
     constructor(id, name, location, population_capacity,
         floor_space, date_created = new Date(),
         date_updated = new Date(), created_by,
         exact_address, municipality, contact_numbers,
-        admin_id, category, facilities, images = []) {
+        admin_id, category, facilities, images = [],
+        status, remarks) {
         super()
         this.id = id || keyGenID('evac',5)
         this.name = name
@@ -255,37 +306,41 @@ class EvacuationCenter extends Model {
             lng: null
         }
         this.population_capacity = population_capacity
-        this.floor_space = floor_space
-        this.date_created = date_created
-        this.date_updated = date_updated
-        this.created_by = created_by
-        this.exact_address = exact_address
-        this.municipality = municipality
-        this.contact_numbers = contact_numbers
-        this.admin_id = admin_id
-        this.category = category
-        this.facilities = facilities
-        this.images = images
+        this.floor_space         = floor_space
+        this.date_created        = date_created
+        this.date_updated        = date_updated
+        this.created_by          = created_by
+        this.exact_address       = exact_address
+        this.municipality        = municipality
+        this.contact_numbers     = contact_numbers
+        this.admin_id            = admin_id
+        this.category            = category
+        this.facilities          = facilities
+        this.images              = images
+        this.status              = status || EvacuationCenter.EvacuationStatus.active
+        this.remarks             = remarks
     }
 
     /**returns instance to json object */
     toObject() {
         return {
-            id: this.id,
-            name: this.name,
-            location: this.location,
+            id                 : this.id,
+            name               : this.name,
+            location           : this.location,
             population_capacity: this.population_capacity,
-            floor_space: this.floor_space,
-            date_created: this.date_created,
-            date_updated: this.date_updated,
-            created_by: this.created_by,
-            exact_address: this.exact_address,
-            municipality: this.municipality,
-            contact_numbers: this.contact_numbers,
-            admin_id: this.admin_id,
-            category: this.category,
-            facilities: this.facilities,
-            images: this.images,
+            floor_space        : this.floor_space,
+            date_created       : this.date_created,
+            date_updated       : this.date_updated,
+            created_by         : this.created_by,
+            exact_address      : this.exact_address,
+            municipality       : this.municipality,
+            contact_numbers    : this.contact_numbers,
+            admin_id           : this.admin_id,
+            category           : this.category,
+            facilities         : this.facilities,
+            images             : this.images,
+            status             : this.status,
+            remarks            : this.remarks
         }
     }
 
@@ -311,6 +366,8 @@ class EvacuationCenter extends Model {
             object.category,
             object.facilities,
             object.images,
+            object.status,
+            object.remarks
         )
 
         return evac
