@@ -253,8 +253,8 @@
 
         <div class="section">
             <h3>Users</h3>
-            <filter-component :filter_add="filter_add" v-on:filter="onFilterReport($event)"
-                v-on:search="onSearchReport($event)" v-on:cancel="onCancelSearchReport($event)"
+            <filter-component :filter_add="filter_add" v-on:filter="onFilterPublic($event)"
+                v-on:search="onSearchPublic($event)" v-on:cancel="onCancelSearchReport($event)"
                 v-on:clear="onClearFilterReport()">
             </filter-component>
             <div class="button-container">
@@ -597,7 +597,7 @@
                 //----------DEPENDENT-USER-----------------!>
 
                 /* FILTER / SEARCH */
-                onFilterReport(filter) {
+                onFilterPublic(filter) {
                     console.log("filter %o", filter)
 
                     var view_list = this.user_list.filter((data) => {
@@ -657,8 +657,8 @@
                     this.view_user_list = view_list
                 },
 
-                onSearchReport(filter) {
-                    this.onFilterReport(filter)
+                onSearchPublic(filter) {
+                    this.onFilterPublic(filter)
 
                     this.view_user_list = this.view_user_list.filter((data) => {
                         var object = {
@@ -667,7 +667,7 @@
                         let user_search = SearchObject(object, filter.searchTerm)
 
                         let found = data.dependents.map((dep) => {
-                            return SearchObject(dep)
+                            return SearchObject(dep, filter.searchTerm)
                         }).filter((dep) => {
                             return dep
                         })
@@ -677,7 +677,7 @@
                 },
 
                 onCancelSearchReport(filter) {
-                    this.onFilterReport(filter)
+                    this.onFilterPublic(filter)
                 },
 
                 onClearFilterReport() {

@@ -25,28 +25,28 @@ class MapHandlerClass {
             zoom: 15,
             disableDefaultUI: true,
             draggableCursor:'crosshair',
-            styles: [
-            // {
-            //     featureType: 'all',
-            //     stylers: [
-            //     { "color": "#C0C0C0" }
-            //     ]
-            // }
-            {
-                featureType: 'poi',
-                stylers: [
-                { "visibility": "off" }
-                ]
-            }
-            ,{
+            styles: [{
+                featureType: 'all',
+                stylers: [{
+                    saturation: -80
+                }]
+            }, {
                 featureType: 'road.arterial',
                 elementType: 'geometry',
-                stylers: [
-                { hue: '#00ffee' },
-                { saturation: 50 }
+                stylers: [{
+                        hue: '#00ffee'
+                    },
+                    {
+                        saturation: 50
+                    }
                 ]
-            }
-            ]
+            }, {
+                featureType: 'poi.business',
+                elementType: 'labels',
+                stylers: [{
+                    visibility: 'off'
+                }]
+            }]
         });
 
         const isPinEnabled = this.isPinEnabled
