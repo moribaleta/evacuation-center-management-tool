@@ -204,26 +204,28 @@
             <div class="loader"></div>
         </div>
         <div class="section" v-if="!isLoading">
-            <h3>Municipality: {{user.municipality == '0' ? 'Public' : user.municipality}}</h3>
-            <div class="section" v-if="municipality.length > 0">
-                <table class="table">
-                    <tr>
-                        <th>
-                            #
-                        </th>
-                        <th>
-                            Municipality
-                        </th>
-                        <th>
-                            Current Population
-                        </th>
-                    </tr>
-                    <tr v-for="item,index in muni_list">
-                        <td>{{index + 1}}</td>
-                        <td>{{item.name}}</td>
-                        <td>{{item.count}}</td>
-                    </tr>
-                </table>
+            <div class="container" v-if="user.admin_type != 'evacuation'">
+                <h3>Municipality: {{user.municipality == '0' ? 'Public' : user.municipality}}</h3>
+                <div class="section" v-if="municipality.length > 0">
+                    <table class="table">
+                        <tr>
+                            <th>
+                                #
+                            </th>
+                            <th>
+                                Municipality
+                            </th>
+                            <th>
+                                Current Population
+                            </th>
+                        </tr>
+                        <tr v-for="item,index in muni_list">
+                            <td>{{index + 1}}</td>
+                            <td>{{item.name}}</td>
+                            <td>{{item.count}}</td>
+                        </tr>
+                    </table>
+                </div>
             </div>
             <h3>Evacuations</h3>
             <div class="section" v-if="evac_list.length > 0">
@@ -314,7 +316,8 @@
                 ],
 
                 /* EVACUATIONS */
-                population_dict: {},
+                population_dict : {},
+                family_dict     : {},
                 muni_list: [],
                 
                 evac_list: [],
@@ -348,6 +351,12 @@
                         console.log(error)
                     })
                 }, //fetchAllAdmins
+
+
+                fetchAllPending(){
+
+                },
+
 
                 fetchEvacationCenter() {
                     this.isLoading = true
