@@ -222,7 +222,7 @@
           console.log(user)
           if (user) {
             console.log('success')
-            window.open('index.html', "_self")
+            window.open('main.html', "_self")
           }
         },
         login() {
@@ -253,7 +253,7 @@
           if (data != "error") {
             console.log("login %o", data)
             sessionStorage.setItem('user', JSON.stringify(data.data.toObject()))
-            window.open('index.html', "_self")
+            window.open('main.html', "_self")
           } else {
             alert("error")
           }

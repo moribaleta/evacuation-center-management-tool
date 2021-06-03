@@ -47,7 +47,7 @@ class UserHandler extends DataHandlerType {
         return new Promise((resolve, reject) => {
             console.log(username + "--" + password)
             let ref = validateEmail(username) ? "email" : "username"
-                
+
             this.firestore.collection('admin_user')
                 .where(ref, "==", username)
                 .where("password", "==", password)
@@ -119,7 +119,7 @@ class UserHandler extends DataHandlerType {
      * used to get a single admin by id
      * @param {*} userid - admin id to select
      */
-    getAdminById(userid = ""){
+    getAdminById(userid = "") {
         return new Promise((resolve, reject) => {
 
             if (userid.isEmpty()) {
@@ -130,33 +130,33 @@ class UserHandler extends DataHandlerType {
             }
 
             this.firestore.collection('admin_user')
-            .where('id','==',userid)
-            .get().then((querySnapshot) => {
-                var users
-                querySnapshot.forEach((doc) => {
-                    console.log(doc.id, " => ", doc.data());
-                    let data = doc.data()
-                    let id = doc.id
-                    const object = parseObject({
-                        id,
-                        ...data
-                    })
-                    //users.push(AdminUser.parse(object))
-                    users = AdminUser.parse(object)
+                .where('id', '==', userid)
+                .get().then((querySnapshot) => {
+                    var users
+                    querySnapshot.forEach((doc) => {
+                        console.log(doc.id, " => ", doc.data());
+                        let data = doc.data()
+                        let id = doc.id
+                        const object = parseObject({
+                            id,
+                            ...data
+                        })
+                        //users.push(AdminUser.parse(object))
+                        users = AdminUser.parse(object)
+                    });
+
+                    var message = new Message()
+                    message.data = users
+                    resolve(message)
+                })
+                .catch(function (error) {
+                    console.log("Error getting documents: ", error);
+                    reject(error)
                 });
-
-                var message = new Message()
-                message.data = users
-                resolve(message)
-            })
-            .catch(function (error) {
-                console.log("Error getting documents: ", error);
-                reject(error)
-            });
         })
-    }//getAdminById
+    } //getAdminById
 
-    getAdminUserMunicipality(municipality){
+    getAdminUserMunicipality(municipality) {
         return new Promise((resolve, reject) => {
             this.firestore.collection('admin_user')
                 .where('municipality', '==', municipality)
@@ -504,7 +504,7 @@ class PublicUserHandler extends UserHandler {
     } //getPublicUserHistory
 
     /** returns the public history of the user or general if given empty id */
-    getActivePublicUserHistory(municipality ) {
+    getActivePublicUserHistory(municipality) {
         return new Promise((resolve, reject) => {
             const ref = this.firestore.collection(UserHandler.tables.public_user_history)
             var query = ref
@@ -514,9 +514,9 @@ class PublicUserHandler extends UserHandler {
             }
 
             //checks if the public user is not yet cleared
-            query = query.where('date_cleared','==','')
+            query = query.where('date_cleared', '==', '')
             query = query.orderBy('date_admitted', 'desc')
-            
+
             query.get().then(function (querySnapshot) {
                 var history = []
                 querySnapshot.forEach(function (doc) {
@@ -537,6 +537,86 @@ class PublicUserHandler extends UserHandler {
             });
         })
     } //getPublicUserHistory
+
+
+
+    getActivePublicUserHistoryAllPopulation(municipality) {
+        return new Promise((resolve, reject) => {
+
+            const history_ref = this.firestore.collection(UserHandler.tables.public_user_history)
+            const population_ref = this.firestore.collection(UserHandler.tables.public_user)
+
+            var query_history = history_ref
+            var query_population = population_ref
+
+            if (municipality && !municipality.trim().isEmpty() && municipality != 0) {
+                query_history = query_history.where('municipality', '==', municipality)
+            }
+
+            //checks if the public user is not yet cleared
+            query_history = query_history.where('date_cleared', '==', '')
+            query_history = query_history.orderBy('date_admitted', 'desc')
+
+            //query_population = query_population.where('id', '==', )
+
+            query_history.get().then((query_historySnapshot) => {
+
+                var history_dict = {
+                    //user_id : { history, user }
+                }
+
+                var populationPromises = []
+
+                query_historySnapshot.forEach((doc) => {
+                    let data = doc.data()
+                    let id = doc.id
+                    const object = parseObject({
+                        id,
+                        ...data
+                    })
+                    let history = PublicUserHistory.parse(object)
+
+                    history_dict[history.user_id] = {
+                        history,
+                    }
+
+                    let population_promise = query_population.doc(history.user_id).get()
+                        .then((doc) => {
+                            if (doc.exists) {
+                                let data = doc.data()
+                                let id = doc.id
+                                const object = parseObject({
+                                    id,
+                                    ...data
+                                })
+                                return PublicUser.parse(object)
+                            } else {
+                                console.log("No such document! -> " + history.user_id);
+                                return null
+                            }
+                        })
+                    populationPromises.push(population_promise)
+                })
+
+                Promise.all(populationPromises)
+                .then((users) => {
+                    users
+                    .map((user) =>  {
+                        history_dict[user.id]['user'] = user
+                    })
+                    var message     = new Message()
+                    message.data    = Object.keys(history_dict).map((key) => {
+                        return history_dict[key]
+                    })
+                    resolve(message)
+                })
+
+            }).catch(function (error) {
+                console.log("Error getting documents: ", error);
+                reject(error)
+            });
+        })
+    }
 
 
 
@@ -700,6 +780,39 @@ class EvacuationHandler extends PublicUserHandler {
         })
     } //getEvacuationCenters
 
+    ///gets the evacuation center by id
+    getEvacuationById(id) {
+        return new Promise((resolve, reject) => {
+
+            var ref = this.firestore.collection(UserHandler.tables.evacuation_centers)
+
+            ref = ref.where('id', '==', id)
+
+            ref.get().then(function (querySnapshot) {
+                var evacuations = []
+                querySnapshot.forEach(function (doc) {
+                    //console.log(doc.id, " => ", doc.data());
+                    const data = doc.data()
+                    const id = doc.id
+                    const object = parseObject({
+                        id,
+                        ...data
+                    })
+
+                    evacuations.push(EvacuationCenter.parse(object))
+                });
+
+                var message = new Message()
+
+                message.data = evacuations
+                resolve(message)
+
+            }).catch(function (error) {
+                reject(error)
+            });
+        })
+    } //getEvacuationById
+
     /** overrides images */
     addEvacationCenter(params = new EvacuationCenter(), images = []) {
         if (images.length > 0) {
@@ -818,7 +931,7 @@ class EvacuationHandler extends PublicUserHandler {
         })
     } //addEvacuationHistory
 
-    addLargeEvacuationHistory( params = []) {
+    addLargeEvacuationHistory(params = []) {
         return new Promise((resolve, reject) => {
             var db = this.firestore
             var batch = db.batch();
@@ -1437,7 +1550,10 @@ class DonorHandler extends MunicipalInventoryHandler {
                     let data = doc.data()
                     let id = doc.id
 
-                    const object = parseObject({id,...data})
+                    const object = parseObject({
+                        id,
+                        ...data
+                    })
                     reports.push(DonorsReport.parse(object))
                 });
                 var message = new Message()

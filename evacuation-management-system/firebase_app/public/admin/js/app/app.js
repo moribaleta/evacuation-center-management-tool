@@ -6,7 +6,7 @@ var header = new Vue({
         logo: "resources/images/logo.png",
         header_items: [{
             id: 'content',
-            href: 'contents.html',
+            href: 'main.html',
             icon: 'language',
             title: 'Contents'
         },
@@ -68,10 +68,10 @@ methods: {
             let user = JSON.parse(sessionStorage.getItem('user'))
             user = AdminUser.parse(user)
 
-            if (user.admin_type == 'mdrrmo') {
+            if (user.admin_type == AdminUser.AdminTypes.mdrrmo || user.admin_type == AdminUser.AdminTypes.evacuation) {
                 this.header_items = [{
                     id: 'content',
-                    href: 'contents.html',
+                    href: 'main.html',
                     icon: 'language',
                     title: 'Contents'
                 },

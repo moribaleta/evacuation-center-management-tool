@@ -36,8 +36,8 @@ class EmergencyMarker extends Model {
 
         var emergencymarker = new google.maps.Marker({
             position: position,
-            map: map,
-            icon: 'resources/images/emergency_32.png',
+            map     : map,
+            icon    : 'resources/images/emergency_32.png',
         });
 
         var id = "location-" + genID(5)
@@ -79,23 +79,32 @@ class EvacuationMarker extends EmergencyMarker {
 
     static create(evac, position, map) {
 
+        let available = evac.status == EvacuationCenter.EvacuationStatus.active
+
         var emergencymarker = new google.maps.Marker({
             position: position,
-            map: map,
-            icon: 'resources/images/hospital_32.png',
+            map     : map,
+            icon    : available ? 'resources/images/hospital_32.png' : 'resources/images/no_available.png', 
         });
 
         var id = "evacuation-" + genID(5)
         var contentMessage =
-            `
-        <h4>${evac.name}</h4>
-        <p>Evacuation Marker</p>
-        <p>population capacity: ${evac.population_capacity}</p>
-        <p>floor space: ${evac.floor_space}</p>
-        <p>municipality: ${evac.municipality}</p>
-        <p>contac info: ${evac.contact_numbers}</p>
-        <p>exact address: ${evac.exact_address}</p>
-        <p>lat: ${evac.location.lat}, lng: ${evac.location.lng}</p>
+        `
+            <h4>${evac.name}</h4>
+            ${
+                available ? 
+                ("<p>Evacuation available</p>" +
+                 "<p style='color:green;'>active</p>"
+                )  :
+                ("<p style='color:red;'>Evacuation not available</p>" +
+                `<p>Remarks: ${evac.remarks}<p>`)
+            }
+            <p>population capacity: ${evac.population_capacity}</p>
+            <p>floor space: ${evac.floor_space}</p>
+            <p>municipality: ${evac.municipality}</p>
+            <p>contac info: ${evac.contact_numbers}</p>
+            <p>exact address: ${evac.exact_address}</p>
+            <p>lat: ${evac.location.lat}, lng: ${evac.location.lng}</p>
         `;
 
         var infoEmergency = new google.maps.InfoWindow({
@@ -304,7 +313,11 @@ class MapApp {
                 const emergency_node = MapRouter.getNearestNode(emergency_location)
 
                 //FILTER LIST BASED ON ITS DISTANCE FROM THE ORIGIN
-                const _filter_evacs = this.evacuation_center_list.map((evac) => {
+                const _filter_evacs = this.evacuation_center_list
+                .filter((evac) => {
+                    return evac.status == EvacuationCenter.EvacuationStatus.active
+                })
+                .map((evac) => {
                     let distance = MapRouter.getPathOfTwoPoints(emergency_node, evac.node, emergency_location, evac.location)
                     //console.log("distance %o", distance)
                     evac['distance'] = distance.distance
@@ -389,7 +402,7 @@ class MapApp {
                 test_output["classified_result"] = computed_results
                 test_output["classified"] = min
 
-                console.log("output %o", test_output)
+                //console.log("output %o", test_output)
 
                 obs.next(test_output)
             })

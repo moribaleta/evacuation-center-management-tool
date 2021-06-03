@@ -53,7 +53,7 @@ class AdminUser extends Model {
     /**
      * used to determine the type of access of user
      */
-    static admin_types = {
+    static AdminTypes = {
         pdrrmo      : 'pdrrmo',     //higher - provincial
         mdrrmo      : 'mdrrmo',     //lower - municipal
         evacuation  : 'evacuation'  //lowest - evacuation level
@@ -65,7 +65,7 @@ class AdminUser extends Model {
         lastname, municipality, username, email, password, images, evacuation_id) {
         super()
         this.id             = id            || keyGenID("admin")//"admin-" + genID(5)
-        this.admin_type     = admin_type    || AdminUser.admin_types.mdrrmo
+        this.admin_type     = admin_type    || AdminUser.AdminTypes.mdrrmo
         this.created_by     = created_by
         this.date_created   = date_created  || new Date()
         this.firstname      = firstname

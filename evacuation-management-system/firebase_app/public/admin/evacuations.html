@@ -374,7 +374,7 @@
                             }
                         })
 
-                        this.evacFormModel.municipality.isHidden = this.user.admin_type == AdminUser.admin_types.mdrrmo
+                        this.evacFormModel.municipality.isHidden = this.user.admin_type == AdminUser.AdminTypes.mdrrmo
 
                     } catch (err) {
                         console.log(err)
@@ -422,7 +422,7 @@
                         this.admins = message.data
                         this.evacFormModel.admin_id.options = this.admins
                         .filter(admin => {
-                            return admin.admin_type == AdminUser.admin_types.evacuation
+                            return admin.admin_type == AdminUser.AdminTypes.evacuation
                         })
                         .map(admin => {
                             this.admins_selection[admin.id] =
@@ -479,7 +479,7 @@
                     }
                     this.evac_data_input.created_by = this.user.id
                     this.admin_id = this.user.id
-                    this.evac_data_input.municipality = this.user.admin_type == AdminUser.admin_types.mdrrmo ? this.user.municipality : ''
+                    this.evac_data_input.municipality = this.user.admin_type == AdminUser.AdminTypes.mdrrmo ? this.user.municipality : ''
                     $('#editorModal').modal()
                 }, //onAddItem
 

@@ -4,7 +4,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Contents</title>
+    <title>Main</title>
 
     <!-- update the version number as needed -->
     <script defer src="/__/firebase/7.19.1/firebase-app.js"></script>
@@ -131,6 +131,24 @@
                                         Updated: {{ formatDate(view_item.date_updated)}}
                                     </div>
                                 </div>
+                            </li>
+
+                            <li class="list-group-item">
+                                <p class="item-label">
+                                    Status:
+                                </p>
+                                <p class="item-value">
+                                    {{view_item.status}}
+                                </p>
+                            </li>
+
+                            <li class="list-group-item" v-if="view_item.status == 'inactive'">
+                                <p class="item-label">
+                                    Remarks:
+                                </p>
+                                <p class="item-value">
+                                    {{view_item.remarks}}
+                                </p>
                             </li>
 
                             <li class="list-group-item">
@@ -334,22 +352,27 @@
                 fetchEvacationCenter() {
                     this.isLoading = true
 
-                    DataHandler.getActivePublicUserHistory(this.user.municipality).then((message) => {
+
+                    DataHandler.getActivePublicUserHistoryAllPopulation(this.user.municipality).then((message) => {
+
+                        console.log("objects %o", message)
 
                         var muni_dict = {}
 
                         this.municipality.forEach((muni) => {
                             muni_dict[muni] = 0
-                            ////console.log("muni_dict %s %o", muni, muni_dict[muni])
                         })
 
-                        ////console.log("log %o", message)
-
                         message.data.map(data => {
-                            this.population_dict[data.evac_id] = this.population_dict[data.evac_id] || 0
-                            this.population_dict[data.evac_id]++
-                            muni_dict[data.municipality] = muni_dict[data.municipality] || 0 
-                            muni_dict[data.municipality]++
+                            let municipality    = data.history.municipality
+                            let evac_id         = data.history.evac_id
+                            
+                            let user_count      = (1 + data.user.dependents.length)
+
+                            this.population_dict[evac_id] = this.population_dict[evac_id] || 0
+                            this.population_dict[evac_id] += user_count
+                            muni_dict[municipality] = muni_dict[municipality] || 0 
+                            muni_dict[municipality] += user_count
                         })
 
                         let object = Object.keys(muni_dict).map((name) => {
@@ -363,20 +386,24 @@
                             return rhs.count - lhs.count
                         })
 
-                        //console.log(muni_dict)
-                        //console.log(this.muni_list)
-                        //console.log(this.population_dict)
+                        var promiseEvacuation;
 
-                        DataHandler.getEvacuationCenters(this.user.municipality).then((data) => {
+                        if (this.user.admin_type == AdminUser.AdminTypes.evacuation) {
+                            promiseEvacuation = DataHandler.getEvacuationById(this.user.evacuation_id)
+                        } else {
+                            promiseEvacuation = DataHandler.getEvacuationCenters(this.user.municipality)
+                        }
+
+                        promiseEvacuation.then((data) => {
                             this.evac_list = data.data
                             this.view_list = data.data
-
-                            //console.log("evac_list %o", this.evac_list)
                         }).catch(err => {
                             console.log(err)
                         }).finally(() => {
                             this.isLoading = false
                         })
+
+
                     }).catch(err => {
                         console.log(err)
                     })

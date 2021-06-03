@@ -476,7 +476,7 @@
                         return true
                     }).then(() => {
                         this.isLoading.reports = true
-                        DataHandler.getDonorReports(null, this.user.admin_type == AdminUser.admin_types
+                        DataHandler.getDonorReports(null, this.user.admin_type == AdminUser.AdminTypes
                             .pdrrmo ? 10 : 1000).then((message) => {
                             //this.donor_report_list = message.data
                             console.log("data %o", message)
