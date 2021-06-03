@@ -15,6 +15,27 @@ class Model {
     images = []
 } //Model
 
+
+/**
+ * class for Status update
+ */
+ class StatusModel extends Model {
+
+    /**
+     * value of StatusType determining the status of the model
+     * @model StatusType
+     */
+    status
+
+}//StatusModel
+
+/** static cases for status type */
+const StatusType = {
+    pending     : 'pending',
+    approved    : 'approved',
+    rejected    : 'rejected'
+}
+
 /** statics cases for form model type */
 const FormModels = {
     text    : 'text',
@@ -26,6 +47,24 @@ const FormModels = {
     password: 'password',
     email   : 'email',
     compound: 'compound'
+}
+
+class FormModelsUtilities {
+
+    /**
+     * helper value for dropdown of status
+     */
+    static StatusDropdown = {
+        title: 'Status',
+        type: FormModels.dropdown,
+        options: Object.keys(StatusType).map((key) => {
+            return {
+                title: key,
+                value: key
+            }
+        })
+    }
+
 }
 
 const SupplyStatus = {
@@ -518,6 +557,7 @@ class EvacuationHistory extends Model {
 
 } //EvacuationHistory
 
+
 /**
  * object used in generating results
  */
@@ -532,17 +572,15 @@ class MOABCParameters extends Model {
     active
 
     static parameters_shown = {
-        id: 'id',
-        date_created: 'Date Created',
-        date_updated: 'Date Updated',
-        created_by: 'Created By User',
-        max_length: 'Maximum Number of Nectars per Food Source',
+        id             : 'id',
+        date_created   : 'Date Created',
+        date_updated   : 'Date Updated',
+        created_by     : 'Created By User',
+        max_length     : 'Maximum Number of Nectars per Food Source',
         population_size: 'Maximum # of Population',
-        trial_limit: 'Trial Limit',
-        max_epoch: 'Maximum Generation',
-        /* min_shuffle: 'Minimum Shuffle Value',
-        max_shuffle: 'Maximum Shuffle Value', */
-        is_active: 'Is Active'
+        trial_limit    : 'Trial Limit',
+        max_epoch      : 'Maximum Generation',
+        is_active      : 'Is Active'
     }
 
     constructor(id, date_created, date_updated, created_by, max_length, max_val, population_size, trial_limit, max_epoch, min_shuffle, max_shuffle, is_active) {
@@ -863,7 +901,7 @@ class EvacuationSupplyType extends Model {
 
 
 /** defines the object of Public User */
-class PublicUser extends Model {
+class PublicUser extends StatusModel {
 
     /** firstname of the public */
     firstname
@@ -935,7 +973,8 @@ class PublicUser extends Model {
         disabilities: 'Disabilities',
         employment: 'Employment',
         medical_needs: 'Medical Needs',
-        is_active: 'Is Admitted'
+        is_active: 'Is Admitted',
+        status: 'Status'
     }
 
     static visiblekeys = [
@@ -952,7 +991,8 @@ class PublicUser extends Model {
         'disabilities',
         'employment',
         'medical_needs',
-        'is_active'
+        'is_active',
+        'status'
     ]
 
     /** defines the form of the model to be shown to create an entry */
@@ -1033,7 +1073,7 @@ class PublicUser extends Model {
 
     constructor(id, created_by, date_created, date_updated, firstname, lastname, middleinit,
         municipality, username, password, email, birthdate, phone_number, address, sex,
-        disabilities, employment, medical_needs, dependents, is_active) {
+        disabilities, employment, medical_needs, dependents, is_active, status, images) {
         super()
         this.id = id || keyGenID("publicuser", 5) //"publicuser-" + genID(5)
         this.created_by = created_by
@@ -1055,6 +1095,8 @@ class PublicUser extends Model {
         this.employment = employment || ""
         this.medical_needs = medical_needs || ""
         this.is_active  = is_active  || false
+        this.status     = status || StatusType.pending
+        this.images     = images || []
 
         this.dependents = (dependents || []).map((dep) => {
             return DependentUser.parse(dep)
@@ -1063,28 +1105,30 @@ class PublicUser extends Model {
 
     toObject() {
         return {
-            id: this.id,
-            created_by: this.created_by,
-            date_created: this.date_created,
-            date_updated: this.date_updated,
-            firstname: this.firstname,
-            lastname: this.lastname,
-            middleinit: this.middleinit,
-            municipality: this.municipality,
-            username: this.username,
-            password: this.password,
-            email: this.email,
-            birthdate: this.birthdate,
-            phone_number: this.phone_number,
-            address: this.address,
-            sex: this.sex,
-            disabilities: this.disabilities,
-            employment: this.employment,
+            id           : this.id,
+            created_by   : this.created_by,
+            date_created : this.date_created,
+            date_updated : this.date_updated,
+            firstname    : this.firstname,
+            lastname     : this.lastname,
+            middleinit   : this.middleinit,
+            municipality : this.municipality,
+            username     : this.username,
+            password     : this.password,
+            email        : this.email,
+            birthdate    : this.birthdate,
+            phone_number : this.phone_number,
+            address      : this.address,
+            sex          : this.sex,
+            disabilities : this.disabilities,
+            employment   : this.employment,
             medical_needs: this.medical_needs,
-            dependents: (this.dependents || []).map((val) => {
+            dependents   : (this.dependents || []).map((val) => {
                 return val.toObject()
             }),
-            is_active: this.is_active
+            is_active: this.is_active,
+            status   : this.status,
+            images   : this.images
         }
     }
 
@@ -1113,7 +1157,9 @@ class PublicUser extends Model {
             object.employment,
             object.medical_needs,
             object.dependents,
-            object.is_active
+            object.is_active,
+            object.status,
+            object.images
         )
     }
 } //PublicUser
@@ -1188,10 +1234,13 @@ class DependentUser extends PublicUser {
             object.medical_needs,
         )
     }
-}
+}//DependentUser
+
+
+
 
 /** defines the object of history of each public user */
-class PublicUserHistory extends Model {
+class PublicUserHistory extends StatusModel {
 
     /** user id of the history */
     user_id
@@ -1219,7 +1268,7 @@ class PublicUserHistory extends Model {
         date_cleared: {
             title: 'Date Cleared',
             type: FormModels.datetime
-        }
+        }, 
     }
 
     static headers = [
@@ -1233,7 +1282,7 @@ class PublicUserHistory extends Model {
     ]
     
 
-    constructor(id, date_created, date_updated, created_by, user_id, evac_id, date_admitted, date_cleared, municipality) {
+    constructor(id, date_created, date_updated, created_by, user_id, evac_id, date_admitted, date_cleared, municipality, status) {
         super()
         this.id = id || keyGenID("publicuserhistory") //"publicuserhistory-" + genID(5)
         this.date_created   = date_created  || new Date()
@@ -1244,20 +1293,22 @@ class PublicUserHistory extends Model {
         this.municipality   = municipality  || ""
         this.user_id        = user_id
         this.evac_id        = evac_id
+        this.status         = status        || StatusType.pending
     }
 
 
     toObject() {
         return {
-            id: this.id,
-            date_created: this.date_created,
-            date_updated: this.date_updated,
+            id           : this.id,
+            date_created : this.date_created,
+            date_updated : this.date_updated,
             date_admitted: this.date_admitted,
-            date_cleared: this.date_cleared,
-            created_by: this.created_by,
-            user_id: this.user_id,
-            evac_id: this.evac_id,
-            municipality: this.municipality
+            date_cleared : this.date_cleared,
+            created_by   : this.created_by,
+            user_id      : this.user_id,
+            evac_id      : this.evac_id,
+            municipality : this.municipality,
+            status       : this.status
         }
     }
 
@@ -1271,7 +1322,8 @@ class PublicUserHistory extends Model {
             object.evac_id,
             object.date_admitted,
             object.date_cleared,
-            object.municipality
+            object.municipality,
+            object.status
         )
     }
 
@@ -1366,36 +1418,42 @@ class DonorsOrganization extends Model {
     constructor(id, created_by, date_created, date_updated,
         name, business, address,
         email, phone_number, contact_person,
-        contact_email, contact_phone_number) {
+        contact_email, contact_phone_number, 
+        status,
+        images) {
         super()
-        this.id = id || keyGenID("donororg") //"donororg-" + genID(5)
-        this.created_by = created_by || '0'
-        this.date_created = date_created || new Date()
-        this.date_updated = date_updated || new Date()
-        this.name = name
-        this.business = business
-        this.address = address
-        this.email = email
-        this.phone_number = phone_number
-        this.contact_person = contact_person
-        this.contact_email = contact_email
+        this.id                   = id || keyGenID("donororg")  //"donororg-" + genID(5)
+        this.created_by           = created_by || '0'
+        this.date_created         = date_created || new Date()
+        this.date_updated         = date_updated || new Date()
+        this.name                 = name
+        this.business             = business
+        this.address              = address
+        this.email                = email
+        this.phone_number         = phone_number
+        this.contact_person       = contact_person
+        this.contact_email        = contact_email
         this.contact_phone_number = contact_phone_number
+        this.status               = status || StatusType.pending
+        this.images               = images
     }
 
     toObject() {
         return {
-            id: this.id,
-            created_by: this.created_by,
-            date_created: this.date_created,
-            date_updated: this.date_updated,
-            name: this.name,
-            business: this.business,
-            address: this.address,
-            email: this.email,
-            phone_number: this.phone_number,
-            contact_person: this.contact_person,
-            contact_email: this.contact_email,
+            id                  : this.id,
+            created_by          : this.created_by,
+            date_created        : this.date_created,
+            date_updated        : this.date_updated,
+            name                : this.name,
+            business            : this.business,
+            address             : this.address,
+            email               : this.email,
+            phone_number        : this.phone_number,
+            contact_person      : this.contact_person,
+            contact_email       : this.contact_email,
             contact_phone_number: this.contact_phone_number,
+            status              : this.status,
+            images              : this.images
         }
     }
 
@@ -1412,7 +1470,9 @@ class DonorsOrganization extends Model {
             object.phone_number,
             object.contact_person,
             object.contact_email,
-            object.contact_phone_number
+            object.contact_phone_number,
+            object.status,
+            object.images
         )
     }
 } //DonorsOrganization
@@ -1520,11 +1580,9 @@ class DonorsIndividual extends Model {
         },
     }
 
-
-
     constructor(id, created_by, date_created, date_updated, firstname, lastname, middleinit,
         email, birthdate, phone_number, address, sex,
-        employment_position, employment_business) {
+        employment_position, employment_business, status, images) {
         super()
         this.id = id || keyGenID("donorindv", 5) //"publicuser-" + genID(5)
         this.created_by = created_by || '0'
@@ -1541,24 +1599,28 @@ class DonorsIndividual extends Model {
         this.sex = sex || 0
         this.employment_position = employment_position || ""
         this.employment_business = employment_business || ""
+        this.status = status || StatusType.pending
+        this.images = images        
     }
 
     toObject() {
         return {
-            id: this.id,
-            created_by: this.created_by,
-            date_created: this.date_created,
-            date_updated: this.date_updated,
-            firstname: this.firstname,
-            lastname: this.lastname,
-            middleinit: this.middleinit,
-            email: this.email,
-            birthdate: this.birthdate,
-            phone_number: this.phone_number,
-            address: this.address,
-            sex: this.sex,
+            id                 : this.id,
+            created_by         : this.created_by,
+            date_created       : this.date_created,
+            date_updated       : this.date_updated,
+            firstname          : this.firstname,
+            lastname           : this.lastname,
+            middleinit         : this.middleinit,
+            email              : this.email,
+            birthdate          : this.birthdate,
+            phone_number       : this.phone_number,
+            address            : this.address,
+            sex                : this.sex,
             employment_position: this.employment_position,
             employment_business: this.employment_business,
+            status             : this.status,
+            images             : this.images
         }
     }
 
@@ -1578,6 +1640,8 @@ class DonorsIndividual extends Model {
             object.sex,
             object.employment_position,
             object.employment_business,
+            object.status,
+            object.images
         )
     }
 } //DonorsIndividual

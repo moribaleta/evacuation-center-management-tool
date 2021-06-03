@@ -60,7 +60,15 @@
             <li><a href="users.html">Users</a></li>
             <li><a href="#">User History</a></li>
         </ul>
+        
         <!-- MODAL -->
+        <status-modal 
+            modal_id    = "status_modal_update"
+            title       = "Update Admission Status"
+            :status     = "data_input.status"
+            v-on:save   = "onSaveStatus($event)">
+        </status-modal>
+
         <div id="editorModal" class="modal fade" role="dialog">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -116,69 +124,6 @@
 
         <!-- CONTENT -->
         <div class="section">
-            <!-- HEADER FILTER -->
-            <!-- <div class="header-container">
-                <div class="well input-container" style="padding:10px; width: 100%; min-height: 70px">
-                    <div class="col col-md-1">
-                        <p class="input-label">YEAR</p>
-                        <select id="input-type" class="input input-select" v-model="filter.year">
-                            <option v-for="(item,index) in selections.years"
-                                :selected="index == filter.year ? true : false">{{item
-                            ? item : "NOT AVAILABLE"}}</option>
-                        </select>
-                    </div>
-                    <div class="col col-md-2">
-                        <p class="input-label">MONTH</p>
-                        <select id="input-type" class="input input-select" v-model="filter.month">
-                            <option v-for="(item,index) in selections.months"
-                                :selected="index == filter.month ? true : false">
-                                {{item}}</option>
-                        </select>
-                    </div>
-                    <div class="col col-md-4">
-                        <p class="input-label">EVACUATION CENTER</p>
-                        <select id="input-district" class="input input-select" v-model="filter.station">
-                            <option :selected="filter.station == 'all' ? true : false">
-                                all</option>
-                            <option v-for="(item,index) in evac_list"
-                                :selected="index == filter.station ? true : false">
-                                {{item.name}}</option>
-                        </select>
-                    </div>
-                    <div class="col col-md-3">
-                        <p class="input-label">MUNICIPAL</p>
-                        <select id="input-district" class="input input-select" v-model="filter.municipal">
-                            <option :selected="filter.municipal == 'all' ? true : false">
-                                all</option>
-                            <option v-for="(item,index) in municipalities"
-                                :selected="index == filter.municipal ? true : false">
-                                {{item.toUpperCase()}}</option>
-                        </select>
-                    </div>
-                    <div class="col col-md-1 button-filter-container">
-                        <button type="button" class="btn btn-warning button-view button-filter"
-                            v-on:click="filterList()">filter
-                        </button>
-                    </div>
-
-                </div>
-                <div class="button-container">
-                    <button type="button" class="btn btn-info button-view" v-if="!public_user.is_active"
-                        v-on:click="admitHistory()">
-                        ADMIT USER
-                    </button>
-
-                    <button type="button" class="btn btn-info button-view" v-on:click="addPastHistory()">
-                        ADD
-                        PAST HISTORY
-                    </button>
-                    <button type="button" class="btn btn-info button-view" v-on:click="openGenerateReport()">
-                        GENERATE
-                        REPORT
-                    </button>
-                </div>
-            </div> -->
-
             <filter-component :filter_add="filter_add" v-on:filter="onFilterReport($event)"
                 v-on:search="onSearchReport($event)" v-on:cancel="onCancelSearchReport($event)"
                 v-on:clear="onClearFilterReport()">
@@ -198,28 +143,6 @@
             <!-- TABLE VIEW -->
             <div class="table-container" v-if="!isDataLoading">
                 <div class="table" id="tableData">
-                    <!-- <div class="well" v-if="active_history != null">
-                        <div class="row">
-                            <div class="col col-md-3 item-info">
-                                <p class="item-value">{{1}}.</p>
-                            </div>
-                            <div class="col col-md-3 item-info " v-for="info,index in header">
-                                <div v-if="info == 'evac_id'">
-                                    <p class="item-label">EVACUATION NAME</p>
-                                    <p class="item-value">{{getEvacFromId(active_history.evac_id).name}}</p>
-                                </div>
-                                <entry-single-component v-if="info != 'evac_id'" :label="info"
-                                    :value="active_history[info]">
-                                </entry-single-component>
-                            </div>
-                            <div class="col col-md-12">
-                                <button type="button" class="btn btn-default btn-warning" v-if="public_user.is_active"
-                                    v-on:click="clearAdmission()">Clear Admission</button>
-                                <button class="btn btn-default btn-danger"
-                                    v-on:click="deleteAdmission()">delete</button>
-                            </div>
-                        </div>
-                    </div> -->
                     <div class="well" v-for="item,index in reports_view">
                         <div class="row">
                             <div class="col col-md-3 item-info">
@@ -237,9 +160,19 @@
                                     :value="item[info]"
                                     :showtime="true">
                                 </entry-single-component>
+                                
                             </div>
+                            <div class="col col-md-3 item-info ">
+                                <entry-single-component 
+                                    label="Status" 
+                                    :value="item.status">
+                                </entry-single-component>
+                            </div>
+                            
+
                             <div class="col col-md-12">
                                 <button class="btn btn-default btn-info" v-on:click="editItem(index)">edit</button>
+                                <button class="btn btn-default btn-info" v-on:click="onUpdateStatus(index)">update status</button>
                                 <button class="btn btn-default btn-danger"
                                     v-on:click="deleteItem(index)">delete</button>
                             </div>
@@ -359,6 +292,24 @@
                     $('#editorModal').modal()
                 }, //editItem
 
+                onUpdateStatus(index) {
+                    const user = this.reports_view[index]
+                    this.isEdit = true
+                    this.data_input = PublicUserHistory.parse(user.toObject())
+                    this.data_input.date_updated = new Date()
+                    this.user_status = this.data_input.status
+                    $('#status_modal_update').modal()
+                },
+
+                onSaveStatus(status) {
+                    console.log("updateUserStatus - status %o", status)
+                    this.data_input.status = status
+                    this.data_input.date_updated = new Date()
+                    console.log("updateUserStatus - model %o", this.data_input)
+                    this.saveHistory()
+                },
+
+
                 createHistory() {
                     var input = new PublicUserHistory()
                     input.user_id = this.public_user.id
@@ -392,6 +343,8 @@
                 saveHistory() {
                     this.data_input.municipality = this.getEvacFromId(this.data_input.evac_id).municipality ||
                         ""
+
+                    this.data_input.date_cleared = this.data_input.date_cleared == "Invalid Date" ? "" : this.data_input.date_cleared
 
                     DataHandler.addPublicUserHistory(this.data_input).then((data) => {
                         console.log('response %o', data)

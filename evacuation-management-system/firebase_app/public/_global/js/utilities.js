@@ -798,3 +798,57 @@ const FilterComponent = Vue.extend({
 })
 
 Vue.component('filter-component', FilterComponent)
+
+
+
+
+const StatusComponent = Vue.extend({
+    template: `
+        <div :id="modal_id" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">{{title}}</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form-generator :form="formModel" :input.sync="input_model"></form-generator>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal"
+                            v-on:click="onSave()">Save</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        `,
+    props: {
+        modal_id: String,
+        title   : String,
+        status  : {},
+    },
+    watch: {
+        status(val) {
+            console.log("update status %o",val)
+            this.input_model.status = val
+        }
+    },
+    data() {
+        return {
+            input_model : {
+                status : StatusType.pending
+            },
+            formModel: {
+                status : FormModelsUtilities.StatusDropdown
+            }
+        }
+    },
+    methods: {
+        onSave() {
+            this.$emit('save', this.input_model.status)
+        },
+    }
+})
+
+Vue.component('status-modal', StatusComponent)

@@ -77,6 +77,14 @@
             </div>
         </div>
 
+        <status-modal 
+            modal_id    = "status_modal_update"
+            title       = "Update User Status"
+            :status     = "user_status"
+            v-on:save   = "updateUserStatus($event)">
+        </status-modal>
+
+
         <div id="dependentModal" class="modal fade" role="dialog">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -169,7 +177,7 @@
                                 <div v-if="info == 'evac_id'">
                                     <p class="item-label">EVACUATION NAME</p>
                                     <p class="item-value">
-                                        {{item.evac_id.isEmpty() ? 'public' : getEvacFromId(item.evac_id).name}}</p>
+                                        {{item.evac_id.isEmpty() ? 'public' : getEvacFromId(item.evac_id) ? getEvacFromId(item.evac_id).name : ''}}</p>
                                 </div>
                                 <entry-single-component v-if="info != 'evac_id'" :label="info" :value="item[info]">
                                 </entry-single-component>
@@ -273,10 +281,14 @@
             <div class="table-container" id="tableData">
                 <div class="well" v-for="item,index in view_user_list">
                     <div class="row">
-                        <div class="col col-md-12 item-info">
+                        <div class="col col-md-1 item-info">
                             <p class="item-label">
                                 {{index + 1}}.
                             </p>
+                        </div>
+                        <div class="col col-md-12 item-info">
+                            <img :src="cdn + item.images[0]" onerror="this.src='resources/images/avatar.jpeg';"
+                                style="height: 50px; width: 50px; border-radius: 25;">
                         </div>
                         <div class="col col-md-12">
                             <entry-component :entry="item" :headers="headers" :labels="user_labels"></entry-component>
@@ -290,7 +302,10 @@
                                 History</button>
                             <button class="btn btn-default btn-info" v-on:click="onViewReports(item.id)">View
                                 Reports</button>
-                            <button class="btn btn-default btn-info" v-on:click="onEditItem(index)">edit</button>
+                            <button class="btn btn-default btn-info" :href="'#imagerow'+index"
+                                data-toggle="collapse">View Images</button>
+                            <button class="btn btn-warning btn-info" v-on:click="onEditItem(index)">edit</button>
+                            <button class="btn btn-warning btn-info" v-on:click="onUserStatus(index)">update status</button>
                             <button class="btn btn-default btn-danger" v-on:click="onDeleteItem(index)">delete</button>
                         </div>
                     </div>
@@ -335,6 +350,33 @@
                         </div>
                     </div>
 
+                    <div :id="'imagerow'+index" class="panel-collapse collapse">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col col-md-12" v-if="!item.images || item.images.length <= 0">
+                                    <p>Images are empty</p>
+                                </div>
+                                <div class="col col-md-2 item-info" v-for="image,index in item.images">
+                                    <!-- <img :src="cdn+image" class="img-thumbnail img-grid"/> -->
+                                    <div class="image-area">
+                                        <img :src="cdn+image" alt="Preview">
+                                        <a class="remove-image" v-on:click="onDeleteImage(item.id, index)"
+                                            style="display: inline;">&#215;</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-footer">
+                            <div class="row">
+                                <p>Upload Images</p>
+                                <input :id="'input_images'+index" type="file" name="files[]" multiple
+                                    style="margin-bottom: 12px;" />
+                                <button class="btn btn-default btn-info" v-on:click="onAddImages(index)">upload
+                                    pictures</button>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -360,6 +402,8 @@
                 view_user_list: [],
 
                 user_input: {},
+                user_status: StatusType.pending,
+
                 dependent_input: {},
 
                 edit_dependent: {
@@ -413,7 +457,8 @@
                     evacuation: [],
                     status: ['all', ...Object.keys(SupplyStatus)],
                     item_type: []
-                }
+                },
+                cdn: DataHandlerType.api_host,
             },
             methods: {
                 onStart() {
@@ -463,6 +508,23 @@
                     $('#userModal').modal()
                 }, //onEditItem
 
+                onUserStatus(index) {
+                    const user = this.user_list[index]
+                    this.isEdit = true
+                    this.user_input = user.toObject()
+                    this.user_input.date_updated = new Date()
+                    this.user_status = this.user_input.status
+                    $('#status_modal_update').modal()
+                },
+
+                updateUserStatus(status) {
+                    console.log("updateUserStatus - status %o", status)
+                    this.user_input.status = status
+                    this.user_input.date_updated = new Date()
+                    console.log("updateUserStatus - model %o", this.user_input)
+                    this.onSaveUser()
+                },
+
                 onSaveUser() {
                     const input = PublicUser.parse(this.user_input)
 
@@ -477,6 +539,36 @@
                         console.log(error)
                     })
                 }, //onSaveUser
+
+                onAddImages(index) {
+                    const files = document.getElementById('input_images' + index).files;
+                    var uploads = []
+                    for (var i = 0; i < files.length; i++) {
+                        uploads.push(files[i])
+                    }
+
+                    if (uploads.length > 0) {
+
+                        var value = PublicUser.parse(this.user_list[index].toObject())
+
+                        DataHandler.uploadImages(uploads).then((resp) => {
+                            return resp.json()
+                        }).then((saved_images) => {
+                            value.images = value.images || []
+                            value.images = value.images.concat(saved_images)
+                            return DataHandler.addPublicUser(value)
+                        }).then((message) => {
+                            if (!message.error) {
+                                alert("Item Persisted Successfuly")
+                                this.fetchUser()
+                            } else {
+                                alert(`Failed to updated error: ${message.error}`)
+                            }
+                        }).catch(error => {
+                            console.log(error)
+                        })
+                    }
+                },//onAddImages
 
                 onDeleteItem(index) {
                     let onConfirm = confirm('Deleting User\nPress confirm to proceed')

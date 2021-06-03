@@ -273,63 +273,63 @@
         app = new Vue({
             el: '#content',
             data: {
-                user: new AdminUser(),
-                admins: [],
+                user            : new AdminUser(),
+                admins          : [],
                 admins_selection: {},
-                municipality: [],
+                municipality    : [],
 
                 selections: [{
-                        id: 'homepage',
-                        href: "content_homepage.html",
-                        icon: 'web',
+                        id   : 'homepage',
+                        href : "content_homepage.html",
+                        icon : 'web',
                         title: 'Content',
                         color: '#32a852'
                     },
                     {
-                        id: 'gallery',
-                        href: "content_gallery.html",
-                        icon: 'perm_media',
+                        id   : 'gallery',
+                        href : "content_gallery.html",
+                        icon : 'perm_media',
                         title: 'Gallery',
                         color: '#60A244'
                     },
                     {
-                        id: 'events',
-                        href: "content_events.html",
-                        icon: 'today',
+                        id   : 'events',
+                        href : "content_events.html",
+                        icon : 'today',
                         title: 'Events',
                         color: '#fcba03'
                     },
                     {
-                        id: 'documents',
-                        href: "content_documents.html",
-                        icon: 'article',
+                        id   : 'documents',
+                        href : "content_documents.html",
+                        icon : 'article',
                         title: 'Documents',
                         color: '#4287f5'
                     },
                     {
-                        id: 'information',
-                        href: "content_information.html",
-                        icon: 'live_help',
+                        id   : 'information',
+                        href : "content_information.html",
+                        icon : 'live_help',
                         title: 'Other Informations',
                         color: '#eb4034'
                     },
                 ],
 
                 /* EVACUATIONS */
-                population_dict : {},
-                family_dict     : {},
-                muni_list: [],
+                population_dict: {},
+                family_dict    : {},
+                muni_list      : [],
                 
                 evac_list: [],
                 view_list: [],
                 view_item: null,
 
-                headers: Object.keys(EvacuationCenter.headers),
-                header_labels: EvacuationCenter.headers,
-                evac_data_input: new EvacuationCenter(), //new EvacuationCenter(), 
-                evacFormModel: EvacuationCenter.formModel,
-                cdn: DataHandlerType.api_host,
-                isLoading: false
+                headers        : Object.keys(EvacuationCenter.headers),
+                header_labels  : EvacuationCenter.headers,
+                evac_data_input: new EvacuationCenter(),
+                evacFormModel  : EvacuationCenter.formModel,
+                cdn            : DataHandlerType.api_host,
+                isLoading      : false,
             },
             methods: {
                 onStart() {

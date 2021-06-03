@@ -514,8 +514,9 @@ class PublicUserHandler extends UserHandler {
             }
 
             //checks if the public user is not yet cleared
-            query = query.where('date_cleared', '==', '')
+            query = query.where('date_cleared', '==', '').where('status','==', StatusType.approved)
             query = query.orderBy('date_admitted', 'desc')
+            
 
             query.get().then(function (querySnapshot) {
                 var history = []
@@ -554,7 +555,7 @@ class PublicUserHandler extends UserHandler {
             }
 
             //checks if the public user is not yet cleared
-            query_history = query_history.where('date_cleared', '==', '')
+            query_history = query_history.where('date_cleared', '==', '').where('status','==', StatusType.approved)
             query_history = query_history.orderBy('date_admitted', 'desc')
 
             //query_population = query_population.where('id', '==', )
