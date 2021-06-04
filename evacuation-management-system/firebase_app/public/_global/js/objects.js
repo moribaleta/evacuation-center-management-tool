@@ -1329,9 +1329,15 @@ class PublicUserHistory extends StatusModel {
 
 } //PublicUserHistory
 
+class DonorModel extends StatusModel {
+
+    /** password used for login */
+    password
+
+}
 
 /** defines the object of an organization donor */
-class DonorsOrganization extends Model {
+class DonorsOrganization extends DonorModel {
 
     /** name of the organization */
     name
@@ -1357,18 +1363,20 @@ class DonorsOrganization extends Model {
     /** phone of the person to be accounted for */
     contact_phone_number
 
+    
+
     static headers = {
-        id: 'ID',
-        created_by: 'Issued By',
-        date_created: 'Date Created',
-        date_updated: 'Date Updated',
-        name: 'Name',
-        business: 'Nature of Business',
-        phone_number: 'Contact Number',
-        email: "Email",
-        address: 'Exact Address',
-        contact_person: 'Contact Person',
-        contact_email: 'Contact Email',
+        id                  : 'ID',
+        created_by          : 'Issued By',
+        date_created        : 'Date Created',
+        date_updated        : 'Date Updated',
+        name                : 'Name',
+        business            : 'Nature of Business',
+        phone_number        : 'Contact Number',
+        email               : "Email",
+        address             : 'Exact Address',
+        contact_person      : 'Contact Person',
+        contact_email       : 'Contact Email',
         contact_phone_number: 'Personal Contact Number'
     }
 
@@ -1420,7 +1428,7 @@ class DonorsOrganization extends Model {
         email, phone_number, contact_person,
         contact_email, contact_phone_number, 
         status,
-        images) {
+        images, password) {
         super()
         this.id                   = id || keyGenID("donororg")  //"donororg-" + genID(5)
         this.created_by           = created_by || '0'
@@ -1436,6 +1444,7 @@ class DonorsOrganization extends Model {
         this.contact_phone_number = contact_phone_number
         this.status               = status || StatusType.pending
         this.images               = images
+        this.password             = password
     }
 
     toObject() {
@@ -1453,7 +1462,8 @@ class DonorsOrganization extends Model {
             contact_email       : this.contact_email,
             contact_phone_number: this.contact_phone_number,
             status              : this.status,
-            images              : this.images
+            images              : this.images,
+            password            : this.password
         }
     }
 
@@ -1472,13 +1482,14 @@ class DonorsOrganization extends Model {
             object.contact_email,
             object.contact_phone_number,
             object.status,
-            object.images
+            object.images,
+            object.password
         )
     }
 } //DonorsOrganization
 
 /** defines the model of an individual donor */
-class DonorsIndividual extends Model {
+class DonorsIndividual extends DonorModel {
 
     /** firstname of the public */
     firstname
@@ -1525,6 +1536,7 @@ class DonorsIndividual extends Model {
         sex: 'Sex',
         employment_position: 'Employment Position',
         employment_business: 'Nature of Business',
+        status : 'Status'
     }
 
     /** defines the form of the model to be shown to create an entry */
@@ -1582,25 +1594,26 @@ class DonorsIndividual extends Model {
 
     constructor(id, created_by, date_created, date_updated, firstname, lastname, middleinit,
         email, birthdate, phone_number, address, sex,
-        employment_position, employment_business, status, images) {
+        employment_position, employment_business, status, images, password) {
         super()
-        this.id = id || keyGenID("donorindv", 5) //"publicuser-" + genID(5)
-        this.created_by = created_by || '0'
+        this.id           = id || keyGenID("donorindv", 5)  //"publicuser-" + genID(5)
+        this.created_by   = created_by || '0'
         this.date_created = date_created || new Date()
         this.date_updated = date_updated || new Date()
 
-        this.firstname = firstname
-        this.lastname = lastname
-        this.middleinit = middleinit
-        this.email = email || ""
-        this.birthdate = birthdate
-        this.phone_number = phone_number || ""
-        this.address = address || ""
-        this.sex = sex || 0
+        this.firstname           = firstname
+        this.lastname            = lastname
+        this.middleinit          = middleinit
+        this.email               = email || ""
+        this.birthdate           = birthdate
+        this.phone_number        = phone_number || ""
+        this.address             = address || ""
+        this.sex                 = sex || 0
         this.employment_position = employment_position || ""
         this.employment_business = employment_business || ""
-        this.status = status || StatusType.pending
-        this.images = images        
+        this.status              = status || StatusType.pending
+        this.images              = images
+        this.password            = password
     }
 
     toObject() {
@@ -1620,7 +1633,8 @@ class DonorsIndividual extends Model {
             employment_position: this.employment_position,
             employment_business: this.employment_business,
             status             : this.status,
-            images             : this.images
+            images             : this.images,
+            password           : this.password
         }
     }
 
@@ -1641,7 +1655,8 @@ class DonorsIndividual extends Model {
             object.employment_position,
             object.employment_business,
             object.status,
-            object.images
+            object.images,
+            object.password
         )
     }
 } //DonorsIndividual
@@ -1745,8 +1760,8 @@ class PublicUserReport extends ReportType {
         this.created_by = created_by        || '0'
         this.user_id    = user_id
         this.evac_id    = evac_id
-        this.reports    = reports || []
-        this.status     = status || SupplyStatus.pending
+        this.reports    = reports           || []
+        this.status     = status            || SupplyStatus.pending
     }
 
     static parse(object = {}) {
