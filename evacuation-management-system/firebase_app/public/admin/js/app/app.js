@@ -4,6 +4,8 @@ var header = new Vue({
         user: new AdminUser(),
         active: "",
         logo: "resources/images/logo.png",
+        cdn : DataHandlerType.api_host,
+
         header_items: [{
             id: 'content',
             href: 'main.html',
@@ -149,6 +151,8 @@ methods: {
     },
     
     onConfigureApp() {
+        app.cdn = this.cdn
+
         app.formatDate = ((date) => {
             let _date = new Date(date)
             return _date.toLocaleDateString()
@@ -875,11 +879,51 @@ var inventory_selection = new Vue({
 })
 
 
+const BasicUserComponent = Vue.extend({
+    template: 
+    `
+    <div class="col col-md-12 item-info " v-if="user">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <entry-component :entry="user" :headers="user_headers"></entry-component>
+                <button class="btn btn-default btn-info" :href="'#imagerow'+index"
+                data-toggle="collapse">View Images</button>
+            </div>
+            
+            <div :id="'imagerow'+index" class="panel-collapse collapse" v-if="user">
+                <div class="panel-body">
+                    <entry-image-component :id="user.id" :cdn="cdn"
+                        :images="user.images" :edit='false'>
+                    </entry-image-component>
+                </div>
+            </div>
+        </div>
+    </div>
+    `,
+
+    props: {
+        index     : Number,
+        cdn       : String,
+        user      : Object,
+    },
+
+    data() {
+        return {
+            id : keyGenID('history-entry', 2),
+            user_headers: ['lastname', 'firstname', 'municipality', 'birthday', 'phone_number'],
+        }
+    },
+})
+
+
+Vue.component('basic-user-component', BasicUserComponent)
+
+
 const EntryUserHistory = Vue.extend({
     template: `
     <div>
         <div class="row">
-            <div class="col col-md-3 item-info">
+            <div class="col col-md-12 item-info">
                 <p class="item-value">{{view_count}}.</p>
             </div>
 
@@ -888,8 +932,8 @@ const EntryUserHistory = Vue.extend({
                     <p class="item-label">EVACUATION NAME</p>
                     <p class="item-value">{{evac.name}}</p>
             </div>
-                <entry-single-component v-if="info != 'evac_id' && info == 'date_cleared'" :label="info"
-                        :value="isDateValid(item[info]) ? 'active' : item[info]" :showtime="true">
+            <entry-single-component v-if="info != 'evac_id' && info == 'date_cleared'" :label="info"
+                :value="isDateValid(item[info]) ? 'active' : item[info]" :showtime="true">
                     </entry-single-component>
                     <entry-single-component v-if="info != 'evac_id' && info != 'date_cleared'" :label="info"
                         :value="item[info]" :showtime="true">
@@ -904,15 +948,21 @@ const EntryUserHistory = Vue.extend({
                 </div>
 
 
-                <div class="col col-md-12 item-info " v-if="user">
+                <!--<div class="col col-md-12 item-info " v-if="user">
                     <div class="well">
                         <entry-component :entry="user" :headers="user_headers">
                         </entry-component>
                         <button class="btn btn-default btn-info" :href="'#imagerow'+index"
                             data-toggle="collapse">View Images</button>
                     </div>
-                </div>
+                </div-->
 
+                <basic-user-component
+                    :user="user"
+                    :index="index"
+                    :cdn="cdn"
+                    >
+                </basic-user-component>
 
                 <div class="col col-md-12">
                     <button class="btn btn-default btn-info" v-on:click="editItem(index)">edit</button>
@@ -923,14 +973,6 @@ const EntryUserHistory = Vue.extend({
                 </div>
 
 
-            </div>
-
-            <div :id="'imagerow'+index" class="panel-collapse collapse" v-if="user">
-                <div class="panel-body">
-                    <entry-image-component :id="item.user_id" :cdn="cdn"
-                        :images="user.images" :edit='false'>
-                    </entry-image-component>
-                </div>
         </div>
     </div>
 `,
@@ -976,3 +1018,36 @@ const EntryUserHistory = Vue.extend({
 })
 
 Vue.component('entry-user-history-component', EntryUserHistory)
+
+
+
+const ContentSelectionComponent = Vue.extend({
+    template: 
+    `
+    <div :id="id" class="row selection-grid">
+        <div class="col col-md-4 selection-grid-item" v-for="item in selections">
+            <div class="selection-grid-item-content" :style="'background:'+item.color">
+                <a class="selection-grid-item-content-link" :href="item.href">
+                    <div class="selection-block">
+                        <i class="material-icons selection-icon">{{item.icon}}</i>
+                        <h5 class="center">{{item.title}}</h5>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+    `,
+
+    props: {
+        selections  : Array,
+    },
+
+    data() {
+        return {
+            id : keyGenID('content-selection-entry', 2),
+        }
+    },
+})
+
+
+Vue.component('content-selection-component', ContentSelectionComponent)

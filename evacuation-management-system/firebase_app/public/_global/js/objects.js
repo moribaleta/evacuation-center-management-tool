@@ -1280,6 +1280,15 @@ class PublicUserHistory extends StatusModel {
         'date_created',
         'date_updated',
     ]
+
+    static headers_admission = [
+        'user_id',
+        'evac_id',
+        'municipality',
+        'date_admitted',
+        'date_created',
+        'date_updated',
+    ]
     
 
     constructor(id, date_created, date_updated, created_by, user_id, evac_id, date_admitted, date_cleared, municipality, status) {

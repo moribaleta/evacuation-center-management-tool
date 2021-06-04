@@ -368,6 +368,7 @@
                             <th>Municipality</th>
                             <th>Date Admitted</th>
                             <th>Date Cleared</th>
+                            <th>Status</th>
                             <th>Options</th>
                         </tr>
                         <tr v-if="current_history">
@@ -376,8 +377,13 @@
                             <td>{{getEvacFromId(current_history.evac_id).municipality}}</td>
                             <td>{{formatDate(current_history.date_admitted, false)}}</td>
                             <td>Admitted</td>
+                            <td>{{current_history.status}}</td>
                             <td>
-                                <button class="btn btn-default btn-success" v-on:click="clearHistory()"> Clear
+                                <button 
+                                    class="btn btn-default btn-success" 
+                                    v-on:click="clearHistory()"
+                                    :disabled="current_history.status != 'approved' "
+                                > Clear
                                     Admission</button>
                                 <button class="btn btn-default btn-danger" v-on:click="deleteAdmission()"> Cancel
                                     Admission</button>
@@ -389,8 +395,8 @@
                             <td>{{getEvacFromId(entry.evac_id).municipality}}</td>
                             <td>{{formatDate(entry.date_admitted, false)}}</td>
                             <td>{{formatDate(entry.date_cleared, false)}}</td>
-                            <td>
-                            </td>
+                            <td>{{entry.status}}</td>
+                            <td></td>
                         </tr>
                     </table>
                 </div>
