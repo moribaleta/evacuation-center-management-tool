@@ -379,7 +379,7 @@ class PublicUserHandler extends UserHandler {
             });
         })
     } //getUsers
-
+    
     addPublicUser(params = new PublicUser()) {
         return new Promise((resolve, reject) => {
             var ref = this.firestore.collection(UserHandler.tables.public_user)
@@ -504,7 +504,37 @@ class PublicUserHandler extends UserHandler {
     } //getPublicUserHistory
 
     /** returns the public history of the user or general if given empty id */
-    getActivePublicUserHistory(municipality) {
+    getPublicUserHistoryByEvac(evac_id) {
+        return new Promise((resolve, reject) => {
+            const ref = this.firestore.collection(UserHandler.tables.public_user_history)
+            //const query = (municipality != "0") ? ref.where('municipality', '==', municipality) : ref
+            var query = (evac_id && !evac_id.isEmpty()) ? ref.where('evac_id', '==', evac_id) : ref
+
+            query = query.orderBy('date_admitted', 'desc')
+
+            query.get().then(function (querySnapshot) {
+                var history = []
+                querySnapshot.forEach(function (doc) {
+                    let data = doc.data()
+                    let id = doc.id
+                    const object = parseObject({
+                        id,
+                        ...data
+                    })
+                    history.push(PublicUserHistory.parse(object))
+                });
+                var message = new Message()
+                message.data = history
+                resolve(message)
+            }).catch(function (error) {
+                console.log("Error getting documents: ", error);
+                reject(error)
+            });
+        })
+    } //getPublicUserHistory
+
+    /** returns the public history of the user or general if given empty id */
+    getActivePublicUserHistory(municipality, approved) {
         return new Promise((resolve, reject) => {
             const ref = this.firestore.collection(UserHandler.tables.public_user_history)
             var query = ref
@@ -515,6 +545,11 @@ class PublicUserHandler extends UserHandler {
 
             //checks if the public user is not yet cleared
             query = query.where('date_cleared', '==', '').where('status','==', StatusType.approved)
+
+            if (approved) {
+                query = query.where('status','==', StatusType.approved)
+            }
+
             query = query.orderBy('date_admitted', 'desc')
             
 
@@ -538,6 +573,51 @@ class PublicUserHandler extends UserHandler {
             });
         })
     } //getPublicUserHistory
+
+
+    /** returns the public history of the user or general if given empty id */
+    getActivePublicUserHistoryByEvac(evac_id, approved) {
+        return new Promise((resolve, reject) => {
+            const ref = this.firestore.collection(UserHandler.tables.public_user_history)
+            var query = ref
+
+            if (evac_id) {
+                query = query.where('evac_id', '==', evac_id)
+            } else {
+                reject("no evacuation id provided")
+                return
+            }
+
+            if (approved) {
+                query = query.where('status','==', StatusType.approved)
+            }
+
+            //checks if the public user is not yet cleared
+            query = query.where('date_cleared', '==', '')
+            query = query.orderBy('date_admitted', 'desc')
+            
+
+            query.get().then(function (querySnapshot) {
+                var history = []
+                querySnapshot.forEach(function (doc) {
+                    let data = doc.data()
+                    let id = doc.id
+                    const object = parseObject({
+                        id,
+                        ...data
+                    })
+                    history.push(PublicUserHistory.parse(object))
+                });
+                var message = new Message()
+                message.data = history
+                resolve(message)
+            }).catch(function (error) {
+                console.log("Error getting documents: ", error);
+                reject(error)
+            });
+        })
+    } //getPublicUserHistory
+
 
 
 

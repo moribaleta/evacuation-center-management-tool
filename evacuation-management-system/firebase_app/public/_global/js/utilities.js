@@ -491,68 +491,8 @@ const months_array = [
     'DECEMBER',
 ]
 
-const EntrySingleComponent = Vue.extend({
-    template: `
-    <div>
-        <p class="item-label">
-            {{ _label }}
-        </p>
-        <p class="item-value">
-            {{ _value }}
-        </p>
-    </div>
-`,
-    props: [
-        'value',
-        'label',
-        'showtime'
-    ],
 
-    data() {
-        return {
-            _value: [],
-            _label: []
-        }
-    },
 
-    created: function () {
-        this._value = this.getValue(this.label, this.value)
-        this._label = this.getLabel(this.label)
-    },
-
-    methods: {
-        formatDate(date) {
-            try {
-                let _date = new Date(date)
-                if (typeof _date.getMonth === 'function') {
-                    
-                    //console.log("am i valid? %o", date)
-                    return this.showtime ? _date.toLocaleString() : _date.toLocaleDateString()   
-                } else {
-                    return date
-                }
-            }catch {
-                return date
-            }
-            
-        },
-
-        getLabel(key) {
-            return key.replace(/_/g, ' ').toUpperCase() + ": "
-        },
-
-        getValue(key, value) {
-            if (key.toLowerCase().includes('date')) {
-                return this.formatDate(value)
-            } else if (key.includes('sex')) {
-                return value == 0 ? 'Male' : 'Female'
-            }
-            return value
-        }
-    }
-})
-
-Vue.component('entry-single-component', EntrySingleComponent)
 
 const parseObject = (object) => {
     Object.keys(object).filter((key) => {
@@ -852,3 +792,103 @@ const StatusComponent = Vue.extend({
 })
 
 Vue.component('status-modal', StatusComponent)
+
+
+
+const EntrySingleComponent = Vue.extend({
+    template: `
+    <div>
+        <p class="item-label">
+            {{ _label }}
+        </p>
+        <p class="item-value">
+            {{ _value }}
+        </p>
+    </div>
+`,
+    props: [
+        'value',
+        'label',
+        'showtime'
+    ],
+
+    data() {
+        return {
+            _value: [],
+            _label: []
+        }
+    },
+
+    created: function () {
+        this._value = this.getValue(this.label, this.value)
+        this._label = this.getLabel(this.label)
+    },
+
+    methods: {
+        formatDate(date) {
+            try {
+                let _date = new Date(date)
+                if (typeof _date.getMonth === 'function') {
+                    
+                    //console.log("am i valid? %o", date)
+                    return this.showtime ? _date.toLocaleString() : _date.toLocaleDateString()   
+                } else {
+                    return date
+                }
+            }catch {
+                return date
+            }
+            
+        },
+
+        getLabel(key) {
+            return key.replace(/_/g, ' ').toUpperCase() + ": "
+        },
+
+        getValue(key, value) {
+            if (key.toLowerCase().includes('date')) {
+                return this.formatDate(value)
+            } else if (key.includes('sex')) {
+                return value == 0 ? 'Male' : 'Female'
+            }
+            return value
+        }
+    }
+})
+
+Vue.component('entry-single-component', EntrySingleComponent)
+
+
+const EntryImageComponent = Vue.extend({
+    template: `
+    <div :id="id + '-images'" class="row">
+        <div class="col col-md-12"
+            v-if="images.length <= 0">
+            <p>Images are empty</p>
+        </div>
+        <div class="col col-md-2 item-info" v-for="image,index in images">
+            <div class="image-area">
+            <img :src="cdn+image" alt="Preview">
+            <a class="remove-image" v-if="edit" v-on:click="onDeleteImage(item.id, index)"
+                style="display: inline;">&#215;</a>
+        </div>
+    </div>
+`,
+    props: {
+        id      : String,
+        cdn     : String,
+        images  : [],
+        edit    : Boolean
+    },
+
+    methods: {
+        onDeleteImage(index) {
+            this.$emit('delete', {
+                item: this.id ,
+                index
+            })
+        }
+    }
+})
+
+Vue.component('entry-image-component', EntryImageComponent)

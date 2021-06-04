@@ -1684,14 +1684,14 @@ class ReportType extends Model  {
 
     toObject() {
         return {
-            id: this.id,
+            id          : this.id,
             date_created: this.date_created,
             date_updated: this.date_updated,
-            created_by: this.created_by,
-            user_id: this.user_id,
-            evac_id: this.evac_id,
-            reports: this.reports,
-            status: this.status,
+            created_by  : this.created_by,
+            user_id     : this.user_id,
+            evac_id     : this.evac_id,
+            reports     : this.reports,
+            status      : this.status,
         }
     }
 

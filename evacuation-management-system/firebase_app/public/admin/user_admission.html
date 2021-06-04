@@ -60,13 +60,10 @@
             <li><a href="users.html">Users</a></li>
             <li><a href="#">User History</a></li>
         </ul>
-        
+
         <!-- MODAL -->
-        <status-modal 
-            modal_id    = "status_modal_update"
-            title       = "Update Admission Status"
-            :status     = "data_input.status"
-            v-on:save   = "onSaveStatus($event)">
+        <status-modal modal_id="status_modal_update" title="Update Admission Status" :status="data_input.status"
+            v-on:save="onSaveStatus($event)">
         </status-modal>
 
         <div id="editorModal" class="modal fade" role="dialog">
@@ -92,36 +89,6 @@
 
         <h1>Public User History</h1>
 
-        <div class="section">
-            <div class="well">
-                <div class="row" v-if="public_user">
-                    <div class="col col-md-12">
-                        <entry-component :entry="public_user" :headers="public_user_headers"></entry-component>
-                    </div>
-
-                    <div class="col col-md-12">
-                        <button class="btn btn-default btn-info" href="#dependentrow" data-toggle="collapse">View
-                            Dependents</button>
-                    </div>
-                </div>
-
-                <div id="dependentrow" class="panel-collapse collapse">
-                    <div class="panel-body">
-                        <ul class="list-group">
-                            <li class="list-group-item"
-                                v-if="!public_user.dependents || public_user.dependents.length <= 0">
-                                <p>No Dependents</p>
-                            </li>
-
-                            <li class="list-group-item" v-for="dependent,index in public_user.dependents">
-                                <entry-component :entry="dependent" :headers="dependentsHeaders"></entry-component>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- CONTENT -->
         <div class="section">
             <filter-component :filter_add="filter_add" v-on:filter="onFilterReport($event)"
@@ -130,7 +97,8 @@
             </filter-component>
 
             <div class="section" v-if="public_user">
-                <button class="btn btn-default btn-warning" v-if="!public_user.is_active" v-on:click="admitHistory()">Admit</button>
+                <button class="btn btn-default btn-warning" v-if="!public_user.is_active"
+                    v-on:click="admitHistory()">Admit</button>
                 <button class="btn btn-default btn-success" v-on:click="addPastHistory()">Add Past History</button>
                 <button class="btn btn-default btn-info" v-on:click="onGenerateReport()">Generate Report</button>
             </div>
@@ -148,6 +116,7 @@
                             <div class="col col-md-3 item-info">
                                 <p class="item-value">{{index + (!active_history ? 1 : 2) }}.</p>
                             </div>
+
                             <div class="col col-md-3 item-info " v-for="info,index in header">
                                 <div v-if="info == 'evac_id'">
                                     <p class="item-label">EVACUATION NAME</p>
@@ -156,25 +125,49 @@
                                 <entry-single-component v-if="info != 'evac_id' && info == 'date_cleared'" :label="info"
                                     :value="isDateValid(item[info]) ? 'active' : item[info]" :showtime="true">
                                 </entry-single-component>
-                                <entry-single-component v-if="info != 'evac_id' && info != 'date_cleared'" :label="info" 
-                                    :value="item[info]"
-                                    :showtime="true">
+                                <entry-single-component v-if="info != 'evac_id' && info != 'date_cleared'" :label="info"
+                                    :value="item[info]" :showtime="true">
                                 </entry-single-component>
-                                
+
                             </div>
+
+
                             <div class="col col-md-3 item-info ">
-                                <entry-single-component 
-                                    label="Status" 
-                                    :value="item.status">
+                                <entry-single-component label="Status" :value="item.status">
                                 </entry-single-component>
                             </div>
-                            
+
+
+                            <div class="col col-md-12 item-info " v-if="getUserById(item.user_id)">
+                                <div class="well">
+                                    <entry-component :entry="getUserById(item.user_id)" :headers="user_headers">
+                                    </entry-component>
+                                    <button class="btn btn-default btn-info" :href="'#imagerow'+index"
+                                        data-toggle="collapse">View Images</button>
+                                </div>
+                            </div>
+
 
                             <div class="col col-md-12">
                                 <button class="btn btn-default btn-info" v-on:click="editItem(index)">edit</button>
-                                <button class="btn btn-default btn-info" v-on:click="onUpdateStatus(index)">update status</button>
+                                <button class="btn btn-default btn-info" v-on:click="onUpdateStatus(index)">update
+                                    status</button>
                                 <button class="btn btn-default btn-danger"
                                     v-on:click="deleteItem(index)">delete</button>
+                            </div>
+
+
+                        </div>
+
+                        <div :id="'imagerow'+index" class="panel-collapse collapse" v-if="getUserById(item.user_id)">
+                            <div class="panel-body">
+                                <entry-image-component 
+                                    :id="item.user_id" 
+                                    :cdn="cdn" 
+                                    :images="getUserById(item.user_id).images"
+                                    :edit='false'
+                                    >
+                                </entry-image-component>
                             </div>
                         </div>
                     </div>
@@ -199,6 +192,9 @@
                 reports_view  : [],
                 active_history: null,
 
+                user_dict   : {},
+                user_headers: ['lastname', 'firstname', 'municipality', 'birthday', 'phone_number'],
+
                 data_input    : {},
                 municipalities: [],
                 isDataLoading : true,
@@ -206,7 +202,7 @@
                 isAdmit       : false,
 
                 filter_add: {
-                    evacuations: [],
+                    status: Object.keys(StatusType)
                 },
 
                 header               : PublicUserHistory.headers,
@@ -215,49 +211,39 @@
                 public_user_headers  : PublicUserHistory.visiblekeys,
                 dependentsHeaders    : DependentUser.formDependent,
                 public_user          : null,
+                cdn                  : DataHandlerType.api_host,
             },
 
             methods: {
                 onStart() {
-                    this.user           = header.user
-                    const queryString   = window.location.search;
-                    const urlParams     = new URLSearchParams(queryString);
-                    this.formModel      = PublicUserHistory.formModel
+                    this.user = header.user
+                    this.formModel = PublicUserHistory.formModel
                     this.municipalities = municipalities
-                    const id = urlParams.get('id') || null
-                    this.fetchHistory(id, id == null)
+                    this.fetchHistory()
                 },
 
-                fetchHistory(id, isAll) {
+                fetchHistory() {
                     this.isDataLoading = true
-                    if (id) {
-                        DataHandler.getPublicUsers(null, id).then((message) => {
-                            console.log("public user %o", message.data)
-                            this.public_user = message.data
-                            this.public_user_headers = PublicUser.visiblekeys
-                        }).catch(err => {
-                            console.log(err)
-                        })
-                    }
 
                     //promise for public history
                     var historyPromise;
 
-                    if ((this.user.type == AdminUser.AdminTypes.evacuation) && id == null) {
-                        historyPromise  = DataHandler.getPublicUserHistoryByEvac(this.user.evacuation_id)
+                    if ((this.user.type == AdminUser.AdminTypes.evacuation)) {
+                        historyPromise = DataHandler.getActivePublicUserHistoryByEvac(this.user.evacuation_id)
                     } else {
-                        historyPromise  = DataHandler.getPublicUserHistory(id)
+                        historyPromise = DataHandler.getActivePublicUserHistory(this.user.municipality)
                     }
-                    
-                    let evacPromise     = DataHandler.getEvacuationCenters()
 
-                    Promise.all([historyPromise, evacPromise]).then((data) => {
+                    let evacPromise = DataHandler.getEvacuationCenters()
 
-                        let history = data[0].data
-                        this.reports = history
-                        this.reports_view = history
+                    Promise.all([historyPromise, evacPromise]).then((messages) => {
 
-                        this.evac_list = data[1].data
+                        let history = messages[0].data
+                        this.evac_list = messages[1].data
+
+                        //this.reports        = history
+                        //this.reports_view   = history
+
                         this.filter_add.evacuations = ['all']
 
                         console.log("history %o", history)
@@ -272,6 +258,28 @@
                                 value: evac.id
                             }
                         })
+
+                        var user_dict = {}
+
+                        history.forEach((history) => {
+                            user_dict[history.user_id] = history.user_id
+                        })
+
+                        let user_promises = Object.keys(user_dict).map((user_id) => {
+                            return DataHandler.getPublicUsers(null, user_id)
+                        })
+
+                        Promise.all(user_promises).then((messages) => {
+                            messages.forEach((message) => {
+                                let data = message.data
+                                this.user_dict[data.id] = data
+                            })
+                            this.reports = history
+                            this.reports_view = history
+                        }).catch(err => {
+                            console.log("err %o", err)
+                        })
+
                     }).catch(err => {
                         console.log("err %o", err)
                     }).finally(() => {
@@ -316,6 +324,9 @@
                     this.saveHistory()
                 },
 
+                getUserById(id) {
+                    return this.user_dict[id]
+                },
 
                 createHistory() {
                     var input = new PublicUserHistory()
@@ -351,7 +362,8 @@
                     this.data_input.municipality = this.getEvacFromId(this.data_input.evac_id).municipality ||
                         ""
 
-                    this.data_input.date_cleared = this.data_input.date_cleared == "Invalid Date" ? "" : this.data_input.date_cleared
+                    this.data_input.date_cleared = this.data_input.date_cleared == "Invalid Date" ? "" : this
+                        .data_input.date_cleared
 
                     DataHandler.addPublicUserHistory(this.data_input).then((data) => {
                         console.log('response %o', data)

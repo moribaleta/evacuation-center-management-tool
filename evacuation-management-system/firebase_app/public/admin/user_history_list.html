@@ -92,36 +92,6 @@
 
         <h1>Public User History</h1>
 
-        <div class="section">
-            <div class="well">
-                <div class="row" v-if="public_user">
-                    <div class="col col-md-12">
-                        <entry-component :entry="public_user" :headers="public_user_headers"></entry-component>
-                    </div>
-
-                    <div class="col col-md-12">
-                        <button class="btn btn-default btn-info" href="#dependentrow" data-toggle="collapse">View
-                            Dependents</button>
-                    </div>
-                </div>
-
-                <div id="dependentrow" class="panel-collapse collapse">
-                    <div class="panel-body">
-                        <ul class="list-group">
-                            <li class="list-group-item"
-                                v-if="!public_user.dependents || public_user.dependents.length <= 0">
-                                <p>No Dependents</p>
-                            </li>
-
-                            <li class="list-group-item" v-for="dependent,index in public_user.dependents">
-                                <entry-component :entry="dependent" :headers="dependentsHeaders"></entry-component>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- CONTENT -->
         <div class="section">
             <filter-component :filter_add="filter_add" v-on:filter="onFilterReport($event)"
@@ -148,6 +118,7 @@
                             <div class="col col-md-3 item-info">
                                 <p class="item-value">{{index + (!active_history ? 1 : 2) }}.</p>
                             </div>
+                            
                             <div class="col col-md-3 item-info " v-for="info,index in header">
                                 <div v-if="info == 'evac_id'">
                                     <p class="item-label">EVACUATION NAME</p>
@@ -162,11 +133,22 @@
                                 </entry-single-component>
                                 
                             </div>
+
+                            
                             <div class="col col-md-3 item-info ">
                                 <entry-single-component 
                                     label="Status" 
                                     :value="item.status">
                                 </entry-single-component>
+                            </div>
+
+
+                            <div class="col col-md-12 item-info " v-if="getUserById(item.user_id)">
+                                <div class="well">
+                                    <entry-component :entry="getUserById(item.user_id)" :headers="user_headers" ></entry-component>
+                                    <button class="btn btn-default btn-info" :href="'#imagerow'+index"
+                                    data-toggle="collapse">View Images</button>
+                                </div>
                             </div>
                             
 
@@ -175,6 +157,20 @@
                                 <button class="btn btn-default btn-info" v-on:click="onUpdateStatus(index)">update status</button>
                                 <button class="btn btn-default btn-danger"
                                     v-on:click="deleteItem(index)">delete</button>
+                            </div>
+
+                            
+                        </div>
+
+                        <div :id="'imagerow'+index" class="panel-collapse collapse" v-if="getUserById(item.user_id)">
+                            <div class="panel-body">
+                                <entry-image-component 
+                                    :id="item.user_id" 
+                                    :cdn="cdn" 
+                                    :images="getUserById(item.user_id).images"
+                                    :edit='false'
+                                    >
+                                </entry-image-component>
                             </div>
                         </div>
                     </div>
@@ -199,6 +195,9 @@
                 reports_view  : [],
                 active_history: null,
 
+                user_dict     : {},
+                user_headers  : ['lastname','firstname','municipality','birthday','phone_number'],
+
                 data_input    : {},
                 municipalities: [],
                 isDataLoading : true,
@@ -209,55 +208,45 @@
                     evacuations: [],
                 },
 
-                header               : PublicUserHistory.headers,
-                formModel            : PublicUserHistory.formModel,
-                public_user_formModel: PublicUser.formModel,
-                public_user_headers  : PublicUserHistory.visiblekeys,
-                dependentsHeaders    : DependentUser.formDependent,
-                public_user          : null,
+                header                  : PublicUserHistory.headers,
+                formModel               : PublicUserHistory.formModel,
+                public_user_formModel   : PublicUser.formModel,
+                public_user_headers     : PublicUserHistory.visiblekeys,
+                dependentsHeaders       : DependentUser.formDependent,
+                public_user             : null,
+                cdn                     : DataHandlerType.api_host,
             },
 
             methods: {
                 onStart() {
                     this.user           = header.user
-                    const queryString   = window.location.search;
-                    const urlParams     = new URLSearchParams(queryString);
                     this.formModel      = PublicUserHistory.formModel
                     this.municipalities = municipalities
-                    const id = urlParams.get('id') || null
-                    this.fetchHistory(id, id == null)
+                    this.fetchHistory()
                 },
 
-                fetchHistory(id, isAll) {
+                fetchHistory() {
                     this.isDataLoading = true
-                    if (id) {
-                        DataHandler.getPublicUsers(null, id).then((message) => {
-                            console.log("public user %o", message.data)
-                            this.public_user = message.data
-                            this.public_user_headers = PublicUser.visiblekeys
-                        }).catch(err => {
-                            console.log(err)
-                        })
-                    }
-
+                    
                     //promise for public history
                     var historyPromise;
-
-                    if ((this.user.type == AdminUser.AdminTypes.evacuation) && id == null) {
+                    
+                    if ((this.user.type == AdminUser.AdminTypes.evacuation)) {
                         historyPromise  = DataHandler.getPublicUserHistoryByEvac(this.user.evacuation_id)
                     } else {
-                        historyPromise  = DataHandler.getPublicUserHistory(id)
+                        historyPromise  = DataHandler.getPublicUserHistory()
                     }
                     
-                    let evacPromise     = DataHandler.getEvacuationCenters()
+                    let evacPromise     = DataHandler.getEvacuationCenters()                   
 
-                    Promise.all([historyPromise, evacPromise]).then((data) => {
+                    Promise.all([historyPromise, evacPromise]).then((messages) => {
 
-                        let history = data[0].data
-                        this.reports = history
-                        this.reports_view = history
+                        let history         = messages[0].data
+                        this.evac_list      = messages[1].data
+                        
+                        //this.reports        = history
+                        //this.reports_view   = history
 
-                        this.evac_list = data[1].data
                         this.filter_add.evacuations = ['all']
 
                         console.log("history %o", history)
@@ -272,6 +261,28 @@
                                 value: evac.id
                             }
                         })
+
+                        var user_dict = {}
+
+                        history.forEach((history) => {
+                            user_dict[history.user_id] = history.user_id
+                        })
+
+                        let user_promises = Object.keys(user_dict).map((user_id) => {
+                            return DataHandler.getPublicUsers(null, user_id)
+                        })
+
+                        Promise.all(user_promises).then((messages) => {
+                            messages.forEach((message) => {
+                                let data = message.data
+                                this.user_dict[data.id] = data
+                            })
+                            this.reports        = history
+                            this.reports_view   = history
+                        }).catch(err => {
+                            console.log("err %o", err)
+                        })
+
                     }).catch(err => {
                         console.log("err %o", err)
                     }).finally(() => {
@@ -316,6 +327,9 @@
                     this.saveHistory()
                 },
 
+                getUserById(id) {
+                    return this.user_dict[id]
+                },
 
                 createHistory() {
                     var input = new PublicUserHistory()
