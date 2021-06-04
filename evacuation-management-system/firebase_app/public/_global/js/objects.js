@@ -1470,18 +1470,18 @@ class DonorsIndividual extends Model {
         employment_position, employment_business) {
         super()
         this.id = id || keyGenID("donorindv", 5) //"publicuser-" + genID(5)
-        this.created_by = created_by || '0'
+        this.created_by   = created_by || '0'
         this.date_created = date_created || new Date()
         this.date_updated = date_updated || new Date()
 
-        this.firstname = firstname
-        this.lastname = lastname
-        this.middleinit = middleinit
-        this.email = email || ""
-        this.birthdate = birthdate
-        this.phone_number = phone_number || ""
-        this.address = address || ""
-        this.sex = sex || 0
+        this.firstname           = firstname
+        this.lastname            = lastname
+        this.middleinit          = middleinit
+        this.email               = email || ""
+        this.birthdate           = birthdate || new Date()
+        this.phone_number        = phone_number || ""
+        this.address             = address || ""
+        this.sex                 = sex || 0
         this.employment_position = employment_position || ""
         this.employment_business = employment_business || ""
     }
