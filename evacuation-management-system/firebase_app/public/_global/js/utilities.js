@@ -871,13 +871,14 @@ const EntryImageComponent = Vue.extend({
             <img :src="cdn+image" alt="Preview">
             <a class="remove-image" v-if="edit" v-on:click="onDeleteImage(item.id, index)"
                 style="display: inline;">&#215;</a>
+            </div>
         </div>
     </div>
 `,
     props: {
         id      : String,
         cdn     : String,
-        images  : [],
+        images  : Array,
         edit    : Boolean
     },
 

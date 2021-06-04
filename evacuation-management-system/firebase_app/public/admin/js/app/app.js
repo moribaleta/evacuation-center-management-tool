@@ -199,165 +199,6 @@ class AlertMessages {
     }
 }
 
-// const FilterComponent = Vue.extend({
-//     template: `
-//     <div class="section">
-//     <div class="well input-container" style="padding:10px; width: 100%; min-height: 70px">
-//     <div class="col col-md-1">
-//     <p class="input-label">YEAR</p>
-//     <select id="input-type" class="input input-select" v-model="filter.year">
-//     <option v-for="(item,index) in selections.years" :selected="index == filter.year ? true : false">{{item ? item : "NOT AVAILABLE"}}</option>
-//     </select>
-//     </div>
-//     <div class="col col-md-2">
-//     <p class="input-label">MONTH</p>
-//     <select id="input-type" class="input input-select" v-model="filter.month">
-//     <option v-for="(item,index) in selections.months" :selected="index == filter.month ? true : false"> {{item}}</option>
-//     </select>
-//     </div>
-//     <div class="col col-md-3" v-if="!disable_municipal">
-//     <p class="input-label">MUNICIPALITY</p>
-//     <select id="input-type" class="input input-select" v-model="filter.municipality">
-//     <option v-for="(item,index) in selections.municipality" :selected="index == filter.municipality ? true : false"> {{item}}</option>
-//     </select>
-//     </div>
-    
-//     <div class="col col-2 button-filter-container">
-//         <div>&nbsp;</div>
-//         <button type="button" class="btn btn-warning button-view" v-on:click="$emit('filter', filter)">Filter
-//         </button>
-//         <button type="button" class="btn btn-warning button-view" v-on:click="$emit('clear', 0); onClear()">Clear
-//         </button>
-        
-//     </div>
-//     <div class="col col-12  button-filter-container">
-//         <div>&nbsp;</div>
-//         <button type="button" class="btn btn-warning button-view " href="#filteradd" data-toggle="collapse">Additional Filter
-//         </button>
-//         <button type="button" class="btn btn-danger button-view " href="#searchbox" data-toggle="collapse">Show Search
-//         </button>
-//     </div>
-    
-//     </div>
-//     <div id="filteradd" class="panel-collapse collapse">
-//     <div class="panel-body well">
-//     <div class="col col-md-12">
-//     <div class="row">
-//     <div class="col col-md-3" v-for="key, index in Object.keys(filter_add)">
-//     <p class="input-label">{{key.toUpperCase().replace('_'," ")}}</p>
-//     <select id="input-type" class="input input-select" v-model="filter[key]">
-//     <option v-for="(item,index) in filter_add[key]" :selected="index == filter[key] ? true : false"> {{item}}</option>
-//     </select>
-//     </div>
-//     </div>
-//     </div>
-//     </div>
-//     </div>
-//     <div id="searchbox" class="panel-collapse collapse">
-//     <div class="panel-body well">
-//     <p class="input-label">Search</p>
-//     <input id="input_searchTerm" class="input input-text" type="text" v-model="filter.searchTerm" >
-//     <button type="button" class="btn btn-warning button-view" v-on:click="$emit('search', filter)">Search
-//     </button>
-//     <button type="button" class="btn btn-danger button-view" v-if="filter.searchTerm.length > 0" v-on:click="onCancelSearch">Cancel
-//     </button>
-//     </div>
-//     </div>
-//     </div>`,
-//     props: {
-//         filter_add: {},
-//         disable_municipal: Boolean
-//     },
-//     watch: {
-//         filter_add() {
-//             Object.keys(this.filter_add).forEach((key) => {
-//                 this.filter[key] = 'all'
-//             })
-//             console.log("filter %o", this.filter_add)
-//         }
-//     },
-//     data() {
-//         return {
-//             filter: {
-//                 year: 'all',
-//                 month: 'all',
-//                 municipality: 'all',
-//                 searchTerm: ''
-//             },
-//             selections: {
-//                 years: ['all'],
-//                 months: [
-//                     'all',
-//                     'JANUARY',
-//                     'FEBRUARY',
-//                     'MARCH',
-//                     'APRIL',
-//                     'MAY',
-//                     'JUNE',
-//                     'JULY',
-//                     'AUGUST',
-//                     'SEPTEMBER',
-//                     'OCTOBER',
-//                     'NOVEMBER',
-//                     'DECEMBER',
-//                 ],
-//                 months_only: [
-//                     'JANUARY',
-//                     'FEBRUARY',
-//                     'MARCH',
-//                     'APRIL',
-//                     'MAY',
-//                     'JUNE',
-//                     'JULY',
-//                     'AUGUST',
-//                     'SEPTEMBER',
-//                     'OCTOBER',
-//                     'NOVEMBER',
-//                     'DECEMBER',
-//                 ],
-//                 municipality: ['all'].concat(municipalities),
-                
-//                 filter_additional: {}
-//             },
-//         }
-//     },
-//     created() {
-//         console.log('user data from parent component:')
-        
-//         for (var i = (new Date()).getFullYear(); i >= 2000; i--) {
-//             this.selections.years.push(i)
-//         }
-        
-//         try {
-//             Object.keys(this.filter_add).forEach((key) => {
-//                 this.selections.filter_additional[key] = ['all'].concat(this.filter_add[key] || [])
-//                 this.filter[key] = 'all'
-//             })
-//         } catch (err) {
-//             console.log(err)
-//         }
-        
-//     },
-//     methods: {
-//         formatDate(date) {
-//             let _date = new Date(date)
-//             return _date.toLocaleDateString()
-//         },
-//         onCancelSearch() {
-//             this.filter.searchTerm = ""
-//             this.$emit('cancel', this.filter)
-//         },
-//         onClear() {
-//             Object.keys(this.filter).map((key) => {
-//                 this.filter[key] = 'all'
-//             })
-//             this.filter.searchTerm = ''
-//         }
-//     }
-// })
-
-// Vue.component('filter-component', FilterComponent)
-
 const SearchComponent = Vue.extend({
     template: 
     `
@@ -1032,3 +873,106 @@ var inventory_selection = new Vue({
         }
     }
 })
+
+
+const EntryUserHistory = Vue.extend({
+    template: `
+    <div>
+        <div class="row">
+            <div class="col col-md-3 item-info">
+                <p class="item-value">{{view_count}}.</p>
+            </div>
+
+            <div class="col col-md-3 item-info " v-for="info,index in header">
+                <div v-if="info == 'evac_id'">
+                    <p class="item-label">EVACUATION NAME</p>
+                    <p class="item-value">{{evac.name}}</p>
+            </div>
+                <entry-single-component v-if="info != 'evac_id' && info == 'date_cleared'" :label="info"
+                        :value="isDateValid(item[info]) ? 'active' : item[info]" :showtime="true">
+                    </entry-single-component>
+                    <entry-single-component v-if="info != 'evac_id' && info != 'date_cleared'" :label="info"
+                        :value="item[info]" :showtime="true">
+                    </entry-single-component>
+
+                </div>
+
+
+                <div class="col col-md-3 item-info ">
+                    <entry-single-component label="Status" :value="item.status">
+                    </entry-single-component>
+                </div>
+
+
+                <div class="col col-md-12 item-info " v-if="user">
+                    <div class="well">
+                        <entry-component :entry="user" :headers="user_headers">
+                        </entry-component>
+                        <button class="btn btn-default btn-info" :href="'#imagerow'+index"
+                            data-toggle="collapse">View Images</button>
+                    </div>
+                </div>
+
+
+                <div class="col col-md-12">
+                    <button class="btn btn-default btn-info" v-on:click="editItem(index)">edit</button>
+                    <button class="btn btn-default btn-info" v-on:click="onUpdateStatus(index)">update
+                        status</button>
+                    <button class="btn btn-default btn-danger"
+                        v-on:click="deleteItem(index)">delete</button>
+                </div>
+
+
+            </div>
+
+            <div :id="'imagerow'+index" class="panel-collapse collapse" v-if="user">
+                <div class="panel-body">
+                    <entry-image-component :id="item.user_id" :cdn="cdn"
+                        :images="user.images" :edit='false'>
+                    </entry-image-component>
+                </div>
+        </div>
+    </div>
+`,
+    props: {
+        view_count: Number,
+        index     : Number,
+        cdn       : String,
+        item      : Object,
+        evac      : Object,
+        user      : Object,
+        header    : Array,
+    },
+
+    data() {
+        return {
+            id : keyGenID('history-entry', 2),
+            user_headers: ['lastname', 'firstname', 'municipality', 'birthday', 'phone_number'],
+        }
+    },
+
+    methods: {
+        editItem() {
+            this.$emit('edit', this.index)
+        },
+
+        onUpdateStatus() {
+            this.$emit('updatestatus', this.index)
+        },
+
+        deleteItem(){
+            console.log("delete %o", this.index)
+            this.$emit('delete', this.index)
+        },
+
+        isDateValid(date) {
+            if (Object.prototype.toString.call(date) === "[object Date]") {
+                return isNaN(date.getTime())
+            } else {
+                return false
+            }
+        },
+    }
+})
+
+Vue.component('entry-user-history-component', EntryUserHistory)

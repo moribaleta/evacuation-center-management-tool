@@ -3,28 +3,28 @@ class UserHandler extends DataHandlerType {
 
     /** static enum contains all database table */
     static tables = {
-        admin_user: 'admin_user',
-        evacuation_centers: 'evacuation_centers',
+        admin_user            : 'admin_user',
+        evacuation_centers    : 'evacuation_centers',
         evacuation_center_type: 'evacuation_center_type',
-        evacuation_history: 'evacuation_history',
-        evacuation_inventory: 'evacuation_inventory',
-        evacuation_supply: 'evacuation_supply',
-        municipal_inventory: 'municipal_inventory',
-        supply_types: 'supply_types',
-        moabc: 'moabc',
-        users: 'users',
-        public_user: 'public_user',
-        public_comment: 'public_comment',
-        public_user_history: 'public_user_history',
-        public_user_report: 'public_user_report',
-        donor_organization: 'donor_org',
-        donor_individual: 'donor_individual',
-        public_document: 'public_document',
-        public_content: 'public_content',
-        public_events: 'public_events',
-        public_information: 'public_information',
-        public_images: 'public_images',
-        donor_reports: 'donor_reports'
+        evacuation_history    : 'evacuation_history',
+        evacuation_inventory  : 'evacuation_inventory',
+        evacuation_supply     : 'evacuation_supply',
+        municipal_inventory   : 'municipal_inventory',
+        supply_types          : 'supply_types',
+        moabc                 : 'moabc',
+        users                 : 'users',
+        public_user           : 'public_user',
+        public_comment        : 'public_comment',
+        public_user_history   : 'public_user_history',
+        public_user_report    : 'public_user_report',
+        donor_organization    : 'donor_org',
+        donor_individual      : 'donor_individual',
+        public_document       : 'public_document',
+        public_content        : 'public_content',
+        public_events         : 'public_events',
+        public_information    : 'public_information',
+        public_images         : 'public_images',
+        donor_reports         : 'donor_reports'
     }
 
     /** formats object's date */
@@ -534,7 +534,7 @@ class PublicUserHandler extends UserHandler {
     } //getPublicUserHistory
 
     /** returns the public history of the user or general if given empty id */
-    getActivePublicUserHistory(municipality, approved) {
+    getActivePublicUserHistory(municipality, approved = false) {
         return new Promise((resolve, reject) => {
             const ref = this.firestore.collection(UserHandler.tables.public_user_history)
             var query = ref
@@ -544,7 +544,7 @@ class PublicUserHandler extends UserHandler {
             }
 
             //checks if the public user is not yet cleared
-            query = query.where('date_cleared', '==', '').where('status','==', StatusType.approved)
+            query = query.where('date_cleared', '==', '')
 
             if (approved) {
                 query = query.where('status','==', StatusType.approved)
