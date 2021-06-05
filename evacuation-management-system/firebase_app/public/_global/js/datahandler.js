@@ -22,6 +22,7 @@ class UserHandler extends DataHandlerType {
         public_document       : 'public_document',
         public_content        : 'public_content',
         public_events         : 'public_events',
+        public_item_supply    : 'public_item_supply',
         public_information    : 'public_information',
         public_images         : 'public_images',
         donor_reports         : 'donor_reports'
@@ -1909,12 +1910,54 @@ class PublicWebHandler extends DonorHandler {
 
 } //PublicWebHandler
 
+class PublicUserSupplyHandler extends PublicWebHandler {
 
+    /** adds the event to the db */
+    addPublicSupply(params) {
+        return this.addEntry(params.id, params.toObject(), UserHandler.tables.public_item_supply)
+    }
+
+    /**
+     * returns list of public supplies
+     * @param {*} user_id - ref to search by user_id
+     * @returns 
+     */
+    getPublicSupplyByUserId(user_id) {
+        return new Promise((resolve, reject) => {
+            const ref = this.firestore.collection(UserHandler.tables.public_item_supply)
+            //const query = (municipality != "0") ? ref.where('municipality', '==', municipality) : ref
+            var query = (user_id && !user_id.isEmpty()) ? ref.where('user_id', '==', user_id) : ref
+
+            query = query.orderBy('date_updated', 'desc').limit(limit)
+
+            query.get().then(function (querySnapshot) {
+                var reports = []
+                querySnapshot.forEach(function (doc) {
+                    console.log(doc.id, " => ", doc.data());
+                    let data = doc.data()
+                    let id = doc.id
+
+                    const object = parseObject({
+                        id,
+                        ...data
+                    })
+                    reports.push(PublicUserSupply.parse(object))
+                });
+                var message = new Message()
+                message.data = reports
+                resolve(message)
+            }).catch(function (error) {
+                console.log("Error getting documents: ", error);
+                reject(error)
+            });
+        })
+    }
+}
 
 /**
  * class for handling storage and database fetch
  */
-class DataHandlerClass extends PublicWebHandler {
+class DataHandlerClass extends  PublicUserSupplyHandler {
 
     getReports() {
         return this.fetchApi(`${this.baseUrl}/getreports.php?i=1`)

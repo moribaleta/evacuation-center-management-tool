@@ -1791,6 +1791,57 @@ class PublicUserReport extends ReportType {
 
 
 /**
+ * public user supply given by the evacuation
+ */
+class PublicUserSupply extends ReportType {
+
+    supply_id = ""
+    remarks   = ""
+    qty       = 0
+
+    constructor(id, date_created, date_updated, created_by, user_id, evac_id, supply_id, remarks, qty) {
+        super()
+        this.id           = id || keyGenID("publicusersupply")       //"publicuserhistory-" + genID(5)
+        this.date_created = date_created    || new Date()
+        this.date_updated = date_updated    || new Date()
+        this.created_by   = created_by      || '0'
+        this.user_id      = user_id
+        this.evac_id      = evac_id
+        this.supply_id    = supply_id       || []
+        this.remarks      = remarks
+        this.qty          = qty
+    }
+
+    static parse(object = {}) {
+        return new PublicUserSupply(
+            object.id,
+            object.date_created,
+            object.date_updated,
+            object.created_by,
+            object.user_id,
+            object.evac_id,
+            object.supply_id,
+            object.remarks,
+            object.qty
+        )
+    }
+
+    toObject() {
+        return {
+            id          : this.id,
+            date_created: this.date_created,
+            date_updated: this.date_updated,
+            created_by  : this.created_by,
+            user_id     : this.user_id,
+            evac_id     : this.evac_id,
+            supply_id   : this.supply_id,
+            remarks     : this.remarks,
+            qty         : this.qty
+        }
+    }
+}//PublicUserSupply
+
+/**
  * model for comments of the user report by any public user
  */
 class PublicUserComment extends Model { 

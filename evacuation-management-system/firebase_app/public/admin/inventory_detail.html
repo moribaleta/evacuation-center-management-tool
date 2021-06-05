@@ -58,141 +58,153 @@
     
     <div id="inventory-list-picker">
         <inventory-selector :muni_inv_list="muni_inv_list" :evac_list="evac_list" :inventory_list="inventory_list"
-            :is-loading="isLoading" :supplies="supplies" v-on:on-select-inventory="id => {onSelectInventory(id)}">
-        </inventory-selector>
-    </div>
-    <!-- <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#editorModal">Open Modal</button> -->
-    <div class="container" id="content">
-        
-        <!-- Supply modal -->
-        <div id="supplyModal" class="modal fade" role="dialog">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">Inventory Supply</h4>
-                    </div>
-                    <div class="modal-body">
-                        <form-generator :form="supply_form" :input.sync="supply_input"></form-generator>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal"
-                        v-on:click="onSaveSupplyItem()">Save</button>
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    </div>
+        :is-loading="isLoading" :supplies="supplies" v-on:on-select-inventory="id => {onSelectInventory(id)}">
+    </inventory-selector>
+</div>
+<!-- <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#editorModal">Open Modal</button> -->
+<div class="container" id="content">
+    
+    <!-- Supply modal -->
+    <div id="supplyModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Inventory Supply</h4>
                 </div>
-                
-            </div>
-        </div>
-        
-        <!-- Inventory Modal -->
-        <div id="inventoryModal" class="modal fade" role="dialog">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">Edit Inventory</h4>
-                    </div>
-                    <div class="modal-body">
-                        <form class="form-horizontal" v-if="inventory_input != null">
-                            <fieldset>
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label" for="name">Name</label>
-                                    <div class="col-md-4">
-                                        <input id="name" name="name" type="text" placeholder="Name"
-                                        class="form-control input-md" required="" v-model="inventory_input.name">
-                                        <span class="help-block">Enter Name</span>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label" for="description">Description</label>
-                                    <div class="col-md-4">
-                                        <textarea id="description" name="description" type="text"
-                                        placeholder="Description .... " class="form-control input-md" required=""
-                                        v-model="inventory_input.description"></textarea>
-                                        <span class="help-block">Enter Description</span>
-                                    </div>
-                                </div>
-                                <!-- Select Basic -->
-                                <div class="form-group"
-                                v-if="user.admin_type == 0 && user.municipality == 'admin' && inventory_input.id.includes('muninv')">
-                                <label class="col-md-4 control-label" for="municipality">Municipality</label>
-                                <div class="col-md-4">
-                                    <select id="municipality" name="municipality" class="form-control"
-                                    v-model="inventory_input.municipality">
-                                    <option v-for="municipal in municipalities" v-bind:value="municipal">
-                                        {{municipal}}</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </fieldset>
-                    </form>
+                <div class="modal-body">
+                    <form-generator :form="supply_form" :input.sync="supply_input"></form-generator>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal"
-                    v-on:click="onSaveInventory()">Save</button>
+                    v-on:click="onSaveSupplyItem()">Save</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+    
+    <!-- Inventory Modal -->
+    <div id="inventoryModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Edit Inventory</h4>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal" v-if="inventory_input != null">
+                        <fieldset>
+                            <div class="form-group">
+                                <label class="col-md-4 control-label" for="name">Name</label>
+                                <div class="col-md-4">
+                                    <input id="name" name="name" type="text" placeholder="Name"
+                                    class="form-control input-md" required="" v-model="inventory_input.name">
+                                    <span class="help-block">Enter Name</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-md-4 control-label" for="description">Description</label>
+                                <div class="col-md-4">
+                                    <textarea id="description" name="description" type="text"
+                                    placeholder="Description .... " class="form-control input-md" required=""
+                                    v-model="inventory_input.description"></textarea>
+                                    <span class="help-block">Enter Description</span>
+                                </div>
+                            </div>
+                            <!-- Select Basic -->
+                            <div class="form-group"
+                            v-if="user.admin_type == 0 && user.municipality == 'admin' && inventory_input.id.includes('muninv')">
+                            <label class="col-md-4 control-label" for="municipality">Municipality</label>
+                            <div class="col-md-4">
+                                <select id="municipality" name="municipality" class="form-control"
+                                v-model="inventory_input.municipality">
+                                <option v-for="municipal in municipalities" v-bind:value="municipal">
+                                    {{municipal}}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal"
+                v-on:click="onSaveInventory()">Save</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+    
+    
+    
+</div>
+
+<distribution-modal
+        id="distribute_modal"
+        :item="distribute_item"
+        :users="public_users"
+        :supplyType="getSupplyType(distribute_item)"
+        v-if="distribute_item"
+        v-on:selected="onDistributeSupply($event)"
+     ></distribution-modal>
+
+<inventory-supplytype-editor :user="user" :load="supply_types" v-on:onchange="onSuppyTypeDidChange"></inventory-supplytype-editor>
+
+
+<div class="subcontent">
+    <div class="section header">
+        <h1>Inventory Details</h1>
+    </div>
+    
+    <div class="section">
+        <div class="well">
+            <div class="section header">
+                <h4>Inventory</h4>
+            </div>
+            
+            <div class="loader" v-if="loading.isInventory"></div>
+            
+            <div class="row" v-if="!loading.isInventory">
+                <div class="col col-md-12">
+                    <p class="item-value">
+                        name: {{inventory.name}}
+                    </p>
+                    <p class="item-value" v-if="inventory.id.includes('muninv')">
+                        municipality: {{inventory.municipality}}
+                    </p>
+                    <p class="item-value">
+                        description: {{inventory.description}}
+                    </p>
+                    <p class="item-value">
+                        date created: {{formatDate(inventory.date_created)}}
+                    </p>
+                    <p class="item-value">
+                        created by: {{inventory.created_by}}
+                    </p>
+                </div>
+                
+                <div class="col col-md-12">
+                    <button class="btn btn-default btn-info" v-on:click="editInventory()">edit</button>
+                    <button class="btn btn-default btn-danger" v-on:click="onDeleteInventory()">delete</button>
                 </div>
             </div>
         </div>
     </div>
     
-    <inventory-supplytype-editor :user="user" :load="supply_types" v-on:onchange="onSuppyTypeDidChange"></inventory-supplytype-editor>
-    
-    
-    <div class="subcontent">
-        <div class="section header">
-            <h1>Inventory Details</h1>
-        </div>
-        
-        <div class="section">
-            <div class="well">
-                <div class="section header">
-                    <h4>Inventory</h4>
-                </div>
-                
-                <div class="loader" v-if="loading.isInventory"></div>
-                
-                <div class="row" v-if="!loading.isInventory">
-                    <div class="col col-md-12">
-                        <p class="item-value">
-                            name: {{inventory.name}}
-                        </p>
-                        <p class="item-value" v-if="inventory.id.includes('muninv')">
-                            municipality: {{inventory.municipality}}
-                        </p>
-                        <p class="item-value">
-                            description: {{inventory.description}}
-                        </p>
-                        <p class="item-value">
-                            date created: {{formatDate(inventory.date_created)}}
-                        </p>
-                        <p class="item-value">
-                            created by: {{inventory.created_by}}
-                        </p>
-                    </div>
-                    
-                    <div class="col col-md-12">
-                        <button class="btn btn-default btn-info" v-on:click="editInventory()">edit</button>
-                        <button class="btn btn-default btn-danger" v-on:click="onDeleteInventory()">delete</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="section">
-            <button type="button" id="add-report" class="btn btn-info button-view"
-            data-toggle="modal"
-            data-target="#supplyTypesModal">View Supply Types
-        </button>
+    <div class="section">
         <button type="button" id="add-report" class="btn btn-info button-view"
-        v-on:click="addSupplyItem()">Add
-        New
-        Supply
+        data-toggle="modal"
+        data-target="#supplyTypesModal">View Supply Types
     </button>
-    <button type="button" id="add-report" class="btn btn-success button-view"
-    v-on:click="onDownloadReport()">
-    Generate Report
+    <button type="button" id="add-report" class="btn btn-info button-view"
+    v-on:click="addSupplyItem()">Add
+    New
+    Supply
+</button>
+<button type="button" id="add-report" class="btn btn-success button-view"
+v-on:click="onDownloadReport()">
+Generate Report
 </button>
 </div>
 
@@ -221,11 +233,18 @@
     <div class="table-container" id="tableData" v-if="view_list.length > 0">
         <div class="well" v-for="item,index in view_list">
             <div class="row">
-                <div class="col col-md-12 item-info">
+                <div class="col col-md-10 item-info">
                     <p class="item-label">
                         {{index + 1}}.
                     </p>
                 </div>
+
+                <div class="col col-md-2">
+                    <button class="btn btn-default btn-success"
+                        v-on:click="onDistributeItem(item)">Distribute Item
+                    </button>
+                </div>
+
                 <div class="col col-md-12 item-info">
                     <p class="item-label">
                         Name:
@@ -345,7 +364,8 @@
                 isSupplyType: false
             },
             
-            
+            distribute_item : null,
+            public_users    : [],
             
             supply_form: EvacuationSupply.formModel,
             
@@ -392,13 +412,16 @@
             fetchInventory(id) {
                 this.loading.isInventory = true
                 this.loading.isSupply = true
+
+                var promiseFetch;
+                
                 
                 console.log("get municipal", this.isMunicipality)
                 if (this.isMunicipality) {
                     console.log("get municipal", id)
-                    promiseFetch = DataHandler.getMunicipalInventory(id)
+                    promiseFetch    = DataHandler.getMunicipalInventory(id)
                 } else {
-                    promiseFetch = DataHandler.getInventory(id)
+                    promiseFetch    = DataHandler.getInventory(id)
                 }
                 
                 promiseFetch.then((message) => {
@@ -419,6 +442,37 @@
                 } else {
                     this.loading.isSupply = false
                 }
+
+                var promisePublicUsers;
+
+                if (this.user.admin_type == AdminUser.AdminTypes.evacuation) {
+                    console.log("public-user get evacuation %o", this.user.evacuation_id)
+                    promisePublicUsers  = DataHandler.getActivePublicUserHistoryByEvac(this.user.evacuation_id, true)
+                } else {
+                    console.log("public-user get municipal", this.user.municipality)
+                    promisePublicUsers  = DataHandler.getActivePublicUserHistory(this.user.municipality, true)
+                }
+
+                promisePublicUsers.then((message) => {
+                    let actives = message.data
+
+                    console.log("public-user active: %o",actives )
+
+                    let promiseUsers = actives.map((history) => {
+                        return DataHandler.getPublicUsers(null, history.user_id)
+                    })
+
+                    Promise.all(promiseUsers).then((messages) => {
+                        this.public_users = messages.map((message) => {
+                            return message.data
+                        })
+                        console.log("public-user public users %o", this.public_users)
+                    })
+                    
+
+                }).catch((err) => {
+                    console.log(err)
+                })
             },//setInventory
             
             getSupplyDetails(id) {
@@ -470,7 +524,28 @@
             },//fetchSupplyTypePromises
             
             
-            
+            onDistributeItem(item) {
+                this.distribute_item = EvacuationSupply.parse(item.toObject()) 
+                $('#distribute_modal').modal()
+            },
+
+            onDistributeSupply(event) {
+                let selected = event.selected
+                let item     = EvacuationSupply.parse(event.item.toObject())
+
+                selected.forEach((user) => {
+                    let public_item        = new PublicUserSupply()
+                    public_item.created_by = this.user.id
+                    public_item.user_id    = user.id 
+                    public_item.supply_id  = item.id
+                    public_item.qty        = item.qty
+                    public_item.remarks    = "received from inventory: "+ this.item.inventory_id
+
+                    item.remarks += "\ndistributed to user: "+ user_id 
+
+                    return DataHandler.addPublicSupply(public_item)
+                })
+            },
             
             /*!!=============== INVENTORY ===============!!!*/
             editInventory() {
@@ -714,7 +789,7 @@
                     //let evac = this.evac_dict[data.evac_id]
                     let ref = this.getSupplyType(data.inventory_type)//.supply_types_ref[data.inventory_type]
                     object['type'] = ref
-
+                    
                     return object
                 })
                 let csv = ConvertToCSV(view_list)

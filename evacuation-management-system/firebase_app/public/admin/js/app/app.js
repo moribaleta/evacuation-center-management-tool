@@ -1051,3 +1051,214 @@ const ContentSelectionComponent = Vue.extend({
 
 
 Vue.component('content-selection-component', ContentSelectionComponent)
+
+
+
+const SupplyItemEntryComponent = Vue.extend({
+    template:
+    `
+    <div class="row">
+        <div class="col col-md-12 item-info">
+            <p class="item-label">
+                Name:
+            </p>
+            <p class="item-value">
+                {{supplyType}}
+            </p>
+        </div>
+        <div class="col col-md-2 item-info">
+            <p class="item-label">
+                Quantity:
+            </p>
+            <p class="item-value">
+                {{item.qty}}
+            </p>
+        </div>
+                    
+        <div class="col col-md-12 item-info">
+            <p class="item-label">
+                Remarks:
+            </p>
+            <p class="item-value">
+                {{item.remarks}}
+            </p>
+        </div>
+                    
+        <div class="col col-md-4 item-info">
+            <p class="item-label">
+                Status:
+            </p>
+            <p class="item-value">
+                {{item.status}}
+            </p>
+        </div>    
+        <div class="col col-md-4 item-info">
+            <p class="item-label">
+                Date Supplied:
+            </p>
+            <p class="item-value">
+                {{formatDate(item.date_supplied)}}
+            </p>
+        </div>
+        <div class="col col-md-4 item-info">
+            <p class="item-label">
+                Date Created:
+            </p>
+            <p class="item-value">
+                {{formatDate(item.date_created)}}
+            </p>
+        </div>
+        <div class="col col-md-4 item-info">
+            <p class="item-label">
+                Date Updated:
+            </p>
+            <p class="item-value">
+                {{formatDate(item.date_updated)}}
+            </p>
+        </div>
+    </div>
+    `,
+    props: {
+        item: Object,
+        supplyType: String
+    },
+    methods: {
+        formatDate(date){
+            let _date = new Date(date)
+            return _date.toLocaleDateString()
+        }
+    }
+})//SupplyItemEntryComponent
+
+Vue.component('supply-item-entry-component', SupplyItemEntryComponent)
+
+
+
+const DistributionModal = Vue.extend({
+    template: 
+    `
+    <div :id="modal_id" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Distribute Items</h4>
+                </div>
+                <div class="modal-body">
+                    <supply-item-entry-component
+                        :item="item"
+                        :supplyType="supplyType"
+                    >
+                    </supply-item-entry-component>
+                    <div>
+                        <h3>Admitted Public Users</h3>
+                        <p>Please select the public users to receive the items<p>
+
+                        <label>Available Qty: {{qty - selected.length}}</label>
+                        
+                        <ul class="list-group">
+                            <li class="list-group-item" v-for="user,index in users">
+                                <label>
+                                    {{user.lastname + ", " + user.firstname}}
+                                </label>
+                                <button class="btn btn-default btn-success" v-on:click="onadd(user)" >ADD</button>
+                            </li>
+                        </ul>
+                        
+                    </div>
+                    <div v-if="selected.length > 0">
+                        <h3>Selected Public Users</h3>
+                        <ul class="list-group">
+                            <li class="list-group-item" v-for="user,index in selected">
+                                <label>
+                                    {{user_dict[user.id].lastname + ", " + user_dict[user.id].firstname}}
+                                </label>
+                                <button class="btn btn-default btn-danger" v-on:click="onremove(user)" >-</button>
+                                <label>{{user.qty}}</label>
+                                <button class="btn btn-default btn-danger" v-on:click="onremove(user)" >+</button>                
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal"
+                    v-on:click="onsave()">Save</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    `,
+
+    props: {
+        modal_id    : String,
+        item        : Object,
+        users       : Array,
+        supplyType  : Object
+    },
+
+    data() {
+        return {
+            selected: [],
+            user_dict: {},
+            qty: 0
+        }
+    },
+
+    watch: {
+        item() {
+            console.log("public-user - item changed- %o", this.item)
+            this.qty = Number(this.item.qty)
+
+            this.users.forEach((user) => {
+                this.user_dict[user.id] = user
+            })
+            console.log("public-user - users changed- %o", this.user_dict)
+        },
+    },
+
+    methods: {
+
+        onadd(item){
+            if (this.qty > this.selected.length ) {
+                    console.log("public-user - selected: %o",this.selected)
+                if (this.selected.length <= 0) {
+                    this.selected.push(item.id)
+                } else {
+                    let index = this.selected.findIndex((id) => {return id == item.id})
+                    console.log("public-user -on add %o -> index %o", item.id, index)
+                    if (index == -1) {
+                        this.selected.push(item.id)
+                    }
+                }
+            }
+        },
+
+        onremove(user_id){
+            let index = this.selected.findIndex((id) => {return id == user_id})
+            if (index > -1) {
+                this.selected.splice(index, 1)
+            }
+        },
+
+        onreduce(user_id){
+            
+        },
+
+        onincrease(user_id){
+
+        },
+
+        onsave(){
+            this.$emit('selected', {
+                item    : this.item,
+                selected: this.selected
+            })
+        }
+
+    }
+
+})
+
+
+Vue.component('distribution-modal', DistributionModal)
