@@ -61,6 +61,12 @@
     </div>
     <!-- <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#evacModal">Open Modal</button> -->
     <div class="container" id="content">
+
+        <ul class="breadcrumb">
+            <li><a href="inventory.html">Inventory</a></li>
+            <li><a href="#">Inventory Request</a></li>
+        </ul>
+
         <!-- Supply modal -->
         <div id="supplyModal" class="modal fade" role="dialog">
             <div class="modal-dialog">
@@ -89,7 +95,7 @@
 
         <div class="subcontent">
             <div class="section header">
-                <h1>Inventory</h1>
+                <h1>Inventory Supply Request</h1>
             </div>
 
             <filter-component :filter_add="filter_add" v-on:filter="onFilter($event)" v-on:search="onSearch($event)"
@@ -202,7 +208,16 @@
                                 <div class="panel panel-default">
                                     <div class="panel-body">
                                         <p class="item-label">Logs</p>
-                                        <p class="item-value">{{item.logs}}</p>
+                                        <ul class="list-group" v-if="item.logs.length > 0">
+                                            <li class="list-group-item" v-for="log in item.logs">
+                                                {{log}}
+                                            </li>
+                                        </ul>
+                                        <ul class="list-group" v-if="item.logs.length <= 0">
+                                            <li class="list-group-item">
+                                                no logs
+                                            </li>
+                                        </ul>
                                     </div>
                                 </div>
                             </div>
@@ -292,9 +307,15 @@
                 },
 
                 promiseEvacCenter() {
-                    return DataHandler.getEvacuationCenters(this.user.municipality).then((data) => {
-                        return data.data
-                    })
+                    if (this.user.admin_type == AdminUser.AdminTypes.evacuation) {
+                        return DataHandler.getEvacuationById(this.user.evacuation_id).then((data) => {
+                            return data.data
+                        })
+                    } else {
+                        return DataHandler.getEvacuationCenters(this.user.municipality).then((data) => {
+                            return data.data
+                        })
+                    }
                 },
 
                 getSupplyType(id) {
@@ -362,7 +383,7 @@
 
                             return true
                         }).then((val) => {
-                            DataHandler.getPendingSupplies(ids, 10).then((message) => {
+                            DataHandler.getPendingSupplies(ids).then((message) => {
                                 console.log("getPending Supplies %o", message)
                                 //var supplies = []
                                 let value = message.data.reduce((prev, curr) => {

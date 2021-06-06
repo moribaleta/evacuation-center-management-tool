@@ -5,7 +5,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>History</title>
-
+    
     <!-- update the version number as needed -->
     <script defer src="/__/firebase/7.19.1/firebase-app.js"></script>
     <!-- include only the Firebase features as you need -->
@@ -17,7 +17,7 @@
     <script defer src="/__/firebase/7.19.1/firebase-functions.js"></script>
     <!-- initialize the SDK after all desired features are loaded -->
     <script defer src="/__/firebase/init.js"></script>
-
+    
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -28,16 +28,16 @@
     <script src="../_global/js/objects.js"></script>
     <script src="../_global/js/utilities.js"></script>
     <script src="../_global/js/datahandler.js"></script>
-
+    
 </head>
 
 <body>
-
+    
     <div class="sidenav" id="header" attr="history">
         <div class="sidenav-item">
             <img class="nav-image" src="resources/images/logo.png" />
         </div>
-
+        
         <div v-for="item in header_items" v-bind:class="'sidenav-item ' + (active == item.id ? 'active' : '') ">
             <a v-bind:href="item.href">
                 <div class="icon-block">
@@ -46,7 +46,7 @@
                 </div>
             </a>
         </div>
-
+        
         <div class="sidenav-item">
             <a v-on:click="onLogout()">
                 <div class="icon-block">
@@ -57,7 +57,7 @@
         </div>
     </div>
     <div class="container" id="content">
-
+        
         <!-- MODAL -->
         <div id="editorModal" class="modal fade" role="dialog">
             <div class="modal-dialog">
@@ -71,26 +71,26 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal"
-                            v-on:click="saveHistory()">Save</button>
+                        v-on:click="saveHistory()">Save</button>
                         <button type="button" class="btn btn-default" data-dismiss="modal"
-                            v-on:click="close()">Close</button>
+                        v-on:click="close()">Close</button>
                     </div>
                 </div>
-
+                
             </div>
         </div><!-- MODAL -->
-
-
+        
+        
         <!-- CONTENT -->
         <div class="section">
             <!-- HEADER FILTER -->
             <div class="header-container">
                 <h1>Reports</h1>
                 <filter-component :filter_add="filter_add" v-on:filter="onFilter($event)" v-on:search="onSearch($event)"
-                    v-on:cancel="onCancelSearch($event)" v-on:clear="onClearFilter()"></filter-component>
-
+                v-on:cancel="onCancelSearch($event)" v-on:clear="onClearFilter()"></filter-component>
+                
                 <div class="button-container">
-                   <!--  <button type="button" class="btn btn-info button-view" v-on:click="createHistory()">
+                    <!--  <button type="button" class="btn btn-info button-view" v-on:click="createHistory()">
                         Generate
                         History
                     </button> -->
@@ -104,12 +104,12 @@
                     </button>
                 </div>
             </div>
-
+            
             <!-- LOADER -->
             <div class="loader_container" v-if="isDataLoading">
                 <div class="loader"></div>
             </div>
-
+            
             <!-- TABLE VIEW -->
             <div class="table-container" v-if="!isDataLoading">
                 <!-- <ul class="pagination">
@@ -125,193 +125,149 @@
                                 <p class="item-label">EVACUATION NAME</p>
                                 <p class="item-value">
                                     {{getEvacFromId(item.evac_id) ? getEvacFromId(item.evac_id).name : ""}}</p>
-                            </div>
-                            <div class="col col-md-12">
-                                <entry-component :entry="item" :headers="history_header">
+                                </div>
+                                <div class="col col-md-12">
+                                    <entry-component :entry="item" :headers="history_header">
                                     </entry-container>
-                            </div>
-                            <div class="col col-md-12">
-                                <button class="btn btn-default btn-info" v-on:click="editItem(index)">edit</button>
-                                <button class="btn btn-default btn-danger"
+                                </div>
+                                <div class="col col-md-12">
+                                    <button class="btn btn-default btn-info" v-on:click="editItem(index)">edit</button>
+                                    <button class="btn btn-default btn-danger"
                                     v-on:click="deleteItem(index)">delete</button>
+                                </div>
                             </div>
                         </div>
+                        
                     </div>
-
                 </div>
             </div>
         </div>
-    </div>
-
-    <script src="js/app/app.js"></script>
-    <script src="js/app/constants.js"></script>
-
-    <script>
-        app = new Vue({
-            el: '#content',
-            data: {
-                user: null,
-                evac_list: [],
-                evac_dict: {},
-                evac_names: {},
-
-                reports: [],
-                view_list: [],
-                history_header: ['created_by', 'date_created', 'date_updated', 'report_date',
+        
+        <script src="js/app/app.js"></script>
+        <script src="js/app/constants.js"></script>
+        
+        <script>
+            app = new Vue({
+                el: '#content',
+                data: {
+                    user: null,
+                    evac_list: [],
+                    evac_dict: {},
+                    evac_names: {},
+                    
+                    reports: [],
+                    view_list: [],
+                    history_header: ['created_by', 'date_created', 'date_updated', 'report_date',
                     'current_population'
-                ],
-
-                formModel: EvacuationHistory.formModel,
-
-                filter_add: null,
-
-                data_input: new EvacuationHistory(),
-                municipalities: [],
-                isDataLoading: true,
-                isEdit: false,
-            },
-            methods: {
-                onStart() {
-                    this.user = header.user
-                    this.fetchReports()
-                    this.municipalities = municipalities
+                    ],
+                    
+                    formModel: EvacuationHistory.formModel,
+                    
+                    filter_add: null,
+                    
+                    data_input: new EvacuationHistory(),
+                    municipalities: [],
+                    isDataLoading: true,
+                    isEdit: false,
                 },
-
-                fetchReports() {
-                    DataHandler.getEvacuationCenters(this.user.municipality).then((data) => {
-                        this.evac_list = data.data
-                        //this.filter_add['evacuation'] = ['all']
-                        var evac_options = []
-                        var evac_filter = ['all']
-                        this.evac_list.forEach((entry) => {
-                            this.evac_dict[entry.id] = entry
-                            this.evac_names[entry.name] = entry.id
-                            evac_filter.push(entry.name);
-                            evac_options.push({
-                                title: entry.name,
-                                value: entry.id
-                            })
-                        })
-                        //console.log("evac list %o", this.evac_list)
-                        this.filter_add = {
-                            populations: ['all', '0-100', '101-500', '501-1000', '1001+'],
-                            evacuations: evac_filter
+                methods: {
+                    onStart() {
+                        this.user = header.user
+                        this.fetchReports()
+                        this.municipalities = municipalities
+                    },
+                    
+                    fetchReports() {
+                        
+                        var promiseEvac;
+                        
+                        if (this.user.admin_type == AdminUser.AdminTypes.evacuation) {
+                            promiseEvac = DataHandler.getEvacuationById(this.user.evacuation_id)
+                        } else {
+                            promiseEvac = DataHandler.getEvacuationCenters(this.user.municipality)
                         }
-                        this.formModel.evac_id.options = evac_options
-
-                        this.isDataLoading = true
-                        DataHandler.getEvacuationHistory().then((message) => {
-
-                            this.reports = message.data.filter((val) => {
-                                return this.evac_dict[val.evac_id] != null
+                        
+                        promiseEvac.then((data) => {
+                            this.evac_list = data.data
+                            //this.filter_add['evacuation'] = ['all']
+                            var evac_options = []
+                            var evac_filter = ['all']
+                            this.evac_list.forEach((entry) => {
+                                this.evac_dict[entry.id] = entry
+                                this.evac_names[entry.name] = entry.id
+                                evac_filter.push(entry.name);
+                                evac_options.push({
+                                    title: entry.name,
+                                    value: entry.id
+                                })
                             })
-
-                            //this.reports    = message.data
-                            this.view_list = this.reports
-                            //console.log("reports %o", this.reports)
-
-                        }).catch(error => {
-                            console.log(error)
-                        }).finally(() => {
-                            this.isDataLoading = false
+                            //console.log("evac list %o", this.evac_list)
+                            this.filter_add = {
+                                populations: ['all', '0-100', '101-500', '501-1000', '1001+'],
+                                evacuations: evac_filter
+                            }
+                            this.formModel.evac_id.options = evac_options
+                            
+                            this.isDataLoading = true
+                            DataHandler.getEvacuationHistory().then((message) => {
+                                
+                                this.reports = message.data.filter((val) => {
+                                    return this.evac_dict[val.evac_id] != null
+                                })
+                                
+                                //this.reports    = message.data
+                                this.view_list = this.reports
+                                //console.log("reports %o", this.reports)
+                                
+                            }).catch(error => {
+                                console.log(error)
+                            }).finally(() => {
+                                this.isDataLoading = false
+                            })
+                            
+                        }).catch(err => {
+                            console.log("err %o", err)
                         })
-
-                    }).catch(err => {
-                        console.log("err %o", err)
-                    })
-                },
-
-                getEvacFromId(id) {
-                    return this.evac_dict[id]
-                },
-
-                editItem(index) {
-                    this.data_input = EvacuationHistory.parse(this.view_list[index].toObject())
-                    this.isEdit = true
-                    $('#editorModal').modal()
-                },
-
-                addHistory() {
-                    this.data_input = new EvacuationHistory()
-                    this.isEdit = false
-                    $('#editorModal').modal()
-                },
-
-
-                createHistory() {
-                    var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August",
+                    },
+                    
+                    getEvacFromId(id) {
+                        return this.evac_dict[id]
+                    },
+                    
+                    editItem(index) {
+                        this.data_input = EvacuationHistory.parse(this.view_list[index].toObject())
+                        this.isEdit = true
+                        $('#editorModal').modal()
+                    },
+                    
+                    addHistory() {
+                        this.data_input = new EvacuationHistory()
+                        this.isEdit = false
+                        $('#editorModal').modal()
+                    },
+                    
+                    
+                    createHistory() {
+                        var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August",
                         "September", "October", "November", "December"
-                    ];
-
-                    var history = []
-
-                    for (var year = 2018; year <= 2020; year++) {
-                        monthNames.forEach((month, month_index) => {
-                            let date = new Date(year, month_index, getRandomValue(1, month_index == 1 ? 20 : 30))
-                            let _history = this.createHistoryObject(date)
-                            _history.forEach((data) => {
-                                history.push(data)
+                        ];
+                        
+                        var history = []
+                        
+                        for (var year = 2018; year <= 2020; year++) {
+                            monthNames.forEach((month, month_index) => {
+                                let date = new Date(year, month_index, getRandomValue(1, month_index == 1 ? 20 : 30))
+                                let _history = this.createHistoryObject(date)
+                                _history.forEach((data) => {
+                                    history.push(data)
+                                })
                             })
-                        })
-                        //history = history.concat(month_data)
-                    }
-                    //console.log("history %o", history)
-                    ////console.log(JSON.stringify(this.testparams))
-
-                    DataHandler.addLargeEvacuationHistory(history).then((data) => {
-                        //console.log('response %o', data)
-                        if (data.error) {
-                            alert("error " + data.error)
-                        } else {
-                            alert("item deleted successfuly")
-                            this.fetchReports()
+                            //history = history.concat(month_data)
                         }
-                    }).catch(err => {
-                        console.log(err)
-                    }).finally(() => {
-                        this.data_input = new EvacuationHistory()
-                    })
-                },
-
-                createHistoryObject(date) {
-                    return this.evac_list.map((test_evac) => {
-                        var evac_history = new EvacuationHistory()
-                        evac_history.report_date = date
-                        evac_history.current_population = getRandomValue((test_evac.population_capacity)/5, test_evac.population_capacity/1.5)
-                        evac_history.evac_id = test_evac.id
-                        evac_history.created_by = this.user.id
-                        return evac_history
-                    })
-                },
-
-                saveHistory() {
-                    this.data_input.report_date = new Date(this.data_input.report_date)
-                    if (!this.isEdit) {
-                        this.data_input.created_by = header.user.id
-                    }
-
-                    //console.log("saving %o", this.data_input)
-
-                    DataHandler.addEvacuationHistory(this.data_input).then((data) => {
-                        //console.log('response %o', data)
-                        if (data.error) {
-                            alert("error " + data.error)
-                        } else {
-                            alert("item deleted successfuly")
-                            this.fetchReports()
-                        }
-                    }).catch(err => {
-                        console.log(err)
-                    }).finally(() => {
-                        this.data_input = new EvacuationHistory()
-                    })
-                },
-
-                deleteItem(index) {
-                    let id = this.view_list[index].id
-                    let onConfirm = confirm(`delete item id: ${id}`)
-                    if (onConfirm) {
-                        DataHandler.deleteEvacuationHistory(id).then((data) => {
+                        //console.log("history %o", history)
+                        ////console.log(JSON.stringify(this.testparams))
+                        
+                        DataHandler.addLargeEvacuationHistory(history).then((data) => {
                             //console.log('response %o', data)
                             if (data.error) {
                                 alert("error " + data.error)
@@ -319,103 +275,156 @@
                                 alert("item deleted successfuly")
                                 this.fetchReports()
                             }
+                        }).catch(err => {
+                            console.log(err)
+                        }).finally(() => {
+                            this.data_input = new EvacuationHistory()
                         })
-                    }
-                },
-
-
-                /*FILTER /SEARCH/ DOWNLOAD*/
-
-                /* FILTER / SEARCH */
-                onFilter(filter) {
-                    //console.log("filter %o", filter)
-
-                    var view_list = this.reports.filter((data) => {
-                        let date_created = new Date(data.date_created)
-                        let date_updated = new Date(data.date_updated)
-                        let date_report = new Date(data.report_date)
-                        let evac = this.evac_dict[data.evac_id]
-
-                        return (
+                    },
+                    
+                    createHistoryObject(date) {
+                        return this.evac_list.map((test_evac) => {
+                            var evac_history = new EvacuationHistory()
+                            evac_history.report_date = date
+                            evac_history.current_population = getRandomValue((test_evac.population_capacity)/5, test_evac.population_capacity/1.5)
+                            evac_history.evac_id = test_evac.id
+                            evac_history.created_by = this.user.id
+                            return evac_history
+                        })
+                    },
+                    
+                    saveHistory() {
+                        this.data_input.report_date = new Date(this.data_input.report_date)
+                        if (!this.isEdit) {
+                            this.data_input.created_by = header.user.id
+                        }
+                        
+                        //console.log("saving %o", this.data_input)
+                        
+                        DataHandler.addEvacuationHistory(this.data_input).then((data) => {
+                            //console.log('response %o', data)
+                            if (data.error) {
+                                alert("error " + data.error)
+                            } else {
+                                alert("item deleted successfuly")
+                                this.fetchReports()
+                            }
+                        }).catch(err => {
+                            console.log(err)
+                        }).finally(() => {
+                            this.data_input = new EvacuationHistory()
+                        })
+                    },
+                    
+                    deleteItem(index) {
+                        let id = this.view_list[index].id
+                        let onConfirm = confirm(`delete item id: ${id}`)
+                        if (onConfirm) {
+                            DataHandler.deleteEvacuationHistory(id).then((data) => {
+                                //console.log('response %o', data)
+                                if (data.error) {
+                                    alert("error " + data.error)
+                                } else {
+                                    alert("item deleted successfuly")
+                                    this.fetchReports()
+                                }
+                            })
+                        }
+                    },
+                    
+                    
+                    /*FILTER /SEARCH/ DOWNLOAD*/
+                    
+                    /* FILTER / SEARCH */
+                    onFilter(filter) {
+                        //console.log("filter %o", filter)
+                        
+                        var view_list = this.reports.filter((data) => {
+                            let date_created = new Date(data.date_created)
+                            let date_updated = new Date(data.date_updated)
+                            let date_report = new Date(data.report_date)
+                            let evac = this.evac_dict[data.evac_id]
+                            
+                            return (
                             (filter.year == 'all' ||
-                                filter.year == date_report.getFullYear()) &&
+                            filter.year == date_report.getFullYear()) &&
                             (filter.month == 'all' ||
-                                filter.month == (months_array[date_report.getMonth()] || 0)) &&
+                            filter.month == (months_array[date_report.getMonth()] || 0)) &&
                             (filter.municipality == 'all' ||
-                                filter.municipality == evac.municipality)
-                        )
-                    });
-
-                    view_list = view_list.filter((data) => {
-                        let population_range = filter.populations
-                        if (population_range == 'all') {
-                            return true
-                        } else if (!population_range.split('-').isEmpty()) {
-                            let range = population_range.split('-')
-                            //console.log("let range %o", range)
-                            return (data.current_population >= Number(range[0]) && data
+                            filter.municipality == evac.municipality)
+                            )
+                        });
+                        
+                        view_list = view_list.filter((data) => {
+                            let population_range = filter.populations
+                            if (population_range == 'all') {
+                                return true
+                            } else if (!population_range.split('-').isEmpty()) {
+                                let range = population_range.split('-')
+                                //console.log("let range %o", range)
+                                return (data.current_population >= Number(range[0]) && data
                                 .current_population <= Number(range[1]))
-                        } else {
-                            let max_range = population_range.split('+')[0]
-                            //console.log("let max_range %o", max_range)
-                            return (data.current_population >= Number(max_range))
-                        }
-                    })
-
-                    view_list = view_list.filter((data) => {
-                        let evac = filter.evacuations
-                        if (evac == 'all') {
-                            return true
-                        } else {
-                            let evac_id = this.evac_names[evac]
-                            return data.evac_id === evac_id
-                        }
-                    })
-
-
-                    this.view_list = view_list
-                },
-
-                onSearch(filter) {
-                    this.onFilter(filter)
-
-                    this.view_list = this.view_list.filter((data) => {
-                        var object = {
-                            ...data.toObject()
-                        }
-                        let evac = this.evac_dict[data.evac_id]
-                        object['evac_name'] = evac.name
-                        object['municipal'] = evac.municipal
-                        return SearchObject(object, filter.searchTerm)
-                    })
-                },
-
-                onCancelSearch(filter) {
-                    this.onFilter(filter)
-                },
-
-                onClearFilter() {
-                    this.view_list = [...this.reports]
-                },
-
-                onDownloadReport() {
-                    let view_list = this.view_list.map((data) => {
-                        var object = {
-                            ...data.toObject()
-                        }
-                        let evac = this.evac_dict[data.evac_id]
-                        object['evac_name'] = evac.name
-                        object['municipal'] = evac.municipality
-                        return object
-                    })
-                    let csv = ConvertToCSV(view_list)
-                    saveTextAsFile('history.csv', csv)
-                },
-
-            }
-        })
-    </script>
-
-</body>
-
-</html>
+                            } else {
+                                let max_range = population_range.split('+')[0]
+                                //console.log("let max_range %o", max_range)
+                                return (data.current_population >= Number(max_range))
+                            }
+                        })
+                        
+                        view_list = view_list.filter((data) => {
+                            let evac = filter.evacuations
+                            if (evac == 'all') {
+                                return true
+                            } else {
+                                let evac_id = this.evac_names[evac]
+                                return data.evac_id === evac_id
+                            }
+                        })
+                        
+                        
+                        this.view_list = view_list
+                    },
+                    
+                    onSearch(filter) {
+                        this.onFilter(filter)
+                        
+                        this.view_list = this.view_list.filter((data) => {
+                            var object = {
+                                ...data.toObject()
+                            }
+                            let evac = this.evac_dict[data.evac_id]
+                            object['evac_name'] = evac.name
+                            object['municipal'] = evac.municipal
+                            return SearchObject(object, filter.searchTerm)
+                        })
+                    },
+                    
+                    onCancelSearch(filter) {
+                        this.onFilter(filter)
+                    },
+                    
+                    onClearFilter() {
+                        this.view_list = [...this.reports]
+                    },
+                    
+                    onDownloadReport() {
+                        let view_list = this.view_list.map((data) => {
+                            var object = {
+                                ...data.toObject()
+                            }
+                            let evac = this.evac_dict[data.evac_id]
+                            object['evac_name'] = evac.name
+                            object['municipal'] = evac.municipality
+                            return object
+                        })
+                        let csv = ConvertToCSV(view_list)
+                        saveTextAsFile('history.csv', csv)
+                    },
+                    
+                }
+            })
+        </script>
+        
+    </body>
+    
+    </html>

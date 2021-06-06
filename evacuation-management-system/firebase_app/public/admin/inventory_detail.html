@@ -62,7 +62,13 @@
     </inventory-selector>
 </div>
 <!-- <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#editorModal">Open Modal</button> -->
-<div class="container" id="content">
+<div class="container" id="content">    
+
+    <ul class="breadcrumb">
+        <li><a href="inventory.html">Inventory</a></li>
+        <li><a href="inventory_list.html">Inventory List</a></li>
+        <li><a href="#">Inventory Detail</a></li>
+    </ul>
     
     <!-- Supply modal -->
     <div id="supplyModal" class="modal fade" role="dialog">
@@ -141,10 +147,9 @@
 </div>
 
 <distribution-modal
-        id="distribute_modal"
         :item="distribute_item"
         :users="public_users"
-        :supplyType="getSupplyType(distribute_item)"
+        :supplytype="getSupplyType(distribute_item.inventory_type)"
         v-if="distribute_item"
         v-on:selected="onDistributeSupply($event)"
      ></distribution-modal>
@@ -322,7 +327,16 @@ Generate Report
                 <div class="panel panel-default">
                     <div class="panel-body">
                         <p class="item-label">Logs</p>
-                        <p class="item-value">{{item.logs}}</p>
+                        <ul class="list-group" v-if="item.logs.length > 0">
+                            <li class="list-group-item" v-for="log in item.logs">
+                                {{log}}
+                            </li>
+                        </ul>
+                        <ul class="list-group" v-if="item.logs.length <= 0">
+                            <li class="list-group-item">
+                                no logs
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -344,6 +358,8 @@ Generate Report
         data: {
             user: new AdminUser(),
             inventory: new InventoryType(),
+            inventory_id: null,
+
             supplies: [],
             view_list: [],
             
@@ -390,10 +406,12 @@ Generate Report
                 
                 const id = urlParams.get('inventory_id')
                 console.log("inventory id: " + id);
+                this.inventory_id = id
                 
                 const isMuni = urlParams.get('isMuni')
                 console.log("is Municipality: " + isMuni)
                 this.isMunicipality = (isMuni == 'true');
+                
                 
                 this.filter_add = {
                     status : ['all'].concat(Object.keys(SupplyStatus)), 
@@ -526,25 +544,50 @@ Generate Report
             
             onDistributeItem(item) {
                 this.distribute_item = EvacuationSupply.parse(item.toObject()) 
+                console.log("modal distribution")
                 $('#distribute_modal').modal()
+            },
+
+            parseLogs(){
+
             },
 
             onDistributeSupply(event) {
                 let selected = event.selected
-                let item     = EvacuationSupply.parse(event.item.toObject())
+                var item     = EvacuationSupply.parse(event.item.toObject()) 
+                
+                console.log("item %o", item)
 
-                selected.forEach((user) => {
-                    let public_item        = new PublicUserSupply()
-                    public_item.created_by = this.user.id
-                    public_item.user_id    = user.id 
-                    public_item.supply_id  = item.id
-                    public_item.qty        = item.qty
-                    public_item.remarks    = "received from inventory: "+ this.item.inventory_id
+                let promisesPublic = selected.map((public_user) => {
+                    let public_item              = new PublicUserSupply()
+                        public_item.created_by   = this.user.id
+                        public_item.inventory_id = this.inventory_id
+                        public_item.evac_id      = this.inventory.evac_id
+                        public_item.user_id      = public_user.id
+                        public_item.qty          = public_user.qty
+                        public_item.supply_id    = item.id
+                        public_item.remarks      = "received from inventory: "+ item.inventory_id + " Date:" + (new Date())
 
-                    item.remarks += "\ndistributed to user: "+ user_id 
-
+                    item.logs = item.logs || []
+                    item.logs.push("distributed to user: "+ public_user.id +" qty:" + public_user.qty + " Date:" + (new Date()))   //+= "(\\n)
+                    item.qty    -= public_user.qty
                     return DataHandler.addPublicSupply(public_item)
                 })
+
+                
+
+                Promise.all(promisesPublic)
+                    .then((message) => {
+                        return DataHandler.addSupply(item)
+                    })
+                    .then((message)=> {
+                        AlertMessages.success("Supply has been distributed")
+                        this.fetchInventory(this.inventory_id)
+                    })
+                    .catch((err) => {
+                        console.log(err)
+                        AlertMessages.error(err)
+                    })
             },
             
             /*!!=============== INVENTORY ===============!!!*/
@@ -668,7 +711,7 @@ Generate Report
                     this.transfer_supply.inventory_id = id
                     this.transfer_supply.date_updated = new Date()
                     this.transfer_supply.status = SupplyStatus.pending
-                    this.transfer_supply.logs = this.transfer_supply.logs + "\n" + "Transferred from: "+ this.inventory.name +" by: " + this.user.id
+                    this.transfer_supply.logs.push("Transferred from: "+ this.inventory.name +" by: " + this.user.id + " Date: "+ (new Date()))
                     
                     inventory_selection.onDismiss()
                     DataHandler.addSupply(this.transfer_supply).then((data) => {

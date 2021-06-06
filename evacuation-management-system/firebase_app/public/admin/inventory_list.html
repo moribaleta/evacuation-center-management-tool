@@ -459,9 +459,15 @@
                 },
 
                 promiseEvacCenter() {
-                    return DataHandler.getEvacuationCenters(this.user.municipality).then((data) => {
-                        return data.data
-                    })
+                    if (this.user.admin_type == AdminUser.AdminTypes.evacuation) {
+                        return DataHandler.getEvacuationById(this.user.evacuation_id).then((data) => {
+                            return data.data
+                        })
+                    } else {
+                        return DataHandler.getEvacuationCenters(this.user.municipality).then((data) => {
+                            return data.data
+                        })
+                    }
                 },
 
                 getSupplyType(id) {
@@ -626,7 +632,7 @@
                 },
 
                 viewInventory(id) {
-                    window.open(`inventory_detail.html?inventory_id=${id}&isMuni=false`)
+                    window.open(`inventory_detail.html?inventory_id=${id}&isMuni=false`,"_self");
                 },
 
                 onNewMuniInventory() {
@@ -681,7 +687,7 @@
                 },
 
                 onViewMuniInventory(id) {
-                    window.open(`inventory_detail.html?inventory_id=${id}&isMuni=true`)
+                    window.open(`inventory_detail.html?inventory_id=${id}&isMuni=true`,"_self");
                 },
 
                 download() {

@@ -778,8 +778,8 @@
                         evac_supply.qty = supply.qty
                         evac_supply.remarks = supply.remarks
                         evac_supply.status = SupplyStatus.stored
-                        evac_supply.logs = "Converted From Donor Report - " + this.report_input.id +
-                            " by: " + this.user.id
+                        evac_supply.logs.push("Converted From Donor Report - " + this.report_input.id +
+                            " by: " + this.user.id + " Date:" + (new Date()))
                         return evac_supply
                     })
 

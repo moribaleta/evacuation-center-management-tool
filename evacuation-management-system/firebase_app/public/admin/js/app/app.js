@@ -1063,7 +1063,7 @@ const SupplyItemEntryComponent = Vue.extend({
                 Name:
             </p>
             <p class="item-value">
-                {{supplyType}}
+                {{supplytype}}
             </p>
         </div>
         <div class="col col-md-2 item-info">
@@ -1120,7 +1120,7 @@ const SupplyItemEntryComponent = Vue.extend({
     `,
     props: {
         item: Object,
-        supplyType: String
+        supplytype: String
     },
     methods: {
         formatDate(date){
@@ -1137,7 +1137,7 @@ Vue.component('supply-item-entry-component', SupplyItemEntryComponent)
 const DistributionModal = Vue.extend({
     template: 
     `
-    <div :id="modal_id" class="modal fade" role="dialog">
+    <div id="distribute_modal" class="modal fade" role="dialog">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -1147,21 +1147,32 @@ const DistributionModal = Vue.extend({
                 <div class="modal-body">
                     <supply-item-entry-component
                         :item="item"
-                        :supplyType="supplyType"
+                        :supplytype="supplytype"
                     >
                     </supply-item-entry-component>
                     <div>
                         <h3>Admitted Public Users</h3>
-                        <p>Please select the public users to receive the items<p>
+                        <p>Please select the public users to receive the items</p>
 
-                        <label>Available Qty: {{qty - selected.length}}</label>
+                        <label v-if="qty">Available Qty: {{qty - getQty()}}</label>
                         
                         <ul class="list-group">
                             <li class="list-group-item" v-for="user,index in users">
-                                <label>
-                                    {{user.lastname + ", " + user.firstname}}
-                                </label>
-                                <button class="btn btn-default btn-success" v-on:click="onadd(user)" >ADD</button>
+                                <div class="row">
+                                <div class="col col-md-5">
+                                    <label>
+                                        {{user.lastname + ", " + user.firstname}}
+                                    </label>
+                                    <label v-if="user.dependents.length > 0">
+                                        dependents: {{user.dependents.length}}
+                                    </label>
+                                </div>
+                                
+                                <div class="col col-md-2">
+                                    <button class="btn btn-default btn-success" v-on:click="onadd(user)" >ADD</button>
+                                </div>
+                                </div>
+                                
                             </li>
                         </ul>
                         
@@ -1170,12 +1181,21 @@ const DistributionModal = Vue.extend({
                         <h3>Selected Public Users</h3>
                         <ul class="list-group">
                             <li class="list-group-item" v-for="user,index in selected">
-                                <label>
-                                    {{user_dict[user.id].lastname + ", " + user_dict[user.id].firstname}}
-                                </label>
-                                <button class="btn btn-default btn-danger" v-on:click="onremove(user)" >-</button>
-                                <label>{{user.qty}}</label>
-                                <button class="btn btn-default btn-danger" v-on:click="onremove(user)" >+</button>                
+                                <div class="row">
+                                    <div class="col col-md-5">
+                                        <label>
+                                            {{user_dict[user.id].lastname + ", " + user_dict[user.id].firstname}}
+                                        </label>
+                                        <label v-if="user_dict[user.id].dependents.length > 0">
+                                            dependents: {{user_dict[user.id].dependents.length}}
+                                        </label>
+                                    </div>
+                                    <div class="col col-md-3">
+                                        <button class="btn btn-small btn-danger" v-on:click="onreduce(index,user)" >-</button>
+                                        <label>{{user.qty}}</label>
+                                        <button class="btn btn-small btn-danger" v-on:click="onincrease(index,user)" >+</button>                
+                                    </div>
+                                </div>
                             </li>
                         </ul>
                     </div>
@@ -1194,7 +1214,7 @@ const DistributionModal = Vue.extend({
         modal_id    : String,
         item        : Object,
         users       : Array,
-        supplyType  : Object
+        supplytype  : String
     },
 
     data() {
@@ -1223,12 +1243,18 @@ const DistributionModal = Vue.extend({
             if (this.qty > this.selected.length ) {
                     console.log("public-user - selected: %o",this.selected)
                 if (this.selected.length <= 0) {
-                    this.selected.push(item.id)
+                    this.selected.push({
+                        id: item.id,
+                        qty : 1
+                    })
                 } else {
                     let index = this.selected.findIndex((id) => {return id == item.id})
                     console.log("public-user -on add %o -> index %o", item.id, index)
                     if (index == -1) {
-                        this.selected.push(item.id)
+                        this.selected.push({
+                            id: item.id,
+                            qty : 1
+                        })
                     }
                 }
             }
@@ -1241,12 +1267,52 @@ const DistributionModal = Vue.extend({
             }
         },
 
-        onreduce(user_id){
-            
+        getQty() {
+            if (this.selected.length > 0) {
+                return this.selected.map((user) => {
+                    return user.qty
+                }).reduce((prev, curr) => {
+                    prev = prev || 0
+                    return curr + prev
+                })
+            } else {
+                return 0
+            }            
         },
 
-        onincrease(user_id){
+        onreduce(index,user){
+            let list = [...this.selected]
+            let _user = {
+                ...user
+            }
+            _user.qty--
+            if (_user.qty <= 0) {
+                list.splice(index, 1)    
+            } else {
+                list[index] = _user
+            }
 
+            this.selected = list
+        },
+
+        onincrease(index,user){
+            let list = [...this.selected]
+            let _user = {
+                ...user
+            }
+
+            _user.qty++
+
+            console.log("qty %o", this.qty)
+            console.log("user qty %o", this.getQty())
+
+            if (this.qty >= (this.getQty() + 1)) {
+                list[index] = _user    
+            } else {
+                return
+            }
+            
+            this.selected = list
         },
 
         onsave(){

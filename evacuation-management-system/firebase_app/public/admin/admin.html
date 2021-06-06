@@ -66,42 +66,53 @@
                     <div class="modal-body">
                         <div class="row">
                             <div class="col col-md-12 input-container">
-                                <p>username</p>
+                                <P>USERNAME</p>
                                 <input type="text" class="input input-item" v-model="data_input.username">
                             </div>
                             <div class="col col-md-6 input-container">
-                                <p>firstname</p>
+                                <P>FIRSTNAME</p>
                                 <input type="text" class="input input-item" v-model="data_input.firstname">
                             </div>
 
                             <div class="col col-md-6 input-container">
-                                <p>lastname</p>
+                                <P>LASTNAME</p>
                                 <input type="text" class=" input input-item" v-model="data_input.lastname">
                             </div>
 
                             <div class="col col-md-6 input-container">
-                                <p>email</p>
+                                <P>EMAIL</p>
                                 <input type="email" class="input input-item" v-model="data_input.email">
                             </div>
 
                             <div class="col col-md-6 input-container">
-                                <p>admin type</p>
+                                <p>ADMIN TYPE</p>
                                 <select id="input-district" class="input input-item input-select"
-                                    v-model="data_input.admin_type">
+                                    v-model="data_input.admin_type"
+                                    v-if="user.admin_type != 'evacuation'"
+                                    >
                                     <option v-for="admin_type,index in admint_types" v-bind:value="admin_type">
                                         {{admin_type}}</option>
                                 </select>
+                                <p v-if="user.admin_type == 'evacuation'">{{user.admin_type}}</p>
                             </div>
 
                             <div class="col col-md-6 input-container">
-                                <p>municipal</p>
-                                <p v-if="data_input.admin_type == 'pdrrmo'">
+                                <p>MUNICIPAL</p>
+                                <p v-if="data_input.admin_type != 'mdrrmo'">
                                     {{user.municipality == 0 ? "\"admin\"" : user.municipality}}</p>
                                 <select id="input-district" class="input input-item input-select"
-                                    v-model="data_input.municipality" v-if="data_input.admin_type != 'pdrrmo'">
+                                    v-model="data_input.municipality" 
+                                    v-if="data_input.admin_type == 'mdrrmo'">
                                     <option v-for="municipal in municipalities" v-bind:value="municipal">
                                         {{municipal}}</option>
                                 </select>
+                            </div>
+
+                            <div class="col col-md-6 input-container" 
+                                v-if="data_input.admin_type == 'evacuation'">
+                                <p>EVACUATION CENTER</p>
+                                <p>{{data_input.evacuation_id}}</p>
+                                <p v-if="evacuations[data_input.evacuation_id]">{{evacuations[data_input.evacuation_id].name}}</p>
                             </div>
 
                             <div class="col col-md-12 input-container">
@@ -153,54 +164,57 @@
             </div>
         </div>
 
-        <h3>Users</h3>
-        <div class="section">
-            <div class="button-container">
-                <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="addNewUser()">add
-                    User
-                </button>
+        <div class="subcontent" v-if="user.admin_type != 'evacuation'">
+            <h3>Users</h3>
+            <div class="section">
+                <div class="button-container">
+                    <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="addNewUser()">add
+                        User
+                    </button>
+                </div>
             </div>
-        </div>
-        <div class="loader-container" v-if="isLoading">
-            <div class="loader"></div>
-        </div>
-        <div class="section" v-if="!isLoading">
-            <div class="table-container" id="tableData">
-                <div class="well" v-for="item,index in user_list">
-                    <div class="row">
-
-                        <div class="col col-md-12 item-info">
-                            <p class="item-label">
-                                {{index + 1}}.
-                            </p>
-                            <img :src="cdn + item.images[0]" onerror="this.src='resources/images/avatar.jpeg';"
-                                style="height: 50px; width: 50px; border-radius: 25;">
-                        </div>
-
-                        <div class="col col-md-12">
-                            <entry-component :entry="item" :headers="headers">
-                                </entry-container>
-
-                        </div>
-
-                        <div class="well col col-md-12 item-info"
-                            v-if="item.evacuation_id && evacuations[item.evacuation_id]">
-                            <p class="item-label">
-                                Evacuation Center:
-                            </p>
-                            <p class="item-value" style="margin-right: 10px;">
-                                {{evacuations[item.evacuation_id].name}}
-                            </p>
-                        </div>
-
-                        <div class="col col-md-12">
-                            <button class="btn btn-default btn-info" v-on:click="editUser(index)">edit</button>
-                            <button class="btn btn-default btn-danger" v-on:click="deleteItem(index)">delete</button>
+            <div class="loader-container" v-if="isLoading">
+                <div class="loader"></div>
+            </div>
+            <div class="section" v-if="!isLoading">
+                <div class="table-container" id="tableData">
+                    <div class="well" v-for="item,index in user_list">
+                        <div class="row">
+    
+                            <div class="col col-md-12 item-info">
+                                <p class="item-label">
+                                    {{index + 1}}.
+                                </p>
+                                <img :src="cdn + item.images[0]" onerror="this.src='resources/images/avatar.jpeg';"
+                                    style="height: 50px; width: 50px; border-radius: 25;">
+                            </div>
+    
+                            <div class="col col-md-12">
+                                <entry-component :entry="item" :headers="headers">
+                                    </entry-container>
+    
+                            </div>
+    
+                            <div class="well col col-md-12 item-info"
+                                v-if="item.evacuation_id && evacuations[item.evacuation_id]">
+                                <p class="item-label">
+                                    Evacuation Center:
+                                </p>
+                                <p class="item-value" style="margin-right: 10px;">
+                                    {{evacuations[item.evacuation_id].name}}
+                                </p>
+                            </div>
+    
+                            <div class="col col-md-12">
+                                <button class="btn btn-default btn-info" v-on:click="editUser(index)">edit</button>
+                                <button class="btn btn-default btn-danger" v-on:click="deleteItem(index)">delete</button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        
 
     </div>
 
@@ -211,18 +225,17 @@
         app = new Vue({
             el: '#content',
             data: {
-                user: null,
-                user_list: [],
-                headers: AdminUser.keys,
-                data_input: new AdminUser(),
-                isEdit: false,
-                editUserId: null,
-                conf_password: null,
+                user          : null,
+                user_list     : [],
+                headers       : AdminUser.keys,
+                data_input    : new AdminUser(),
+                isEdit        : false,
+                editUserId    : null,
+                conf_password : null,
                 municipalities: [],
-                admint_types: Object.keys(AdminUser.AdminTypes),
-                isLoading: false,
-                cdn: DataHandlerType.api_host,
-                evacuations: {}
+                admint_types  : Object.keys(AdminUser.AdminTypes),
+                isLoading     : false,
+                evacuations   : {}
             },
             methods: {
 
