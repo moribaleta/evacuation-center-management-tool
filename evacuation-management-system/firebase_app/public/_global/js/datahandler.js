@@ -1648,6 +1648,67 @@ class DonorHandler extends MunicipalInventoryHandler {
     deleteDonor(id, isOrg = true) {
         return this.deleteEntry(id, isOrg ? UserHandler.tables.donor_organization : UserHandler.tables.donor_individual)
     }
+
+    getDonorsReportsByEvac(evac_id, status) {
+        return new Promise((resolve, reject) => {
+            const ref = this.firestore.collection(UserHandler.tables.donor_reports)
+            
+            var query = ref.where('evac_id','==',evac_id)
+
+            if (status) {
+                query = ref.where('status','==', status)
+            }
+
+            query = query.orderBy('date_updated', 'desc')
+            
+            query.get().then((querySnapshot) => {
+                var reports = []
+                querySnapshot.forEach((doc) => {
+                    console.log(doc.id, " => ", doc.data());
+                    let data = doc.data()
+                    let id = doc.id
+                    
+                    const object = parseObject({
+                        id,
+                        ...data
+                    })
+                    reports.push(DonorsReport.parse(object))
+                });
+                var message = new Message()
+                message.data = reports
+                resolve(message)
+            }).catch((error) => {
+                console.log("Error getting documents: ", error);
+                reject(error)
+            });
+        })
+    }
+
+    getDonorsReportsByMunicipal(municipality, status) {
+        return new Promise((resolve, reject) => {
+            this.getEvacuationCenters(municipality)
+            .then((evacs) => {
+                let reportsPromises = evacs.data.map((evac) => {
+                    return this.getDonorsReportsByEvac(evac.id, status)                    
+                })
+                Promise.all(reportsPromises).then((messages) => {
+                    let reports = messages.map((message) => {
+                        return message.data
+                    }).reduce((prev, curr) => {
+                        prev = prev || []
+                        return prev.concat(curr)
+                    })
+
+                    var message     = new Message()
+                    message.data    = reports
+                    resolve(message)
+                })
+            }).catch((err) => {
+                console.log("Error getting documents: ", error);
+                reject(err)
+            })
+        })
+    }
     
     /** returns the public history of the user or general if given empty id */
     getDonorReports(user_id, limit = 100) {

@@ -1463,7 +1463,7 @@ class DonorsOrganization extends DonorModel {
         this.contact_email        = contact_email
         this.contact_phone_number = contact_phone_number
         this.status               = status || StatusType.pending
-        this.images               = images
+        this.images               = images || []
         this.password             = password
     }
 
@@ -1632,8 +1632,8 @@ class DonorsIndividual extends DonorModel {
         this.employment_position = employment_position || ""
         this.employment_business = employment_business || ""
         this.status              = status || StatusType.pending
-        this.images              = images
-        this.password            = password
+        this.images              = images || []
+        this.password            = password || ""
     }
 
     toObject() {

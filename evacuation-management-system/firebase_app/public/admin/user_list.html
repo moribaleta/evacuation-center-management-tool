@@ -358,18 +358,6 @@
 
                     <div :id="'imagerow'+index" class="panel-collapse collapse">
                         <div class="panel-body">
-                            <!-- <div class="row">
-                                <div class="col col-md-12" v-if="!item.images || item.images.length <= 0">
-                                    <p>Images are empty</p>
-                                </div>
-                                <div class="col col-md-2 item-info" v-for="image,index in item.images">
-                                    <div class="image-area">
-                                        <img :src="cdn+image" alt="Preview">
-                                        <a class="remove-image" v-on:click="onDeleteImage(item.id, index)"
-                                            style="display: inline;">&#215;</a>
-                                    </div>
-                                </div>
-                            </div> -->
                             <entry-image-component 
                                     :id="item.id" 
                                     :cdn="cdn" 
