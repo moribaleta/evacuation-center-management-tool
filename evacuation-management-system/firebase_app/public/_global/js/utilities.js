@@ -264,14 +264,7 @@ const FormGenerator = Vue.extend({
     },
 
     created() {
-        //console.log('form generator')
-
-        //console.log("formModel %o", this.form)
-        //console.log("input %o", this.input)
-
         this.headers = Object.keys(this.form)
-
-        //console.log("headers %o", this.headers)
     },
 
     methods: {

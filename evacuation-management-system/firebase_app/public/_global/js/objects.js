@@ -1411,10 +1411,7 @@ class DonorsOrganization extends DonorModel {
             title: 'Nature of Business',
             type: FormModels.text
         },
-        phone_number: {
-            title: 'Phone Number',
-            type: FormModels.text
-        },
+        
         email: {
             title: 'Email',
             type: FormModels.email
