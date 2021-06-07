@@ -1557,6 +1557,108 @@ class MunicipalInventoryHandler extends InventoryHandler {
 }
 
 class DonorHandler extends MunicipalInventoryHandler {
+
+    loginDonor(username, password) {
+        return new Promise((resolve, reject) => {
+            let promiseInd = this.loginDonorIndv(username, password)
+            let promiseOrg = this.loginDonorOrg(username, password)
+
+            Promise.all([promiseInd, promiseOrg]).then((messages) => {
+                let ind = messages[0]
+                let org = messages[1]
+
+                if (ind.data != "error") {
+                    resolve(ind)
+                } else if (org.data != "error") {
+                    resolve(org)
+                } else {
+                    let message = new Message()
+                    message.data = "error"
+                    message.error = "Invalid Username and Password"
+                    reject(message)
+                }
+            }).catch((error) => {
+                console.log("Error getting documents: ", error);
+                reject(error)
+            })
+        })
+    }
+
+    loginDonorIndv(username, password) {
+        return new Promise((resolve, reject) => {
+            console.log(username + "--" + password)
+            this.firestore.collection(UserHandler.tables.donor_individual)
+                .where("email", "==", username)
+                .where("password", "==", password)
+                .get().then(function (querySnapshot) {
+                    var users = []
+                    querySnapshot.forEach((doc) => {
+                        console.log(doc.id, " => ", doc.data());
+                        let data = doc.data()
+                        let id = doc.id
+                        let object = parseObject({
+                            id,
+                            ...data
+                        })
+                        users.push(DonorsIndividual.parse(object))
+                    });
+                    
+                    var message = new Message()
+                    
+                    if (users.length > 0) {
+                        message.data = users[0]
+                        resolve(message)
+                    } else {
+                        message.data = "error"
+                        message.error = "Invalid Username and Password"
+                        resolve(message)
+                    }
+                    
+                })
+                .catch((error) => {
+                    console.log("Error getting documents: ", error);
+                    reject(error)
+                });
+        })
+    }
+
+    loginDonorOrg(username, password) {
+        return new Promise((resolve, reject) => {
+            console.log(username + "--" + password)
+            this.firestore.collection(UserHandler.tables.donor_organization)
+                .where("email", "==", username)
+                .where("password", "==", password)
+                .get().then(function (querySnapshot) {
+                    var users = []
+                    querySnapshot.forEach((doc) => {
+                        console.log(doc.id, " => ", doc.data());
+                        let data = doc.data()
+                        let id = doc.id
+                        let object = parseObject({
+                            id,
+                            ...data
+                        })
+                        users.push(DonorsOrganization.parse(object))
+                    });
+                    
+                    var message = new Message()
+                    
+                    if (users.length > 0) {
+                        message.data = users[0]
+                        resolve(message)
+                    } else {
+                        message.data = "error"
+                        message.error = "Invalid Username and Password"
+                        resolve(message)
+                    }
+                    
+                })
+                .catch((error) => {
+                    console.log("Error getting documents: ", error);
+                    reject(error)
+                });
+        })
+    }
     
     /** returns the inventories of the evacuation centers */
     getDonorOrganizations(id) {

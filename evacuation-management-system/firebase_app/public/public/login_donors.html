@@ -32,10 +32,9 @@
     <script src="../_global/js/objects.js"></script>
     <script src="../_global/js/utilities.js"></script>
     <script src="../_global/js/datahandler.js"></script>
-    
 </head>
 
-<body class="basic">
+<body class="donation">
     <nav class="navbar navbar-light bg-light navbar-fixed-top" id="header" attr="home">
         <div class="container-fluid">
             <div class="navbar-header">
@@ -79,29 +78,18 @@
                     <div class="header-container">
                         <img class="header-image" src="resources/images/logo.png">
                         <h1 class="header-title">iEvacuate</h1>
+                        <h4 class="header-subtitle">Donors</h4>
                     </div>
                     <div class="loader" v-if="isloading"></div>
                     <div class="login-form" v-if="!isloading">
-                        <input type="text"      placeholder="email"     v-model="username" />
-                        <input type="password"  placeholder="password"  v-model="password" />
+                        <input type="text" placeholder="username" v-model="username" />
+                        <input type="password" placeholder="password" v-model="password" />
                         <button v-on:click="onLogin">Sign In</button>
                         <div>&nbsp;</div>
                         <button v-on:click="onSignUp">Sign Up</button>
                     </div>
-                    <div class="footer">
-                        <a href="login_donors.html">Are you a Donor?</a>
-                    </div>
                 </div>
             </div>
-            
-            <!-- <div class="footer">
-                <img class="footer-img" src="resources/images/govph-seal-mono-footer.jpg">
-                <div class="footer-item">
-                    <p class="footer-label">REPUBLIC OF THE PHILIPPINES</p>
-                    <p>All content is in the public domain unless otherwise stated.</p>
-                </div>
-            </div> -->
-            
         </div>
         
         
@@ -119,9 +107,9 @@
                 },
                 methods: {
                     onStart() {
-                        const localuser = localStorage.getItem('user') || "{}"
+                        const localuser = localStorage.getItem('donor') || "{}"
                         if (localuser != "{}") {
-                            window.open('users.html','_self')
+                            window.open('donor-detail.html','_self')
                         } 
                     }, //onStart
                     
@@ -134,7 +122,7 @@
                                 alert("Login Success")
                                 let user = message.data
                                 localStorage.setItem('user', JSON.stringify(user.toObject()))
-                                window.open('users.html','_self')
+                                window.open('donor-detail.html','_self')
                             }
                         }).catch((error) => {
                             console.log(error)
