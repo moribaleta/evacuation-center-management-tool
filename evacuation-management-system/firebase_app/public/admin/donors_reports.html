@@ -515,9 +515,9 @@
                         evac_supply.qty = supply.qty
                         evac_supply.remarks = supply.remarks
                         evac_supply.status = SupplyStatus.stored
-                        evac_supply.logs = "Converted From Donor Report - " + this.data_input.id +
-                            " by: " + this.user.id
-                        return evac_supply
+                        evac_supply.logs.push ("Converted From Donor Report - " + this.data_input.id +
+                            " by: " + this.user.id + " date: "+ new Date())
+                        return evac_supplyfa
                     })
 
                     inventory_selection.onTransferDonation(supplies, this.data_input.evac_id, this

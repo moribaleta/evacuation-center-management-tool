@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>iEvacuate</title>
+    <link rel="shortcut icon" href="resources/images/logo.png" />
+
+    <!-- update the version number as needed -->
+    <script src="/__/firebase/7.24.0/firebase-app.js"></script>
+    <!-- include only the Firebase features as you need -->
+    <script src="/__/firebase/7.24.0/firebase-auth.js"></script>
+    <script src="/__/firebase/7.24.0/firebase-database.js"></script>
+    <script src="/__/firebase/7.24.0/firebase-messaging.js"></script>
+    <script src="/__/firebase/7.24.0/firebase-storage.js"></script>
+    <script src="/__/firebase/7.24.0/firebase-firestore.js"></script>
+    <script src="/__/firebase/7.24.0/firebase-functions.js"></script>
+    <!-- initialize the SDK after all desired features are loaded -->
+    <script src="/__/firebase/init.js"></script>
+
+    <!-- CSS  -->
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <script src="js/jquery-3.0.0.min.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.2.2/jquery.form.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+    <link href="css/main-style.css" rel="stylesheet">
+    <script src="js/vue.js"></script>
+    <!-- <script src="js/materialize.js"></script> -->
+    <script src="../_global/js/objects.js"></script>
+    <script src="../_global/js/utilities.js"></script>
+    <script src="../_global/js/datahandler.js"></script>
+
+    <style>
+        body {
+            background-image: url('resources/images/background.jpg');
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+
+        .header-container {
+            display: flex;
+            /* height: 200px; */
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header-image {
+            height: 150px;
+            width: auto;
+        }
+    </style>
+</head>
+
+<body class="donation">
+    <nav class="navbar navbar-light bg-light navbar-fixed-top" id="header" attr="home">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="index.html">
+                    <p class="img-large">GOV PH</p>
+                    <img class="img-small" src="resources/images/logo.png">
+                </a>
+            </div>
+
+            <div class="collapse navbar-collapse" id="myNavbar">
+                <img class="img-small" src="resources/images/logo.png">
+                <ul class="nav navbar-nav">
+                    <li v-for="item in header_items" :class="active == item.id ? 'active' : ''">
+                        <a :href="item.href">{{item.title}}</a>
+                    </li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li v-for="item in right_header">
+                        <a :href="item.href">
+                            <span :class="'glyphicon '+item.icon"></span>
+                            {{item.title}}
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+
+
+    <div class="container" id="container">
+
+        <div class="login-page" id='content'>
+            <div class="well">
+                <div class="header-container center">
+                    <img class="header-image" src="resources/images/logo.png">
+                    <h1 class="header-title">iEvacuate</h1>
+                </div>
+                <div class="modal-body">
+                    <form-generator :form="formModel" :input.sync="user_input"></form-generator>
+                </div>
+                <button v-on:click="onSaveUser">Create User Account</button>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!--  Scripts-->
+    <script src="js/app/app.js"></script>
+
+
+    <script>
+        var app = new Vue({
+            el: '#container',
+            data: {
+                username: null,
+                password: null,
+                cdn: DataHandlerType.api_host,
+                formModel: PublicUser.formModel,
+                user_input: {},
+                municipalities: municipalities
+            },
+            methods: {
+                onStart() {
+                    const localdonor = localStorage.getItem('donor') || "{}"
+                    if (localdonor != "{}") {
+                        window.open('donors-detail.html', '_self')
+                    }
+
+                    this.formModel.municipality.options = municipalities.map((municipal) => {
+                        return {
+                            title: municipal,
+                            value: municipal
+                        }
+                    })
+                }, //onStart
+
+                onSaveUser() {
+                    this.user_input.created_by = '0'
+                    const input = PublicUser.parse(this.user_input)
+
+                    DataHandler.addDonor(input).then((data) => {
+                        if (data.error) {
+                            alert(`Can't Save User: ${data.error}`)
+                        } else {
+                            alert(`User Have Been Saved Successfuly`)
+                            localStorage.setItem('user', JSON.stringify(input.toObject()))
+                            window.open('donors-detail.html','_self')
+                        }
+                    }).catch(error => {
+                        console.log(error)
+                    })
+                }, //onSaveUser
+
+            }
+        })
+    </script>
+    <script src="js/jumbotron.js"></script>
+</body>
+
+</html>

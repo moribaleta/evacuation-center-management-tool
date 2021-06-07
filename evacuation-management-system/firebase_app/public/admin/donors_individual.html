@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Donors</title>
+
+    <!-- update the version number as needed -->
+    <script defer src="/__/firebase/7.19.1/firebase-app.js"></script>
+    <!-- include only the Firebase features as you need -->
+    <script defer src="/__/firebase/7.19.1/firebase-auth.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-database.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-messaging.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-storage.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-firestore.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-functions.js"></script>
+    <!-- initialize the SDK after all desired features are loaded -->
+    <script defer src="/__/firebase/init.js"></script>
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <script src="js/jquery-3.0.0.min.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <link href="css/main-style.css" rel="stylesheet">
+    <script src="js/vue.js"></script>
+    <script src="../_global/js/objects.js"></script>
+    <script src="../_global/js/utilities.js"></script>
+    <script src="../_global/js/datahandler.js"></script>
+
+</head>
+
+<body>
+    <div class="sidenav" id="header" attr="donors">
+        <div class="sidenav-item">
+            <img class="nav-image" :src="logo" />
+        </div>
+
+        <div v-for="item in header_items" v-bind:class="'sidenav-item ' + (active == item.id ? 'active' : '') ">
+            <a v-bind:href="item.href">
+                <div class="icon-block">
+                    <i class="material-icons">{{item.icon}}</i>
+                    <h5 class="center">{{item.title}}</h5>
+                </div>
+            </a>
+        </div>
+
+        <div class="sidenav-item">
+            <a v-on:click="onLogout()">
+                <div class="icon-block">
+                    <i class="material-icons">close</i>
+                    <h5 class="center">Log Out</h5>
+                </div>
+            </a>
+        </div>
+    </div>
+    <div id="inventory-list-picker">
+        <inventory-selector :muni_inv_list="muni_inv_list" :evac_list="evac_list" :inventory_list="inventory_list"
+            :is-loading="isLoading" :supplies="supplies" v-on:on-select-inventory="id => {onSelectInventory(id)}"
+            :evac_id="evac_id">
+        </inventory-selector>
+    </div>
+    <div class="container" id="content">
+        <ul class="breadcrumb">
+            <li><a href="donors.html">Donors</a></li>
+            <li><a href="#">Individual Donors</a></li>
+        </ul>
+
+        <status-modal modal_id="status_modal_update" title="Update Donor Status" :status="user_status"
+            v-on:save="updateUserStatus($event)">
+        </status-modal>
+
+        <div id="indvModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">{{isEdit ? 'Edit ': 'Add '}} Donor</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form-generator :form="indv_formmodel" :input.sync="indv_input"></form-generator>
+                        <form-generator :form="form_password_model" :input.sync="form_indv_password"></form-generator>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal"
+                            v-on:click="onSaveIndvDonor()">Save</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+        <h1>Donors Individual</h1>
+
+        <!-------- DONOR HEADERS ------------->
+        <div class="section">
+            <h3>Donors Users</h3>
+            <search-component title="Search Donor" v-on:search="onSearchDonor" v-on:cancel="onCancelSearchDonor">
+            </search-component>
+            <div class="button-container">
+                <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="onAddNewIndv()">Add
+                    New Individual</button>
+            </div>
+            <div>&nbsp;</div>
+        </div>
+
+        <!--------- INDIVIDUAL --------------->
+        <div class="section">
+
+            <h4>Individual</h4>
+
+            <div class="loader-container" v-if="isLoading.indv">
+                <div class="loader"></div>
+            </div>
+
+            <div class="table-container" id="tableData" v-if="!isLoading.indv">
+                <div class="well" v-for="item,index in view_indv_list">
+                    <div class="row">
+                        <div class="col col-xs-12 item-info">
+                            <p class="item-label">
+                                {{index + 1}}.
+                            </p>
+                        </div>
+                        <div class="col col-xs-12 item-info" v-if="item.images[0]">
+                            <img :src="cdn + item.images[0]" onerror="this.src='resources/images/avatar.jpeg';"
+                                style="height: 50px; width: 50px; border-radius: 25;">
+                        </div>
+                        <div class="col col-xs-12 item-info" v-if="!item.images[0]">
+                            <img src="resources/images/avatar.jpeg"
+                                style="height: 50px; width: 50px; border-radius: 25;">
+                        </div>
+                        <div class="col col-xs-4 item-info" v-for="key,index in indv_headers" v-if="key !='id'">
+                            <entry-single-component :label="key" :value="item[key]"></entry-single-component>
+                        </div>
+                        <div class="col col-xs-12">
+                            <button class="btn btn-default btn-info" v-on:click="viewReports(item.id)">View
+                                Reports</button>
+                            <button class="btn btn-default btn-info" v-on:click="onEditIndv(index)">Edit</button>
+                            <button class="btn btn-default btn-warning" v-on:click="editStatus(index)">Update
+                                Status</button>
+                            <button class="btn btn-default btn-danger" v-on:click="onDeleteIndv(index)">Delete</button>
+                        </div>
+                        <div class="col col-xs-12">
+                            <div class="well">
+                                <button class="btn btn-default btn-info" :href="'#imagerow'+index"
+                                    data-toggle="collapse">View Images</button>
+                                <div :id="'imagerow'+index" class="panel-collapse collapse">
+                                    <div class="panel-body">
+                                        <entry-image-component :id="item.id" :cdn="cdn" :images="item.images" :edit='true'
+                                            v-on:delete="onDeleteImage($event)">
+                                        </entry-image-component>
+                                    </div>
+                                    <div class="panel-footer">
+                                        <div class="row">
+                                            <p>Upload Images</p>
+                                            <input :id="'input_images'+index" type="file" name="files[]" multiple
+                                                style="margin-bottom: 12px;" />
+                                            <button class="btn btn-default btn-info" v-on:click="onAddImages(index)">upload
+                                                pictures</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--------- INDIVIDUAL --------------->
+
+
+    </div>
+
+
+    <script src="js/app/app.js"></script>
+    <script>
+        app = new Vue({
+            el: '#content',
+            data: {
+                user: new AdminUser(),
+
+                //ENTRIES
+                indv_list: [],
+                view_indv_list: [],
+                donor_ref: {},
+
+                //MODEL INPUTS
+                indv_input: {},
+
+                //FORM MODELS
+                indv_headers: Object.keys(DonorsIndividual.headers),
+                indv_formmodel: DonorsIndividual.formModel,
+                form_indv_password: {
+                    password: null,
+                    conf_password: null
+                },
+
+                form_password_model: {
+                    password: {
+                        title: "Password",
+                        type: FormModels.password,
+                    },
+                    conf_password: {
+                        title: "Confirm Password",
+                        type: FormModels.password,
+                    }
+                },
+
+                isEdit: false,
+                isLoading: {
+                    indv: false,
+                },
+
+                user_status: null,
+
+            },
+            methods: {
+                onStart() {
+                    this.user = header.user
+                    this.municipalities = municipalities
+                    this.fetchIndv()
+                }, //onStart
+
+                fetchIndv() {
+                    this.isLoading.indv = true
+                    DataHandler.getDonorIndividual().then((message) => {
+                        this.indv_list = message.data
+                        this.view_indv_list = message.data
+
+                        this.indv_list.forEach((indv) => {
+                            this.donor_ref[indv.id] = indv
+                        })
+                    }).catch(err => {
+                        console.log(err)
+                    }).finally(() => {
+                        this.isLoading.indv = false
+                    })
+                }, //fetchIndv
+
+                viewReports(id) {
+                    window.open(`donors_reports.html?id=${id}`, '_self')
+                },
+
+                onAddNewIndv() {
+                    this.isEdit = false
+                    this.indv_input = (new DonorsIndividual()).toObject()
+                    this.indv_input.created_by = this.user.id
+                    $('#indvModal').modal()
+                }, //onAddNewIndv
+
+                onEditIndv(index) {
+                    this.isEdit = true
+                    this.indv_input = this.view_indv_list[index].toObject()
+                    this.indv_input.date_updated = new Date()
+                    $('#indvModal').modal()
+                }, //onEditIndv
+
+
+                editStatus(index) {
+                    this.isEdit = true
+                    this.indv_input = this.view_indv_list[index].toObject()
+                    this.user_status = this.indv_input.status
+                    $('#status_modal_update').modal()
+                },
+
+                updateUserStatus(status) {
+                    console.log("updateUserStatus - status %o", status)
+                    this.indv_input.status = status
+                    this.indv_input.date_updated = new Date()
+                    console.log("updateUserStatus - model %o", this.user_input)
+                    this.onSaveIndvDonor(false)
+                },
+
+                onSaveIndvDonor(password_included = true) {
+                    var input = DonorsIndividual.parse(this.indv_input)
+
+                    if (password_included) {
+                        if (this.validatePassword()) {
+                            input.password = this.form_indv_password.password
+                        } else {
+                            return
+                        }
+                    }
+
+
+                    DataHandler.addDonor(input, false).then((data) => {
+                        if (data.error) {
+                            alert(`Can't Save Entry: ${data.error}`)
+                        } else {
+                            alert(`Entry Was Saved Successfuly`)
+                            this.fetchIndv()
+                        }
+                    }).catch(error => {
+                        console.log(error)
+                    })
+                }, //onSaveIndvDonor
+
+                validatePassword() {
+                    let conf = this.form_indv_password.conf_password
+                    let pass = this.form_indv_password.password
+
+                    if (!pass || pass.length <= 0) {
+                        AlertMessages.error("password is required")
+                        return false
+                    }
+
+                    if (!conf || conf.length <= 0) {
+                        AlertMessages.error("confirm password is required")
+                        return false
+                    }
+
+                    if (pass.length < 5) {
+                        AlertMessages.error("password must have a minimum of 5 characters")
+                        return false
+                    }
+
+                    if (conf.length < 5) {
+                        AlertMessages.error("confirm password must have a minimum of 5 characters")
+                        return false
+                    }
+
+                    if (pass != conf) {
+                        AlertMessages.error("password and confirm password doesn't match")
+                        return false
+                    }
+
+                    return true
+                },
+
+                onDeleteIndv(index) {
+                    if (confirm('Deleting Entry?\nPress confirm to proceed')) {
+                        DataHandler.deleteDonor(this.indv_list[index].id, false).then((data) => {
+                            console.log(data)
+                            if (data.error) {
+                                alert(`Can't Delete Entry ${data.error}`)
+                            } else {
+                                alert(`Entry Was Deleted Successfuly`)
+                                this.fetchIndv()
+                            }
+                        })
+                    }
+                }, //onDeleteIndv
+
+                onSearchDonor(search) {
+                    this.view_indv_list = this.indv_list.filter((indv) => {
+                        return SearchObject(indv.toObject(), search)
+                    })
+                },
+
+                onCancelSearchDonor() {
+                    this.view_indv_list = [...this.indv_list]
+                },
+
+                //----------DEPENDENT-USER-----------------!>
+
+                onViewAllReports() {
+                    window.open(`donors_reports.html`, '_self')
+                },
+
+                onAddImages(index) {
+                    const files = document.getElementById('input_images' + index).files;
+                    var uploads = []
+                    for (var i = 0; i < files.length; i++) {
+                        uploads.push(files[i])
+                    }
+
+                    if (uploads.length > 0) {
+
+                        var value = DonorsIndividual.parse(this.view_indv_list[index].toObject())
+
+                        DataHandler.uploadImages(uploads).then((resp) => {
+                            return resp.json()
+                        }).then((saved_images) => {
+                            value.images = value.images || []
+                            value.images = value.images.concat(saved_images)
+                            return DataHandler.addDonor(value, false)
+                        }).then((message) => {
+                            if (!message.error) {
+                                alert("Item Persisted Successfuly")
+                                this.fetchIndv()
+                            } else {
+                                alert(`Failed to updated error: ${message.error}`)
+                            }
+                        }).catch(error => {
+                            console.log(error)
+                        })
+                    }
+                }, //onAddImages
+
+                onDeleteImage(value) {
+
+                    console.log("delete %o", value)
+
+                    let indv_id = value.item
+                    let index = value.index
+
+                    var first = this.indv_list.filter((value) => {
+                        return value.id == indv_id
+                    })[0]
+
+                    if (first && confirm("Do you want to delete this image?")) {
+                        let image_to_delete = first.images.splice(index, 1)
+                        console.log("images to delete %o", image_to_delete)
+                        DataHandler.deleteImages(image_to_delete).then((removed) => {
+                            console.log(removed)
+                        }).catch((err) => {
+                            console.log(err)
+                        })
+                        DataHandler.addDonor(first, false).then((message) => {
+                            this.fetchIndv()
+                        }).catch((err) => {
+                            console.log(err)
+                        })
+                    }
+                }, //onDeleteImage
+
+                onDeleteItem(index) {
+                    let donor_id = this.view_indv_list[index].id
+                    let onConfirm = confirm('Deleting User\nPress confirm to proceed')
+                    if (onConfirm) {
+                        DataHandler.deleteDonor(donor_id, false).then((data) => {
+                            console.log(data)
+                            if (data.error) {
+                                alert(`Can't Delete User ${data.error}`)
+                            } else {
+                                alert(`User Have Been Deleted Successfuly`)
+                                this.fetchIndv()
+                            }
+                        })
+                    }
+                }, //onDeleteItem
+
+            }
+        })
+
+        /* $(document).ready(() => {
+            header.onStart()
+        }) */
+    </script>
+
+</body>
+
+</html>

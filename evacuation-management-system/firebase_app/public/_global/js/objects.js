@@ -98,7 +98,7 @@ class AdminUser extends Model {
         evacuation  : 'evacuation'  //lowest - evacuation level
     }
 
-    static keys = ['admin_type', 'date_created', 'firstname', 'lastname', 'municipality', 'username', 'email']
+    static keys = ['admin_type', 'date_created', 'firstname', 'lastname', 'municipality', 'username', 'email', 'admin_type']
 
     constructor(id, admin_type, created_by, date_created, date_updated, firstname,
         lastname, municipality, username, email, password, images, evacuation_id) {
@@ -262,9 +262,9 @@ class EvacuationCenter extends Model {
         },
 
         admin_id: {
-            title: 'Evacuation Center In-charge',
-            type: FormModels.dropdown,
-            options: []
+            title   : 'Evacuation Center In-charge',
+            type    : FormModels.dropdown,
+            options : [],
         },
 
         municipality: {
@@ -766,7 +766,7 @@ class EvacuationSupply extends Model {
     remarks = ""
 
     /** log data of the supply */
-    logs = ""
+    logs = [] // [String]
 
     static formModel = {
         inventory_type : {
@@ -815,7 +815,14 @@ class EvacuationSupply extends Model {
         this.date_supplied = date_supplied
         this.remarks = remarks
         this.status  = status || SupplyStatus.pending
-        this.logs = logs || "Created Entry"
+
+        if (typeof logs == "string") {
+            console.log("evacuation-supply id"+ this.id +" -> log is string")
+            this.logs = [logs]
+        } else {
+            console.log("evacuation-supply id"+ this.id +" -> log is array")
+            this.logs = logs || ["Created Entry"]
+        }
     }
 
     static parse(objects = {}) {
@@ -830,8 +837,12 @@ class EvacuationSupply extends Model {
             objects.date_supplied,
             objects.remarks,
             objects.status,
-            objects.logs || ""
+            objects.logs || []
         )
+    }
+
+    addLog(value) {
+        this.logs.push(value + " Date: " + (new Date()))
     }
 
     toObject() {
@@ -1280,6 +1291,15 @@ class PublicUserHistory extends StatusModel {
         'date_created',
         'date_updated',
     ]
+
+    static headers_admission = [
+        'user_id',
+        'evac_id',
+        'municipality',
+        'date_admitted',
+        'date_created',
+        'date_updated',
+    ]
     
 
     constructor(id, date_created, date_updated, created_by, user_id, evac_id, date_admitted, date_cleared, municipality, status) {
@@ -1377,7 +1397,8 @@ class DonorsOrganization extends DonorModel {
         address             : 'Exact Address',
         contact_person      : 'Contact Person',
         contact_email       : 'Contact Email',
-        contact_phone_number: 'Personal Contact Number'
+        contact_phone_number: 'Personal Contact Number',
+        status              : 'Status'
     }
 
     /** defines the form of the model to be shown to create an entry */
@@ -1443,8 +1464,8 @@ class DonorsOrganization extends DonorModel {
         this.contact_email        = contact_email
         this.contact_phone_number = contact_phone_number
         this.status               = status || StatusType.pending
-        this.images               = images
-        this.password             = password
+        this.images               = images || []
+        this.password             = password || ""
     }
 
     toObject() {
@@ -1612,8 +1633,8 @@ class DonorsIndividual extends DonorModel {
         this.employment_position = employment_position || ""
         this.employment_business = employment_business || ""
         this.status              = status || StatusType.pending
-        this.images              = images
-        this.password            = password
+        this.images              = images || []
+        this.password            = password || ""
     }
 
     toObject() {
@@ -1780,6 +1801,64 @@ class PublicUserReport extends ReportType {
 
 }//PublicUserReport
 
+
+/**
+ * public user supply given by the evacuation
+ */
+class PublicUserSupply extends ReportType {
+
+    supply_id = ""
+    remarks   = ""
+    qty       = 0
+
+    constructor(id, date_created,
+        date_updated, created_by,
+        user_id, inventory_id,
+        evac_id, supply_id,
+        remarks, qty) {
+        super()
+        this.id           = id || keyGenID("publicusersupply")       //"publicuserhistory-" + genID(5)
+        this.date_created = date_created    || new Date()
+        this.date_updated = date_updated    || new Date()
+        this.created_by   = created_by      || '0'
+        this.user_id      = user_id
+        this.inventory_id = inventory_id
+        this.evac_id      = evac_id         || ""
+        this.supply_id    = supply_id       || []
+        this.remarks      = remarks
+        this.qty          = qty
+    }
+
+    static parse(object = {}) {
+        return new PublicUserSupply(
+            object.id,
+            object.date_created,
+            object.date_updated,
+            object.created_by,
+            object.user_id,
+            object.inventory_id,
+            object.evac_id,
+            object.supply_id,
+            object.remarks,
+            object.qty
+        )
+    }
+
+    toObject() {
+        return {
+            id              : this.id,
+            date_created    : this.date_created,
+            date_updated    : this.date_updated,
+            created_by      : this.created_by,
+            user_id         : this.user_id,
+            inventory_id    : this.inventory_id,
+            evac_id         : this.evac_id,
+            supply_id       : this.supply_id,
+            remarks         : this.remarks,
+            qty             : this.qty
+        }
+    }
+}//PublicUserSupply
 
 /**
  * model for comments of the user report by any public user

@@ -4,6 +4,8 @@ var header = new Vue({
         user: new AdminUser(),
         active: "",
         logo: "resources/images/logo.png",
+        cdn : DataHandlerType.api_host,
+
         header_items: [{
             id: 'content',
             href: 'main.html',
@@ -149,6 +151,8 @@ methods: {
     },
     
     onConfigureApp() {
+        app.cdn = this.cdn
+
         app.formatDate = ((date) => {
             let _date = new Date(date)
             return _date.toLocaleDateString()
@@ -198,165 +202,6 @@ class AlertMessages {
         return confirm(`Confirm Delete Item? ${message || ""}`)
     }
 }
-
-// const FilterComponent = Vue.extend({
-//     template: `
-//     <div class="section">
-//     <div class="well input-container" style="padding:10px; width: 100%; min-height: 70px">
-//     <div class="col col-md-1">
-//     <p class="input-label">YEAR</p>
-//     <select id="input-type" class="input input-select" v-model="filter.year">
-//     <option v-for="(item,index) in selections.years" :selected="index == filter.year ? true : false">{{item ? item : "NOT AVAILABLE"}}</option>
-//     </select>
-//     </div>
-//     <div class="col col-md-2">
-//     <p class="input-label">MONTH</p>
-//     <select id="input-type" class="input input-select" v-model="filter.month">
-//     <option v-for="(item,index) in selections.months" :selected="index == filter.month ? true : false"> {{item}}</option>
-//     </select>
-//     </div>
-//     <div class="col col-md-3" v-if="!disable_municipal">
-//     <p class="input-label">MUNICIPALITY</p>
-//     <select id="input-type" class="input input-select" v-model="filter.municipality">
-//     <option v-for="(item,index) in selections.municipality" :selected="index == filter.municipality ? true : false"> {{item}}</option>
-//     </select>
-//     </div>
-    
-//     <div class="col col-2 button-filter-container">
-//         <div>&nbsp;</div>
-//         <button type="button" class="btn btn-warning button-view" v-on:click="$emit('filter', filter)">Filter
-//         </button>
-//         <button type="button" class="btn btn-warning button-view" v-on:click="$emit('clear', 0); onClear()">Clear
-//         </button>
-        
-//     </div>
-//     <div class="col col-12  button-filter-container">
-//         <div>&nbsp;</div>
-//         <button type="button" class="btn btn-warning button-view " href="#filteradd" data-toggle="collapse">Additional Filter
-//         </button>
-//         <button type="button" class="btn btn-danger button-view " href="#searchbox" data-toggle="collapse">Show Search
-//         </button>
-//     </div>
-    
-//     </div>
-//     <div id="filteradd" class="panel-collapse collapse">
-//     <div class="panel-body well">
-//     <div class="col col-md-12">
-//     <div class="row">
-//     <div class="col col-md-3" v-for="key, index in Object.keys(filter_add)">
-//     <p class="input-label">{{key.toUpperCase().replace('_'," ")}}</p>
-//     <select id="input-type" class="input input-select" v-model="filter[key]">
-//     <option v-for="(item,index) in filter_add[key]" :selected="index == filter[key] ? true : false"> {{item}}</option>
-//     </select>
-//     </div>
-//     </div>
-//     </div>
-//     </div>
-//     </div>
-//     <div id="searchbox" class="panel-collapse collapse">
-//     <div class="panel-body well">
-//     <p class="input-label">Search</p>
-//     <input id="input_searchTerm" class="input input-text" type="text" v-model="filter.searchTerm" >
-//     <button type="button" class="btn btn-warning button-view" v-on:click="$emit('search', filter)">Search
-//     </button>
-//     <button type="button" class="btn btn-danger button-view" v-if="filter.searchTerm.length > 0" v-on:click="onCancelSearch">Cancel
-//     </button>
-//     </div>
-//     </div>
-//     </div>`,
-//     props: {
-//         filter_add: {},
-//         disable_municipal: Boolean
-//     },
-//     watch: {
-//         filter_add() {
-//             Object.keys(this.filter_add).forEach((key) => {
-//                 this.filter[key] = 'all'
-//             })
-//             console.log("filter %o", this.filter_add)
-//         }
-//     },
-//     data() {
-//         return {
-//             filter: {
-//                 year: 'all',
-//                 month: 'all',
-//                 municipality: 'all',
-//                 searchTerm: ''
-//             },
-//             selections: {
-//                 years: ['all'],
-//                 months: [
-//                     'all',
-//                     'JANUARY',
-//                     'FEBRUARY',
-//                     'MARCH',
-//                     'APRIL',
-//                     'MAY',
-//                     'JUNE',
-//                     'JULY',
-//                     'AUGUST',
-//                     'SEPTEMBER',
-//                     'OCTOBER',
-//                     'NOVEMBER',
-//                     'DECEMBER',
-//                 ],
-//                 months_only: [
-//                     'JANUARY',
-//                     'FEBRUARY',
-//                     'MARCH',
-//                     'APRIL',
-//                     'MAY',
-//                     'JUNE',
-//                     'JULY',
-//                     'AUGUST',
-//                     'SEPTEMBER',
-//                     'OCTOBER',
-//                     'NOVEMBER',
-//                     'DECEMBER',
-//                 ],
-//                 municipality: ['all'].concat(municipalities),
-                
-//                 filter_additional: {}
-//             },
-//         }
-//     },
-//     created() {
-//         console.log('user data from parent component:')
-        
-//         for (var i = (new Date()).getFullYear(); i >= 2000; i--) {
-//             this.selections.years.push(i)
-//         }
-        
-//         try {
-//             Object.keys(this.filter_add).forEach((key) => {
-//                 this.selections.filter_additional[key] = ['all'].concat(this.filter_add[key] || [])
-//                 this.filter[key] = 'all'
-//             })
-//         } catch (err) {
-//             console.log(err)
-//         }
-        
-//     },
-//     methods: {
-//         formatDate(date) {
-//             let _date = new Date(date)
-//             return _date.toLocaleDateString()
-//         },
-//         onCancelSearch() {
-//             this.filter.searchTerm = ""
-//             this.$emit('cancel', this.filter)
-//         },
-//         onClear() {
-//             Object.keys(this.filter).map((key) => {
-//                 this.filter[key] = 'all'
-//             })
-//             this.filter.searchTerm = ''
-//         }
-//     }
-// })
-
-// Vue.component('filter-component', FilterComponent)
 
 const SearchComponent = Vue.extend({
     template: 
@@ -1032,3 +877,544 @@ var inventory_selection = new Vue({
         }
     }
 })
+
+
+const BasicUserComponent = Vue.extend({
+    template: 
+    `
+    <div class="col col-md-12 item-info " v-if="user">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <entry-component :entry="user" :headers="user_headers"></entry-component>
+                <button class="btn btn-default btn-info" :href="'#imagerow'+index"
+                data-toggle="collapse">View Images</button>
+            </div>
+            
+            <div :id="'imagerow'+index" class="panel-collapse collapse" v-if="user">
+                <div class="panel-body">
+                    <entry-image-component :id="user.id" :cdn="cdn"
+                        :images="user.images" :edit='false'>
+                    </entry-image-component>
+                </div>
+            </div>
+        </div>
+    </div>
+    `,
+
+    props: {
+        index     : Number,
+        cdn       : String,
+        user      : Object,
+    },
+
+    data() {
+        return {
+            id : keyGenID('history-entry', 2),
+            user_headers: ['lastname', 'firstname', 'municipality', 'birthday', 'phone_number'],
+        }
+    },
+})
+
+
+Vue.component('basic-user-component', BasicUserComponent)
+
+
+const EntryUserHistory = Vue.extend({
+    template: `
+    <div>
+        <div class="row">
+            <div class="col col-md-12 item-info">
+                <p class="item-value">{{view_count}}.</p>
+            </div>
+
+            <div class="col col-md-3 item-info " v-for="info,index in header">
+                <div v-if="info == 'evac_id'">
+                    <p class="item-label">EVACUATION NAME</p>
+                    <p class="item-value">{{evac.name}}</p>
+            </div>
+            <entry-single-component v-if="info != 'evac_id' && info == 'date_cleared'" :label="info"
+                :value="isDateValid(item[info]) ? 'active' : item[info]" :showtime="true">
+                    </entry-single-component>
+                    <entry-single-component v-if="info != 'evac_id' && info != 'date_cleared'" :label="info"
+                        :value="item[info]" :showtime="true">
+                    </entry-single-component>
+
+                </div>
+
+
+                <div class="col col-md-3 item-info ">
+                    <entry-single-component label="Status" :value="item.status">
+                    </entry-single-component>
+                </div>
+
+
+                <!--<div class="col col-md-12 item-info " v-if="user">
+                    <div class="well">
+                        <entry-component :entry="user" :headers="user_headers">
+                        </entry-component>
+                        <button class="btn btn-default btn-info" :href="'#imagerow'+index"
+                            data-toggle="collapse">View Images</button>
+                    </div>
+                </div-->
+
+                <basic-user-component
+                    :user="user"
+                    :index="index"
+                    :cdn="cdn"
+                    >
+                </basic-user-component>
+
+                <div class="col col-md-12">
+                    <button class="btn btn-default btn-info" v-on:click="editItem(index)">edit</button>
+                    <button class="btn btn-default btn-info" v-on:click="onUpdateStatus(index)">update
+                        status</button>
+                    <button class="btn btn-default btn-danger"
+                        v-on:click="deleteItem(index)">delete</button>
+                </div>
+
+
+        </div>
+    </div>
+`,
+    props: {
+        view_count: Number,
+        index     : Number,
+        cdn       : String,
+        item      : Object,
+        evac      : Object,
+        user      : Object,
+        header    : Array,
+    },
+
+    data() {
+        return {
+            id : keyGenID('history-entry', 2),
+            user_headers: ['lastname', 'firstname', 'municipality', 'birthday', 'phone_number'],
+        }
+    },
+
+    methods: {
+        editItem() {
+            this.$emit('edit', this.index)
+        },
+
+        onUpdateStatus() {
+            this.$emit('updatestatus', this.index)
+        },
+
+        deleteItem(){
+            console.log("delete %o", this.index)
+            this.$emit('delete', this.index)
+        },
+
+        isDateValid(date) {
+            if (Object.prototype.toString.call(date) === "[object Date]") {
+                return isNaN(date.getTime())
+            } else {
+                return false
+            }
+        },
+    }
+})
+
+Vue.component('entry-user-history-component', EntryUserHistory)
+
+
+
+const ContentSelectionComponent = Vue.extend({
+    template: 
+    `
+    <div :id="id" class="row selection-grid">
+        <div class="col col-md-4 selection-grid-item" v-for="item in selections">
+            <div class="selection-grid-item-content" :style="'background:'+item.color">
+                <a class="selection-grid-item-content-link" :href="item.href">
+                    <div class="selection-block">
+                        <i class="material-icons selection-icon">{{item.icon}}</i>
+                        <h5 class="center">{{item.title}}</h5>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+    `,
+
+    props: {
+        selections  : Array,
+    },
+
+    data() {
+        return {
+            id : keyGenID('content-selection-entry', 2),
+        }
+    },
+})
+
+
+Vue.component('content-selection-component', ContentSelectionComponent)
+
+
+
+const SupplyItemEntryComponent = Vue.extend({
+    template:
+    `
+    <div class="row">
+        <div class="col col-md-12 item-info">
+            <p class="item-label">
+                Name:
+            </p>
+            <p class="item-value">
+                {{supplytype}}
+            </p>
+        </div>
+        <div class="col col-md-2 item-info">
+            <p class="item-label">
+                Quantity:
+            </p>
+            <p class="item-value">
+                {{item.qty}}
+            </p>
+        </div>
+                    
+        <div class="col col-md-12 item-info">
+            <p class="item-label">
+                Remarks:
+            </p>
+            <p class="item-value">
+                {{item.remarks}}
+            </p>
+        </div>
+                    
+        <div class="col col-md-4 item-info">
+            <p class="item-label">
+                Status:
+            </p>
+            <p class="item-value">
+                {{item.status}}
+            </p>
+        </div>    
+        <div class="col col-md-4 item-info">
+            <p class="item-label">
+                Date Supplied:
+            </p>
+            <p class="item-value">
+                {{formatDate(item.date_supplied)}}
+            </p>
+        </div>
+        <div class="col col-md-4 item-info">
+            <p class="item-label">
+                Date Created:
+            </p>
+            <p class="item-value">
+                {{formatDate(item.date_created)}}
+            </p>
+        </div>
+        <div class="col col-md-4 item-info">
+            <p class="item-label">
+                Date Updated:
+            </p>
+            <p class="item-value">
+                {{formatDate(item.date_updated)}}
+            </p>
+        </div>
+    </div>
+    `,
+    props: {
+        item: Object,
+        supplytype: String
+    },
+    methods: {
+        formatDate(date){
+            let _date = new Date(date)
+            return _date.toLocaleDateString()
+        }
+    }
+})//SupplyItemEntryComponent
+
+Vue.component('supply-item-entry-component', SupplyItemEntryComponent)
+
+
+
+const DistributionModal = Vue.extend({
+    template: 
+    `
+    <div id="distribute_modal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Distribute Items</h4>
+                </div>
+                <div class="modal-body">
+                    <supply-item-entry-component
+                        :item="item"
+                        :supplytype="supplytype"
+                    >
+                    </supply-item-entry-component>
+                    <div>
+                        <h3>Admitted Public Users</h3>
+                        <p>Please select the public users to receive the items</p>
+
+                        <label v-if="qty">Available Qty: {{qty - getQty()}}</label>
+                        
+                        <ul class="list-group">
+                            <li class="list-group-item" v-for="user,index in users">
+                                <div class="row">
+                                <div class="col col-md-5">
+                                    <label>
+                                        {{user.lastname + ", " + user.firstname}}
+                                    </label>
+                                    <label v-if="user.dependents.length > 0">
+                                        dependents: {{user.dependents.length}}
+                                    </label>
+                                </div>
+                                
+                                <div class="col col-md-2">
+                                    <button class="btn btn-default btn-success" v-on:click="onadd(user)" >ADD</button>
+                                </div>
+                                </div>
+                                
+                            </li>
+                        </ul>
+                        
+                    </div>
+                    <div v-if="selected.length > 0">
+                        <h3>Selected Public Users</h3>
+                        <ul class="list-group">
+                            <li class="list-group-item" v-for="user,index in selected">
+                                <div class="row">
+                                    <div class="col col-md-5">
+                                        <label>
+                                            {{user_dict[user.id].lastname + ", " + user_dict[user.id].firstname}}
+                                        </label>
+                                        <label v-if="user_dict[user.id].dependents.length > 0">
+                                            dependents: {{user_dict[user.id].dependents.length}}
+                                        </label>
+                                    </div>
+                                    <div class="col col-md-3">
+                                        <button class="btn btn-small btn-danger" v-on:click="onreduce(index,user)" >-</button>
+                                        <label>{{user.qty}}</label>
+                                        <button class="btn btn-small btn-danger" v-on:click="onincrease(index,user)" >+</button>                
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal"
+                    v-on:click="onsave()">Save</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    `,
+
+    props: {
+        modal_id    : String,
+        item        : Object,
+        users       : Array,
+        supplytype  : String
+    },
+
+    data() {
+        return {
+            selected: [],
+            user_dict: {},
+            qty: 0
+        }
+    },
+
+    watch: {
+        item() {
+            console.log("public-user - item changed- %o", this.item)
+            this.qty = Number(this.item.qty)
+
+            this.users.forEach((user) => {
+                this.user_dict[user.id] = user
+            })
+            console.log("public-user - users changed- %o", this.user_dict)
+        },
+    },
+
+    methods: {
+
+        onadd(item){
+            if (this.qty > this.selected.length ) {
+                    console.log("public-user - selected: %o",this.selected)
+                if (this.selected.length <= 0) {
+                    this.selected.push({
+                        id: item.id,
+                        qty : 1
+                    })
+                } else {
+                    let index = this.selected.findIndex((id) => {return id == item.id})
+                    console.log("public-user -on add %o -> index %o", item.id, index)
+                    if (index == -1) {
+                        this.selected.push({
+                            id: item.id,
+                            qty : 1
+                        })
+                    }
+                }
+            }
+        },
+
+        onremove(user_id){
+            let index = this.selected.findIndex((id) => {return id == user_id})
+            if (index > -1) {
+                this.selected.splice(index, 1)
+            }
+        },
+
+        getQty() {
+            if (this.selected.length > 0) {
+                return this.selected.map((user) => {
+                    return user.qty
+                }).reduce((prev, curr) => {
+                    prev = prev || 0
+                    return curr + prev
+                })
+            } else {
+                return 0
+            }            
+        },
+
+        onreduce(index,user){
+            let list = [...this.selected]
+            let _user = {
+                ...user
+            }
+            _user.qty--
+            if (_user.qty <= 0) {
+                list.splice(index, 1)    
+            } else {
+                list[index] = _user
+            }
+
+            this.selected = list
+        },
+
+        onincrease(index,user){
+            let list = [...this.selected]
+            let _user = {
+                ...user
+            }
+
+            _user.qty++
+
+            console.log("qty %o", this.qty)
+            console.log("user qty %o", this.getQty())
+
+            if (this.qty >= (this.getQty() + 1)) {
+                list[index] = _user    
+            } else {
+                return
+            }
+            
+            this.selected = list
+        },
+
+        onsave(){
+            this.$emit('selected', {
+                item    : this.item,
+                selected: this.selected
+            })
+        }
+
+    }
+
+})
+
+
+Vue.component('distribution-modal', DistributionModal)
+
+
+
+const DonorComponent = Vue.extend({
+    template: `
+    <!-- Individual -->
+    <div class="row" v-if="indv">
+        <div class="col col-md-4 item-info" v-for="key,index in indv_headers" v-if="key !='id'">
+            <p class="item-label">
+                {{key.replace(/_/g,' ').toUpperCase() +": "}}
+            </p>
+            <p class="item-value">
+                {{ getValue(key, indv[key]) || '--'}}
+            </p>
+        </div>
+    </div>
+    <!-- Organization -->
+    <div class="row" v-if="org">
+        <div class="col col-md-4 item-info" v-for="key,index in org_headers" v-if="key !='id'">
+            <p class="item-label">
+                {{key.replace(/_/g,' ').toUpperCase() +": "}}
+            </p>
+            <p class="item-value">
+                {{ getValue(key, org[key]) || '--'}}
+            </p>
+        </div>
+    </div>
+    `,
+    props: {
+        donor: Object,
+        filterheaders: Array
+    },
+
+    data() {
+        return {
+            org: null,
+            indv: null,
+            
+            org_headers: [],
+            indv_headers: [],
+        }
+    },
+
+    created() {
+        console.log("donor %o", this.donor)
+        if (this.donor.id.includes('org')) {
+            this.org = this.donor
+        } else {
+            this.indv = this.donor
+        }
+
+        let filterheaders = [
+            'date_created',
+            'date_updated',
+            'firstname',
+            'lastname',
+            'middleinit',
+            'email',
+            'birthdate',
+            'phone_number',
+            'address',
+            'sex',
+            'status',
+        ]
+
+        this.org_headers = Object.keys(DonorsOrganization.headers).filter((val) => {
+            return filterheaders.includes(val)
+        })
+        this.indv_headers = Object.keys(DonorsIndividual.headers).filter((val) => {
+            return filterheaders.includes(val)
+        })
+    },
+
+    methods: {
+        formatDate(date) {
+            return app.formatDate(date)
+        },
+
+        getValue(key, value) {
+            if (key.includes('date')) {
+                return this.formatDate(value)
+            } else if (key.includes('sex')) {
+                return value == 0 ? 'Male' : 'Female'
+            }
+            return value
+        }
+    }
+})
+
+Vue.component('donor-container', DonorComponent)

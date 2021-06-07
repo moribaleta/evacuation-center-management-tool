@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Donors</title>
+
+    <!-- update the version number as needed -->
+    <script defer src="/__/firebase/7.19.1/firebase-app.js"></script>
+    <!-- include only the Firebase features as you need -->
+    <script defer src="/__/firebase/7.19.1/firebase-auth.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-database.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-messaging.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-storage.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-firestore.js"></script>
+    <script defer src="/__/firebase/7.19.1/firebase-functions.js"></script>
+    <!-- initialize the SDK after all desired features are loaded -->
+    <script defer src="/__/firebase/init.js"></script>
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <script src="js/jquery-3.0.0.min.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <link href="css/main-style.css" rel="stylesheet">
+    <script src="js/vue.js"></script>
+    <script src="../_global/js/objects.js"></script>
+    <script src="../_global/js/utilities.js"></script>
+    <script src="../_global/js/datahandler.js"></script>
+
+</head>
+
+<body>
+    <div class="sidenav" id="header" attr="donors">
+        <div class="sidenav-item">
+            <img class="nav-image" :src="logo" />
+        </div>
+
+        <div v-for="item in header_items" v-bind:class="'sidenav-item ' + (active == item.id ? 'active' : '') ">
+            <a v-bind:href="item.href">
+                <div class="icon-block">
+                    <i class="material-icons">{{item.icon}}</i>
+                    <h5 class="center">{{item.title}}</h5>
+                </div>
+            </a>
+        </div>
+
+        <div class="sidenav-item">
+            <a v-on:click="onLogout()">
+                <div class="icon-block">
+                    <i class="material-icons">close</i>
+                    <h5 class="center">Log Out</h5>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="container" id="content">
+
+        <ul class="breadcrumb">
+            <li><a href="donors.html">Donors</a></li>
+            <li><a href="#">Organization Donors</a></li>
+        </ul>
+
+
+        <status-modal modal_id="status_modal_update" title="Update Donor Status" :status="user_status"
+            v-on:save="updateUserStatus($event)">
+        </status-modal>
+
+        <div id="orgsModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">{{isEdit ? 'Edit ': 'Add '}} Donor</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form-generator :form="org_formmodel" :input.sync="orgs_input"></form-generator>
+                        <form-generator :form="form_password_model" :input.sync="form_org_password"></form-generator>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal"
+                            v-on:click="onSaveOrgDonor()">Save</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <h1>Donors</h1>
+
+        <!-------- DONOR HEADERS ------------->
+        <div class="section">
+            <h3>Donors Users</h3>
+            <search-component title="Search Donor" v-on:search="onSearchDonor" v-on:cancel="onCancelSearchDonor">
+            </search-component>
+            <div class="button-container">
+                <button type="button" id="add-report" class="btn btn-info button-view" v-on:click="onAddNewOrg()">Add
+                    New Organization</button>
+            </div>
+            <div>&nbsp;</div>
+        </div>
+
+        <!--------- ORGANIZATION ------------->
+        <div class="section">
+            <h4>Organization</h4>
+
+            <div class="loader-container" v-if="isLoading.org">
+                <div class="loader"></div>
+            </div>
+
+            <div class="table-container" id="tableData" v-if="!isLoading.org">
+                <div class="well" v-for="item,index in view_orgs_list">
+                    <div class="row">
+                        <div class="col col-xs-12 item-info">
+                            <p class="item-label">
+                                {{index + 1}}.
+                            </p>
+                        </div>
+                        <div class="col col-xs-12 item-info" v-if="item.images[0]">
+                            <img :src="cdn + item.images[0]" onerror="this.src='resources/images/avatar.jpeg';"
+                                style="height: 50px; width: 50px; border-radius: 25;">
+                        </div>
+                        <div class="col col-xs-12 item-info" v-if="!item.images[0]">
+                            <img src="resources/images/avatar.jpeg"
+                                style="height: 50px; width: 50px; border-radius: 25;">
+                        </div>
+                        <div class="col col-xs-4 item-info" v-for="key,index in org_headers" v-if="key !='id'">
+                            <entry-single-component :label="key" :value="item[key]"></entry-single-component>
+                        </div>
+
+                        <div class="col col-xs-12">
+                            <button class="btn btn-default btn-info" v-on:click="viewReports(item.id)">View
+                                Reports</button>
+                            <button class="btn btn-default btn-info" v-on:click="onEditOrg(index)">Edit</button>
+                            <button class="btn btn-default btn-warning" v-on:click="editStatus(index)">Update
+                                Status</button>
+                            <button class="btn btn-default btn-danger" v-on:click="onDeleteOrg(index)">Delete</button>
+                        </div>
+                        <div class="col col-xs-12">
+                            <div class="well">
+                                <button class="btn btn-default btn-info" :href="'#imagerow'+index"
+                                    data-toggle="collapse">View Images</button>
+                                <div :id="'imagerow'+index" class="panel-collapse collapse">
+                                    <div class="panel-body">
+                                        <entry-image-component :id="item.id" :cdn="cdn" :images="item.images"
+                                            :edit='true' v-on:delete="onDeleteImage($event)">
+                                        </entry-image-component>
+                                    </div>
+                                    <div class="panel-footer">
+                                        <div class="row">
+                                            <p>Upload Images</p>
+                                            <input :id="'input_images'+index" type="file" name="files[]" multiple
+                                                style="margin-bottom: 12px;" />
+                                            <button class="btn btn-default btn-info"
+                                                v-on:click="onAddImages(index)">upload
+                                                pictures</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--------- ORGANIZATION ------------->
+
+
+    </div>
+
+
+    <script src="js/app/app.js"></script>
+    <script>
+        app = new Vue({
+            el: '#content',
+            data: {
+                user: new AdminUser(),
+
+                //ENTRIES
+                orgs_list: [],
+                view_orgs_list: [],
+                donor_ref: {},
+
+                //MODEL INPUTS
+                orgs_input: {},
+
+                //FORM MODELS
+                org_headers: Object.keys(DonorsOrganization.headers),
+                org_formmodel: DonorsOrganization.formModel,
+
+                form_org_password: {
+                    password: null,
+                    conf_password: null
+                },
+
+                form_password_model: {
+                    password: {
+                        title: "Password",
+                        type: FormModels.password,
+                    },
+                    conf_password: {
+                        title: "Confirm Password",
+                        type: FormModels.password,
+                    }
+                },
+
+                isEdit: false,
+                isLoading: {
+                    org: false,
+                },
+
+                user_status: null,
+            },
+            methods: {
+                onStart() {
+                    this.user = header.user
+                    this.municipalities = municipalities
+                    this.fetchData()
+                }, //onStart
+
+                fetchData() {
+                    this.fetchOrg()
+                }, //fetchData
+
+                fetchOrg() {
+                    this.isLoading.org = true
+                    DataHandler.getDonorOrganizations().then((message) => {
+                        this.orgs_list = message.data
+                        this.view_orgs_list = message.data
+                        this.orgs_list.forEach((org) => {
+                            this.donor_ref[org.id] = org
+                        })
+                    }).catch(err => {
+                        console.log(err)
+                    }).finally(() => {
+                        this.isLoading.org = false
+                    })
+                }, //fetchOrg
+
+                viewReports(id) {
+                    window.open(`donors_reports.html?id=${id}`, '_self')
+                },
+
+                //<!----------INDEPENDENT-USER--------------
+                onAddNewOrg() {
+                    this.orgs_input = (new DonorsOrganization()).toObject()
+                    this.orgs_input.created_by = this.user.id
+                    this.isEdit = false
+                    $('#orgsModal').modal()
+                }, //onAddNewOrg
+
+                onEditOrg(index) {
+                    const donor = this.orgs_list[index]
+                    this.isEdit = true
+                    this.orgs_input = donor.toObject()
+                    this.orgs_input.date_updated = new Date()
+                    $('#orgsModal').modal()
+                }, //onEditOrg
+
+                onSaveOrgDonor(password_included = true) {
+                    var input = DonorsOrganization.parse(this.orgs_input)
+
+                    if (password_included) {
+                        if (this.validatePassword()) {
+                            input.password = this.form_org_password.password
+                        } else {
+                            return
+                        }
+                    }
+
+                    DataHandler.addDonor(input, true).then((data) => {
+                        if (data.error) {
+                            alert(`Can't Save Entry: ${data.error}`)
+                        } else {
+                            alert(`Entry Was Saved Successfuly`)
+                            this.fetchOrg()
+                        }
+                    }).catch(error => {
+                        console.log(error)
+                    })
+                }, //onSaveOrgDonor
+
+                onDeleteOrg(index) {
+                    let onConfirm = confirm('Deleting Entry?\nPress confirm to proceed')
+                    if (onConfirm) {
+                        DataHandler.deleteDonor(this.view_orgs_list[index].id, true).then((data) => {
+                            console.log(data)
+                            if (data.error) {
+                                alert(`Can't Delete Entry ${data.error}`)
+                            } else {
+                                alert(`Entry Was Deleted Successfuly`)
+                                this.fetchOrg()
+                            }
+                        })
+                    }
+                }, //onDeleteOrg
+
+                editStatus(index) {
+                    this.isEdit = true
+                    this.orgs_input = this.view_orgs_list[index].toObject()
+                    this.user_status = this.orgs_input.status
+                    $('#status_modal_update').modal()
+                },
+
+                updateUserStatus(status) {
+                    console.log("updateUserStatus - status %o", status)
+                    this.orgs_input.status = status
+                    this.orgs_input.date_updated = new Date()
+                    console.log("updateUserStatus - model %o", this.orgs_input)
+                    this.onSaveOrgDonor(false)
+                },
+
+                validatePassword() {
+                    let conf = this.form_org_password.conf_password
+                    let pass = this.form_org_password.password
+
+                    console.log("password %o", this.form_password_model)
+
+                    if (!pass || pass.length <= 0) {
+                        AlertMessages.error("password is required")
+                        return false
+                    }
+
+                    if (!conf || conf.length <= 0) {
+                        AlertMessages.error("confirm password is required")
+                        return false
+                    }
+
+                    if (pass.length < 5) {
+                        AlertMessages.error("password must have a minimum of 5 characters")
+                        return false
+                    }
+
+                    if (conf.length < 5) {
+                        AlertMessages.error("confirm password must have a minimum of 5 characters")
+                        return false
+                    }
+
+                    if (pass != conf) {
+                        AlertMessages.error("password and confirm password doesn't match")
+                        return false
+                    }
+
+                    
+
+                    return true
+                },
+
+
+                onSearchDonor(search) {
+                    this.view_orgs_list = this.orgs_list.filter((org) => {
+                        return SearchObject(org.toObject(), search)
+                    })
+                },
+
+                onCancelSearchDonor() {
+                    this.view_orgs_list = [...this.orgs_list]
+                },
+
+                //----------DEPENDENT-USER-----------------!>
+
+                onViewAllReports() {
+                    window.open(`donors_reports.html`, '_self')
+                },
+
+                onAddImages(index) {
+                    const files = document.getElementById('input_images' + index).files;
+                    var uploads = []
+                    for (var i = 0; i < files.length; i++) {
+                        uploads.push(files[i])
+                    }
+
+                    if (uploads.length > 0) {
+
+                        var value = DonorsOrganization.parse(this.view_orgs_list[index].toObject())
+
+                        DataHandler.uploadImages(uploads).then((resp) => {
+                            return resp.json()
+                        }).then((saved_images) => {
+                            value.images = value.images || []
+                            value.images = value.images.concat(saved_images)
+                            return DataHandler.addDonor(value, true)
+                        }).then((message) => {
+                            if (!message.error) {
+                                alert("Item Persisted Successfuly")
+                                this.fetchOrg()
+                            } else {
+                                alert(`Failed to updated error: ${message.error}`)
+                            }
+                        }).catch(error => {
+                            console.log(error)
+                        })
+                    }
+                }, //onAddImages
+
+                onDeleteImage(value) {
+
+                    console.log("delete %o", value)
+
+                    let org_id = value.item
+                    let index = value.index
+
+                    var first = this.orgs_list.filter((value) => {
+                        return value.id == org_id
+                    })[0]
+
+                    if (first && confirm("Do you want to delete this image?")) {
+                        let image_to_delete = first.images.splice(index, 1)
+                        console.log("images to delete %o", image_to_delete)
+                        DataHandler.deleteImages(image_to_delete).then((removed) => {
+                            console.log(removed)
+                        }).catch((err) => {
+                            console.log(err)
+                        })
+                        DataHandler.addDonor(first, true).then((message) => {
+                            this.fetchOrg()
+                        }).catch((err) => {
+                            console.log(err)
+                        })
+                    }
+                }, //onDeleteImage
+
+            }
+        })
+
+        /* $(document).ready(() => {
+            header.onStart()
+        }) */
+    </script>
+
+</body>
+
+</html>

@@ -93,8 +93,14 @@
         <h1>Public User History</h1>
 
         <div class="section">
-            <div class="well">
-                <div class="row" v-if="public_user">
+            <div class="well" v-if="public_user">
+                <div class="row">
+                    <div class="col col-md-12 item-info">
+                        <img 
+                            :src="public_user.images[0] ? cdn + public_user.images[0] : 'resources/images/avatar.jpeg'"
+                            onerror="this.src='resources/images/avatar.jpeg';"
+                            style="height: 50px; width: 50px; border-radius: 25;">
+                    </div>
                     <div class="col col-md-12">
                         <entry-component :entry="public_user" :headers="public_user_headers"></entry-component>
                     </div>
@@ -190,10 +196,11 @@
         app = new Vue({
             el: '#content',
             data: {
-                user      : null,
-                evac_list : [],
-                evac_names: {},
-                evac_dict : {},
+                //cdn         : DataHandlerType.api_host,
+                user        : null,
+                evac_list   : [],
+                evac_names  : {},
+                evac_dict   : {},
 
                 reports       : [],
                 reports_view  : [],

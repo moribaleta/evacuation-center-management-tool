@@ -114,65 +114,19 @@
             <div class="table-container" v-if="!isDataLoading">
                 <div class="table" id="tableData">
                     <div class="well" v-for="item,index in reports_view">
-                        <div class="row">
-                            <div class="col col-md-3 item-info">
-                                <p class="item-value">{{index + (!active_history ? 1 : 2) }}.</p>
-                            </div>
-                            
-                            <div class="col col-md-3 item-info " v-for="info,index in header">
-                                <div v-if="info == 'evac_id'">
-                                    <p class="item-label">EVACUATION NAME</p>
-                                    <p class="item-value">{{getEvacFromId(item.evac_id).name}}</p>
-                                </div>
-                                <entry-single-component v-if="info != 'evac_id' && info == 'date_cleared'" :label="info"
-                                    :value="isDateValid(item[info]) ? 'active' : item[info]" :showtime="true">
-                                </entry-single-component>
-                                <entry-single-component v-if="info != 'evac_id' && info != 'date_cleared'" :label="info" 
-                                    :value="item[info]"
-                                    :showtime="true">
-                                </entry-single-component>
-                                
-                            </div>
-
-                            
-                            <div class="col col-md-3 item-info ">
-                                <entry-single-component 
-                                    label="Status" 
-                                    :value="item.status">
-                                </entry-single-component>
-                            </div>
-
-
-                            <div class="col col-md-12 item-info " v-if="getUserById(item.user_id)">
-                                <div class="well">
-                                    <entry-component :entry="getUserById(item.user_id)" :headers="user_headers" ></entry-component>
-                                    <button class="btn btn-default btn-info" :href="'#imagerow'+index"
-                                    data-toggle="collapse">View Images</button>
-                                </div>
-                            </div>
-                            
-
-                            <div class="col col-md-12">
-                                <button class="btn btn-default btn-info" v-on:click="editItem(index)">edit</button>
-                                <button class="btn btn-default btn-info" v-on:click="onUpdateStatus(index)">update status</button>
-                                <button class="btn btn-default btn-danger"
-                                    v-on:click="deleteItem(index)">delete</button>
-                            </div>
-
-                            
-                        </div>
-
-                        <div :id="'imagerow'+index" class="panel-collapse collapse" v-if="getUserById(item.user_id)">
-                            <div class="panel-body">
-                                <entry-image-component 
-                                    :id="item.user_id" 
-                                    :cdn="cdn" 
-                                    :images="getUserById(item.user_id).images"
-                                    :edit='false'
-                                    >
-                                </entry-image-component>
-                            </div>
-                        </div>
+                        <entry-user-history-component
+                            :view_count="index + 1"
+                            :index="index"
+                            :cdn="cdn"
+                            :item="item"
+                            :evac="getEvacFromId(item.evac_id)"
+                            :user="getUserById(item.user_id)"
+                            :header="header"
+                            v-on:edit="editItem($event)"
+                            v-on:updatestatus="onUpdateStatus($event)"
+                            v-on:delete="deleteItem($event)"
+                        >
+                        </entry-user-history-component>
                     </div>
                 </div>
             </div>
@@ -205,10 +159,11 @@
                 isAdmit       : false,
 
                 filter_add: {
+                    status: ['all', ...Object.keys(StatusType)],
                     evacuations: [],
                 },
 
-                header                  : PublicUserHistory.headers,
+                header                  : ['id', ...PublicUserHistory.headers],
                 formModel               : PublicUserHistory.formModel,
                 public_user_formModel   : PublicUser.formModel,
                 public_user_headers     : PublicUserHistory.visiblekeys,
@@ -244,13 +199,7 @@
                         let history         = messages[0].data
                         this.evac_list      = messages[1].data
                         
-                        //this.reports        = history
-                        //this.reports_view   = history
-
                         this.filter_add.evacuations = ['all']
-
-                        console.log("history %o", history)
-
                         this.formModel.evac_id.options = this.evac_list.map((evac) => {
                             this.evac_dict[evac.id] = evac
                             this.evac_names[evac.name] = evac.id
@@ -281,6 +230,8 @@
                             this.reports_view   = history
                         }).catch(err => {
                             console.log("err %o", err)
+                            this.reports        = history
+                            this.reports_view   = history
                         })
 
                     }).catch(err => {
@@ -293,14 +244,10 @@
 
                 getEvacFromId(id) {
                     return this.evac_dict[id]
-                }, //getEvacFromId
+                },
 
-                isDateValid(date) {
-                    if (Object.prototype.toString.call(date) === "[object Date]") {
-                        return isNaN(date.getTime())
-                    } else {
-                        return false
-                    }
+                getUserById(id) {
+                    return this.user_dict[id]
                 },
 
                 editItem(index) {
@@ -327,9 +274,7 @@
                     this.saveHistory()
                 },
 
-                getUserById(id) {
-                    return this.user_dict[id]
-                },
+               
 
                 createHistory() {
                     var input = new PublicUserHistory()
@@ -462,6 +407,16 @@
                         )
                     });
 
+                    view_list = view_list.filter((data) => {
+                        let status = filter.status
+                        if (status == 'all') {
+                            return true
+                        } else {
+                            let match = status == data.status
+                            console.log(status +"<->"+ data.id + ":" + data.status +" match: " + match)
+                            return match
+                        }
+                    })
 
                     view_list = view_list.filter((data) => {
                         let evac = filter.evacuations
@@ -486,8 +441,14 @@
                             ...data.toObject(),
                         }
                         let evac = this.evac_dict[data.evac_id]
+                        let user = this.user_dict[data.user_id]
+
                         object['evac_name'] = evac ? evac.name : "public"
                         object['municipal'] = evac ? evac.municipal : "public"
+                        object['user']      = Object.keys(user).map((key) => {
+                            return user[key]
+                        }).join(",")
+
                         console.log("object search %o", object)
                         return SearchObject(object, filter.searchTerm)
                     })
