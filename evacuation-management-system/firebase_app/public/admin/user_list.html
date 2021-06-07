@@ -83,11 +83,8 @@
             </div>
         </div>
 
-        <status-modal 
-            modal_id    = "status_modal_update"
-            title       = "Update User Status"
-            :status     = "user_status"
-            v-on:save   = "updateUserStatus($event)">
+        <status-modal modal_id="status_modal_update" title="Update User Status" :status="user_status"
+            v-on:save="updateUserStatus($event)">
         </status-modal>
 
 
@@ -148,123 +145,6 @@
 
         <h1>Public Users</h1>
 
-
-        <!-- <div class="section">
-            <h3>Latest Reports</h3>
-            <-!-- HEADER FILTER --|>
-            <div class="header-container">
-                <filter-component :filter_add="filter_pending_add" v-on:filter="onFilterPendingReports($event)"
-                    v-on:search="onSearchPendingReports($event)" v-on:cancel="onCancelSearchPendingReports($event)"
-                    v-on:clear="onClearFilterPendingReports()">
-                </filter-component>
-                <div class="button-container">
-                    <button type="button" class="btn btn-info button-view" v-on:click="onViewAllPending()">VIEW
-                        ALL</button>
-                    <button type="button" class="btn btn-info button-view"
-                        v-on:click="onGeneratePendingReports()">GENERATE
-                        REPORT DATA</button>
-                </div>
-            </div>
-
-            <-!-- LOADER --|>
-            <div class="loader_container" v-if="isReportsLoading">
-                <div class="loader"></div>
-            </div>
-
-            <-!-- TABLE VIEW --|>
-            <div class="table-container" v-if="!isReportsLoading">
-                <div class="table" id="tableData">
-                    <div class="well" v-for="item,index in pending_reports_view">
-                        <div class="row">
-                            <div class="col col-md-12 item-info">
-                                <p class="item-value">{{index + 1}}.</p>
-                            </div>
-                            <div class="col col-md-3 item-info " v-for="info,index in pending_header">
-                                <div v-if="info == 'evac_id'">
-                                    <p class="item-label">EVACUATION NAME</p>
-                                    <p class="item-value">
-                                        {{item.evac_id.isEmpty() ? 'public' : getEvacFromId(item.evac_id) ? getEvacFromId(item.evac_id).name : ''}}</p>
-                                </div>
-                                <entry-single-component v-if="info != 'evac_id'" :label="info" :value="item[info]">
-                                </entry-single-component>
-                            </div>
-                            <div class="col col-md-12">
-                                <button class="btn btn-default btn-info" :href="'#requestrow-'+index" data-toggle="collapse">view details</button>
-                                <button class="btn btn-default btn-info" :href="'#commentrow-'+index" data-toggle="collapse">view comments</button>
-                                <button class="btn btn-default btn-warning" v-on:click="editReport(index)">edit</button>
-                                <button class="btn btn-default btn-warning" v-on:click="editStatus(index)">update status</button>
-                                <button class="btn btn-default btn-danger"
-                                    v-on:click="deleteItem(index)">delete</button>
-                            </div>
-                        </div>
-                        <div :id="'requestrow-'+index" class="panel-collapse collapse">
-                            <div class="panel-body">
-                                <ul class="list-group">
-                                    <li class="list-group-item" v-if="item.reports.isEmpty()">
-                                        <p>No Request</p>
-                                    </li>
-
-                                    <li class="list-group-item" v-for="report,index in item.reports">
-                                        <-!-- <img :src="cdn+image" class="img-thumbnail img-grid"/> --|>
-                                        <div class="row">
-                                            <div class="col col-md-12 item-info">
-                                                <p class="item-label">
-                                                    {{ index + 1 }}. {{supply_types[report.inventory_type].name}}
-                                                </p>
-                                            </div>
-                                            <div class="col col-md-12 item-info">
-                                                <p class="item-label">
-                                                    QTY:
-                                                </p>
-                                                <p class="item-value">
-                                                    {{report.qty}}
-                                                </p>
-                                            </div>
-                                            <div class="col col-md-12 item-info">
-                                                <p class="item-label">
-                                                    remarks:
-                                                </p>
-                                                <p class="item-value">
-                                                    {{report.remarks}}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div :id="'commentrow-'+index" class="panel-collapse collapse">
-                            <div class="panel-body">
-                                <ul class="list-group">
-                                    <li class="list-group-item" v-if="item.comments.isEmpty()">
-                                        <p>No Comments</p>
-                                    </li>
-
-                                    <li class="list-group-item" v-for="comment,index in item.comments">
-                                        <div class="row">
-                                            <div class="col col-md-12 item-info">
-                                                <p class="item-label">
-                                                    {{ index + 1 }}. {{comment.user_id}}
-                                                </p>
-                                            </div>
-                                            <div class="col col-md-12 item-info">
-                                                <p>{{comment.comment}}</p>
-                                            </div>
-                                            <div class="col col-md-12 item-info">
-                                                <p class="item-value">
-                                                    {{comment.date_updated ? formatDate(comment.date_updated) : "--"}}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div> -->
-
         <div class="section">
             <h3>Users</h3>
             <filter-component :filter_add="filter_add" v-on:filter="onFilterPublic($event)"
@@ -292,8 +172,12 @@
                                 {{index + 1}}.
                             </p>
                         </div>
-                        <div class="col col-md-12 item-info">
+                        <div class="col col-md-12 item-info" v-if="item.images[0]">
                             <img :src="cdn + item.images[0]" onerror="this.src='resources/images/avatar.jpeg';"
+                                style="height: 50px; width: 50px; border-radius: 25;">
+                        </div>
+                        <div class="col col-md-12 item-info" v-if="!item.images[0]">
+                            <img src="resources/images/avatar.jpeg"
                                 style="height: 50px; width: 50px; border-radius: 25;">
                         </div>
                         <div class="col col-md-12">
@@ -311,7 +195,8 @@
                             <button class="btn btn-default btn-info" :href="'#imagerow'+index"
                                 data-toggle="collapse">View Images</button>
                             <button class="btn btn-warning btn-info" v-on:click="onEditItem(index)">edit</button>
-                            <button class="btn btn-warning btn-info" v-on:click="onUserStatus(index)">update status</button>
+                            <button class="btn btn-warning btn-info" v-on:click="onUserStatus(index)">update
+                                status</button>
                             <button class="btn btn-default btn-danger" v-on:click="onDeleteItem(index)">delete</button>
                         </div>
                     </div>
@@ -358,14 +243,9 @@
 
                     <div :id="'imagerow'+index" class="panel-collapse collapse">
                         <div class="panel-body">
-                            <entry-image-component 
-                                    :id="item.id" 
-                                    :cdn="cdn" 
-                                    :images="item.images"
-                                    :edit='true'
-                                    v-on:delete="onDeleteImage($event)"
-                                    >
-                                </entry-image-component>
+                            <entry-image-component :id="item.id" :cdn="cdn" :images="item.images" :edit='true'
+                                v-on:delete="onDeleteImage($event)">
+                            </entry-image-component>
                         </div>
                         <div class="panel-footer">
                             <div class="row">
@@ -570,7 +450,35 @@
                             console.log(error)
                         })
                     }
-                },//onAddImages
+                }, //onAddImages
+
+                onDeleteImage(value) {
+
+                    console.log("delete %o", value)
+
+                    let user_id = value.item
+                    let index   = value.index
+
+
+                    var first = this.user_list.filter((value) => {
+                        return value.id == user_id
+                    })[0]
+
+                    if (first && confirm("Do you want to delete this image?")) {
+                        let image_to_delete = first.images.splice(index, 1)
+                        console.log("images to delete %o", image_to_delete)
+                        DataHandler.deleteImages(image_to_delete).then((removed) => {
+                            console.log(removed)
+                        }).catch((err) => {
+                            console.log(err)
+                        })
+                        DataHandler.addPublicUser(first).then((message) => {
+                            this.fetchUser()
+                        }).catch((err) => {
+                            console.log(err)
+                        })
+                    }
+                }, //onDeleteImage
 
                 onDeleteItem(index) {
                     let onConfirm = confirm('Deleting User\nPress confirm to proceed')
@@ -792,20 +700,20 @@
                     this.isReportsLoading = true
 
                     this.pending_formReportModel = {
-                            inventory_type: {
-                                title: 'Supply Type',
-                                type: FormModels.dropdown,
-                                options: []
-                            },
-                            qty: {
-                                title: 'QTY',
-                                type: FormModels.number
-                            },
-                            remarks: {
-                                title: 'Remarks',
-                                type: FormModels.textarea
-                            }
+                        inventory_type: {
+                            title: 'Supply Type',
+                            type: FormModels.dropdown,
+                            options: []
+                        },
+                        qty: {
+                            title: 'QTY',
+                            type: FormModels.number
+                        },
+                        remarks: {
+                            title: 'Remarks',
+                            type: FormModels.textarea
                         }
+                    }
 
                     Promise.all([promiseEvac, promiseSuppType]).then((messages) => {
                         console.log("promises 1:%o 2:%o", messages[0], messages[1])
@@ -845,17 +753,20 @@
                             this.pending_reports_view = this.pending_reports
 
                             DataHandler.getPublicUserComments()
-                            .then((message) => {
-                                console.log("comments %o", message.data)
-                                message.data.forEach((comment) => {
-                                    let index = this.pending_reports.firstIndex((curr) => {
-                                        return curr.id == comment.report_id 
+                                .then((message) => {
+                                    console.log("comments %o", message.data)
+                                    message.data.forEach((comment) => {
+                                        let index = this.pending_reports.firstIndex(
+                                            (curr) => {
+                                                return curr.id == comment
+                                                    .report_id
+                                            })
+                                        if (index != null) {
+                                            this.pending_reports[index].comments
+                                                .push(comment)
+                                        }
                                     })
-                                    if (index != null) {
-                                        this.pending_reports[index].comments.push(comment)
-                                    }
                                 })
-                            })
                         }).catch(err => {
                             console.log("err %o", err)
                         }).finally(() => {
@@ -875,7 +786,7 @@
                             user_ids.push(user.id)
                         })
 
-                        
+
 
                     }).catch(err => {
                         console.log(err)
@@ -894,7 +805,7 @@
                     $('#reportModal').modal()
                 },
 
-                editStatus(index){
+                editStatus(index) {
                     let string = JSON.stringify(this.pending_reports_view[index].toObject())
                     this.report_input = PublicUserReport.parse(JSON.parse(string))
                     this.report_input.date_updated = new Date()
@@ -1039,7 +950,7 @@
                 },
 
                 onViewAllPending() {
-                    window.open('user_reports.html','_self')
+                    window.open('user_reports.html', '_self')
                 },
 
                 onGeneratePendingReports() {

@@ -867,10 +867,10 @@ const EntryImageComponent = Vue.extend({
             <p>Images are empty</p>
         </div>
         <div class="col col-md-2 item-info" v-for="image,index in images">
-            <div class="image-area">
-            <img :src="cdn+image" alt="Preview">
-            <a class="remove-image" v-if="edit" v-on:click="onDeleteImage(item.id, index)"
-                style="display: inline;">&#215;</a>
+            <div class="image-area" v-if="image">
+                <img :src="cdn+image" alt="Preview">
+                <a class="remove-image" v-if="edit" v-on:click="onDeleteImage(index)"
+                    style="display: inline;">&#215;</a>
             </div>
         </div>
     </div>

@@ -1390,6 +1390,7 @@ const DonorComponent = Vue.extend({
             'phone_number',
             'address',
             'sex',
+            'status',
         ]
 
         this.org_headers = Object.keys(DonorsOrganization.headers).filter((val) => {

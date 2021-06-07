@@ -1397,7 +1397,8 @@ class DonorsOrganization extends DonorModel {
         address             : 'Exact Address',
         contact_person      : 'Contact Person',
         contact_email       : 'Contact Email',
-        contact_phone_number: 'Personal Contact Number'
+        contact_phone_number: 'Personal Contact Number',
+        status              : 'Status'
     }
 
     /** defines the form of the model to be shown to create an entry */
@@ -1464,7 +1465,7 @@ class DonorsOrganization extends DonorModel {
         this.contact_phone_number = contact_phone_number
         this.status               = status || StatusType.pending
         this.images               = images || []
-        this.password             = password
+        this.password             = password || ""
     }
 
     toObject() {
