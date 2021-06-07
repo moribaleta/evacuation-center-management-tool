@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <script src="js/vue.js"></script>
+</head>
+
+<body>
+    <div id="sample">
+        <p>{{text}}</p>
+        <ul>
+            <li v-for="item,index in text_list"> 
+                <div> 
+                    <p>{{index + 1}}</p>
+                    <p>{{item.name}} </p>
+                    <p>{{item.qty}} </p>
+
+                    <button id="button_increase" v-on:click="onchangeqty(index,true)">+</button>
+                    <button id="button_decrease" v-on:click="onchangeqty(index,false)">-</button>
+
+                </div>
+            </li>
+        </ul>
+        <input type="text" v-model="input_text.name"></input>
+        
+
+
+        <button id="button1" v-on:click="onclick"> 
+            print
+        </button>
+    </div> 
+
+    <script>
+
+class Product{
+    name
+    qty = 1
+
+    constructor(name) {
+        this.name = name
+    }
+
+}
+class Drygood extends Product{
+    
+}
+const app = new Vue({
+    el: "#sample", 
+    data:{
+        text:"sample",
+        input_text:{
+            name:null,
+            qty:null,
+
+        },
+        text_list:[],
+        edit_index:null
+
+    } ,
+    methods:{
+        onclick(){
+            let value = this.input_text
+            if(this.edit_index != null){
+                this.text_list[this.edit_index] = value 
+                this.edit_index = null 
+
+            }
+            else{     
+                let product = new Product(this.input_text.name)
+                this.text_list.push(product)
+             
+            }
+            this.input_text = {
+                name:null,
+                age:null
+            }
+        }, 
+        onchangeqty(index,isIncrease){
+            let list = [...this.text_list]
+            var product = new Product()
+            product.name = list[index].name
+            product.qty = list[index].qty
+            if(isIncrease){
+                product.qty++
+            } else {
+                product.qty--
+            }
+            if(product.qty<=0){ 
+                list.splice(index,1)
+
+            } else {
+                list[index] = product
+
+            }
+             
+            console.log(product)
+            this.text_list = list 
+        },
+        onedit(index){
+            let value = {
+                name:this.text_list[index].name,
+                age:this.text_list[index].age,
+                
+            }
+            this.input_text = value 
+            this.edit_index = index
+        
+        },
+
+        ondelete(index){
+            this.text_list.splice(index,1)
+        }
+    }
+})
+    </script>
+</body>
+</html>

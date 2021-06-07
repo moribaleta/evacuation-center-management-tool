@@ -100,7 +100,26 @@
                     <h1 class="header-title">iEvacuate</h1>
                 </div>
                 <div class="modal-body">
-                    <form-generator :form="formModel" :input.sync="user_input"></form-generator>
+                    <div> 
+                        <label>
+                            select donor type 
+                        </label>
+                        <form-generator :form="donorTypeModel" :input.sync="type_input"> </form-generator>
+                    </div>
+                    <div id="formOrg" v-if="type_input.type == '0'">  
+                        <form-generator :form="formModelOrg" :input.sync="org_input"></form-generator>
+                    </div>
+
+                    <div id="formIndv" v-if="type_input.type == '1'">  
+  
+                        <form-generator :form="formModelIndv" :input.sync="indv_input"></form-generator>
+                    </div>
+                    <div id="formPassword" v-if="type_input.type != null">  
+  
+                        <form-generator :form="formModelPassword" :input.sync="password_input"></form-generator>
+                    </div>
+ 
+
                 </div>
                 <button v-on:click="onSaveUser">Create User Account</button>
             </div>
@@ -122,7 +141,42 @@
                 cdn: DataHandlerType.api_host,
                 formModel: PublicUser.formModel,
                 user_input: {},
-                municipalities: municipalities
+                municipalities: municipalities,
+                type_input: {
+                    type:null
+                },
+                donorTypeModel: {
+                    type:{
+                        title:"Donor Type",
+                        type: FormModels.dropdown,
+                        options:[
+                            {title:"Organization", value:'0'},
+                            {title:"Individual", value:'1'},
+                        ]
+                    }
+                },
+                formModelOrg: DonorsOrganization.formModel,
+                org_input: new DonorsOrganization(),
+                indv_input: new DonorsIndividual(),
+                formModelIndv: DonorsIndividual.formModel,
+                formModelPassword: {
+                    password: {
+                        title: "Password",
+                        type: FormModels.password,
+                    },
+                    conf_password: {
+                        title: "Confirm Password",
+                        type: FormModels.password,
+                    }
+                },
+
+password_input: {
+                    password: null,
+                    conf_password: null
+                    }
+
+            
+
             },
             methods: {
                 onStart() {
@@ -140,22 +194,68 @@
                 }, //onStart
 
                 onSaveUser() {
-                    this.user_input.created_by = '0'
-                    const input = PublicUser.parse(this.user_input)
+                    var donorModel 
+                    var isOrg = this.type_input == '0'
+                    if (this.type_input.type == '0'){
+                        donorModel = this.org_input
+                    } else if (this.type_input.type == '1'){
+                        donorModel = this.indv_input
+                    } else {
+                        return
+                    }
 
-                    DataHandler.addDonor(input).then((data) => {
+                    if (this.validatePassword()){
+                        donorModel.password = this.password_input.password
+                        
+                    } else {
+                        return
+                    }
+                
+
+
+                    DataHandler.addDonor(donorModel,isOrg).then((data) => {
                         if (data.error) {
                             alert(`Can't Save User: ${data.error}`)
                         } else {
                             alert(`User Have Been Saved Successfuly`)
-                            localStorage.setItem('user', JSON.stringify(input.toObject()))
+                            localStorage.setItem('donor', JSON.stringify(input.toObject()))
                             window.open('donors-detail.html','_self')
                         }
                     }).catch(error => {
                         console.log(error)
                     })
                 }, //onSaveUser
+                validatePassword() {
+                    let conf = this.password_input.conf_password
+                    let pass = this.password_input.password
 
+                    if (!pass || pass.length <= 0) {
+                        AlertMessages.error("password is required")
+                        return false
+                    }
+
+                    if (!conf || conf.length <= 0) {
+                        AlertMessages.error("confirm password is required")
+                        return false
+                    }
+
+                    if (pass.length < 5) {
+                        AlertMessages.error("password must have a minimum of 5 characters")
+                        return false
+                    }
+
+                    if (conf.length < 5) {
+                        AlertMessages.error("confirm password must have a minimum of 5 characters")
+                        return false
+                    }
+
+                    if (pass != conf) {
+                        AlertMessages.error("password and confirm password doesn't match")
+                        return false
+                    }
+
+                    return true
+                },
             }
         })
     </script>
