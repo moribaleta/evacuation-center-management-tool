@@ -40,6 +40,12 @@ var header = new Vue({
                 icon: 'info',
                 title: 'ABOUTS'
             },
+            {
+                id: 'donation',
+                href: "info.html",
+                icon: 'info',
+                title: 'INFO'
+            },
         ],
         right_header: [
             {
@@ -50,7 +56,7 @@ var header = new Vue({
             },
             {
                 id: 'donors',
-                href: 'donors.html',
+                href: 'login-donors.html',
                 icon: 'glyphicon-gift',
                 title: 'Donors'
             }
@@ -422,7 +428,7 @@ var municipalities =
                         </div>
         `,
         props: {
-            images : [],
+            images : Array,
             cdn : String
         }, 
         

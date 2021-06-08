@@ -651,6 +651,119 @@ class PublicUserHandler extends UserHandler {
             });
         })
     } //getPublicUserHistory
+
+
+    /**
+     * returns the active population by evacuation center
+     * ```
+     * message.data = {
+                    history : [],
+                    users   : [],
+                    evac_id
+                }
+     * ```
+     * @param {*} evac_id 
+     * @param {*} approved 
+     * @returns 
+     */
+    getPublicActivePopulation(approved) {
+
+        let promiseEvac = ((id, evac_id) => {
+            return new Promise((resolve, reject) => {
+                const ref = this.firestore.collection(UserHandler.tables.public_user)
+                var query = ref.where('id', '==', id)
+                
+                query.get().then((querySnapshot) => {
+                    var users = []
+                    querySnapshot.forEach(function (doc) {
+                        console.log(doc.id, " => ", doc.data());
+                        let data = doc.data()
+                        let id = doc.id
+                        const object = parseObject({
+                            id,
+                            ...data
+                        })
+                        users.push(PublicUser.parse(object))
+                    });
+                    
+                    var message     = new Message()
+                    message.data    = {
+                        user: users[0],
+                        evac_id
+                    }
+                    resolve(message)
+                }).catch((error) => {
+                    console.log("Error getting documents: ", error);
+                    reject(error)
+                });
+            })
+        })
+         
+        
+
+        return new Promise((resolve, reject) => {
+            const history_ref   = this.firestore.collection(UserHandler.tables.public_user_history)
+            
+            var history_query = history_ref
+            
+            //checks if the public user is not yet cleared
+            history_query = history_query.where('date_cleared', '==', '')
+            
+            if (approved) {
+                history_query = history_query.where('status','==', StatusType.approved)
+            }
+            
+            history_query = history_query.orderBy('date_admitted', 'desc')
+            
+            console.log("datahandler - get active history %o")
+            
+            history_query.get().then(function (querySnapshot) {
+                var promises    = []
+
+                var final_message = new Message()
+                
+                final_message.data = {}
+
+                querySnapshot.forEach((doc) => {
+                    let data = doc.data()
+                    let id = doc.id
+                    const object = parseObject({
+                        id,
+                        ...data
+                    })
+                    let history = PublicUserHistory.parse(object)
+
+                    final_message.data[history.evac_id] = final_message.data[history.evac_id] || {
+                        users: [],
+                        history: [],
+                        count: 0
+                    }
+
+                    final_message.data[history.evac_id].history.push(history)
+
+                    promises.push(promiseEvac(history.user_id, history.evac_id))
+                });
+
+                Promise.all(promises).then((messages) => {
+                    messages.map((message) => {
+                        let user    = message.data.user 
+                        let evac_id = message.data.evac_id
+                        final_message.data[evac_id].users.push(user)
+                        final_message.data[evac_id].count += (1 + (user.dependents.length))
+                    })
+
+
+                    resolve(final_message)
+                }).catch((err) => {
+                    throw err;
+                })
+                
+            }).catch(function (error) {
+                console.log("Error getting documents: ", error);
+                reject(error)
+            });
+        })
+    }//getPublicActivePopulationByEvac
     
     
     
@@ -1690,6 +1803,76 @@ class DonorHandler extends MunicipalInventoryHandler {
                 } else {
                     message.data = donors
                 }
+                resolve(message)
+            }).catch(function (error) {
+                reject(error)
+            });
+        })
+    } //getDonorOrganizations
+
+    /** returns the dictionary of donor organization */
+    getDonorOrganizationsDict() {
+        return new Promise((resolve, reject) => {
+            const ref = this.firestore.collection(UserHandler.tables.donor_organization)
+            const query = ref
+            
+            query.get().then(function (querySnapshot) {
+                var donors = {}
+                querySnapshot.forEach(function (doc) {
+                    let data = doc.data()
+                    let id = doc.id
+                    
+                    let object = {
+                        id,
+                        ...data
+                    }
+                    try {
+                        object.date_created = object.date_created.toDate()
+                        object.date_updated = object.date_updated.toDate()
+                    } catch (err) {
+                        //console.log(err)
+                    }
+                    //donors.push(DonorsOrganization.parse(object))
+                    let donor = DonorsOrganization.parse(object)
+                    donors[donor.id] = donor
+                });
+                var message = new Message()
+                message.data = donors
+                resolve(message)
+            }).catch(function (error) {
+                reject(error)
+            });
+        })
+    } //getDonorOrganizations
+
+    /** returns the dictionary of donor organization */
+    getDonorIndividualDict() {
+        return new Promise((resolve, reject) => {
+            const ref = this.firestore.collection(UserHandler.tables.donor_individual)
+            const query = ref
+            
+            query.get().then(function (querySnapshot) {
+                var donors = {}
+                querySnapshot.forEach(function (doc) {
+                    let data = doc.data()
+                    let id = doc.id
+                    
+                    let object = {
+                        id,
+                        ...data
+                    }
+                    try {
+                        object.date_created = object.date_created.toDate()
+                        object.date_updated = object.date_updated.toDate()
+                    } catch (err) {
+                        //console.log(err)
+                    }
+                    //donors.push(DonorsOrganization.parse(object))
+                    let donor = DonorsIndividual.parse(object)
+                    donors[donor.id] = donor
+                });
+                var message = new Message()
+                message.data = donors
                 resolve(message)
             }).catch(function (error) {
                 reject(error)

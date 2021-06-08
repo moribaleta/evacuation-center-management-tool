@@ -292,13 +292,13 @@
                                     user_comments.data.forEach((comment) => {
                                         let index = this.pending_reports.firstIndex(
                                             (curr) => {
-                                                console.log("searching %o - %o",
-                                                    curr.id, comment
-                                                    .report_id)
+                                                // console.log("searching %o - %o",
+                                                //     curr.id, comment
+                                                //     .report_id)
                                                 return curr.id == comment
                                                     .report_id
                                             })
-                                        console.log("first? %o index", index)
+                                        //console.log("first? %o index", index)
                                         if (index != null) {
                                             this.pending_reports[index].comments
                                                 .push(comment)

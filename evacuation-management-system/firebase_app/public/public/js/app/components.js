@@ -29,6 +29,12 @@ const DonationPanelComponent = Vue.extend({
                                             <div class="col col-md-3">
                                                 qty total: {{item.total}}
                                             </div>
+                                            <div class="col col-md-12">
+                                                <p class="item-value" v-if="active_history_dict[item.evac.id]">
+                                                    current population:
+                                                    {{active_history_dict[item.evac.id].count || 0}}
+                                                </p>
+                                            </div>
                                         </div>
                                     </li>
                                 </ul>
@@ -50,18 +56,18 @@ const DonationPanelComponent = Vue.extend({
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                     <h4 class="modal-title">Create A Donation Request For:
-                        {{evac_names[donor_exist.donor_request.evac_id]}}</h4>
+                        {{evac_names[donor_request_entry.donor_request.evac_id]}}</h4>
                 </div>
                 <div class="modal-body">
                     <div id="form-donors">
                         <label>Donate Supplies</label>
-                        <ul class="list-group" v-if="donor_exist.donor_request != null">
+                        <ul class="list-group" v-if="donor_request_entry.donor_request != null">
                             <li class="list-group-item danger">
                                 <button type="button" class="btn btn-info" v-on:click="addInputInventory()">Add Item
                                     Request</button>
                             </li>
 
-                            <li class="list-group-item" v-for="report,index in donor_exist.donor_request.reports">
+                            <li class="list-group-item" v-for="report,index in donor_request_entry.donor_request.reports">
                                 <form-generator :form="donor_report_item_form" :input.sync="report">
                                 </form-generator>
                                 <button type="button" class="btn btn-danger"
@@ -130,9 +136,9 @@ const DonationPanelComponent = Vue.extend({
                                                 inventories:
                                                 {{evacuation_inventories[evac.id] ? evacuation_inventories[evac.id].length : 0}}
                                             </p>
-                                            <p class="item-value">
+                                            <p class="item-value" v-if="active_history_dict[evac.id]">
                                                 current population:
-                                                {{active_history_dict[evac.id] || 0}}
+                                                {{active_history_dict[evac.id].count || 0}}
                                             </p>
                                         </h4>
                                     </div>
@@ -219,9 +225,7 @@ const DonationPanelComponent = Vue.extend({
 
         </div>
     `,
-    prop: {
-        donor: Object
-    },
+    
     data() {
         return {
             cdn: DataHandlerType.api_host,
@@ -229,48 +233,33 @@ const DonationPanelComponent = Vue.extend({
             isEdit: false,
 
             //DONORS
-            donor_inv_input: new DonorsIndividual(),
-            donor_org_input: new DonorsOrganization(),
             donor_report_input: new DonorsReport(),
 
-            donor_exist: {
-                exist: null,
-                type: null,
-                user_id: null,
+            donor_request_entry: {
+                donor: null,
                 donor_request: new DonorsReport(),
-            }, //Bool,
+            }, 
             //donor_evac_id: null,
 
-            donor_inv_form          : DonorsIndividual.formModel,
-            donor_org_form          : DonorsOrganization.formModel,
-            donor_report_form       : DonorsReport.formModel,
             donor_report_item_form  : ReportItemType.reportItemFormModel,
-
-            donor_org_headers       : DonorsOrganization.headers,
-            donor_inv_headers       : DonorsIndividual.headers,
-            donor_report_headers    : DonorsReport.headers,
-
-            donor_org_list: [],
-            donor_inv_list: [],
-            donor_report_list: [],
 
             /** contains the current number of population per evacuation center */
             active_history_dict: {},
 
 
             //EVAC
-            evac_list: [],
-            evac_names: {},
+            evac_list    : [],
+            evac_names   : {},
             muni_inv_list: [],
 
             //SUPPLIES
-            supply_types: {},
+            supply_types       : {},
             supply_types_option: [],
 
             //INVENTORIES
-            public_inventories: [],
+            public_inventories    : [],
             evacuation_inventories: {},
-            inventory_supplies: {},
+            inventory_supplies    : {},
 
             view_inventory: null,
 
@@ -278,24 +267,18 @@ const DonationPanelComponent = Vue.extend({
                 recommendation: false
             },
 
-            recommendations: []
+            recommendations: [],
         }
-    },
-
-    watch: {
-
-        donor() {
-            this.donor_exist.exist      = true
-            this.donor_exist.user_id    = this.donor.id
-            
-        }
-
     },
 
     created() {
        
     },
     methods: {
+        loadDonor(donor){
+            this.donor_request_entry.donor = donor
+        },
+
         fetchReports() {
             DataHandler.getSupplyTypes().then((message) => {
                 var suppliesPromise = []
@@ -332,15 +315,11 @@ const DonationPanelComponent = Vue.extend({
                 console.log("err %o", err)
             })
 
-            DataHandler.getActivePublicUserHistory().then((message) => {
-                message.data.map(data => {
-                    this.active_history_dict[data.evac_id] = this.active_history_dict[
-                        data.evac_id] || 0
-                    this.active_history_dict[data.evac_id]++
-                    console.log("active history %o", this.active_history_dict)
-                })
-            }).catch(error => {
-                console.log(error)
+            DataHandler.getPublicActivePopulation(true).then((message) => {
+                this.active_history_dict = message.data
+                console.log("active history dict %o", this.active_history_dict)
+            }).catch(err => {
+                console.log(err)
             })
 
             var evac_list = []
@@ -402,12 +381,12 @@ const DonationPanelComponent = Vue.extend({
             var report = new DonorsReport()
             report.evac_id = evac_id
 
-            this.donor_exist.donor_request = report
+            this.donor_request_entry.donor_request = report
             $('#donateModal').modal()
         }, //addReport
 
         onClose() {
-            this.donor_exist = {
+            this.donor_request_entry = {
                 exist: null,
                 type: null,
                 user_id: null,
@@ -420,12 +399,12 @@ const DonationPanelComponent = Vue.extend({
             if (confirm("Send Report")) {
                 this.saveReport()
             }                
-            console.log("donor exist %o", this.donor_exist)
+            console.log("donor exist %o", this.donor_request_entry)
         },//onMove
 
         addInputInventory() {
-            this.donor_exist.donor_request.reports = this.donor_exist.donor_request.reports || []
-            this.donor_exist.donor_request.reports.push({
+            this.donor_request_entry.donor_request.reports = this.donor_request_entry.donor_request.reports || []
+            this.donor_request_entry.donor_request.reports.push({
                 inventory_type: '',
                 qty: 0,
                 remarks: ''
@@ -433,7 +412,7 @@ const DonationPanelComponent = Vue.extend({
         },//addInputInventory
 
         removeInputInventory(index) {
-            this.donor_exist.donor_request.reports.splice(index, 1)
+            this.donor_request_entry.donor_request.reports.splice(index, 1)
         },//removeInputInventory
 
 
@@ -441,9 +420,10 @@ const DonationPanelComponent = Vue.extend({
 
             var promises = []
 
-            var donor_request = DonorsReport.parse(this.donor_exist.donor_request.toObject())
-            donor_request.user_id = this.donor_exist.user_id
-
+            var donor_request = DonorsReport.parse(this.donor_request_entry.donor_request.toObject())
+            donor_request.user_id = this.donor_request_entry.donor.id
+            console.log("donor exist %o", this.donor_request_entry)
+            console.log("donor request %o", donor_request)
             promises.push(DataHandler.addDonorsReport(donor_request))
 
             Promise.all(promises).then((data) => {
