@@ -886,3 +886,318 @@ const EntryImageComponent = Vue.extend({
 })
 
 Vue.component('entry-image-component', EntryImageComponent)
+
+
+
+const DonorComponent = Vue.extend({
+    template: `
+    <!-- Individual -->
+    <div class="row" v-if="indv">
+        <div class="col col-md-4 item-info" v-for="key,index in indv_headers" v-if="key !='id'">
+            <p class="item-label">
+                {{key.replace(/_/g,' ').toUpperCase() +": "}}
+            </p>
+            <p class="item-value">
+                {{ getValue(key, indv[key]) || '--'}}
+            </p>
+        </div>
+    </div>
+    <!-- Organization -->
+    <div class="row" v-else-if="org">
+        <div class="col col-md-4 item-info" v-for="key,index in org_headers" v-if="key !='id'">
+            <p class="item-label">
+                {{key.replace(/_/g,' ').toUpperCase() +": "}}
+            </p>
+            <p class="item-value">
+                {{ getValue(key, org[key]) || '--'}}
+            </p>
+        </div>
+    </div>
+    `,
+    props: {
+        donor: Object
+    },
+
+    data() {
+        return {
+            org: null,
+            indv: null,
+            
+            org_headers : DonorsOrganization.visiblekeys,
+            indv_headers: DonorsIndividual.visiblekeys,
+        }
+    },
+
+    created() {
+        console.log("donor %o", this.donor)
+        if (this.donor.id.includes('org')) {
+            this.org = this.donor
+        } else {
+            this.indv = this.donor
+        }
+    },
+
+    methods: {
+        formatDate(date) {
+            return app.formatDate(date)
+        },
+
+        getValue(key, value) {
+            if (key.includes('date')) {
+                return this.formatDate(value)
+            } else if (key.includes('sex')) {
+                return value == 0 ? 'Male' : 'Female'
+            }
+            return value
+        }
+    }
+})
+
+Vue.component('donor-container', DonorComponent)
+
+
+
+
+let ImageProfileComponent = Vue.extend({
+    template: 
+    `
+    <div class="row">
+        <div class="col col-xs-12 item-info" v-if="image">
+            <img :src="cdn + image" onerror="this.src='resources/images/avatar.jpeg';"
+                style="height: 50px; width: 50px; border-radius: 25;">
+        </div>
+        <div class="col col-xs-12 item-info" v-if="!image">
+            <img src="resources/images/avatar.jpeg"
+                style="height: 50px; width: 50px; border-radius: 25;">
+        </div>
+    </div>
+    `,
+    props: {
+        image: String,
+        cdn: String
+    }
+})
+
+Vue.component('image-profile-component', ImageProfileComponent)
+
+
+const PasswordEditorComponent = Vue.extend({
+    template:
+    `
+        <div :id="modal_id" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" v-on:click="onClose()" >&times;</button>
+                        <h4 class="modal-title">Update Password</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="panel-body">
+                            <form-generator :form="formModelPassword" :input.sync="password_input"></form-generator>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" 
+                            class="btn btn-default" 
+                            v-on:click="onSave()"
+                        >Save</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    `,
+    props: {
+        modal_id: String,
+        password: String,
+        override: Boolean
+    },
+
+    watch: {
+        override() {
+            if(this.override) {
+                this.password_input = {
+                    password        : null,
+                    conf_password   : null
+                }
+                this.formModelPassword = {
+                    password: {
+                        title: "Password",
+                        type: FormModels.password,
+                    },
+                    conf_password: {
+                        title: "Confirm Password",
+                        type: FormModels.password,
+                    }
+                }
+            }
+        }
+    },
+
+    data() {
+        return {
+            password_input: {
+                curr_password   : null,
+                password        : null,
+                conf_password   : null
+            },
+            formModelPassword: {
+                curr_password: {
+                    title: "Current Password",
+                    type: FormModels.password,
+                },
+                password: {
+                    title: "Password",
+                    type: FormModels.password,
+                },
+                conf_password: {
+                    title: "Confirm Password",
+                    type: FormModels.password,
+                }
+            },
+        }
+    },
+
+    methods: {
+        onSave() {            
+            if (!this.validatePassword()) {
+                this.password_input = {
+                    curr_password   : null,
+                    password        : null,
+                    conf_password   : null
+                }
+                return
+            }
+            $('#'+this.modal_id).modal('toggle');
+            this.$emit('onsave', this.password_input.password)
+        }, //onSaveUser
+
+        onClose(){
+            this.password_input = {
+                curr_password   : null,
+                password        : null,
+                conf_password   : null
+            }
+        },
+
+        validatePassword() {
+            let curr_pass   = this.password_input.curr_password
+            let conf        = this.password_input.conf_password
+            let pass        = this.password_input.password
+
+            if (!curr_pass || curr_pass.length <= 0) {
+                AlertMessages.error("current password is required")
+                return false
+            }
+
+            if (!pass || pass.length <= 0) {
+                AlertMessages.error("password is required")
+                return false
+            }
+
+            if (!conf || conf.length <= 0) {
+                AlertMessages.error("confirm password is required")
+                return false
+            }
+
+            if (pass.length < 5) {
+                AlertMessages.error("password must have a minimum of 5 characters")
+                return false
+            }
+
+            if (conf.length < 5) {
+                AlertMessages.error("confirm password must have a minimum of 5 characters")
+                return false
+            }
+
+            if (pass != conf) {
+                AlertMessages.error("password and confirm password doesn't match")
+                return false
+            }
+
+            if (pass == curr_pass && !this.override) {
+                AlertMessages.error("password should not be the same with the current password")
+                return false
+            }
+
+            return true
+        },
+
+    },
+})
+
+
+Vue.component('password-editor-component', PasswordEditorComponent)
+
+
+const DonorRegistrationComponent = Vue.extend({
+    template: 
+    `
+        <div :id="modal_id" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" v-on:click="onClose()" >&times;</button>
+                        <h4 class="modal-title">Update Donor Profile</h4>
+                    </div>
+                    <div class="modal-body" v-if="model_input">
+                        <div class="panel-body">
+                            <div id="formOrg" v-if="type">
+                                <form-generator :form="formModelOrg" :input.sync="model_input"></form-generator>
+                            </div>
+                            <div id="formIndv" v-else-if="!type">
+                                <form-generator :form="formModelIndv" :input.sync="model_input"></form-generator>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" 
+                        data-dismiss="modal"
+                            class="btn btn-default" 
+                            v-on:click="onSave()"
+                        >Save</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    
+    
+    `,
+    props: {
+        modal_id: String,
+        donor   : Object
+    },
+
+    watch: {
+        donor(){
+            if (this.donor) {
+                this.type           = this.donor.id.includes("org")
+                console.log("type %o", this.type)
+                this.model_input    = this.donor
+            } else {
+                this.model_input    = null
+            }
+        }
+    },
+
+    data() {
+        return  {
+            type         : null,
+            model_input  : null,
+            formModelOrg : DonorsOrganization.formModel,
+            formModelIndv: DonorsIndividual.formModel,
+        }
+    },
+
+    methods: {
+        onSave() {
+            if(AlertMessages.confirmSave('Edit Profile')) {
+                this.$emit("onsave", this.model_input)
+            }
+        }
+    }
+})
+
+
+Vue.component('donor-registration-component', DonorRegistrationComponent)

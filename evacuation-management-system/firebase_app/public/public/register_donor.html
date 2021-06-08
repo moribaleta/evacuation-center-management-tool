@@ -100,28 +100,28 @@
                     <h1 class="header-title">iEvacuate</h1>
                 </div>
                 <div class="modal-body">
-                    <div> 
+                    <div>
                         <label>
-                            select donor type 
+                            Select Donor Type
                         </label>
                         <form-generator :form="donorTypeModel" :input.sync="type_input"> </form-generator>
                     </div>
-                    <div id="formOrg" v-if="type_input.type == '0'">  
+                    <div id="formOrg" v-if="type_input.type == '0'">
                         <form-generator :form="formModelOrg" :input.sync="org_input"></form-generator>
                     </div>
 
-                    <div id="formIndv" v-if="type_input.type == '1'">  
-  
+                    <div id="formIndv" v-if="type_input.type == '1'">
                         <form-generator :form="formModelIndv" :input.sync="indv_input"></form-generator>
                     </div>
-                    <div id="formPassword" v-if="type_input.type != null">  
-  
+                    <div id="formPassword" v-if="type_input.type != null">
                         <form-generator :form="formModelPassword" :input.sync="password_input"></form-generator>
                     </div>
- 
+
 
                 </div>
+                
                 <button v-on:click="onSaveUser">Create User Account</button>
+                <a href="login_donors.html">Already have an account?</a>
             </div>
         </div>
 
@@ -136,29 +136,32 @@
         var app = new Vue({
             el: '#container',
             data: {
-                username: null,
-                password: null,
-                cdn: DataHandlerType.api_host,
-                formModel: PublicUser.formModel,
-                user_input: {},
-                municipalities: municipalities,
                 type_input: {
-                    type:null
+                    type: null
                 },
+
                 donorTypeModel: {
-                    type:{
-                        title:"Donor Type",
+                    type: {
+                        title: "Donor Type",
                         type: FormModels.dropdown,
-                        options:[
-                            {title:"Organization", value:'0'},
-                            {title:"Individual", value:'1'},
+                        options: [{
+                                title: "Organization",
+                                value: '0'
+                            },
+                            {
+                                title: "Individual",
+                                value: '1'
+                            },
                         ]
                     }
                 },
-                formModelOrg: DonorsOrganization.formModel,
-                org_input: new DonorsOrganization(),
-                indv_input: new DonorsIndividual(),
+                
+                formModelOrg : DonorsOrganization.formModel,
+                org_input    : new DonorsOrganization(),
+                
                 formModelIndv: DonorsIndividual.formModel,
+                indv_input   : new DonorsIndividual(),
+
                 formModelPassword: {
                     password: {
                         title: "Password",
@@ -170,14 +173,12 @@
                     }
                 },
 
-password_input: {
+                password_input: {
                     password: null,
                     conf_password: null
-                    }
-
-            
-
+                }
             },
+            
             methods: {
                 onStart() {
                     const localdonor = localStorage.getItem('donor') || "{}"
@@ -194,37 +195,36 @@ password_input: {
                 }, //onStart
 
                 onSaveUser() {
-                    var donorModel 
+                    var donorModel
                     var isOrg = this.type_input == '0'
-                    if (this.type_input.type == '0'){
+
+                    if (this.type_input.type == '0') {
                         donorModel = this.org_input
-                    } else if (this.type_input.type == '1'){
+                    } else if (this.type_input.type == '1') {
                         donorModel = this.indv_input
                     } else {
                         return
                     }
 
-                    if (this.validatePassword()){
+                    if (this.validatePassword()) {
                         donorModel.password = this.password_input.password
-                        
                     } else {
                         return
                     }
-                
 
-
-                    DataHandler.addDonor(donorModel,isOrg).then((data) => {
+                    DataHandler.addDonor(donorModel, isOrg).then((data) => {
                         if (data.error) {
                             alert(`Can't Save User: ${data.error}`)
                         } else {
                             alert(`User Have Been Saved Successfuly`)
-                            localStorage.setItem('donor', JSON.stringify(input.toObject()))
-                            window.open('donors-detail.html','_self')
+                            localStorage.setItem('donor', JSON.stringify(donorModel.toObject()))
+                            window.open('donors-detail.html', '_self')
                         }
                     }).catch(error => {
                         console.log(error)
                     })
                 }, //onSaveUser
+
                 validatePassword() {
                     let conf = this.password_input.conf_password
                     let pass = this.password_input.password
@@ -259,7 +259,5 @@ password_input: {
             }
         })
     </script>
-    <script src="js/jumbotron.js"></script>
 </body>
-
 </html>

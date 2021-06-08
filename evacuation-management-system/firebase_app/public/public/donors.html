@@ -890,35 +890,6 @@
                     }) */
                 }, //saveReport
 
-
-                onAdmit() {
-                    this.history_data_input = new PublicUserHistory()
-                    this.history_data_input.user_id = this.user.id
-                    this.isEdit = false
-
-                    $('#historyModal').modal()
-                },
-
-                clearHistory() {
-                    this.history_data_input = PublicUserHistory.parse(this.current_history.toObject())
-                    this.history_data_input.date_cleared = new Date()
-                    this.saveHistory()
-                },
-
-                saveHistory() {
-                    DataHandler.addPublicUserHistory(this.history_data_input).then((data) => {
-                        console.log('response %o', data)
-                        if (data.error) {
-                            throw date.error
-                        } else {
-                            AlertMessages.success()
-                            location.reload()
-                        }
-                    }).catch(err => {
-                        AlertMessages.error(err)
-                    })
-                },
-
                 onRecommendEvacuation() {
                     this.isLoading.recommendation = true
                     $('#recommendModal').modal()

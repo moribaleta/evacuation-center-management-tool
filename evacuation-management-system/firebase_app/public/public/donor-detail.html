@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>iEvacuate</title>
+    <link rel="shortcut icon" href="resources/images/logo.png" />
+
+    <!-- update the version number as needed -->
+    <script src="/__/firebase/7.24.0/firebase-app.js"></script>
+    <!-- include only the Firebase features as you need -->
+    <script src="/__/firebase/7.24.0/firebase-auth.js"></script>
+    <script src="/__/firebase/7.24.0/firebase-database.js"></script>
+    <script src="/__/firebase/7.24.0/firebase-messaging.js"></script>
+    <script src="/__/firebase/7.24.0/firebase-storage.js"></script>
+    <script src="/__/firebase/7.24.0/firebase-firestore.js"></script>
+    <script src="/__/firebase/7.24.0/firebase-functions.js"></script>
+    <!-- initialize the SDK after all desired features are loaded -->
+    <script src="/__/firebase/init.js"></script>
+
+    <!-- CSS  -->
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="js/jquery-3.0.0.min.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.2.2/jquery.form.min.js"></script>
+
+    <link href="css/main-style.css" rel="stylesheet">
+    <script src="js/vue.js"></script>
+    <!-- <script src="js/materialize.js"></script> -->
+    <script src="../_global/js/objects.js"></script>
+    <script src="../_global/js/utilities.js"></script>
+    <script src="../_global/js/datahandler.js"></script>
+    <script src="js/app/components.js"></script>
+
+</head>
+
+<body>
+    <nav class="navbar navbar-light bg-light navbar-fixed-top" id="header" attr="home">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="index.html">
+                    <p class="img-large">GOV PH</p>
+                    <img class="img-small" src="resources/images/logo.png">
+                </a>
+            </div>
+
+            <div class="collapse navbar-collapse" id="myNavbar">
+                <img class="img-small" src="resources/images/logo.png">
+                <ul class="nav navbar-nav">
+                    <li v-for="item in header_items" :class="active == item.id ? 'active' : ''">
+                        <a :href="item.href">{{item.title}}</a>
+                    </li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li v-for="item in right_header">
+                        <a :href="item.href">
+                            <span :class="'glyphicon '+item.icon"></span>
+                            {{item.title}}
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div id="post-container">
+
+        <div id="viewReportModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">User Request Report</h4>
+                    </div>
+                    <div class="modal-body" v-if="report_data_view">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col col-md-3 item-info " v-for="info,index in header">
+                                    <div v-if="info == 'evac_id'">
+                                        <p class="item-label">EVACUATION NAME</p>
+                                        <p class="item-value">
+                                            {{report_data_view.evac_id.isEmpty() ? 'public' : getEvacFromId(report_data_view.evac_id).name}}
+                                        </p>
+                                    </div>
+                                    <div v-if="info != 'evac_id'">
+                                        <p class="item-label">{{info.replace(/_/g,' ').toUpperCase() +": "}}</p>
+                                        <p class="item-value">{{getValue(info, report_data_view[info]) || 'N/A'}}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="panel-default">
+                                <div class="panel-body">
+                                    <div class="table-responsive">
+                                        <table class="table">
+                                            <tr>
+                                                <th>#</th>
+                                                <th>name</th>
+                                                <th>qty</th>
+                                                <th>remarks</th>
+                                            </tr>
+                                            <tr v-for="report,index in report_data_view.reports">
+                                                <td>{{index + 1}}</td>
+                                                <td>{{supply_types[report.inventory_type] ? supply_types[report.inventory_type].name : report.inventory_type}}
+                                                </td>
+                                                <td>{{report.qty}}</td>
+                                                <td>{{report.remarks}}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <password-editor-component modal_id="password-editor" :password="password_input" :override="false"
+            v-on:onsave="onSavePassword($event)">
+        </password-editor-component>
+
+        <donor-registration-component modal_id="profile-editor" :donor="donor_input"
+            v-on:onsave="onSaveProfile($event)">
+        </donor-registration-component>
+
+        <div class="container">
+            <div class="section">
+                <h3>Donor Profile</h3>
+                <!-- Individual -->
+                <div class="well" v-if="user">
+                    <div>
+                        <image-profile-component :image="user.images[0]" :cdn="cdn"></image-profile-component>
+                        <donor-container :donor="user">
+                            </donor-component>
+                    </div>
+                    <button type="button" class="btn btn-info button-view" v-on:click="onEditProfile()">EDIT
+                        PROFILE</button>
+
+                    <button type="button" class="btn btn-warning button-view" v-on:click="onChangePassword()">CHANGE
+                        PASSWORD</button>
+
+                    <button type="button" class="btn btn-danger button-view" v-on:click="onLogout()">LOG OUT</button>
+                </div>
+
+                
+            </div>
+
+            <!-- CONTENT -->
+            <div class="section">
+
+                <div class="button-container" style="margin:10px;">
+                    <button type="button" class="btn btn-info button-view"
+                        v-on:click="addReport()">RECOMMEND EVACUATION CENTER</button>
+                </div>
+
+                <div id="tabs" class="tab-control" data-role="tab-control">
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a data-toggle="tab" href="#reports">Donations</a></li>
+                        <li><a data-toggle="tab" href="#inventories">Inventories</a></li>
+                    </ul>
+                </div>
+                
+
+                <div class="tab-content">
+                    <div id="reports" class="tab-pane fade in active">
+                        <h3>Donations</h3>
+                        <!-- HEADER FILTER -->
+                        <div class="header-container">
+                            <filter-component :filter_add="filter_add" v-on:filter="onFilterReport($event)"
+                                v-on:search="onSearchReport($event)" v-on:cancel="onCancelSearchReport($event)"
+                                v-on:clear="onClearFilterReport()">
+                            </filter-component>
+                            
+                        </div>
+
+                        <!-- LOADER -->
+                        <div class="loader_container" v-if="isDataLoading">
+                            <div class="loader"></div>
+                        </div>
+
+                        <!-- TABLE VIEW -->
+                        <div class="table-container" v-if="!isDataLoading">
+                            <h3>Donation Request</h3>
+                            <div class="table" id="tableData">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Request ID</th>
+                                            <th>Evacuation Center</th>
+                                            <th>Municipality</th>
+                                            <th>Date Created</th>
+                                            <th>Date Updated</th>
+                                            <th>Status</th>
+                                            <th>Options</th>
+                                        </tr>
+                                        <tr v-for="item,index in reports_view">
+                                            <td>{{index + 1}}</td>
+                                            <td>{{item.id}}</td>
+                                            <td>{{getEvacFromId(item.evac_id).name}}</td>
+                                            <td>{{getEvacFromId(item.evac_id).municipality}}</td>
+                                            <td>{{formatDate(item.date_created, false)}}</td>
+                                            <td>{{formatDate(item.date_updated, false)}}</td>
+                                            <td>{{item.status}}</td>
+                                            <td><button class="btn btn-default btn-info"
+                                                    v-on:click="viewReport(index)">View Request</button></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="inventories" class="tab-pane fade">
+                        <donation-panel-component 
+                            ref="donation_panel"
+                            donor="user"
+                            ></donation-panel-component>
+                    </div>
+                </div>
+                
+            </div>
+
+
+
+
+        </div>
+    </div>
+
+    <div class="footer">
+        <img class="footer-img" src="resources/images/govph-seal-mono-footer.jpg">
+        <div class="footer-item">
+            <p class="footer-label">REPUBLIC OF THE PHILIPPINES</p>
+            <p>All content is in the public domain unless otherwise stated.</p>
+        </div>
+    </div>
+
+    </div>
+
+
+    <!--  Scripts-->
+    <script src="js/app/app.js"></script>
+
+
+    <script>
+        var formDependent = {}
+        DependentUser.formDependent.forEach((key) => {
+            formDependent[key] = PublicUser.formModel[key]
+        })
+
+        app = new Vue({
+            el: '#post-container',
+            data: {
+                user: null, //DONOR
+
+                //REFERENCES
+                evac_list: [],
+                evac_dict: {},
+                muni_inv_list: [],
+                cdn: DataHandlerType.api_host,
+
+
+                //REPORTS
+                reports: [],
+                reports_view: [],
+                report_data_view: null,
+
+                //DONOR INPUT
+                data_input: new DonorsReport(),
+                municipalities: municipalities,
+
+                donor_ref: {},
+
+                isDataLoading: true,
+                isEdit: false,
+
+                header: DonorsReport.headers,
+                donor_input: null,
+                password_input: null,
+
+                org: null,
+                indv: null,
+
+                supply_types: {},
+                supply_types_option: [],
+
+                filter_add: {
+                    status: ['all'].concat(Object.keys(SupplyStatus)),
+                    evacuation: [],
+                    item_type: []
+                },
+
+                //SUPPLIES
+                supply_types       : {},
+                supply_types_option: [],
+
+                //INVENTORIES
+                public_inventories    : [],
+                evacuation_inventories: {},
+                inventory_supplies    : {},
+
+                view_inventory: null,
+
+                donation_panel: null
+            },
+            methods: {
+
+                onStart() {
+                    const localDonor = localStorage.getItem('donor') || "{}"
+
+                    if (localDonor != "{}") {
+                        let obj_user = JSON.parse(localDonor)
+                        if (obj_user.id.includes('org')) {
+                            this.user = DonorsOrganization.parse(obj_user)
+                        } else {
+                            this.user = DonorsIndividual.parse(obj_user)
+                        }
+                    } else {
+                        window.open('login_donors.html', '_self')
+                        return
+                    }
+
+                    this.fetchReports(this.user.id)
+
+                    this.donation_panel = this.$refs.donation_panel
+                    this.donation_panel.fetchReports()
+                },
+
+                fetchReports(id) {
+                    this.setLoading(true)
+
+                    let promiseEvac = DataHandler.getEvacuationCenters()
+                    let promiseSuppType = DataHandler.getSupplyTypes()
+
+                    Promise.all([promiseEvac, promiseSuppType]).then((data) => {
+                        this.evac_list = data[0].data
+                        this.filter_add.evacuation = ['all']
+                        let evac_list = this.evac_list.map((evac) => {
+                            this.evac_dict[evac.id] = evac
+                            this.filter_add.evacuation.push(evac.name)
+                            return {
+                                title: evac.name,
+                                value: evac.id
+                            }
+                        })
+
+                        this.supply_types_option = []
+                        this.filter_add.item_type = ['all']
+                        this.supply_types_option = data[1].data.map((supply) => {
+                            this.supply_types[supply.id] = supply
+                            this.filter_add.item_type.push(supply.name)
+                            return {
+                                title: supply.name,
+                                value: supply.id
+                            }
+                        })
+
+                        return true
+                    }).then((data) => {
+                        console.log("user id %o", id)
+                        DataHandler.getDonorReports(id).then((message) => {
+                            this.reports = message.data.filter((data) => {
+                                return this.evac_dict[data.evac_id] != null
+                            })
+                            this.reports_view = this.reports
+                        }).catch(error => {
+                            console.log(error)
+                        }).finally(() => {
+                            this.setLoading(false)
+                        })
+                    }).catch(err => {
+                        console.log("err %o", err)
+                    })
+
+                    if (id) {
+                        try {
+                            id = id || ""
+                            if (id.includes('donororg')) {
+                                DataHandler.getDonorOrganizations(id).then((message) => {
+                                    console.log("public user %o", message.data)
+                                    this.org = message.data
+                                    this.user = this.org
+                                }).catch(err => {
+                                    console.log(err)
+                                })
+                            } else {
+                                DataHandler.getDonorIndividual(id).then((message) => {
+                                    console.log("public user %o", message.data)
+                                    this.indv = message.data
+                                    this.user = this.indv
+                                }).catch(err => {
+                                    console.log(err)
+                                })
+                            }
+                        } catch (err) {
+                            console.log(err)
+                        }
+                    } else {
+                        let promiseIndv = DataHandler.getDonorIndividual()
+                        let promiseOrg = DataHandler.getDonorOrganizations()
+                        Promise.all([promiseIndv, promiseOrg]).then((responses) => {
+                            responses.map((message) => {
+                                message.data.forEach((donor) => {
+                                    this.donor_ref[donor.id] = donor
+                                })
+                            })
+                        }).catch(err => {
+                            console.log(err)
+                        })
+                    }
+                },
+
+                addReport(){
+                    $('.nav-tabs a:last').tab('show')
+                    this.donation_panel.onRecommendEvacuation()
+                },
+
+                getEvacFromId(id) {
+                    return this.evac_dict[id]
+                },
+
+                setLoading(isLoading) {
+                    this.isDataLoading = isLoading
+                },
+
+                getUser(id) {
+                    const donor = this.donor_ref[id]
+                    if (donor) {
+                        if (id.includes('org')) {
+                            return donor.name + ' - ' + donor.contact_person
+                        } else {
+                            return donor.lastname + ', ' + donor.firstname
+                        }
+                    }
+                    return "N/A"
+                },
+
+                getValue(key, value) {
+                    if (key.includes('date')) {
+                        return this.formatDate(value)
+                    } else if (key.includes('sex')) {
+                        return value == 0 ? 'Male' : 'Female'
+                    }
+                    return value
+                },
+
+                viewReport(index) {
+                    this.report_data_view = this.reports_view[index].toObject()
+                    $('#viewReportModal').modal()
+                },
+
+                onEditProfile() {
+                    if (this.org) {
+                        this.donor_input = DonorsOrganization.parse(this.org.toObject())
+                    } else {
+                        this.donor_input = DonorsIndividual.parse(this.indv.toObject())
+                    }
+                    $('#profile-editor').modal()
+                },
+
+                onSaveProfile(donor) {
+                    this.onSaveUser(donor)
+                },
+
+                onChangePassword() {
+                    this.password_input = this.user.password
+                    $('#password-editor').modal()
+                },
+
+                onSavePassword(password) {
+                    var user
+
+                    if (this.org) {
+                        user = DonorsOrganization.parse(this.user.toObject())
+                    } else {
+                        user = DonorsIndividual.parse(this.user.toObject())
+                    }
+
+                    user.password = password
+
+                    this.onSaveUser(user)
+                },
+
+                onSaveUser(user) {
+                    var user
+                    let isOrg = this.org != null
+
+                    DataHandler.addDonor(user, isOrg).then((data) => {
+                        if (data.error) {
+                            alert(`Can't Save Entry: ${data.error}`)
+                        } else {
+                            alert(`Entry Was Saved Successfuly`)
+                            this.user = user
+                            localStorage.setItem('donor', JSON.stringify(user.toObject()))
+                            location.reload();
+                        }
+                    }).catch(error => {
+                        console.log(error)
+                    })
+                },
+
+                onLogout() {
+                    if (confirm("Press Ok to Logout")) {
+                        localStorage.setItem('donor', "{}")
+                        window.open('login_donors.html', '_self')
+                    }
+                },
+
+
+                //----------REPORT FILTERS----------------!>
+                /* FILTER / SEARCH */
+                onFilterReport(filter) {
+                    console.log("filter %o", filter)
+
+                    var view_list = this.reports.filter((data) => {
+                        let date_created = new Date(data.date_created)
+                        let date_updated = new Date(data.date_updated)
+                        let evac = this.evac_dict[data.evac_id] || new EvacuationCenter()
+
+                        return (
+                            (filter.year == 'all' ||
+                                filter.year == date_created.getFullYear() ||
+                                filter.year == date_updated.getFullYear()
+                            ) &&
+                            (filter.month == 'all' ||
+                                filter.month == (months_array[date_created.getMonth()] || 0) ||
+                                filter.month == (months_array[date_updated.getMonth()] || 0)
+                            ) &&
+                            (filter.municipality == 'all' ||
+                                (filter.municipality == evac.municipality))
+                        )
+                    });
+
+                    view_list = view_list.filter((data) => {
+                        return (filter.status == 'all' ||
+                            filter.status == data.status
+                        )
+                    })
+
+                    view_list = view_list.filter((data) => {
+                        let evac_name = filter.evacuation
+
+                        if (evac_name == 'all') {
+                            return true
+                        }
+
+                        if (evac_name == 'public' && data.evac_id == "") {
+                            console.log("report %o", data)
+                            return true
+                        } else if (data.evac_id == "") {
+                            return false
+                        }
+
+                        let data_evac = this.evac_dict[data.evac_id].name
+                        return data_evac == evac_name
+                    })
+
+                    view_list = view_list.filter((data) => {
+                        let supplies = data.reports.map((report) => {
+                            return this.supply_types[report.inventory_type].name.trim()
+                                .toLowerCase()
+                        })
+                        console.log("data %o -- %o", data, supplies)
+                        return (filter.item_type == 'all' || supplies.includes(filter.item_type
+                            .toLowerCase()))
+                    })
+
+                    this.reports_view = view_list
+                },
+
+                onSearchReport(filter) {
+                    this.onFilterReport(filter)
+
+                    this.reports_view = this.reports_view.filter((data) => {
+                        let user = this.donor_ref[data.user_id]
+                        var object = {
+                            ...data.toObject(),
+                            ...user
+                        }
+                        let evac = this.evac_dict[data.evac_id]
+                        object['evac_name'] = evac ? evac.name : "public"
+                        object['municipal'] = evac ? evac.municipal : "public"
+                        console.log("object search %o", object)
+                        return SearchObject(object, filter.searchTerm)
+                    })
+                },
+
+                onCancelSearchReport(filter) {
+                    this.onFilterReport(filter)
+                },
+
+                onClearFilterReport() {
+                    this.reports_view = [...this.reports]
+                },
+            }
+        })
+    </script>
+</body>
+
+</html>

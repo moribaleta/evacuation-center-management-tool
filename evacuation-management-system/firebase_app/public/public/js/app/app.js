@@ -154,6 +154,10 @@ var municipalities =
         static confirmDelete(message) {
             return confirm(`Confirm Delete Item? ${message || ""}`)
         }
+
+        static confirmSave(message) {
+            return confirm(`Confirm Save? ${message || ""}`)
+        }
     }
     
     

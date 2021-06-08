@@ -817,10 +817,8 @@ class EvacuationSupply extends Model {
         this.status  = status || SupplyStatus.pending
 
         if (typeof logs == "string") {
-            console.log("evacuation-supply id"+ this.id +" -> log is string")
             this.logs = [logs]
         } else {
-            console.log("evacuation-supply id"+ this.id +" -> log is array")
             this.logs = logs || ["Created Entry"]
         }
     }
@@ -1401,6 +1399,22 @@ class DonorsOrganization extends DonorModel {
         status              : 'Status'
     }
 
+    ///for displaying content on public
+    static visiblekeys = [
+        'id',
+        'name',
+        'business',
+        'email',
+        'phone_number',
+        'address',
+        'contact_person',
+        'contact_email',
+        'contact_phone_number',
+        'status',
+        'date_created',
+        'date_updated',
+    ]
+
     /** defines the form of the model to be shown to create an entry */
     static formModel = {
         name: {
@@ -1556,6 +1570,24 @@ class DonorsIndividual extends DonorModel {
         employment_business: 'Nature of Business',
         status : 'Status'
     }
+
+    ///visible keys for public view
+    static visiblekeys = [
+        'id',
+        'firstname',
+        'lastname',
+        'middleinit',
+        'email',
+        'birthdate',
+        'phone_number',
+        'address',
+        'sex',
+        'employment_position',
+        'employment_business',
+        'status',
+        'date_created',
+        'date_updated',
+    ]
 
     /** defines the form of the model to be shown to create an entry */
     static formModel = {

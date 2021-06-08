@@ -121,7 +121,7 @@
                             } else {
                                 alert("Login Success")
                                 let user = message.data
-                                localStorage.setItem('user', JSON.stringify(user.toObject()))
+                                localStorage.setItem('donor', JSON.stringify(user.toObject()))
                                 window.open('donor-detail.html','_self')
                             }
                         }).catch((error) => {
