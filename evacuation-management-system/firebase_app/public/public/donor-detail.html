@@ -142,16 +142,17 @@
                 <div class="well" v-if="user">
                     <div>
                         <image-profile-component :image="user.images[0]" :cdn="cdn"></image-profile-component>
-                        <donor-container :donor="user"></donor-component>
+                        <donor-container :donor="user">
+                            </donor-component>
                     </div>
 
                     <div class="well">
-                        <button class="btn btn-default btn-info" href="#imagerow"
-                            data-toggle="collapse">View Images</button>
+                        <button class="btn btn-default btn-info" href="#imagerow" data-toggle="collapse">View
+                            Images</button>
                         <div id="imagerow" class="panel-collapse collapse">
                             <div class="panel-body">
-                                <entry-image-component :id="user.id" :cdn="cdn" :images="user.images"
-                                    :edit='true' v-on:delete="onDeleteImage($event)">
+                                <entry-image-component :id="user.id" :cdn="cdn" :images="user.images" :edit='true'
+                                    v-on:delete="onDeleteImage($event)">
                                 </entry-image-component>
                             </div>
                             <div class="panel-footer">
@@ -159,8 +160,7 @@
                                     <p>Upload Images</p>
                                     <input id="input_images" type="file" name="files[]" multiple
                                         style="margin-bottom: 12px;" />
-                                    <button class="btn btn-default btn-info"
-                                        v-on:click="onAddImages()">upload
+                                    <button class="btn btn-default btn-info" v-on:click="onAddImages()">upload
                                         pictures</button>
                                 </div>
                             </div>
@@ -175,16 +175,19 @@
 
                     <button type="button" class="btn btn-danger button-view" v-on:click="onLogout()">LOG OUT</button>
                 </div>
-
-                
             </div>
 
             <!-- CONTENT -->
             <div class="section">
 
-                <div class="button-container" style="margin:10px;">
-                    <button type="button" class="btn btn-info button-view"
-                        v-on:click="addReport()">RECOMMEND EVACUATION CENTER</button>
+                <div class="button-container" style="margin:10px;" v-if="user">
+                    <p style="color:red" v-if="user.status != 'approved'">donor needs to be approved first</p>
+                    <button type="button" 
+                        class="btn btn-info button-view" 
+                        v-on:click="addReport()" 
+                        :disabled="user.status != 'approved'" 
+                        >RECOMMEND EVACUATION
+                        CENTER</button>
                 </div>
 
                 <div id="tabs" class="tab-control" data-role="tab-control">
@@ -193,7 +196,7 @@
                         <li><a data-toggle="tab" href="#inventories">Inventories</a></li>
                     </ul>
                 </div>
-                
+
 
                 <div class="tab-content">
                     <div id="reports" class="tab-pane fade in active">
@@ -204,7 +207,7 @@
                                 v-on:search="onSearchReport($event)" v-on:cancel="onCancelSearchReport($event)"
                                 v-on:clear="onClearFilterReport()">
                             </filter-component>
-                            
+
                         </div>
 
                         <!-- LOADER -->
@@ -245,13 +248,10 @@
                         </div>
                     </div>
                     <div id="inventories" class="tab-pane fade">
-                        <donation-panel-component 
-                            ref="donation_panel"
-                            donor="user"
-                            ></donation-panel-component>
+                        <donation-panel-component ref="donation_panel" donor="user"></donation-panel-component>
                     </div>
                 </div>
-                
+
             </div>
 
 
@@ -284,6 +284,7 @@
         app = new Vue({
             el: '#post-container',
             data: {
+                login: null, //LOGINUSER
                 user: null, //DONOR
 
                 //REFERENCES
@@ -324,13 +325,13 @@
                 },
 
                 //SUPPLIES
-                supply_types       : {},
+                supply_types: {},
                 supply_types_option: [],
 
                 //INVENTORIES
-                public_inventories    : [],
+                public_inventories: [],
                 evacuation_inventories: {},
-                inventory_supplies    : {},
+                inventory_supplies: {},
 
                 view_inventory: null,
 
@@ -339,28 +340,37 @@
             methods: {
 
                 onStart() {
-                    const localDonor = localStorage.getItem('donor') || "{}"
-
-                    if (localDonor != "{}") {
-                        let obj_user = JSON.parse(localDonor)
-                        if (obj_user.id.includes('org')) {
-                            this.user = DonorsOrganization.parse(obj_user)
-                        } else {
-                            this.user = DonorsIndividual.parse(obj_user)
-                        }
-                    } else {
-                        window.open('login-donors.html', '_self')
-                        return
-                    }
-
-                    this.fetchReports(this.user.id)
-
-                    this.donation_panel = this.$refs.donation_panel
-                    this.donation_panel.fetchReports()
+                    this.onAppValidate(LoginUser.LoginType.donor)
+                        .then((login) => {
+                            this.login = login
+                            this.fetchReports(this.login.id)
+                            this.donation_panel = this.$refs.donation_panel
+                            this.donation_panel.fetchReports()
+                        }).catch(err => {
+                            alert(err)
+                            window.open('login-donors.html', '_self')
+                        })
                 },
 
                 fetchReports(id) {
                     this.setLoading(true)
+                    
+                    let isOrg = id.includes('donororg')
+                    DataHandler.getDonorById(id, isOrg).then((message) => {
+                        console.log("public user %o", message.data)
+                        let user = message.data
+                        if (isOrg) {
+                            this.org    = user
+                        } else {
+                            this.indv   = user
+                        }
+                    
+                        this.user = user
+                        this.donation_panel.loadDonor(this.user)
+                    }).catch(err => {
+                        console.log(err)
+                        this.onAppLogout(LoginUser.LoginType.donor)
+                    })
 
                     let promiseEvac = DataHandler.getEvacuationCenters()
                     let promiseSuppType = DataHandler.getSupplyTypes()
@@ -405,47 +415,10 @@
                         console.log("err %o", err)
                     })
 
-                    if (id) {
-                        try {
-                            id = id || ""
-                            if (id.includes('donororg')) {
-                                DataHandler.getDonorOrganizations(id).then((message) => {
-                                    console.log("public user %o", message.data)
-                                    this.org = message.data
-                                    this.user = this.org
-                                    this.donation_panel.loadDonor(this.user)
-                                }).catch(err => {
-                                    console.log(err)
-                                })
-                            } else {
-                                DataHandler.getDonorIndividual(id).then((message) => {
-                                    console.log("public user %o", message.data)
-                                    this.indv = message.data
-                                    this.user = this.indv
-                                    this.donation_panel.loadDonor(this.user)
-                                }).catch(err => {
-                                    console.log(err)
-                                })
-                            }
-                        } catch (err) {
-                            console.log(err)
-                        }
-                    } else {
-                        let promiseIndv = DataHandler.getDonorIndividual()
-                        let promiseOrg = DataHandler.getDonorOrganizations()
-                        Promise.all([promiseIndv, promiseOrg]).then((responses) => {
-                            responses.map((message) => {
-                                message.data.forEach((donor) => {
-                                    this.donor_ref[donor.id] = donor
-                                })
-                            })
-                        }).catch(err => {
-                            console.log(err)
-                        })
-                    }
+
                 },
 
-                addReport(){
+                addReport() {
                     $('.nav-tabs a:last').tab('show')
                     this.donation_panel.onRecommendEvacuation()
                 },
@@ -668,7 +641,7 @@
                     console.log("delete %o", value)
 
                     let indv_id = value.item
-                    let index   = value.index
+                    let index = value.index
 
                     var user
                     if (this.org) {
@@ -676,7 +649,7 @@
                     } else {
                         user = DonorsIndividual.parse(this.user.toObject())
                     }
-                    
+
 
                     if (user && confirm("Do you want to delete this image?")) {
                         let image_to_delete = user.images.splice(index, 1)

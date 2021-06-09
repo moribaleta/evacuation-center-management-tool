@@ -60,10 +60,11 @@ var header = new Vue({
                 icon: 'glyphicon-gift',
                 title: 'Donors'
             }
-        ]
+        ],
     },
     methods: {
         onStart() {
+            
             DataHandler.configure()
             this.onAppWillLoad()
             this.active = $('#header').attr('attr')
@@ -79,6 +80,45 @@ var header = new Vue({
                 setInterval(() => {
                     app.time = (new Date()).toLocaleString()
                 }, 1000)
+            })
+
+            app.onAppValidate = ((key) => {
+                return new Promise((resolve, reject) => {
+                    let item    = LoginUser.parseString(localStorage.getItem(key) || "{}")
+                    if (item.id) {
+                        if (item.isExpired()) {
+                            localStorage.setItem(key, "{}")
+                            reject("login expired")
+                        } else {
+                            resolve(item)
+                        }
+                    } else {
+                        reject("not exist")
+                    }
+                })
+            })
+
+            app.onAppLogin = ((key, id) => {
+                return new Promise((resolve, reject) => {
+                    let item = new LoginUser(id)
+                    try {
+                        localStorage.setItem(key, item.toStringify())
+                        resolve(true)
+                    } catch(err) {
+                        reject(err)
+                    }
+                })
+            })
+
+            app.onAppLogout = ((key) => {
+                return new Promise((resolve, reject) => {
+                    try {
+                        localStorage.setItem(key, "{}")
+                        resolve(true)
+                    } catch(err) {
+                        reject(err)
+                    }
+                })
             })
 
             app.formatDate = ((date, dateOnly = true) => {

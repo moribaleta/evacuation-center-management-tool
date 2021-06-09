@@ -206,6 +206,7 @@
         <div class="section" v-if="!isLoading">
             <div class="container" v-if="user.admin_type != 'evacuation'">
                 <h3>Municipality: {{user.municipality == '0' ? 'Public' : user.municipality}}</h3>
+                <p>Sorted by # of population</p>
                 <div class="section" v-if="municipality.length > 0">
                     <table class="table">
                         <tr>
@@ -218,51 +219,72 @@
                             <th>
                                 Current Population
                             </th>
+                            <th>
+                                Family
+                            </th>
+                            <th>
+                                Independents
+                            </th>
                         </tr>
                         <tr v-for="item,index in muni_list">
                             <td>{{index + 1}}</td>
                             <td>{{item.name}}</td>
-                            <td>{{item.count}}</td>
+                            <td>{{item.population   || 0}}</td>
+                            <td>{{item.family       || 0}}</td>
+                            <td>{{item.independent  || 0}}</td>
                         </tr>
                     </table>
                 </div>
-            </div>
-            <h3>Evacuations</h3>
-            <div class="section" v-if="evac_list.length > 0">
-                <div class="table-container" id="tableData">
-                    <table class="table">
-                        <tr>
-                            <th>
-                                #
-                            </th>
-                            <th>
-                                NAME
-                            </th>
-                            <th>
-                                Current Population
-                            </th>
-                            <th>
-                                Maximum Population
-                            </th>
-                            <th>
-                                Floor Space &#13217;
-                            </th>
-                            <th></th>
-                        </tr>
-                        <tr v-for="item,index in view_list">
-                            <td>{{item.id}}</td>
-                            <td>{{item.name}}</td>
-                            <td>{{population_dict[item.id] || 0}}</td>
-                            <td>{{item.population_capacity}}</td>
-                            <td>{{item.floor_space || 0}}</td>
-                            <td><button class="btn btn-default btn-info" v-on:click="viewEvac(index)">view
-                                    details</button></td>
-                        </tr>
-                    </table>
+
+                <h3>Evacuations</h3>
+                <div class="section" v-if="evac_list.length > 0">
+                    <div class="table-container" id="tableData">
+                        <table class="table">
+                            <tr>
+                                <th>
+                                    #
+                                </th>
+                                <th>
+                                    NAME
+                                </th>
+                                <th>
+                                    Population
+                                </th>
+                                <th>
+                                    Families
+                                </th>
+                                <th>
+                                    Independents
+                                </th>
+                                <th>
+                                    Maximum Population
+                                </th>
+                                <th>
+                                    Floor Space &#13217;
+                                </th>
+                                <th></th>
+                            </tr>
+                            <tr v-for="item,index in view_list">
+                                <td>{{item.id}}</td>
+                                <td>{{item.name}}</td>
+
+                                <td>{{getHistory(item.id).count         || 0}}</td>
+                                <td>{{getHistory(item.id).family        || 0}}</td>
+                                <td>{{getHistory(item.id).independent   || 0}}</td>
+                               
+                                <td>{{item.population_capacity}}</td>
+                                <td>{{item.floor_space || 0}}</td>
+                                <td><button class="btn btn-default btn-info" v-on:click="viewEvac(index)">view
+                                        details</button></td>
+                            </tr>
+                        </table>
 
 
+                    </div>
                 </div>
             </div>
+
+
         </div>
     </div>
 
@@ -273,71 +295,75 @@
         app = new Vue({
             el: '#content',
             data: {
-                user            : new AdminUser(),
-                admins          : [],
+                user: new AdminUser(),
+                admins: [],
                 admins_selection: {},
-                municipality    : [],
+                municipality: [],
 
                 selections: [{
-                        id   : 'homepage',
-                        href : "content_homepage.html",
-                        icon : 'web',
+                        id: 'homepage',
+                        href: "content_homepage.html",
+                        icon: 'web',
                         title: 'Content',
                         color: '#32a852'
                     },
                     {
-                        id   : 'gallery',
-                        href : "content_gallery.html",
-                        icon : 'perm_media',
+                        id: 'gallery',
+                        href: "content_gallery.html",
+                        icon: 'perm_media',
                         title: 'Gallery',
                         color: '#60A244'
                     },
                     {
-                        id   : 'events',
-                        href : "content_events.html",
-                        icon : 'today',
+                        id: 'events',
+                        href: "content_events.html",
+                        icon: 'today',
                         title: 'Events',
                         color: '#fcba03'
                     },
                     {
-                        id   : 'documents',
-                        href : "content_documents.html",
-                        icon : 'article',
+                        id: 'documents',
+                        href: "content_documents.html",
+                        icon: 'article',
                         title: 'Documents',
                         color: '#4287f5'
                     },
                     {
-                        id   : 'information',
-                        href : "content_information.html",
-                        icon : 'live_help',
+                        id: 'information',
+                        href: "content_information.html",
+                        icon: 'live_help',
                         title: 'Other Informations',
                         color: '#eb4034'
                     },
                 ],
 
                 /* EVACUATIONS */
-                population_dict: {},
-                family_dict    : {},
-                muni_list      : [],
-                
+                population_dict : {},
+                family_dict     : {},
+                muni_list       : [],
+
                 evac_list: [],
                 view_list: [],
                 view_item: null,
 
-                headers        : Object.keys(EvacuationCenter.headers),
-                header_labels  : EvacuationCenter.headers,
+                active_history_dict: {},
+
+                headers: Object.keys(EvacuationCenter.headers),
+                header_labels: EvacuationCenter.headers,
                 evac_data_input: new EvacuationCenter(),
-                evacFormModel  : EvacuationCenter.formModel,
-                cdn            : DataHandlerType.api_host,
-                isLoading      : false,
+                evacFormModel: EvacuationCenter.formModel,
+                cdn: DataHandlerType.api_host,
+                isLoading: false,
             },
             methods: {
                 onStart() {
                     this.user = header.user
-                    this.municipality = this.user.municipality == '0' ? municipalities : [this.user.municipality]
+                    this.municipality = this.user.municipality == '0' ? municipalities : [this.user
+                        .municipality
+                    ]
                     ////console.log(this.municipality)
                     this.fetchAllAdmins()
-                    this.fetchEvacationCenter()
+                    this.fetchEvacuationCenter()
                 },
 
                 fetchAllAdmins() {
@@ -352,70 +378,85 @@
                     })
                 }, //fetchAllAdmins
 
-
-                fetchAllPending(){
-
+                getHistory(evac_id) {
+                    let active = this.active_history_dict[evac_id] 
+                    if (active) {
+                        return active
+                    }
+                    return {
+                        count       : 0,
+                        family      : 0,
+                        independent : 0
+                    }
                 },
 
-
-                fetchEvacationCenter() {
+                fetchEvacuationCenter() {
                     this.isLoading = true
 
+                    var promiseEvac
+                    if (this.user.admin_type == AdminUser.AdminTypes.mdrrmo || this.user.admin_type == AdminUser.AdminTypes.pdrrmo) {
+                        promiseEvac = DataHandler.getEvacuationCenters(this.user.municipality)
+                    } else if(!((this.user.evacuation_id || "").isEmpty())) {//evacuation manager
+                        promiseEvac = DataHandler.getEvacuationById(this.user.evacuation_id)
+                    }
 
-                    DataHandler.getActivePublicUserHistoryAllPopulation(this.user.municipality).then((message) => {
+                    var evac_list = []
+                    var muni_list = []
+                    var muni_dict = {}
+                    var actives   = {}
 
-                        console.log("objects %o", message)
+                    this.municipality.forEach((key) => {
+                        muni_dict[key] = {
+                            name        : key,
+                            population  : 0,
+                            family      : 0,
+                            independent : 0
+                        }
+                    })
 
-                        var muni_dict = {}
 
-                        this.municipality.forEach((muni) => {
-                            muni_dict[muni] = 0
-                        })
-
-                        message.data.map(data => {
-                            let municipality    = data.history.municipality
-                            let evac_id         = data.history.evac_id
-                            
-                            let user_count      = (1 + data.user.dependents.length)
-
-                            this.population_dict[evac_id] = this.population_dict[evac_id] || 0
-                            this.population_dict[evac_id] += user_count
-                            muni_dict[municipality] = muni_dict[municipality] || 0 
-                            muni_dict[municipality] += user_count
-                        })
-
-                        let object = Object.keys(muni_dict).map((name) => {
-                            return {
-                                name,
-                                count: muni_dict[name]
+                    promiseEvac.then((message) => {
+                        evac_list = message.data
+                        return DataHandler.getPublicActivePopulation()
+                    })
+                    .then((message) => {
+                        actives = message.data
+                    
+                        evac_list.forEach((evac) => {
+                            let active  = actives[evac.id]
+                            console.log("active %o", active)
+                            if (active) {
+                                muni_dict[evac.municipality].population    += active.count
+                                muni_dict[evac.municipality].family        += active.family
+                                muni_dict[evac.municipality].independent   += active.independent
                             }
                         })
 
-                        this.muni_list = object.sort((lhs, rhs) => {
-                            return rhs.count - lhs.count
+                        muni_list = Object.keys(muni_dict).map((key) => {
+                            return muni_dict[key]
                         })
 
-                        var promiseEvacuation;
+                        muni_list = muni_list.sort((lhs, rhs) => {
+                            return lhs.population - rhs.population
+                        }).reverse()
 
-                        if (this.user.admin_type == AdminUser.AdminTypes.evacuation) {
-                            promiseEvacuation = DataHandler.getEvacuationById(this.user.evacuation_id)
-                        } else {
-                            promiseEvacuation = DataHandler.getEvacuationCenters(this.user.municipality)
-                        }
-
-                        promiseEvacuation.then((data) => {
-                            this.evac_list = data.data
-                            this.view_list = data.data
-                        }).catch(err => {
-                            console.log(err)
-                        }).finally(() => {
-                            this.isLoading = false
-                        })
-
-
-                    }).catch(err => {
-                        console.log(err)
+                        return true
                     })
+                    .then((message) => {
+                        this.muni_list              = muni_list
+                        this.active_history_dict    = actives
+                        this.evac_list              = evac_list
+                        this.view_list              = evac_list
+
+                        console.log("muni list %o", this.muni_list)
+                    })
+                    .catch((error) => {
+                        console.log(error)
+                    })
+                    .finally(() =>{
+                        this.isLoading = false
+                    })
+                    
                 }, //fetchEvacationCenter
 
                 viewEvac(index) {

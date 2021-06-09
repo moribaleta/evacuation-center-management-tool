@@ -74,19 +74,34 @@
             el: '#content',
             data: {
                 user: new AdminUser(),
-                selections: [{
-                        id: 'user_list',
-                        href: "user_list.html",
-                        icon: 'people',
-                        title: 'Public Users',
-                        color: '#32a852'
+                selections: [
+                    {
+                        id: 'pending_user_list',
+                        href: "user_list.html?pending=true",
+                        icon: 'person_add',
+                        title: 'Pending Public Users',
+                        color: '#e68a00'
                     },
                     {
                         id      : 'admission',
                         href    : "user_admission.html",
                         icon    : 'notification_add',
                         title   : 'Admission Request',
-                        color   : '#60A244'
+                        color   : '#006600'
+                    },
+                    {
+                        id: 'pending_reports',
+                        href: "user_reports.html?pending=true",
+                        icon: 'announcement',
+                        title: 'Reports',
+                        color: '#262673'
+                    },
+                    {
+                        id: 'user_list',
+                        href: "user_list.html",
+                        icon: 'people',
+                        title: 'Public Users',
+                        color: '#ff9900'
                     },
                     {
                         id: 'history',
@@ -100,7 +115,7 @@
                         href: "user_reports.html",
                         icon: 'flag',
                         title: 'Reports',
-                        color: '#fcba03'
+                        color: '#3939ac'
                     },
                 ],
             },

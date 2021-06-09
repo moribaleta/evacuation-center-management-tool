@@ -80,8 +80,8 @@
                         <img class="header-image" src="resources/images/logo.png">
                         <h1 class="header-title">iEvacuate</h1>
                     </div>
-                    <div class="loader" v-if="isloading"></div>
-                    <div class="login-form" v-if="!isloading">
+                    <div class="loader" v-if="isLoading"></div>
+                    <div class="login-form" v-if="!isLoading">
                         <input type="text"      placeholder="email"     v-model="username" />
                         <input type="password"  placeholder="password"  v-model="password" />
                         <button v-on:click="onLogin">Sign In</button>
@@ -116,6 +116,7 @@
                     username: null,
                     password: null,
                     cdn: DataHandlerType.api_host,
+                    isLoading: true
                 },
                 methods: {
                     onStart() {
@@ -123,10 +124,11 @@
                         if (localuser != "{}") {
                             window.open('users.html','_self')
                         } 
+                        this.isLoading = false
                     }, //onStart
                     
                     onLogin() {
-                        DataHandler.loginDonor(this.username, this.password)
+                        DataHandler.loginPublicUser(this.username, this.password)
                         .then((message) => {
                             if (message.error) {
                                 throw message.error

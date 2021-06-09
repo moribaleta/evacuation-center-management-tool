@@ -74,6 +74,62 @@ const SupplyStatus = {
     cancelled:      'cancelled',
 }
 
+class LoginUser extends Model { 
+
+    static LoginType = {
+        public  : "public",
+        admin   : "admin",
+        donor   : "donor"
+    }
+
+    constructor(id, date_created) {
+        super()
+        this.id             = id
+        this.date_created   = date_created  || new Date()
+    }
+
+    /**
+     * coverts instance into a JSON object
+     */
+    toObject() {
+        return {
+            id              : this.id,
+            date_created    : this.date_created
+        }
+    }
+
+    /**
+     * converts instance into a stringified object
+     */
+    toStringify(){
+        return JSON.stringify(this.toObject())
+    }
+
+    /**
+     * returns true if the current date is greater than the created_date + 5 days
+     * @returns 
+     */
+    isExpired(){
+        let curr        = new Date()
+        var addedDate   = new Date(this.date_created.getTime()+(1*24*60*60*1000));
+        return curr > addedDate
+    }
+
+    static parse(object = {}) {
+        return new LoginUser(
+            object.id,
+            object.date_updated,
+        )
+    }
+
+    static parseString(string) {
+        return LoginUser.parse(JSON.parse(string))
+    }
+
+
+}
+
+
 /**
  * User object structure
  */

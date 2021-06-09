@@ -101,7 +101,8 @@
             <div class="well" v-if="public_user != null">
                 <div class="row">
                     <div class="col col-md-12">
-                        <entry-component :entry="public_user" :labels="public_user_labels" :headers="public_user_headers" ></entry-component>
+                        <entry-component :entry="public_user" :labels="public_user_labels"
+                            :headers="public_user_headers"></entry-component>
                     </div>
 
                     <div class="col col-md-12">
@@ -151,8 +152,8 @@
                     <div class="button-container">
                         <!-- <button type="button" class="btn btn-info button-view" v-on:click="addReport()">ADD REQUEST
                             REPORT</button> -->
-                        <button type="button" class="btn btn-info button-view"
-                            v-on:click="onGenerateReport()">GENERATE REPORT DATA</button>
+                        <button type="button" class="btn btn-info button-view" v-on:click="onGenerateReport()">GENERATE
+                            REPORT DATA</button>
                     </div>
                 </div>
 
@@ -179,12 +180,8 @@
                                     </entry-single-component>
                                 </div>
 
-                                <basic-user-component 
-                                    v-if  ="getUserFromId(item.user_id)"
-                                    :index="index"
-                                    :user ="getUserFromId(item.user_id)"
-                                    :cdn  ="cdn"
-                                    >                                    
+                                <basic-user-component v-if="getUserFromId(item.user_id)" :index="index"
+                                    :user="getUserFromId(item.user_id)" :cdn="cdn">
                                 </basic-user-component>
 
                                 <div class="col col-md-12">
@@ -192,8 +189,8 @@
                                         data-toggle="collapse">view details</button>
                                     <button class="btn btn-default btn-warning"
                                         v-on:click="editReport(index)">edit</button>
-                                    <button class="btn btn-default btn-warning"
-                                        v-on:click="editStatus(index)">update status</button>
+                                    <button class="btn btn-default btn-warning" v-on:click="editStatus(index)">update
+                                        status</button>
                                     <button class="btn btn-default btn-danger"
                                         v-on:click="deleteItem(index)">delete</button>
                                 </div>
@@ -247,32 +244,33 @@
                 data: {
                     user: null,
                     isAll: false,
+                    isPending: false,
 
-                    evac_list       : [],
-                    evac_dict       : {},
-                    evac_names      : {},
+                    evac_list: [],
+                    evac_dict: {},
+                    evac_names: {},
 
-                    reports         : [],
-                    reports_view    : [],
+                    reports: [],
+                    reports_view: [],
 
-                    data_input      : new PublicUserReport(),
-                    municipalities  : municipalities,
+                    data_input: new PublicUserReport(),
+                    municipalities: municipalities,
 
-                    isDataLoading   : true,
-                    isEdit          : false,
+                    isDataLoading: true,
+                    isEdit: false,
 
-                    header          : PublicUserReport.headers,
-                    formModel       : PublicUserReport.formModel,
-                    formReportModel : {},
+                    header: PublicUserReport.headers,
+                    formModel: PublicUserReport.formModel,
+                    formReportModel: {},
 
                     /* public user */
-                    public_user_formModel   : PublicUser.formModel,
-                    public_user_labels      : PublicUser.headers,
-                    public_user_headers     : PublicUser.visiblekeys,
-                    dependentsHeaders       : DependentUser.formDependent,
+                    public_user_formModel: PublicUser.formModel,
+                    public_user_labels: PublicUser.headers,
+                    public_user_headers: PublicUser.visiblekeys,
+                    dependentsHeaders: DependentUser.formDependent,
 
-                    public_user         : null,
-                    public_user_dict    : {},
+                    public_user: null,
+                    public_user_dict: {},
 
                     supply_types: {},
                     supply_types_option: [],
@@ -290,7 +288,10 @@
                         const queryString = window.location.search;
                         const urlParams = new URLSearchParams(queryString);
                         const id = urlParams.get('id') || null
+                        this.isPending = urlParams.get('pending') || false
+
                         this.isAll = id == null
+
                         this.fetchReports(id)
 
                         this.formReportModel = {
@@ -312,7 +313,7 @@
                     },
 
                     fetchReports(id, isAll) {
-                        let promiseEvac     = DataHandler.getEvacuationCenters()
+                        let promiseEvac = DataHandler.getEvacuationCenters()
                         let promiseSuppType = DataHandler.getSupplyTypes()
 
                         this.isDataLoading = true
@@ -345,31 +346,36 @@
                             })
 
                             this.formReportModel.inventory_type.options = this.supply_types_option
-                            
+
                         }).catch(err => {
                             console.log("err %o", err)
                         }).finally(() => {
                             console.log("public user id %o", id)
 
-                            DataHandler.getPublicUserReports(id).then((message) => {
-                                console.log("public user reports %o", message)
-                                console.log("evac_dict %o", this.evac_dict)
-                                this.reports = []
-                                /* message.data.forEach((report) => {
-                                    this.reports.push(report)
-                                }) */
-                                this.reports = message.data
-                                this.reports_view = this.reports
-                                console.log("reports view %o", this.reports_view)
-                            }).catch(err => {
-                                console.log("err %o", err)
-                            }).finally(() => {
-                                console.log("hey im")
-                                this.isDataLoading = false
-                            })
+                            DataHandler.getPublicUserReports(id)
+                                .then((message) => {
+                                    if (this.isPending) {
+                                        return message.data.filter((item) => {
+                                            return item.status == SupplyStatus.pending
+                                        })
+                                    }
+                                    return message.data
+                                })
+                                .then((list) => {
+                                    console.log("evac_dict %o", this.evac_dict)
+                                    this.reports = []
+                                    this.reports = list
+                                    this.reports_view = this.reports
+                                    console.log("reports view %o", this.reports_view)
+                                }).catch(err => {
+                                    console.log("err %o", err)
+                                }).finally(() => {
+                                    console.log("hey im")
+                                    this.isDataLoading = false
+                                })
                         })
 
-                        
+
 
                         if (id) {
                             DataHandler.getPublicUsers(null, id).then((message) => {
@@ -396,7 +402,7 @@
                         return this.evac_dict[id]
                     },
 
-                    getUserFromId(id){
+                    getUserFromId(id) {
                         return this.public_user_dict[id]
                     },
 
@@ -408,7 +414,7 @@
                         $('#editorModal').modal()
                     },
 
-                    editStatus(index){
+                    editStatus(index) {
                         let string = JSON.stringify(this.reports_view[index].toObject())
                         this.data_input = PublicUserReport.parse(JSON.parse(string))
                         this.data_input.date_updated = new Date()
@@ -417,9 +423,9 @@
                     },
 
                     addReport() {
-                        this.data_input             = new PublicUserReport()
+                        this.data_input = new PublicUserReport()
                         //this.data_input.user_id     = this.public_user.id
-                        this.data_input.created_by  = this.user.id
+                        this.data_input.created_by = this.user.id
                         this.isEdit = false
                         $('#editorModal').modal()
                     },
@@ -534,7 +540,8 @@
                         this.onFilterReport(filter)
 
                         this.reports_view = this.reports_view.filter((data) => {
-                            let user =  this.isAll ? this.public_user_dict  [data.user_id] : this.public_user //this.donor_ref[data.user_id]
+                            let user = this.isAll ? this.public_user_dict[data.user_id] : this
+                                .public_user //this.donor_ref[data.user_id]
                             var object = {
                                 ...data.toObject(),
                                 ...user

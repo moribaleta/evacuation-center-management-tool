@@ -64,7 +64,7 @@
     <div class="container" id="content">
         <ul class="breadcrumb">
             <li><a href="donors.html">Donors</a></li>
-            <li><a href="#">Individual Donors</a></li>
+            <li><a href="#">{{isPending ? "Pending " : ""}}Individual Donors</a></li>
         </ul>
 
         <status-modal modal_id="status_modal_update" title="Update Donor Status" :status="user_status"
@@ -93,11 +93,11 @@
         </div>
 
 
-        <h1>Donors Individual</h1>
+        
 
         <!-------- DONOR HEADERS ------------->
         <div class="section">
-            <h3>Donors Users</h3>
+            <h1>{{isPending ? "Pending" : ""}} Donors Individual</h1>
             <search-component title="Search Donor" v-on:search="onSearchDonor" v-on:cancel="onCancelSearchDonor">
             </search-component>
             <div class="button-container">
@@ -181,6 +181,7 @@
             el: '#content',
             data: {
                 user: new AdminUser(),
+                isPending: false,
 
                 //ENTRIES
                 indv_list: [],
@@ -215,20 +216,35 @@
                 },
 
                 user_status: null,
+                
 
             },
             methods: {
                 onStart() {
                     this.user = header.user
                     this.municipalities = municipalities
+
+                    const queryString   = window.location.search;
+                    const urlParams     = new URLSearchParams(queryString);
+                    this.isPending      = urlParams.get('pending') || false
+
                     this.fetchIndv()
                 }, //onStart
 
                 fetchIndv() {
                     this.isLoading.indv = true
-                    DataHandler.getDonorIndividual().then((message) => {
-                        this.indv_list = message.data
-                        this.view_indv_list = message.data
+                    DataHandler.getDonorIndividual()
+                    .then((message) => {
+                        if(this.isPending) {
+                            return message.data.filter((item) => {
+                                return item.status == StatusType.pending
+                            })
+                        }
+                        return message.data
+                    })
+                    .then((list) => {
+                        this.indv_list = list
+                        this.view_indv_list = list
 
                         this.indv_list.forEach((indv) => {
                             this.donor_ref[indv.id] = indv

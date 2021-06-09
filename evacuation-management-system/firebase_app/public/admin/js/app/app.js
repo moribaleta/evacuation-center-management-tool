@@ -1,10 +1,11 @@
 var header = new Vue({
     el: '#header',
     data: {
-        user: new AdminUser(),
-        active: "",
-        logo: "resources/images/logo.png",
-        cdn : DataHandlerType.api_host,
+        user     : new AdminUser(),
+        active   : "",
+        logo     : "resources/images/logo.png",
+        cdn      : DataHandlerType.api_host,
+        login_key: LoginUser.LoginType.admin,
 
         header_items: [{
             id: 'content',
@@ -121,16 +122,20 @@ methods: {
                 }]
             }
 
-
-            console.log("user %o", user)
-            if (user != undefined && user != null) {
-                console.log(user)
-                this.user = user
-                this.onConfigureApp()
-                app.onStart()
-            } else {
-                throw "login user"
+            try{
+                console.log("user %o", user)
+                if (user != undefined && user != null) {
+                    console.log(user)
+                    this.user = user
+                    this.onConfigureApp()
+                    app.onStart()
+                } else {
+                    throw "login user"
+                }
+            }catch(err) {
+                console.log(err)
             }
+            
         } catch (error) {
             console.error(error)
             alert('login user account')
@@ -171,6 +176,8 @@ methods: {
             }
             return datestring
         })
+
+        
     }
 }
 })

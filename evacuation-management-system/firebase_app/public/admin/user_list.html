@@ -60,7 +60,7 @@
 
         <ul class="breadcrumb">
             <li><a href="users.html">Users</a></li>
-            <li><a href="#">User List</a></li>
+            <li><a href="#">{{isPending ? "Pending " : ""}}User List</a></li>
         </ul>
 
         <div id="userModal" class="modal fade" role="dialog">
@@ -143,10 +143,9 @@
             </div>
         </div><!-- MODAL -->
 
-        <h1>Public Users</h1>
-
+        
         <div class="section">
-            <h3>Users</h3>
+            <h1>{{isPending ? "Pending " : ""}}Public Users</h1>
             <filter-component :filter_add="filter_add" v-on:filter="onFilterPublic($event)"
                 v-on:search="onSearchPublic($event)" v-on:cancel="onCancelSearchReport($event)"
                 v-on:clear="onClearFilterReport()">
@@ -279,6 +278,7 @@
             data: {
                 user: new AdminUser(),
                 user_list: [],
+                isPending: false,
 
                 view_user_list: [],
 
@@ -352,13 +352,18 @@
                             value: municipal
                         }
                     })
+
+                    const queryString   = window.location.search;
+                    const urlParams     = new URLSearchParams(queryString);
+                    this.isPending      = urlParams.get('pending') || false
+
                     this.fetchUser()
-                    this.fetchPendingReports()
                 }, //onStart
 
                 fetchUser() {
                     this.isLoading = true
-                    DataHandler.getPublicUsers(this.user.municipality).then((message) => {
+
+                    DataHandler.getAllPublicUsers(this.isPending).then((message) => {
                         this.setUser(message.data)
                     }).catch(err => {
                         console.log(err)
@@ -691,119 +696,7 @@
                     saveTextAsFile('public_user.csv', csv)
                 },
 
-                //-----------PENDING REPORTS------------------!>
-
-                fetchPendingReports(id, isAll) {
-                    let promiseEvac = DataHandler.getEvacuationCenters(this.user.municipality)
-                    let promiseSuppType = DataHandler.getSupplyTypes()
-
-                    this.isReportsLoading = true
-
-                    this.pending_formReportModel = {
-                        inventory_type: {
-                            title: 'Supply Type',
-                            type: FormModels.dropdown,
-                            options: []
-                        },
-                        qty: {
-                            title: 'QTY',
-                            type: FormModels.number
-                        },
-                        remarks: {
-                            title: 'Remarks',
-                            type: FormModels.textarea
-                        }
-                    }
-
-                    Promise.all([promiseEvac, promiseSuppType]).then((messages) => {
-                        console.log("promises 1:%o 2:%o", messages[0], messages[1])
-
-                        this.evac_list = messages[0].data
-                        this.filter_pending_add.evacuation = ['all']
-
-                        this.pending_formModel.evac_id.options = this.evac_list.map((evac) => {
-                            this.evac_dict[evac.id] = evac
-                            this.evac_names[evac.name] = evac.id
-                            this.filter_pending_add.evacuation.push(evac.name)
-                            return {
-                                title: evac.name,
-                                value: evac.id
-                            }
-                        })
-
-                        this.supply_types_option = []
-                        this.filter_pending_add.item_type = ['all']
-                        this.supply_types_option = messages[1].data.map((supply) => {
-                            this.supply_types[supply.id] = supply
-                            this.filter_pending_add.item_type.push(supply.name)
-                            return {
-                                title: supply.name,
-                                value: supply.id
-                            }
-                        })
-
-                        this.pending_formReportModel.inventory_type.options = this.supply_types_option
-
-                        DataHandler.getPublicUserReports(id).then((message) => {
-                            console.log("reports %o", message)
-                            this.pending_reports = []
-                            message.data.forEach((data) => {
-                                this.pending_reports.push(data)
-                            })
-                            this.pending_reports_view = this.pending_reports
-
-                            DataHandler.getPublicUserComments()
-                                .then((message) => {
-                                    console.log("comments %o", message.data)
-                                    message.data.forEach((comment) => {
-                                        let index = this.pending_reports.firstIndex(
-                                            (curr) => {
-                                                return curr.id == comment
-                                                    .report_id
-                                            })
-                                        if (index != null) {
-                                            this.pending_reports[index].comments
-                                                .push(comment)
-                                        }
-                                    })
-                                })
-                        }).catch(err => {
-                            console.log("err %o", err)
-                        }).finally(() => {
-                            console.log("hey im")
-                            this.isReportsLoading = false
-                        })
-                    }).catch(err => {
-                        console.log("err %o", err)
-                    })
-
-
-
-                    DataHandler.getPublicUsers(this.user.municipality).then((message) => {
-                        var user_ids = []
-                        message.data.forEach((user) => {
-                            this.public_users_ref[user.id] = user
-                            user_ids.push(user.id)
-                        })
-
-
-
-                    }).catch(err => {
-                        console.log(err)
-                    })
-                }, //fetchPendingReports
-
-                getEvacFromId(id) {
-                    return this.evac_dict[id]
-                },
-
-                editReport(index) {
-                    let string = JSON.stringify(this.pending_reports_view[index].toObject())
-                    this.report_input = PublicUserReport.parse(JSON.parse(string))
-                    this.report_input.date_updated = new Date()
-                    this.isEdit = true
-                    $('#reportModal').modal()
-                },
+                
 
                 editStatus(index) {
                     let string = JSON.stringify(this.pending_reports_view[index].toObject())

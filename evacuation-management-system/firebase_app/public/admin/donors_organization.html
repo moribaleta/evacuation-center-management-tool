@@ -60,7 +60,7 @@
 
         <ul class="breadcrumb">
             <li><a href="donors.html">Donors</a></li>
-            <li><a href="#">Organization Donors</a></li>
+            <li><a href="#">{{isPending ? "Pending" : ""}} Donor Organization</a></li>
         </ul>
 
 
@@ -93,7 +93,7 @@
 
         <!-------- DONOR HEADERS ------------->
         <div class="section">
-            <h3>Donors Users</h3>
+            <h1>{{isPending ? "Pending" : ""}} Donor Organization</h1>
             <search-component title="Search Donor" v-on:search="onSearchDonor" v-on:cancel="onCancelSearchDonor">
             </search-component>
             <div class="button-container">
@@ -105,8 +105,6 @@
 
         <!--------- ORGANIZATION ------------->
         <div class="section">
-            <h4>Organization</h4>
-
             <div class="loader-container" v-if="isLoading.org">
                 <div class="loader"></div>
             </div>
@@ -178,11 +176,11 @@
             el: '#content',
             data: {
                 user: new AdminUser(),
-
+                isPending: false,
                 //ENTRIES
-                orgs_list: [],
+                orgs_list     : [],
                 view_orgs_list: [],
-                donor_ref: {},
+                donor_ref     : {},
 
                 //MODEL INPUTS
                 orgs_input: {},
@@ -218,6 +216,11 @@
                 onStart() {
                     this.user = header.user
                     this.municipalities = municipalities
+
+                    const queryString   = window.location.search;
+                    const urlParams     = new URLSearchParams(queryString);
+                    this.isPending      = urlParams.get('pending') || false
+
                     this.fetchData()
                 }, //onStart
 
@@ -227,9 +230,18 @@
 
                 fetchOrg() {
                     this.isLoading.org = true
-                    DataHandler.getDonorOrganizations().then((message) => {
-                        this.orgs_list = message.data
-                        this.view_orgs_list = message.data
+                    DataHandler.getDonorOrganizations()
+                    .then((message) => {
+                        if(this.isPending) {
+                            return message.data.filter((item) => {
+                                return item.status == StatusType.pending
+                            })
+                        }
+                        return message.data
+                    })
+                    .then((list) => {
+                        this.orgs_list      = list
+                        this.view_orgs_list = list
                         this.orgs_list.forEach((org) => {
                             this.donor_ref[org.id] = org
                         })

@@ -102,43 +102,40 @@
         var app = new Vue({
             el: '#container',
             data: {
-                username: null,
-                password: null,
-                cdn: DataHandlerType.api_host,
-                isLoading: true
+                username    : null,
+                password    : null,
+                cdn         : DataHandlerType.api_host,
+                isLoading   : true
             },
             methods: {
                 onStart() {
-                    try {
-                        const localuser = localStorage.getItem('donor') || "{}"
-                        if (localuser != "{}") {
+                    this.isLoading = true
+                    this.onAppValidate(LoginUser.LoginType.donor)
+                        .then((success) => {
                             window.open('donor-detail.html', '_self')
-                        } else {
+                        }).catch((err) => {
                             this.isLoading = false
-                            console.log("no login user %o", this.isLoading)
-                        }
-                    } catch (err) {
-                        this.isLoading = false
-                        console.log(err)
-                    }
+                            console.log("no login user %o", err)
+                        }).finally(() => {
+                            this.isLoading = false
+                        })
 
                 }, //onStart
 
                 onLogin() {
                     DataHandler.loginDonor(this.username, this.password)
                         .then((message) => {
-                            if (message.error) {
+                            if(message.error) {
                                 throw message.error
-                            } else {
-                                alert("Login Success")
-                                let user = message.data
-                                localStorage.setItem('donor', JSON.stringify(user.toObject()))
-                                window.open('donor-detail.html', '_self')
                             }
-                        }).catch((error) => {
+                            return this.onAppLogin(LoginUser.LoginType.donor, message.data.id)
+                        })
+                        .then((success) => {
+                            window.open('donor-detail.html', '_self')
+                        })
+                        .catch((error) => {
                             console.log(error)
                             alert(JSON.stringify(error))
-                            //AlertMesssages.error(error)
                         })
                 },
 

@@ -119,7 +119,7 @@
 
 
                 </div>
-                
+
                 <button v-on:click="onSaveUser">Create User Account</button>
                 <a href="login_donors.html">Already have an account?</a>
             </div>
@@ -155,12 +155,12 @@
                         ]
                     }
                 },
-                
-                formModelOrg : DonorsOrganization.formModel,
-                org_input    : new DonorsOrganization(),
-                
+
+                formModelOrg: DonorsOrganization.formModel,
+                org_input: new DonorsOrganization(),
+
                 formModelIndv: DonorsIndividual.formModel,
-                indv_input   : new DonorsIndividual(),
+                indv_input: new DonorsIndividual(),
 
                 formModelPassword: {
                     password: {
@@ -178,25 +178,21 @@
                     conf_password: null
                 }
             },
-            
+
             methods: {
                 onStart() {
-                    const localdonor = localStorage.getItem('donor') || "{}"
-                    if (localdonor != "{}") {
-                        window.open('donors-detail.html', '_self')
-                    }
-
-                    this.formModel.municipality.options = municipalities.map((municipal) => {
-                        return {
-                            title: municipal,
-                            value: municipal
-                        }
-                    })
+                    this.onAppValidate(LoginUser.LoginType.donor)
+                        .then((success) => {
+                            window.open('donor-detail.html', '_self')
+                        }).catch((err) => {
+                            this.isLoading = false
+                            console.log("no login user %o", err)
+                        })
                 }, //onStart
 
                 onSaveUser() {
                     var donorModel
-                    var isOrg = this.type_input == '0'
+                    var isOrg = this.type_input.type == '0'
 
                     if (this.type_input.type == '0') {
                         donorModel = this.org_input
@@ -212,15 +208,19 @@
                         return
                     }
 
-                    DataHandler.addDonor(donorModel, isOrg).then((data) => {
-                        if (data.error) {
-                            alert(`Can't Save User: ${data.error}`)
+                    DataHandler.addDonor(donorModel, isOrg).then((message) => {
+                        if (message.error) {
+                            throw `Can't Save User: ${data.error}`
                         } else {
-                            alert(`User Have Been Saved Successfuly`)
-                            localStorage.setItem('donor', JSON.stringify(donorModel.toObject()))
-                            window.open('donors-detail.html', '_self')
+                            return this.onAppLogin(LoginUser.LoginType.donor, donorModel.id)   
                         }
-                    }).catch(error => {
+                    })
+                    .then((data)=> {
+                        alert(`User Have Been Saved Successfuly`)
+                        window.open('donor-detail.html', '_self')
+                    })
+                    .catch(error => {
+                        alert(error);
                         console.log(error)
                     })
                 }, //onSaveUser
@@ -260,4 +260,5 @@
         })
     </script>
 </body>
+
 </html>

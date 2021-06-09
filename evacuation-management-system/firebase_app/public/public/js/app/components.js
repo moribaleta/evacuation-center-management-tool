@@ -214,9 +214,10 @@ const DonationPanelComponent = Vue.extend({
                                         </ul>
                                     </div>
                                 </div>
-                                <div class="panel-footer">
+                                <div class="panel-footer" v-if="donor_request_entry.donor">
                                     <button type="button" id="add-report" class="btn btn-info button-view"
-                                        v-on:click="addNewRequest(evac.id)">
+                                        v-on:click="addNewRequest(evac.id)"
+                                        :disabled="donor_request_entry.donor.status != 'approved'" >
                                         Donate
                                     </button>
                                 </div>
