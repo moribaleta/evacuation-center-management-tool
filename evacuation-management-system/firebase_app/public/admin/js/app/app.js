@@ -72,54 +72,56 @@ methods: {
             user = AdminUser.parse(user)
 
             if (user.admin_type == AdminUser.AdminTypes.mdrrmo || user.admin_type == AdminUser.AdminTypes.evacuation) {
-                this.header_items = [{
-                    id: 'content',
-                    href: 'main.html',
-                    icon: 'language',
-                    title: 'Contents'
-                },
-                {
-                    id: 'evacuations',
-                    href: "evacuations.html",
-                    icon: 'home_work',
-                    title: 'Evacuations'
-                },
-                {
-                    id: 'history',
-                    href: "history.html",
-                    icon: 'assessment',
-                    title: 'History'
-                },
-                {
-                    id: 'inventory',
-                    href: 'inventory.html',
-                    icon: 'storage',
-                    title: 'Inventory'
-                },
-                {
-                    id: 'admin',
-                    href: 'admin.html',
-                    icon: 'group',
-                    title: 'Admin'
-                },
-                {
-                    id: 'map',
-                    href: 'map.html',
-                    icon: 'room',
-                    title: 'Map'
-                },
-                {
-                    id: 'donors',
-                    href: 'donors.html',
-                    icon: 'reduce_capacity',
-                    title: 'Donors'
-                },
-                {
-                    id: 'users',
-                    href: 'users.html',
-                    icon: 'account_circle',
-                    title: 'Public'
-                }]
+                this.header_items = [
+                    {
+                        id: 'content',
+                        href: 'main.html',
+                        icon: 'language',
+                        title: 'Contents'
+                    },
+                    {
+                        id: 'evacuations',
+                        href: "evacuations.html",
+                        icon: 'home_work',
+                        title: 'Evacuations'
+                    },
+                    {
+                        id: 'history',
+                        href: "history.html",
+                        icon: 'assessment',
+                        title: 'History'
+                    },
+                    {
+                        id: 'inventory',
+                        href: 'inventory.html',
+                        icon: 'storage',
+                        title: 'Inventory'
+                    },
+                    {
+                        id: 'admin',
+                        href: 'admin.html',
+                        icon: 'group',
+                        title: 'Admin'
+                    },
+                    {
+                        id: 'map',
+                        href: 'map.html',
+                        icon: 'room',
+                        title: 'Map'
+                    },
+                    {
+                        id: 'donors',
+                        href: 'donors.html',
+                        icon: 'reduce_capacity',
+                        title: 'Donors'
+                    },
+                    {
+                        id: 'users',
+                        href: 'users.html',
+                        icon: 'account_circle',
+                        title: 'Public'
+                    },
+                ]
             }
 
             try{
