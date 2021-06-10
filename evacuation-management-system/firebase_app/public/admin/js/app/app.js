@@ -1032,11 +1032,17 @@ const ContentSelectionComponent = Vue.extend({
     template: 
     `
     <div :id="id" class="row selection-grid">
-        <div class="col col-md-4 selection-grid-item" v-for="item in selections">
+        <div :class=" small ? 'col col-md-2 selection-grid-item' : 'col col-md-4 selection-grid-item'" 
+            v-for="item in selections">
             <div class="selection-grid-item-content" :style="'background:'+item.color">
                 <a class="selection-grid-item-content-link" :href="item.href">
                     <div class="selection-block">
-                        <i class="material-icons selection-icon">{{item.icon}}</i>
+                        <div class="selection-block-icon">
+                            <i class="material-icons selection-icon">{{item.icon}}</i>
+                            <div class="selection-notification" v-if="item.count">
+                                <p >{{item.count}}</p>
+                            </div>
+                        </div>
                         <h5 class="center">{{item.title}}</h5>
                     </div>
                 </a>
@@ -1047,6 +1053,7 @@ const ContentSelectionComponent = Vue.extend({
 
     props: {
         selections  : Array,
+        small       : Boolean
     },
 
     data() {

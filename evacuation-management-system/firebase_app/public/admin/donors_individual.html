@@ -67,6 +67,14 @@
             <li><a href="#">{{isPending ? "Pending " : ""}}Individual Donors</a></li>
         </ul>
 
+        <password-editor-component
+            modal_id="password-editor"
+            :password_input="password_input.password"
+            :override="true"
+            v-on:onsave="onSavePassword($event)"
+        >
+        </password-editor-component>
+
         <status-modal modal_id="status_modal_update" title="Update Donor Status" :status="user_status"
             v-on:save="updateUserStatus($event)">
         </status-modal>
@@ -80,11 +88,12 @@
                     </div>
                     <div class="modal-body">
                         <form-generator :form="indv_formmodel" :input.sync="indv_input"></form-generator>
-                        <form-generator :form="form_password_model" :input.sync="form_indv_password"></form-generator>
+                        <form-generator :form="form_password_model" :input.sync="form_indv_password" v-if="!isEdit">
+                        </form-generator>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal"
-                            v-on:click="onSaveIndvDonor()">Save</button>
+                            v-on:click="onSaveIndvDonor(!isEdit)">Save</button>
                         <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                     </div>
                 </div>
@@ -138,9 +147,10 @@
                         <div class="col col-xs-12">
                             <button class="btn btn-default btn-info" v-on:click="viewReports(item.id)">View
                                 Reports</button>
-                            <button class="btn btn-default btn-info" v-on:click="onEditIndv(index)">Edit</button>
+                            <button class="btn btn-default btn-info" v-on:click="onEditIndv(index)">Edit Profile</button>
                             <button class="btn btn-default btn-warning" v-on:click="editStatus(index)">Update
                                 Status</button>
+                            <button class="btn btn-default btn-warning" v-on:click="onChangePassword(index)">Change Password</button>
                             <button class="btn btn-default btn-danger" v-on:click="onDeleteIndv(index)">Delete</button>
                         </div>
                         <div class="col col-xs-12">
@@ -215,8 +225,11 @@
                     indv: false,
                 },
 
-                user_status: null,
-                
+                user_status   : null,
+                password_input: {
+                    user    : null,
+                    password: null
+                }
 
             },
             methods: {
@@ -290,6 +303,25 @@
                     this.onSaveIndvDonor(false)
                 },
 
+                onChangePassword(index) {
+                    let user    = this.view_indv_list[index].copy()
+                    this.password_input = {
+                        user,
+                        password: user.password,
+                    }
+                    $('#password-editor').modal()
+                },//onChangePassword
+
+                onSavePassword(password) {
+                    let index       = this.password_input.index
+                    let user        = this.password_input.user
+                    user.password   = password
+                    console.log("password input %o", this.password_input)
+                    console.log("new password %o", password)
+                    this.indv_input = user
+                    this.onSaveIndvDonor(false)
+                },//onSavePassword
+
                 onSaveIndvDonor(password_included = true) {
                     var input = DonorsIndividual.parse(this.indv_input)
 
@@ -359,6 +391,8 @@
                         })
                     }
                 }, //onDeleteIndv
+
+                
 
                 onSearchDonor(search) {
                     this.view_indv_list = this.indv_list.filter((indv) => {

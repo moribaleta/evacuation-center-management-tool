@@ -68,6 +68,10 @@
             v-on:save="updateUserStatus($event)">
         </status-modal>
 
+        <password-editor-component modal_id="password-editor" :password_input="password_input.password" :override="true"
+            v-on:onsave="onSavePassword($event)">
+        </password-editor-component>
+
         <div id="orgsModal" class="modal fade" role="dialog">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -77,11 +81,12 @@
                     </div>
                     <div class="modal-body">
                         <form-generator :form="org_formmodel" :input.sync="orgs_input"></form-generator>
-                        <form-generator :form="form_password_model" :input.sync="form_org_password"></form-generator>
+                        <form-generator :form="form_password_model" :input.sync="form_org_password" v-if="!isEdit">
+                        </form-generator>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal"
-                            v-on:click="onSaveOrgDonor()">Save</button>
+                            v-on:click="onSaveOrgDonor(!isEdit)">Save</button>
                         <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                     </div>
                 </div>
@@ -135,6 +140,8 @@
                             <button class="btn btn-default btn-info" v-on:click="onEditOrg(index)">Edit</button>
                             <button class="btn btn-default btn-warning" v-on:click="editStatus(index)">Update
                                 Status</button>
+                            <button class="btn btn-default btn-warning" v-on:click="onChangePassword(index)">Change
+                                Password</button>
                             <button class="btn btn-default btn-danger" v-on:click="onDeleteOrg(index)">Delete</button>
                         </div>
                         <div class="col col-xs-12">
@@ -178,9 +185,9 @@
                 user: new AdminUser(),
                 isPending: false,
                 //ENTRIES
-                orgs_list     : [],
+                orgs_list: [],
                 view_orgs_list: [],
-                donor_ref     : {},
+                donor_ref: {},
 
                 //MODEL INPUTS
                 orgs_input: {},
@@ -210,6 +217,11 @@
                     org: false,
                 },
 
+                password_input: {
+                    user: null,
+                    password: null
+                },
+
                 user_status: null,
             },
             methods: {
@@ -217,9 +229,9 @@
                     this.user = header.user
                     this.municipalities = municipalities
 
-                    const queryString   = window.location.search;
-                    const urlParams     = new URLSearchParams(queryString);
-                    this.isPending      = urlParams.get('pending') || false
+                    const queryString = window.location.search;
+                    const urlParams = new URLSearchParams(queryString);
+                    this.isPending = urlParams.get('pending') || false
 
                     this.fetchData()
                 }, //onStart
@@ -231,25 +243,25 @@
                 fetchOrg() {
                     this.isLoading.org = true
                     DataHandler.getDonorOrganizations()
-                    .then((message) => {
-                        if(this.isPending) {
-                            return message.data.filter((item) => {
-                                return item.status == StatusType.pending
-                            })
-                        }
-                        return message.data
-                    })
-                    .then((list) => {
-                        this.orgs_list      = list
-                        this.view_orgs_list = list
-                        this.orgs_list.forEach((org) => {
-                            this.donor_ref[org.id] = org
+                        .then((message) => {
+                            if (this.isPending) {
+                                return message.data.filter((item) => {
+                                    return item.status == StatusType.pending
+                                })
+                            }
+                            return message.data
                         })
-                    }).catch(err => {
-                        console.log(err)
-                    }).finally(() => {
-                        this.isLoading.org = false
-                    })
+                        .then((list) => {
+                            this.orgs_list = list
+                            this.view_orgs_list = list
+                            this.orgs_list.forEach((org) => {
+                                this.donor_ref[org.id] = org
+                            })
+                        }).catch(err => {
+                            console.log(err)
+                        }).finally(() => {
+                            this.isLoading.org = false
+                        })
                 }, //fetchOrg
 
                 viewReports(id) {
@@ -325,6 +337,25 @@
                     this.onSaveOrgDonor(false)
                 },
 
+                onChangePassword(index) {
+                    let user = this.view_orgs_list[index].copy()
+                    this.password_input = {
+                        user,
+                        password: user.password,
+                    }
+                    $('#password-editor').modal()
+                }, //onChangePassword
+
+                onSavePassword(password) {
+                    let index = this.password_input.index
+                    let user = this.password_input.user
+                    user.password = password
+                    console.log("password input %o", this.password_input)
+                    console.log("new password %o", password)
+                    this.orgs_input = user
+                    this.onSaveOrgDonor(false)
+                }, //onSavePassword
+
                 validatePassword() {
                     let conf = this.form_org_password.conf_password
                     let pass = this.form_org_password.password
@@ -356,7 +387,7 @@
                         return false
                     }
 
-                    
+
 
                     return true
                 },

@@ -1555,6 +1555,10 @@ class DonorsOrganization extends DonorModel {
         }
     }
 
+    copy(){
+        return DonorsOrganization.parse(this.toObject())
+    }
+
     static parse(object = {}) {
         return new DonorsOrganization(
             object.id,
@@ -1742,6 +1746,14 @@ class DonorsIndividual extends DonorModel {
             images             : this.images,
             password           : this.password
         }
+    }
+
+    /**
+     * returns a copy of the instance
+     * @returns 
+     */
+    copy(){
+        return DonorsIndividual.parse(this.toObject())
     }
 
     static parse(object = {}) {

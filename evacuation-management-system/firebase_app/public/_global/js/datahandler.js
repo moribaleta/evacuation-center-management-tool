@@ -736,8 +736,6 @@ class PublicUserHandler extends UserHandler {
             })
         })
 
-
-
         return new Promise((resolve, reject) => {
             const history_ref = this.firestore.collection(UserHandler.tables.public_user_history)
 
@@ -2016,9 +2014,9 @@ class DonorHandler extends MunicipalInventoryHandler {
 
             var query = ref.where('evac_id', '==', evac_id)
 
-            if (status) {
-                query = ref.where('status', '==', status)
-            }
+            // if (status) {
+            //     query = ref.where('status', '==', status)
+            // }
 
             query = query.orderBy('date_updated', 'desc')
 
@@ -2033,9 +2031,19 @@ class DonorHandler extends MunicipalInventoryHandler {
                         id,
                         ...data
                     })
-                    reports.push(DonorsReport.parse(object))
+
+                    let report = DonorsReport.parse(object)
+
+                    if (status) {
+                        if(report.status == status) {
+                            reports.push(report)
+                        }
+                    }
+                    
                 });
                 var message = new Message()
+
+
                 message.data = reports
                 resolve(message)
             }).catch((error) => {
@@ -2062,6 +2070,7 @@ class DonorHandler extends MunicipalInventoryHandler {
 
                         var message = new Message()
                         message.data = reports
+                        console.log("getDonorsReportsByMunicipal: evacs: %o", evacs.data);
                         resolve(message)
                     })
                 }).catch((err) => {
@@ -2097,6 +2106,48 @@ class DonorHandler extends MunicipalInventoryHandler {
                 message.data = reports
                 resolve(message)
             }).catch(function (error) {
+                console.log("Error getting documents: ", error);
+                reject(error)
+            });
+        })
+    } //getPublicUserReports
+
+    /**
+     * returns the count of pending reports of donor
+     * @returns Promise(Int)
+     */
+    getDonorPendingReportsCount(evac_id) {
+        return new Promise((resolve, reject) => {
+            const ref = this.firestore.collection(UserHandler.tables.donor_reports)
+            var query = ref //.where('status','==',SupplyStatus.pending)
+
+            if(evac_id) {
+                query = query.where('evac_id','==', evac_id)
+            }
+
+            query.get().then((querySnapshot) => {
+
+                var count = 0 
+
+                querySnapshot.forEach(function (doc) {
+                    console.log(doc.id, " => ", doc.data());
+                    let data = doc.data()
+                    let id = doc.id
+
+                    const object = parseObject({
+                        id,
+                        ...data
+                    })
+                    let report = DonorsReport.parse(object)
+                    if(report.status == SupplyStatus.pending) {
+                        count++
+                    }
+                });
+
+                var message     = new Message()
+                message.data    = count
+                resolve(message)
+            }).catch((error) => {
                 console.log("Error getting documents: ", error);
                 reject(error)
             });

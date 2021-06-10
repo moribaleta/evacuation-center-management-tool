@@ -58,7 +58,7 @@
     <div class="container" id="content">
         <ul class="breadcrumb">
             <li><a href="users.html">Users</a></li>
-            <li><a href="#">User Reports</a></li>
+            <li><a href="#">{{isPending ? "Pending " : ""}} User Reports</a></li>
         </ul>
         <!-- MODAL -->
         <div id="editorModal" class="modal fade" role="dialog">
@@ -95,7 +95,7 @@
         <!-- MODAL -->
 
         <update-status-modal :input.sync="data_input" v-on:persist="saveReport"></update-status-modal>
-        <h1>Public User Reports</h1>
+        <h1>{{isPending ? "Pending " : ""}} Public User Reports</h1>
 
         <div class="section">
             <div class="well" v-if="public_user != null">
@@ -197,7 +197,7 @@
                             </div>
                             <div :id="'requestrow-'+index" class="panel-collapse collapse">
                                 <div class="panel-body">
-                                    <ul class="list-group">
+                                    <ul class="list-group" v-if="item.reports">
                                         <li class="list-group-item" v-if="item.reports.isEmpty()">
                                             <p>No Request</p>
                                         </li>
@@ -312,11 +312,21 @@
 
                     },
 
-                    fetchReports(id, isAll) {
-                        let promiseEvac = DataHandler.getEvacuationCenters()
+                    fetchReports(id) {
+                    
+                        var promiseEvac 
+
+                        if(!id && this.user.evacuation_id) {
+                            console.log("promise single %o %o", id, this.user.evacuation_id)   
+                            promiseEvac = DataHandler.getEvacuationById(this.user.evacuation_id)
+                        } else {
+                            promiseEvac = DataHandler.getEvacuationCenters()
+                        }
+
+
                         let promiseSuppType = DataHandler.getSupplyTypes()
 
-                        this.isDataLoading = true
+                        this.isDataLoading  = true
 
                         Promise.all([promiseEvac, promiseSuppType]).then((messages) => {
                             console.log("promises 1:%o 2:%o", messages[0], messages[1])
@@ -351,8 +361,10 @@
                             console.log("err %o", err)
                         }).finally(() => {
                             console.log("public user id %o", id)
-
-                            DataHandler.getPublicUserReports(id)
+                            
+                            
+                            if (id) {
+                                DataHandler.getPublicUserReports(id)
                                 .then((message) => {
                                     if (this.isPending) {
                                         return message.data.filter((item) => {
@@ -373,6 +385,43 @@
                                     console.log("hey im")
                                     this.isDataLoading = false
                                 })
+                            } else {
+
+                                let reportPromises = this.evac_list.map((evac) => {
+                                    return DataHandler.getActivePublicUserHistoryByEvac(evac.id)
+                                    .then((message) => {
+                                        return message.data
+                                    }).then((list) => {
+                                        if (this.isPending) {
+                                            return list.filter((data) => {
+                                                return data.status == SupplyStatus.pending
+                                            })
+                                        }
+                                        return list
+                                    })
+                                })
+
+                                console.log("evacs %o", this.evac_list)
+
+                                Promise.all(reportPromises)
+                                .then((list) => {
+                                    let reports = list.reduce((prev, curr) => {
+                                        prev = prev || []
+                                        return prev.concat(curr)
+                                    })
+                                    this.reports = []
+                                    this.reports = reports
+                                    this.reports_view = reports
+                                    console.log("reports view %o", this.reports_view)
+                                    this.isDataLoading = false
+                                }).catch(err => {
+                                    console.log("err %o", err)
+                                }).finally(() => {
+                                    console.log("hey im")
+                                    this.isDataLoading = false
+                                })
+                            }
+                            
                         })
 
 

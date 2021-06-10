@@ -299,6 +299,22 @@
     flex-direction: column;
 }
 
+.selection-block-icon{
+    display: flex;
+    align-items: center;
+    text-align: center;
+    flex-direction: row;
+}
+
+.selection-block-icon .selection-notification {
+    background-color: red;
+    border-radius: 10px;
+    height: 20px;
+    width: 20px;
+    text-align: center;
+}
+
+
 /* Style the list */
 ul.breadcrumb {
     padding: 10px 16px;

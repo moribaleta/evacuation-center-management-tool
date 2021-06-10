@@ -187,22 +187,21 @@
         <div class="section">
             <h1>Home</h1>
             <h3 v-if="user.admin_type == 'pdrrmo'">Contents</h3>
-            <div class="row selection-grid" v-if="user.admin_type == 'pdrrmo'">
-                <div class="col col-md-4 selection-grid-item" v-for="item in selections">
-                    <div class="selection-grid-item-content" :style="'background:'+item.color">
-                        <a class="selection-grid-item-content-link" :href="item.href">
-                            <div class="selection-block">
-                                <i class="material-icons selection-icon">{{item.icon}}</i>
-                                <h5 class="center">{{item.title}}</h5>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </div>
+            <content-selection-component :selections="selections" v-if="user.admin_type == 'pdrrmo'">
+            </content-selection-component>
         </div>
+
+
+        <div class="section">
+            <h3>Pending Items</h3>
+            <content-selection-component :selections="pending_selections" :small="true">
+            </content-selection-component>
+        </div>
+
         <div class="loader-container" v-if="isLoading">
             <div class="loader"></div>
         </div>
+
         <div class="section" v-if="!isLoading">
             <div class="container" v-if="user.admin_type != 'evacuation'">
                 <h3>Municipality: {{user.municipality == '0' ? 'Public' : user.municipality}}</h3>
@@ -235,7 +234,9 @@
                         </tr>
                     </table>
                 </div>
+            </div>
 
+            <div class="container">
                 <h3>Evacuations</h3>
                 <div class="section" v-if="evac_list.length > 0">
                     <div class="table-container" id="tableData">
@@ -271,7 +272,7 @@
                                 <td>{{getHistory(item.id).count         || 0}}</td>
                                 <td>{{getHistory(item.id).family        || 0}}</td>
                                 <td>{{getHistory(item.id).independent   || 0}}</td>
-                               
+
                                 <td>{{item.population_capacity}}</td>
                                 <td>{{item.floor_space || 0}}</td>
                                 <td><button class="btn btn-default btn-info" v-on:click="viewEvac(index)">view
@@ -283,7 +284,6 @@
                     </div>
                 </div>
             </div>
-
 
         </div>
     </div>
@@ -337,10 +337,51 @@
                     },
                 ],
 
+                pending_selections: [{
+                        id: 'donors_pending_reports',
+                        href: "donors_pending_reports_list.html",
+                        icon: 'flag',
+                        title: 'Pending Donor Request',
+                        color: '#cc6500',
+                        count: 0
+                    },
+                    {
+                        id: 'donors_individual_pending',
+                        href: "donors_individual.html?pending=true",
+                        icon: 'person_add_alt',
+                        title: 'Pending Individual',
+                        color: '#A3008C',
+                        count: 0
+                    },
+                    {
+                        id: 'donors_organization_pending',
+                        href: "donors_organization.html?pending=true",
+                        icon: 'group_add',
+                        title: 'Pending Organization',
+                        color: '#9400cc',
+                        count: 0
+                    },
+                    {
+                        id: 'pending_user_list',
+                        href: "user_list.html?pending=true",
+                        icon: 'person_add',
+                        title: 'Pending Public Users',
+                        color: '#e68a00',
+                        count: 0
+                    },
+                    {
+                        id: 'admission',
+                        href: "user_admission.html",
+                        icon: 'notification_add',
+                        title: 'Admission Request',
+                        color: '#006600',
+                        count: 0
+                    },
+                ],
                 /* EVACUATIONS */
-                population_dict : {},
-                family_dict     : {},
-                muni_list       : [],
+                population_dict: {},
+                family_dict: {},
+                muni_list: [],
 
                 evac_list: [],
                 view_list: [],
@@ -364,6 +405,7 @@
                     ////console.log(this.municipality)
                     this.fetchAllAdmins()
                     this.fetchEvacuationCenter()
+
                 },
 
                 fetchAllAdmins() {
@@ -379,14 +421,14 @@
                 }, //fetchAllAdmins
 
                 getHistory(evac_id) {
-                    let active = this.active_history_dict[evac_id] 
+                    let active = this.active_history_dict[evac_id]
                     if (active) {
                         return active
                     }
                     return {
-                        count       : 0,
-                        family      : 0,
-                        independent : 0
+                        count: 0,
+                        family: 0,
+                        independent: 0
                     }
                 },
 
@@ -394,76 +436,219 @@
                     this.isLoading = true
 
                     var promiseEvac
-                    if (this.user.admin_type == AdminUser.AdminTypes.mdrrmo || this.user.admin_type == AdminUser.AdminTypes.pdrrmo) {
+                    if (this.user.admin_type == AdminUser.AdminTypes.mdrrmo || this.user.admin_type == AdminUser
+                        .AdminTypes.pdrrmo) {
                         promiseEvac = DataHandler.getEvacuationCenters(this.user.municipality)
-                    } else if(!((this.user.evacuation_id || "").isEmpty())) {//evacuation manager
+                    } else if (!((this.user.evacuation_id || "").isEmpty())) { //evacuation manager
                         promiseEvac = DataHandler.getEvacuationById(this.user.evacuation_id)
                     }
 
                     var evac_list = []
                     var muni_list = []
                     var muni_dict = {}
-                    var actives   = {}
+                    var actives = {}
 
                     this.municipality.forEach((key) => {
                         muni_dict[key] = {
-                            name        : key,
-                            population  : 0,
-                            family      : 0,
-                            independent : 0
+                            name: key,
+                            population: 0,
+                            family: 0,
+                            independent: 0
                         }
                     })
 
 
                     promiseEvac.then((message) => {
-                        evac_list = message.data
-                        return DataHandler.getPublicActivePopulation()
-                    })
-                    .then((message) => {
-                        actives = message.data
-                    
-                        evac_list.forEach((evac) => {
-                            let active  = actives[evac.id]
-                            console.log("active %o", active)
-                            if (active) {
-                                muni_dict[evac.municipality].population    += active.count
-                                muni_dict[evac.municipality].family        += active.family
-                                muni_dict[evac.municipality].independent   += active.independent
-                            }
+                            evac_list = message.data
+                            return DataHandler.getPublicActivePopulation()
+                        })
+                        .then((message) => {
+                            actives = message.data
+
+                            evac_list.forEach((evac) => {
+                                let active = actives[evac.id]
+                                console.log("active %o", active)
+                                if (active) {
+                                    muni_dict[evac.municipality].population += active.count
+                                    muni_dict[evac.municipality].family += active.family
+                                    muni_dict[evac.municipality].independent += active.independent
+                                }
+                            })
+
+                            muni_list = Object.keys(muni_dict).map((key) => {
+                                return muni_dict[key]
+                            })
+
+                            muni_list = muni_list.sort((lhs, rhs) => {
+                                return lhs.population - rhs.population
+                            }).reverse()
+
+                            return true
+                        })
+                        .then((message) => {
+                            this.muni_list = muni_list
+                            this.active_history_dict = actives
+                            this.evac_list = evac_list
+                            this.view_list = evac_list
+                            console.log("muni list %o", this.muni_list)
+                        })
+                        .catch((error) => {
+                            console.log(error)
+                        })
+                        .finally(() => {
+                            this.isLoading = false
+                            this.fetchAllPending()
                         })
 
-                        muni_list = Object.keys(muni_dict).map((key) => {
-                            return muni_dict[key]
-                        })
-
-                        muni_list = muni_list.sort((lhs, rhs) => {
-                            return lhs.population - rhs.population
-                        }).reverse()
-
-                        return true
-                    })
-                    .then((message) => {
-                        this.muni_list              = muni_list
-                        this.active_history_dict    = actives
-                        this.evac_list              = evac_list
-                        this.view_list              = evac_list
-
-                        console.log("muni list %o", this.muni_list)
-                    })
-                    .catch((error) => {
-                        console.log(error)
-                    })
-                    .finally(() =>{
-                        this.isLoading = false
-                    })
-                    
                 }, //fetchEvacationCenter
 
                 viewEvac(index) {
                     this.view_item = this.view_list[index]
                     $('#evacModal').modal();
-                }
+                },
 
+                fetchAllPending() {
+                    this.fetchPendingDonorReports()
+                    this.fetchPendingDonor(true)
+                    this.fetchPendingDonor(false)
+                    this.fetchAdmisionRequest()
+                    this.fetchUserPending()
+                },
+
+                fetchUserPending() {
+
+                    DataHandler.getAllPublicUsers(true)
+                        .then((message) => {
+                            return message.data.length
+                        })
+                        .then((count) => {
+                            let temp_arr = this.pending_selections
+                            let index = this.pending_selections.findIndex((item) => {
+                                let isPossible = item.id == "pending_user_list"
+
+                                return isPossible
+                            })
+
+                            console.log("index %o, selected %o count %o", index, this.pending_selections[
+                                index], count)
+                            if (index != -1) {
+                                let item = this.pending_selections[index]
+                                item.count = count;
+                                temp_arr[index] = item
+                                this.pending_selections = temp_arr
+                            }
+                            console.log(this.pending_selections)
+                        })
+                },
+
+                fetchAdmisionRequest() {
+
+                    let evacPromises = this.evac_list.map((evac) => {
+                        return DataHandler.getActivePublicUserHistoryByEvac(evac.id)
+                            .then((message) => {
+                                let count = message.data.filter((history) => {
+                                    return history.status == StatusType.pending
+                                }).length
+                                console.log("evac %o -> data %o", evac.id, message.data)
+                                return count;
+                            })
+                    })
+
+                    Promise.all(evacPromises).then((counts) => {
+
+                        let temp_arr = this.pending_selections
+                        var count = counts.reduce((prev, curr) => {
+                            prev = prev || 0
+                            return curr + prev
+                        })
+
+                        let index = this.pending_selections.findIndex((item) => {
+                            let isPossible = item.id == "admission"
+
+                            return isPossible
+                        })
+
+                        console.log("index %o, selected %o count %o", index, this.pending_selections[
+                            index], count)
+                        if (index != -1) {
+                            let item = this.pending_selections[index]
+                            item.count = count;
+                            temp_arr[index] = item
+                            this.pending_selections = temp_arr
+                        }
+                        console.log(this.pending_selections)
+                    }).catch((err) => {
+                        console.log(err)
+                    })
+                },
+
+                fetchPendingDonor(isOrg) {
+                    var pendingCountPromise
+                    if (isOrg) {
+                        pendingCountPromise = DataHandler.getDonorOrganizations()
+                    } else {
+                        pendingCountPromise = DataHandler.getDonorIndividual()
+                    }
+
+                    pendingCountPromise
+                        .then((message) => {
+                            return message.data.filter((user) => {
+                                return user.status == StatusType.pending
+                            }).length
+                        })
+                        .then((count) => {
+                            let temp_arr = this.pending_selections
+
+                            let index = this.pending_selections.findIndex((item) => {
+                                let isPossible = item.id == (isOrg ? "donors_organization_pending" :
+                                    "donors_individual_pending")
+                                console.log("search for %o %o", item, isPossible)
+                                return isPossible
+                            })
+
+                            console.log("index %o, selected %o count %o", index, this.pending_selections[
+                                index], count)
+                            if (index != -1) {
+                                let item = this.pending_selections[index]
+                                item.count = count;
+                                temp_arr[index] = item
+                                this.pending_selections = temp_arr
+                            }
+                            console.log(this.pending_selections)
+
+                        }).catch(error => {
+                            console.log(error)
+                        });
+                },
+
+                fetchPendingDonorReports() {
+                    var pendingCountPromise
+                    if (this.user.evacuation_id) {
+                        pendingCountPromise = DataHandler.getDonorPendingReportsCount(this.user.evacuation_id)
+                    } else {
+                        pendingCountPromise = DataHandler.getDonorPendingReportsCount()
+                    }
+
+                    pendingCountPromise.then((message) => {
+                        let temp_arr = this.pending_selections
+
+                        let index = this.pending_selections.findIndex((item) => {
+                            return item.id == "donors_pending_reports"
+                        })
+                        console.log("index %o, selected %o count %o", index, this.pending_selections[
+                            index], message.data)
+                        if (index != -1) {
+                            let item = this.pending_selections[index]
+                            item.count = message.data;
+                            temp_arr[index] = item
+                            this.pending_selections = temp_arr
+                        }
+                        console.log(this.pending_selections)
+
+                    }).catch(error => {
+                        console.log(error)
+                    });
+                }
             }
         })
     </script>

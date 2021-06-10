@@ -111,21 +111,27 @@ Array.prototype.first = function () {
 
 
 Array.prototype.firstIndex = function (where) {
-    /*this.forEach((item, index) => {
-        if (where(item)) {
-            console.log("found?")
-            return index
-        }
-    })*/
     for(var i = 0; i < this.length; i++) {
         if (where(this[i])) {
             console.log("found?")
             return i
         }
     }
-
     return null
 }
+
+// Array.prototype.firstIndex2 = ((where) => {
+//     console.log("search for size" + this.length)
+//     for(var i = 0; i < this.length; i++) {
+//         console.log("search for" + this[i])
+//         if (where(this[i])) {
+//             console.log("found?")
+//             return i
+//         }
+//     }
+    
+//     return -1
+// })
 
 Array.prototype.hasValue = function () {
     return this.length > 0
@@ -1013,27 +1019,6 @@ const PasswordEditorComponent = Vue.extend({
         override: Boolean
     },
 
-    watch: {
-        override() {
-            if(this.override) {
-                this.password_input = {
-                    password        : null,
-                    conf_password   : null
-                }
-                this.formModelPassword = {
-                    password: {
-                        title: "Password",
-                        type: FormModels.password,
-                    },
-                    conf_password: {
-                        title: "Confirm Password",
-                        type: FormModels.password,
-                    }
-                }
-            }
-        }
-    },
-
     data() {
         return {
             password_input: {
@@ -1055,6 +1040,25 @@ const PasswordEditorComponent = Vue.extend({
                     type: FormModels.password,
                 }
             },
+        }
+    },
+
+    created() {
+        if(this.override) {
+            this.password_input = {
+                password        : null,
+                conf_password   : null
+            }
+            this.formModelPassword = {
+                password: {
+                    title: "Password",
+                    type: FormModels.password,
+                },
+                conf_password: {
+                    title: "Confirm Password",
+                    type: FormModels.password,
+                }
+            }
         }
     },
 
@@ -1085,11 +1089,13 @@ const PasswordEditorComponent = Vue.extend({
             let conf        = this.password_input.conf_password
             let pass        = this.password_input.password
 
-            if (!curr_pass || curr_pass.length <= 0) {
-                AlertMessages.error("current password is required")
-                return false
+            if (!this.override) {
+                if (!curr_pass || curr_pass.length <= 0) {
+                    AlertMessages.error("current password is required")
+                    return false
+                }
             }
-
+            
             if (!pass || pass.length <= 0) {
                 AlertMessages.error("password is required")
                 return false
