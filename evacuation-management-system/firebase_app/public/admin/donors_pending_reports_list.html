@@ -91,7 +91,7 @@
     </div>
     
     <div class="table-container" id="tableData" v-if="!isLoading.reports">
-        <div class="well" v-for="item,index in donor_report_view_list">
+        <div class="well" v-for="item,index in donor_report_view_list" :key="item.id">
             <div class="row">
                 <div class="col col-md-12 item-info">
                     <p class="item-value">{{index + 1}}.</p>

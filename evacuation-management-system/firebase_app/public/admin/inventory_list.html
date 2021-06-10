@@ -210,7 +210,7 @@
                     <h4>Municipal Inventory</h4>
                 </div>
                 <div class="table-container" id="tableData">
-                    <div class="panel-group" v-for="muni_inv,index in muni_inv_list">
+                    <div class="panel-group" v-for="muni_inv,index in muni_inv_list" :key="muni_inv.id">
                         <div class="panel panel-default">
                             <div class="panel-heading">
                                 <h4 class="panel-title">
@@ -259,7 +259,7 @@
                 </div>
 
                 <div class="table-container" id="tableData">
-                    <div class="panel-group" v-for="evac,index in evac_list">
+                    <div class="panel-group" v-for="evac,index in evac_list" :key="evac.id">
                         <div class="panel panel-default">
                             <div class="panel-heading">
                                 <h4 class="panel-title">
@@ -295,7 +295,7 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr v-for="inventory,index in inventory_list[evac.id]">
+                                            <tr v-for="inventory,index in inventory_list[evac.id]" :key="inventory.id">
                                                 <td>{{index+1}}. {{inventory.name }}</td>
                                                 <td>{{inventory.description}}</td>
                                                 <td>{{formatDate(inventory.date_created)}}</td>

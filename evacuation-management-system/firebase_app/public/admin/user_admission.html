@@ -111,7 +111,7 @@
             <!-- TABLE VIEW -->
             <div class="table-container" v-if="!isDataLoading">
                 <div class="table" id="tableData">
-                    <div class="well" v-for="item,index in reports_view">
+                    <div class="well" v-for="item,index in reports_view" :key="item.id">
                         <entry-user-history-component
                             :view_count="index + 1"
                             :index="index"
@@ -385,7 +385,9 @@
                 onFilterReport(filter) {
                     console.log("filter %o", filter)
 
-                    var view_list = this.reports.filter((data) => {
+                    var view_list = [...this.reports]
+
+                    view_list = this.reports.filter((data) => {
                         let date_admitted = new Date(data.date_admitted)
                         let date_cleared = new Date(data.date_cleared)
                         let evac = this.evac_dict[data.evac_id] || new EvacuationCenter()
@@ -405,17 +407,15 @@
                     });
 
 
+                    let status = filter.status
                     view_list = view_list.filter((data) => {
-                        let status = filter.status
-                        if (status == 'all') {
-                            return true
-                        } else {
-                            return status == data.status
-                        }
+                        return ((status == 'all') || status == data.status)
                     })
 
+
+                    let evac = filter.evacuations
                     view_list = view_list.filter((data) => {
-                        let evac = filter.evacuations
+                        
                         if (evac == 'all') {
                             return true
                         } else {
@@ -424,7 +424,10 @@
                         }
                     })
 
+        
                     this.reports_view = view_list
+
+                    console.log(" reportsview %o", this.reports_view)
                 },
 
                 onSearchReport(filter) {

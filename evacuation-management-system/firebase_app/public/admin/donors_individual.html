@@ -126,7 +126,7 @@
             </div>
 
             <div class="table-container" id="tableData" v-if="!isLoading.indv">
-                <div class="well" v-for="item,index in view_indv_list">
+                <div class="well" v-for="item,index in view_indv_list" :key="item.id">
                     <div class="row">
                         <div class="col col-xs-12 item-info">
                             <p class="item-label">

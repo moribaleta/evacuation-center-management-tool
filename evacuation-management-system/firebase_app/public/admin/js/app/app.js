@@ -938,48 +938,32 @@ const EntryUserHistory = Vue.extend({
                 <div v-if="info == 'evac_id'">
                     <p class="item-label">EVACUATION NAME</p>
                     <p class="item-value">{{evac.name}}</p>
+                </div>
+                <entry-single-component v-if="info != 'evac_id' && info == 'date_cleared'" :label="info"
+                    :value="isDateValid(entry[info]) ? 'active' : entry[info]" :showtime="true">
+                </entry-single-component>
+                <entry-single-component v-if="info != 'evac_id' && info != 'date_cleared'" :label="info"
+                    :value="entry[info]" :showtime="true">
+                </entry-single-component>
             </div>
-            <entry-single-component v-if="info != 'evac_id' && info == 'date_cleared'" :label="info"
-                :value="isDateValid(item[info]) ? 'active' : item[info]" :showtime="true">
-                    </entry-single-component>
-                    <entry-single-component v-if="info != 'evac_id' && info != 'date_cleared'" :label="info"
-                        :value="item[info]" :showtime="true">
-                    </entry-single-component>
 
-                </div>
+            <basic-user-component
+                :user="user"
+                :index="index"
+                :cdn="cdn"
+            >
+            </basic-user-component>
 
-
-                <div class="col col-md-3 item-info ">
-                    <entry-single-component label="Status" :value="item.status">
-                    </entry-single-component>
-                </div>
-
-
-                <!--<div class="col col-md-12 item-info " v-if="user">
-                    <div class="well">
-                        <entry-component :entry="user" :headers="user_headers">
-                        </entry-component>
-                        <button class="btn btn-default btn-info" :href="'#imagerow'+index"
-                            data-toggle="collapse">View Images</button>
-                    </div>
-                </div-->
-
-                <basic-user-component
-                    :user="user"
-                    :index="index"
-                    :cdn="cdn"
-                    >
-                </basic-user-component>
-
-                <div class="col col-md-12">
-                    <button class="btn btn-default btn-info" v-on:click="editItem(index)">edit</button>
-                    <button class="btn btn-default btn-info" v-on:click="onUpdateStatus(index)">update
-                        status</button>
-                    <button class="btn btn-default btn-danger"
-                        v-on:click="deleteItem(index)">delete</button>
-                </div>
-
-
+            <div class="col col-md-12">
+                <button class="btn btn-default btn-info" v-on:click="editItem(index)">edit</button>
+                <button class="btn btn-default btn-info" v-on:click="onUpdateStatus(index)">update
+                    status
+                </button>
+                <button class="btn btn-default btn-danger"
+                    v-on:click="deleteItem(index)">
+                    delete
+                </button>
+            </div>
         </div>
     </div>
 `,
@@ -997,7 +981,15 @@ const EntryUserHistory = Vue.extend({
         return {
             id : keyGenID('history-entry', 2),
             user_headers: ['lastname', 'firstname', 'municipality', 'birthday', 'phone_number'],
+            entry: null
         }
+    },
+
+    created() {
+        
+        this.entry = this.item;
+
+        console.log("im created bitch %o", this.entry)
     },
 
     methods: {

@@ -1353,6 +1353,7 @@ class PublicUserHistory extends StatusModel {
         'date_admitted',
         'date_created',
         'date_updated',
+        'status'
     ]
     
 

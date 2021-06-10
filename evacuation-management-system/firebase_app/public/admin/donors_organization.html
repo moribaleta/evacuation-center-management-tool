@@ -115,7 +115,7 @@
             </div>
 
             <div class="table-container" id="tableData" v-if="!isLoading.org">
-                <div class="well" v-for="item,index in view_orgs_list">
+                <div class="well" v-for="item,index in view_orgs_list" :key="item.id">
                     <div class="row">
                         <div class="col col-xs-12 item-info">
                             <p class="item-label">

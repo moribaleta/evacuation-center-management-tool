@@ -116,7 +116,7 @@
                     </div>
 
                     <div class="table-container" id="tableData" v-if="view_list.pending_supplies.length > 0">
-                        <div class="well" v-for="item,index in view_list.pending_supplies">
+                        <div class="well" v-for="item,index in view_list.pending_supplies" :key="item.id">
                             <div class="row">
                                 <div class="col col-md-12 item-info">
                                     <p class="item-label">

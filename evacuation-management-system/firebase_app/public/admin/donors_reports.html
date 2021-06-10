@@ -113,7 +113,7 @@
             <!-- TABLE VIEW -->
             <div class="table-container" v-if="!isDataLoading">
                 <div class="table" id="tableData">
-                    <div class="well" v-for="item,index in reports_view">
+                    <div class="well" v-for="item,index in reports_view" :key="item.id">
                         <div class="row">
                             <div class="col col-md-12 item-info">
                                 <p class="item-value">{{index + 1}}.</p>

@@ -116,7 +116,7 @@
                     <li v-for="offset,index in pages" :class="index==curr_offset_index ? 'active' : ''" ><a v-on:click="setPage(index)">{{index + 1}}</a></li>
                 </ul> -->
                 <div class="table" id="tableData">
-                    <div class="well" v-for="item,index in view_list">
+                    <div class="well" v-for="item,index in view_list" :key="item.id">
                         <div class="row">
                             <div class="col col-md-12 item-info">
                                 <p class="item-value">{{index + 1}}.</p>

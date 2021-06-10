@@ -622,6 +622,7 @@ class PublicUserHandler extends UserHandler {
             }
 
             query = query.orderBy('date_admitted', 'desc')
+            query = query.orderBy('status', 'desc')
 
 
             query.get().then(function (querySnapshot) {

@@ -113,7 +113,7 @@
             <!-- TABLE VIEW -->
             <div class="table-container" v-if="!isDataLoading">
                 <div class="table" id="tableData">
-                    <div class="well" v-for="item,index in reports_view">
+                    <div class="well" v-for="item,index in reports_view" :key="item.id">
                         <entry-user-history-component
                             :view_count="index + 1"
                             :index="index"
@@ -163,7 +163,7 @@
                     evacuations: [],
                 },
 
-                header                  : ['id', ...PublicUserHistory.headers],
+                header                  : ['id', ...PublicUserHistory.headers, 'status'],
                 formModel               : PublicUserHistory.formModel,
                 public_user_formModel   : PublicUser.formModel,
                 public_user_headers     : PublicUserHistory.visiblekeys,

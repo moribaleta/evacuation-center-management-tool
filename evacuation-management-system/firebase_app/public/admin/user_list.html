@@ -164,7 +164,7 @@
 
         <div class="section" v-if="!isLoading">
             <div class="table-container" id="tableData">
-                <div class="well" v-for="item,index in view_user_list">
+                <div class="well" v-for="item,index in view_user_list" :key="item.id">
                     <div class="row">
                         <div class="col col-md-1 item-info">
                             <p class="item-label">
@@ -312,7 +312,7 @@
                     sex: ['all', 'MALE', 'FEMALE'],
                     admitted: ['all', 'TRUE', 'FALSE'],
                     dependents: ['all', 'NONE', 'HAS'],
-                    status: Object.keys(StatusType)
+                    status: ['all', ...Object.keys(StatusType)]
                 },
 
 
@@ -660,6 +660,10 @@
                         }
                     })
 
+                    let status = filter.status
+                    view_list = view_list.filter((data) => {
+                        return (status == 'all' || status == data.status)
+                    })
 
                     this.view_user_list = view_list
                 },
