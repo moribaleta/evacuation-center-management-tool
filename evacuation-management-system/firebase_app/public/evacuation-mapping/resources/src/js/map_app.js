@@ -300,11 +300,7 @@ class MapApp {
     getNearestEvacuations() {
         return new Observable((obs) => {
             setTimeout(() => {
-                //console.log("history list %o", this.history_list)
-                //console.log("params %o", this.model_param)
-
                 //console.log("pos: %o %o", this.emergency_marker.position.lat(), this.emergency_marker.position.lng())
-
                 const emergency_location = {
                     lat: this.emergency_marker.position.lat(),
                     lng: this.emergency_marker.position.lng()
@@ -363,7 +359,7 @@ class MapApp {
                 let test            = new TesterABC()
                 test.evacuations    = _evacs
                 test.history_list   = history_list
-                var test_output   = test.generate(this.model_param)
+                var test_output     = test.generate(this.model_param)
 
 
                 let foodSources = test_output.output.foodsources

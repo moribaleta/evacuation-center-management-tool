@@ -12,6 +12,9 @@ var TesterABC = (function () {
         this.abc.algorithm();
         endTime = (new Date()).getTime();
         totalTime = endTime - startTime;
+
+        console.log(logfile)
+
         return {
             params: params,
             output: {

@@ -1,3 +1,7 @@
+
+var logfile = ""
+var logCount = 1
+
 var ArtificialBeeColony = (function () {
     function ArtificialBeeColony(max_length, max_val, population_size, trial_limit, max_epoch, min_shuffle, max_shuffle, evacuation_centers, evacuation_history) {
         if (max_length === void 0) { max_length = 10; }
@@ -42,28 +46,28 @@ var ArtificialBeeColony = (function () {
             throw "FOOD NUMBER IS EMPTY"
         }
 
-        //console.log("food number %o", this.FOOD_NUMBER)
+
 
         this.initialize();
         this.memorizeBestFoodSource();
         while (!done) {
-            //console.log("iteration current %o, max: %o", epoch, this.MAX_EPOCH);
+            this.addLog(`iteration current ${epoch}, max: ${this.MAX_EPOCH}`);
             if (epoch < this.MAX_EPOCH) {
-                //console.log("im the best %o", this.gBest);
-                if (this.gBest != null && this.gBest.getConflicts() < 0.05) {
+
+                if (this.gBest != null && this.gBest.getConflicts() < 0.01) {
                     done = true;
                 }
-                //console.log("employed bees");
+
                 this.sendEmployedBees();
-                //console.log("update fitness bees");
+
                 this.getFitness();
-                //console.log("probability");
+
                 this.calculateProbabilities();
-                //console.log("onlooker bee");
+
                 this.sendOnlookerBees();
-                //console.log("update food source");
+
                 this.memorizeBestFoodSource();
-                //console.log("scout bee");
+
                 this.sendScoutBees();
 
                 this.iterations.push({
@@ -73,27 +77,27 @@ var ArtificialBeeColony = (function () {
                 })
 
                 epoch++;
-                //console.log("Epoch: " + epoch);
+
             }
             else {
                 done = true;
             }
         }
         if (epoch == this.MAX_EPOCH) {
-            //console.log("No Solution found");
+
             done = false;
         }
-        //console.log("done.");
-        //console.log("Completed " + epoch + " epochs.");
+
+
         this.foodSources.forEach(function (h) {
             if (h.getConflicts() < 0.05) {
-                //console.log("SOLUTION");
+
                 _this.solutions.push(h);
                 _this.printSolution(h);
-                //console.log("conflicts:" + h.getConflicts());
+
             }
         });
-        //console.log("the best of all %o", this.gBest);
+
         return done;
     };
     ArtificialBeeColony.prototype.initialize = function () {
@@ -111,16 +115,25 @@ var ArtificialBeeColony = (function () {
             this.foodSources[newFoodIndex].computeConflicts();
         }
     };
+
+    ArtificialBeeColony.prototype.addLog = function (log) {
+        logfile +=  ( logCount +`. ` + log + `\n`)
+        logCount++
+    }
+
+
     ArtificialBeeColony.prototype.sendEmployedBees = function () {
         var neighborBeeIndex = 0;
         var currentBee;
         var neighborBee;
+
+        this.addLog(`(sendEmployedBees)`)
         
         for (var i = 0; i < this.FOOD_NUMBER; i++) {
-            //console.log("food number %o", this.FOOD_NUMBER)
             neighborBeeIndex = this.getExclusiveRandomNumber(this.FOOD_NUMBER - 1, i);
             currentBee = this.foodSources[i];
             neighborBee = this.foodSources[neighborBeeIndex];
+            this.addLog(`(sendEmployedBees) current bee index ${neighborBeeIndex}, neighbor bee index ${i}`)
             this.sendToWork(currentBee, neighborBee);
         }
     };
@@ -130,16 +143,31 @@ var ArtificialBeeColony = (function () {
         var neighborBeeIndex = 0;
         var currentBee;
         var neighborBee;
+        
+        this.addLog(`(sendOnlookerBees) selectively search from the current foodSources`)
+
         while (t < this.FOOD_NUMBER) {
             currentBee = this.foodSources[i];
-            //console.log("searching onlooker bee %o %o", currentBee, Utilities.genID());
-            if (Math.random() < currentBee.getSelectionProbability()) {
+            
+            this.addLog(`(sendOnlookerBees) current bee ${i}`)
+            this.addLog(`(sendOnlookerBees) search index ${t}`)
+            let randomMath  = Math.random()
+            let selection   = currentBee.getSelectionProbability()
+            this.addLog(`(sendOnlookerBees) generate random value between 0,1 = ${randomMath}`)
+            this.addLog(`(sendOnlookerBee) compare if the currentBee's probability (${selection}) > random value (${randomMath})`)
+            if (randomMath < selection) {
                 t++;
+                this.addLog(`(sendOnlookerBee) increment search ${t}`)
                 neighborBeeIndex = this.getExclusiveRandomNumber(this.FOOD_NUMBER - 1, i);
+                this.addLog(`(sendOnlookerBee) get random index for neighborBee ${neighborBeeIndex}`)
                 neighborBee = this.foodSources[neighborBeeIndex];
                 this.sendToWork(currentBee, neighborBee);
             }
+
+            this.addLog(`(sendOnlookerBee) increment food source index`, i)
             i++;
+
+            this.addLog(`(sendOnlookerBee) if food source index is max number of foodsources set the value of index to 0`)
             if (i == this.FOOD_NUMBER) {
                 i = 0;
             }
@@ -154,34 +182,57 @@ var ArtificialBeeColony = (function () {
         var parameterToChange = 0;
         prevConflicts = currentBee.getConflicts();
         parameterToChange = this.getRandomNumber(0, this.MAX_LENGTH - 1);
-        var phi = -1 + (1 - (1)) * Math.random();
+        var phi = Math.random() * (1 - (-1)) + -1 //-1 + (1 - (1)) * Math.random();
+
+        this.addLog(`(sendToWork) phi - generate random value between -1 and 1  value: ${phi}`)
+
         tempValue = currentBee.getNectar(parameterToChange, EvacuationPropType.current_population);
+
+        this.addLog(`(sendToWork) tempValue: ${tempValue}`)
+
         newValue = (tempValue + (tempValue - neighborBee.getNectar(parameterToChange, EvacuationPropType.current_population)) * phi);
+
+        this.addLog(`(sendToWork) newValue: ${newValue}`)
+
+        this.addLog(`(sendToWork) check if newValue: ${newValue} is between lower 0 and highest ${this.MAX_VAL}`)
         if (newValue < 0) {
             newValue = 0;
         }
         if (newValue > this.MAX_VAL) {
             newValue = this.MAX_VAL;
         }
+        this.addLog(`(sendToWork) set the nectar of current be to the newValue: ${newValue}`)
         currentBee.setNectar(parameterToChange, newValue, EvacuationPropType.current_population);
+        this.addLog(`(sendToWork) compute conflict of the current bee`)
         currentBee.computeConflicts();
         currConflicts = currentBee.getConflicts();
+
+        this.addLog(`(sendToWork) compare conflict of the current bee with the newValue and the tempValue`)
+        this.addLog(`(sendToWork) compare conflict of the current bee with the prevConflict ${prevConflicts}, currConflict ${currConflicts}`)
+        
         if (prevConflicts < currConflicts) {
+            this.addLog(`(sendToWork) if the currConflict is higher than prevConflict set the trial set the nectar back of the current bee with the tempvalue`)
+            this.addLog(`(sendToWork) increment to 1`)
             currentBee.setNectar(parameterToChange, tempValue, EvacuationPropType.current_population);
             currentBee.setNectar(tempIndex, newValue, EvacuationPropType.current_population);
             currentBee.computeConflicts();
             currentBee.setTrials(currentBee.getTrials() + 1);
         }
         else {
+            this.addLog(`(sendToWork) if the currConflict is lower than prevConflict set the trial to 0`)
             currentBee.setTrials(0);
         }
     };
     ArtificialBeeColony.prototype.sendScoutBees = function () {
         var currentBee;
-        var shuffles = 0;
+        
+        this.addLog(`(sendScoutBees) for each food sources with the the trial value reach Trial Limit (${this.LIMIT})`)
+
         for (var i = 0; i < this.FOOD_NUMBER; i++) {
             currentBee = this.foodSources[i];
             if (currentBee.getTrials() >= this.LIMIT) {
+                this.addLog(`(sendScoutBees) compute conflicts of the currentBee ${i}`)
+                this.addLog(`(sendScoutBees) set trial of currentBee to 0`)
                 currentBee.computeConflicts();
                 currentBee.setTrials(0);
             }
@@ -192,32 +243,58 @@ var ArtificialBeeColony = (function () {
         var thisFood;
         var bestScore = 0.0;
         var worstScore = 0.0;
-        //console.log("curr gen: %o foodsource: %o", this.epoch, this.foodSources);
+        this.addLog(`(getFitness) get the fitness of the foodSource`)
         var worst = HoneyUtilities.getMaxValue(this.foodSources, (function (val) {
             return val.getConflicts();
         }));
-        //console.log("worst fitness: %o", worst);
+
+        this.addLog(`(getFitness) get the worst value of the foodSource ${worst.value.getConflicts()}`)
+
+
         worstScore = ((_a = worst.value) === null || _a === void 0 ? void 0 : _a.getConflicts()) || Infinity;
         var minScore = ((_b = HoneyUtilities.getMinValue(this.foodSources, (function (val) {
             return val.getConflicts();
         })).value) === null || _b === void 0 ? void 0 : _b.getConflicts()) || 0;
+
+        this.addLog(`(getFitness) get the best value of the foodSource ${minScore}`)
+
         bestScore = worstScore - minScore;
+
+        this.addLog(`(getFitness) get the bestScore of the foodSource ${bestScore}`)
+
+        this.addLog(`(getFitness) get the fitness of each foodsource`)
         for (var i = 0; i < this.FOOD_NUMBER; i++) {
             thisFood = this.foodSources[i];
-            thisFood.setFitness((worstScore - thisFood.getConflicts()) * 100.0 / bestScore);
+            
+            let fitness = (worstScore - thisFood.getConflicts()) * 100.0 / bestScore
+            this.addLog(`(getFitness) food source ${i}, fitness: ${fitness}`)
+            thisFood.setFitness(fitness);
         }
     };
     ArtificialBeeColony.prototype.calculateProbabilities = function () {
-        //console.log("curr gen: %o foodsource: %o", this.epoch, this.foodSources);
+        
+        this.addLog(`(calculateProbabilities) calculate the probabilities of the current generation of food source ${this.epoch}`)
+
         var currFitness = this.foodSources[this.epoch].getFitness();
+
+        this.addLog(`(calculateProbabilities) get the fitness value of the current generation`, currFitness)
+
         var maxFoodSource = HoneyUtilities.getMaxValue(this.foodSources, (function (val) {
             return val.getFitness();
         })).value;
-        //console.log("max foodsource: %o", maxFoodSource);
         var maxFit = (maxFoodSource === null || maxFoodSource === void 0 ? void 0 : maxFoodSource.getFitness()) || 0;
-        //console.log("currFitness: %o maxfit: %o", currFitness, maxFit);
+
+        this.addLog(`(calculateProbabilities) get the maximum fitness`, maxFit)
+
         var fitness_value = currFitness / maxFit;
+
+        this.addLog(`(calculateProbabilities) get the fitness value of the current fitness of the generation over maxFitness`, fitness_value)
+
         var probability = 0.9 * fitness_value + 0.1;
+
+        this.addLog(`(calculateProbabilities) calculate the probability (prob = 0.9 * fitness_value + 0.1) = ${probability}`)
+
+        this.addLog(`(calculateProbabilities) set the probability value to current generation of food source`)
         this.foodSources[this.epoch].setSelectionProbability(probability);
     };
     ArtificialBeeColony.prototype.getRandomNumber = function (low, high) {
@@ -228,7 +305,7 @@ var ArtificialBeeColony = (function () {
         var getRand = 0;
         while (!done) {
             getRand = HoneyUtilities.randomNumberMax(high);
-            //console.log("getRand %o && except %o % high: %o", getRand, except, high)
+
             if (getRand != except) {
                 done = true;
             }
@@ -247,9 +324,10 @@ var ArtificialBeeColony = (function () {
         this.gBest = HoneyUtilities.getMinValue(this.foodSources, (function (val) {
             return val.getConflicts();
         })).value || undefined;
+        this.addLog(`(memorizeBestFoodSource) get the best food source with the lowest objective value ${this.gBest.getConflicts()}`)
     };
     ArtificialBeeColony.prototype.printSolution = function (solution) {
-        //console.log("given solution: %o", solution);
+
     };
     ArtificialBeeColony.prototype.getSolutions = function () {
         return this.solutions;
